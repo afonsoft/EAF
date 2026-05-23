@@ -417,7 +417,7 @@ jobs:
         run: ./build-and-test.sh
 
       - name: 📊 Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           file: TestResults/CoverageReport/Summary.xml
           flags: unittests
