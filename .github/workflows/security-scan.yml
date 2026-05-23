@@ -91,7 +91,7 @@ jobs:
           dotnet-version: "10.0.x"
       
       - name: 📦 Setup NuGet
-        uses: NuGet/setup-nuget@v2.0.1
+        uses: NuGet/setup-nuget@v3.1.0
       
       - name: 🔧 Restore Dependencies
         run: dotnet restore
