@@ -253,7 +253,7 @@ jobs:
       - name: 📦 Deploy API via FTP
         id: ftp_deploy
         continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ftp.afonsoft.com.br
           port: 21
@@ -273,7 +273,7 @@ jobs:
       - name: 📦 Deploy API via FTP (retry)
         id: ftp_deploy_retry
         if: steps.ftp_deploy.outcome == 'failure'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ftp.afonsoft.com.br
           port: 21
@@ -351,7 +351,7 @@ jobs:
         run: cp -f Templates/ReplaceConfigs/UI/assets/*.json Templates/Angular/Eaf.ProjectName.UI/dist/assets/
 
       - name: 📦 Deploy UI via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ftp.afonsoft.com.br
           port: 21
