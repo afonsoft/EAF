@@ -24,6 +24,8 @@ namespace Abp.Runtime.Caching.Sqlite
     {
         private readonly Timer? _cleanupTimer;
         private readonly DbConnection _db;
+        private readonly object _lock = new object();
+        private bool _disposed;
 
         /// <summary>
         /// Obtém o pool de comandos de banco de dados para operações de cache.
@@ -101,15 +103,23 @@ namespace Abp.Runtime.Caching.Sqlite
         /// </summary>
         public void RemoveExpired()
         {
-            var removed = (long)Commands.Use(Operation.RemoveExpired, cmd =>
+            lock (_lock)
             {
-                cmd.Parameters.AddWithValue("@now", DateTimeOffset.UtcNow.Ticks);
-                return cmd.ExecuteScalar();
-            })!;
+                if (_disposed)
+                {
+                    return;
+                }
 
-            if (removed > 0)
-            {
-                Logger.TraceFormat("Evicted {0} expired entries from cache", removed);
+                var removed = (long)Commands.Use(Operation.RemoveExpired, cmd =>
+                {
+                    cmd.Parameters.AddWithValue("@now", DateTimeOffset.UtcNow.Ticks);
+                    return cmd.ExecuteScalar();
+                })!;
+
+                if (removed > 0)
+                {
+                    Logger.TraceFormat("Evicted {0} expired entries from cache", removed);
+                }
             }
         }
 
@@ -423,12 +433,21 @@ namespace Abp.Runtime.Caching.Sqlite
         /// </summary>
         public override void Dispose()
         {
-            _cleanupTimer?.Dispose();
-            Commands.Dispose();
+            lock (_lock)
+            {
+                if (_disposed)
+                {
+                    return;
+                }
 
-            _db.Close();
-            _db.Dispose();
-            base.Dispose();
+                _disposed = true;
+                _cleanupTimer?.Dispose();
+                Commands.Dispose();
+
+                _db.Close();
+                _db.Dispose();
+                base.Dispose();
+            }
         }
 
         #endregion Dispose

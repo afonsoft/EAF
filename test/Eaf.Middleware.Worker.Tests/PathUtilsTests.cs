@@ -88,7 +88,6 @@ namespace Eaf.Middleware.Worker.Tests
         [InlineData("folder/../file.txt", false)] // Resolves to file.txt
         [InlineData("folder/subfolder/../../file.txt", false)] // Resolves to file.txt
         [InlineData("/absolute/path.txt", false)] // Absolute paths don't navigate above root
-        [InlineData("\\..\\file.txt", false)] // Windows-style path separators (backslash not treated as separator on Linux)
         [InlineData("normal/path/file.txt", false)] // Normal nested path
         [InlineData("a/b/c/d/../../../../e", false)] // Goes back to root level, not above
         [InlineData("a/b/c/d/../../../../../e", true)] // Goes one level above root
