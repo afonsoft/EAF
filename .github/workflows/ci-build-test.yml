@@ -66,7 +66,7 @@ jobs:
             --verbosity normal
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-package-eaf
@@ -76,7 +76,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Coverage Reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-package-eaf
@@ -103,7 +103,7 @@ jobs:
           cat $GITHUB_STEP_SUMMARY > summaries/package-eaf-summary.md
 
       - name: Upload Summary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: summary-package-eaf
@@ -160,7 +160,7 @@ jobs:
           npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
 
       - name: 📊 Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-frontend
@@ -190,7 +190,7 @@ jobs:
           cat $GITHUB_STEP_SUMMARY > summaries/frontend-summary.md
 
       - name: 📤 Upload Summary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: summary-frontend
@@ -237,7 +237,7 @@ jobs:
             --verbosity normal
 
       - name: 📊 Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-api
@@ -266,7 +266,7 @@ jobs:
           cat $GITHUB_STEP_SUMMARY > summaries/api-summary.md
 
       - name: 📤 Upload Summary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: summary-api
@@ -325,7 +325,7 @@ jobs:
           cat $GITHUB_STEP_SUMMARY > summaries/security-summary.md
 
       - name: 📤 Upload Summary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: summary-security
@@ -376,7 +376,7 @@ jobs:
           cat $GITHUB_STEP_SUMMARY > summaries/performance-summary.md
 
       - name: 📤 Upload Summary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: summary-performance
@@ -425,7 +425,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: 📤 Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-coverage
@@ -433,7 +433,7 @@ jobs:
           retention-days: 7
 
       - name: 📤 Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report
@@ -460,7 +460,7 @@ jobs:
           cat $GITHUB_STEP_SUMMARY > summaries/coverage-summary.md
 
       - name: 📤 Upload Summary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: summary-coverage
