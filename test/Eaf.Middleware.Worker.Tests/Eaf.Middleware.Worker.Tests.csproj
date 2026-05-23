@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="coverlet.collector" Version="8.0.0" />
+    <PackageReference Update="coverlet.collector" Version="10.0.1" />
     <PackageReference Update="coverlet.msbuild" Version="8.0.0" />
     <PackageReference Update="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>
