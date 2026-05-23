@@ -2,6 +2,8 @@
 
 [![GitHub](https://img.shields.io/github/license/afonsoft/eaf)](LICENSE) [![GitHub version](https://badge.fury.io/gh/afonsoft%2Feaf.svg)](https://badge.fury.io/gh/afonsoft%2Feaf) [![Commits History](https://img.shields.io/badge/Commits-History-critical)](https://github.com/afonsoft/EAF/commits/main/)
 
+English | **[Português](README_pt.md)**
+
 ![Line Coverage](https://img.shields.io/badge/Line%20Coverage-24.1%25-yellow)
 ![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-15.5%25-red)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-54.5%25-yellow)
@@ -11,326 +13,326 @@
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-122%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-121%20Success-brightgreen)
 
-## Índice
+## Table of Contents
 
-- [Sobre o Projeto](#-sobre-o-projeto)
+- [About the Project](#-about-the-project)
 - [ASP.NET Boilerplate](#-aspnet-boilerplate)
-- [Visão Técnica](#-visão-técnica)
-- [Instalação e Configuração](#-instalação-e-configuração)
-- [Execução e Testes](#-execução-e-testes)
-- [Cobertura de Código](#-cobertura-de-código)
-- [Pacotes NuGet](#-pacotes-nuget)
-- [Contribuição](#-contribuição)
+- [Technical Overview](#-technical-overview)
+- [Installation and Configuration](#-installation-and-configuration)
+- [Running and Testing](#-running-and-testing)
+- [Code Coverage](#-code-coverage)
+- [NuGet Packages](#-nuget-packages)
+- [Contributing](#-contributing)
 
 
-## Sobre o Projeto
+## About the Project
 
-### O que é o EAF?
+### What is EAF?
 
-O **EAF (Enterprise Application Foundation)** é uma plataforma de middleware open source que fornece uma base sólida para o desenvolvimento de aplicações modernas. Baseado no ASP.NET Boilerplate (ABP), o EAF foi otimizado para trabalhar com as versões mais recentes do ASP.NET Core e Entity Framework Core.
+The **EAF (Enterprise Application Foundation)** is an open-source middleware platform that provides a solid foundation for developing modern applications. Based on ASP.NET Boilerplate (ABP), EAF has been optimized to work with the latest versions of ASP.NET Core and Entity Framework Core.
 
-### Principais Benefícios
+### Key Benefits
 
-- **Segurança Integrada**: Autenticação e autorização com suporte a Azure Active Directory e LDAP
-- **Auditoria Completa**: Rastreamento automático de todas as operações do sistema
-- **Multi-tenancy**: Suporte nativo para aplicações multi-inquilino
-- **Observabilidade**: Integração com OpenTelemetry para monitoramento e telemetria
-- **Cache Distribuído**: Suporte para Redis, SQL Server e SQLite
-- **Gerenciamento de Segredos**: Integração com Azure Key Vault e Oracle Cloud Infrastructure
-- **Logging Avançado**: Substituição do log4net por Serilog para melhor performance
+- **Integrated Security**: Authentication and authorization with support for Azure Active Directory and LDAP
+- **Complete Auditing**: Automatic tracking of all system operations
+- **Multi-tenancy**: Native support for multi-tenant applications
+- **Observability**: Integration with OpenTelemetry for monitoring and telemetry
+- **Distributed Cache**: Support for Redis, SQL Server, and SQLite
+- **Secret Management**: Integration with Azure Key Vault and Oracle Cloud Infrastructure
+- **Advanced Logging**: Replacement of log4net with Serilog for better performance
 
-### Casos de Uso
+### Use Cases
 
-- **Aplicações Web**: Sistemas de gestão, CRMs, ERPs e outras aplicações
-- **APIs RESTful**: Desenvolvimento de APIs escaláveis
-- **Microserviços**: Base para arquiteturas de microserviços
-- **Aplicações Multi-tenant**: SaaS e aplicações compartilhadas
+- **Web Applications**: Management systems, CRMs, ERPs, and other applications
+- **RESTful APIs**: Development of scalable APIs
+- **Microservices**: Foundation for microservice architectures
+- **Multi-tenant Applications**: SaaS and shared applications
 
 ---
 
 ## ASP.NET Boilerplate
 
-### O que é ASP.NET Boilerplate?
+### What is ASP.NET Boilerplate?
 
-O **ASP.NET Boilerplate (ABP)** é um framework de aplicação web de código aberto que fornece uma infraestrutura robusta para o desenvolvimento de aplicações modernas. Documentação completa disponível em: [https://aspnetboilerplate.com/Pages/Documents](https://aspnetboilerplate.com/Pages/Documents)
+**ASP.NET Boilerplate (ABP)** is an open-source web application framework that provides a robust infrastructure for developing modern applications. Complete documentation available at: [https://aspnetboilerplate.com/Pages/Documents](https://aspnetboilerplate.com/Pages/Documents)
 
-### EAF: Implementação Open Source Aprimorada
+### EAF: Enhanced Open Source Implementation
 
-O **EAF (Enterprise Application Foundation)** é uma implementação open source baseada no ASP.NET Boilerplate, projetada para oferecer uma interface mais amigável para desenvolvimento de APIs e UIs. O EAF complementa o framework base com diversas melhorias e módulos adicionais:
+The **EAF (Enterprise Application Foundation)** is an open-source implementation based on ASP.NET Boilerplate, designed to offer a more user-friendly interface for API and UI development. EAF complements the base framework with various improvements and additional modules:
 
-### Módulos e Melhorias
+### Modules and Improvements
 
-#### Autenticação e Autorização
-- **Login Externo**: Suporte a login social (Google, Facebook, Twitter, Microsoft)
-- **Azure Active Directory**: Integração completa
-- **LDAP/Active Directory**: Autenticação via diretórios
-- **Two-Factor Authentication**: Autenticação de dois fatores
-- **Gerenciamento de Permissões**: Sistema granular de permissões e roles
+#### Authentication and Authorization
+- **External Login**: Support for social login (Google, Facebook, Twitter, Microsoft)
+- **Azure Active Directory**: Complete integration
+- **LDAP/Active Directory**: Authentication via directories
+- **Two-Factor Authentication**: Two-factor authentication
+- **Permission Management**: Granular permission and role system
 
-#### Auditoria e Logging
-- **Auditoria Automática**: Rastreamento de todas as operações CRUD
-- **Logging Estruturado**: Integração com Serilog para logs detalhados
-- **Entity Change Tracking**: Monitoramento de alterações em entidades
-- **Log de Erros**: Captura e análise de exceções
+#### Auditing and Logging
+- **Automatic Auditing**: Tracking of all CRUD operations
+- **Structured Logging**: Integration with Serilog for detailed logs
+- **Entity Change Tracking**: Monitoring of entity changes
+- **Error Logging**: Capture and analysis of exceptions
 
-#### Comunicação em Tempo Real
-- **Chat System**: Sistema de chat entre usuários
-- **SignalR Integration**: WebSockets para comunicação bidirecional
-- **Notificações Push**: Sistema de notificações em tempo real
-- **Tenant-to-Host Chat**: Chat entre inquilinos e host
-- **Group Chat**: Chat em grupo para colaboração
+#### Real-time Communication
+- **Chat System**: Chat system between users
+- **SignalR Integration**: WebSockets for bidirectional communication
+- **Push Notifications**: Real-time notification system
+- **Tenant-to-Host Chat**: Chat between tenants and host
+- **Group Chat**: Group chat for collaboration
 
 #### Multi-Tenancy
-- **Isolamento de Dados**: Separação completa de dados por tenant
-- **Tenant Management**: Gerenciamento de inquilinos
-- **Tenant Resolution**: Resolução automática de tenant
-- **Feature Management**: Habilitação/desabilitação de features por tenant
+- **Data Isolation**: Complete data separation by tenant
+- **Tenant Management**: Tenant management
+- **Tenant Resolution**: Automatic tenant resolution
+- **Feature Management**: Enable/disable features by tenant
 
-#### Cache e Performance
-- **Cache Distribuído**: Suporte a Redis, SQL Server, SQLite
-- **Cache Abstraction**: Interface unificada para diferentes backends
-- **Cache Manager**: Gerenciamento inteligente de cache
-- **Performance Optimization**: Otimizações de performance integradas
+#### Cache and Performance
+- **Distributed Cache**: Support for Redis, SQL Server, SQLite
+- **Cache Abstraction**: Unified interface for different backends
+- **Cache Manager**: Intelligent cache management
+- **Performance Optimization**: Integrated performance optimizations
 
 #### Background Jobs
-- **Hangfire Integration**: Processamento de tarefas em background
-- **Job Management**: Agendamento e monitoramento de jobs
-- **Recurring Jobs**: Tarefas recorrentes automatizadas
-- **Worker Services**: Serviços de background escaláveis
+- **Hangfire Integration**: Background task processing
+- **Job Management**: Job scheduling and monitoring
+- **Recurring Jobs**: Automated recurring tasks
+- **Worker Services**: Scalable background services
 
-#### UI e Frontend
-- **Angular Integration**: Template Angular completo
-- **Componentes UI**: Componentes reutilizáveis e estilizados
-- **Validação Client-Side**: Validação automática no frontend
-- **Internacionalização**: Suporte a múltiplos idiomas
+#### UI and Frontend
+- **Angular Integration**: Complete Angular template
+- **UI Components**: Reusable and styled components
+- **Client-Side Validation**: Automatic frontend validation
+- **Internationalization**: Support for multiple languages
 
-#### Configuração e Settings
-- **Setting Management**: Gerenciamento de configurações
-- **Feature Flags**: Flags de funcionalidades
-- **Environment Configuration**: Configuração por ambiente
-- **Key Vault Integration**: Segurança de segredos
+#### Configuration and Settings
+- **Setting Management**: Configuration management
+- **Feature Flags**: Feature flags
+- **Environment Configuration**: Configuration by environment
+- **Key Vault Integration**: Secret security
 
-#### Outros Recursos
-- **Event Bus**: Sistema de eventos de domínio
-- **Data Filters**: Filtros de dados automáticos (SoftDelete, TenantId)
-- **Repository Pattern**: Abstração de acesso a dados
-- **Unit of Work**: Gerenciamento de transações
-- **Dependency Injection**: Injeção de dependências configurada
-- **Object Mapping**: AutoMapper integrado
-- **API Documentation**: Swagger/OpenAPI automático
+#### Other Features
+- **Event Bus**: Domain event system
+- **Data Filters**: Automatic data filters (SoftDelete, TenantId)
+- **Repository Pattern**: Data access abstraction
+- **Unit of Work**: Transaction management
+- **Dependency Injection**: Configured dependency injection
+- **Object Mapping**: Integrated AutoMapper
+- **API Documentation**: Automatic Swagger/OpenAPI
 
-### Benefícios do EAF sobre ABP Puro
+### Benefits of EAF over Pure ABP
 
-1. **Interface Mais Amigável**: APIs simplificadas e intuitivas
-2. **Módulos Prontos**: Componentes pré-configurados para uso imediato
-3. **Melhores Práticas**: Padrões de desenvolvimento modernos aplicados
-4. **Performance Otimizada**: Otimizações de performance integradas
-5. **Documentação em Português**: Suporte nativo para língua portuguesa
-6. **Testes BDD**: Testes com padrão Dado/Quando/Então
-7. **Observabilidade**: OpenTelemetry para monitoramento avançado
-8. **Segurança Aprimorada**: Múltiplas opções de autenticação e autorização
+1. **More User-Friendly Interface**: Simplified and intuitive APIs
+2. **Ready-to-Use Modules**: Pre-configured components for immediate use
+3. **Best Practices**: Applied modern development patterns
+4. **Optimized Performance**: Integrated performance optimizations
+5. **Portuguese Documentation**: Native support for Portuguese language
+6. **BDD Tests**: Tests with Given/When/Then pattern
+7. **Observability**: OpenTelemetry for advanced monitoring
+8. **Enhanced Security**: Multiple authentication and authorization options
 
 ---
 
-## Visão Técnica
+## Technical Overview
 
-### Arquitetura
+### Architecture
 
-O EAF segue os princípios do Domain-Driven Design (DDD) e implementa padrões como:
+EAF follows Domain-Driven Design (DDD) principles and implements patterns such as:
 
-- **Repository Pattern**: Abstração da camada de dados
-- **Unit of Work**: Gerenciamento de transações
-- **Dependency Injection**: Inversão de controle
-- **CQRS**: Separação de comandos e consultas
-- **Event Sourcing**: Rastreamento de eventos de domínio
+- **Repository Pattern**: Data layer abstraction
+- **Unit of Work**: Transaction management
+- **Dependency Injection**: Inversion of control
+- **CQRS**: Separation of commands and queries
+- **Event Sourcing**: Domain event tracking
 
-### Tecnologias Suportadas
+### Supported Technologies
 
-| Tecnologia | Versão | Status |
+| Technology | Version | Status |
 |------------|--------|--------|
-| **ASP.NET Core** | 10.0 | Suportado |
-| **Entity Framework Core** | 10.0 | Suportado |
-| **Angular** | 18 | Suportado |
-| **.NET** | 10.0 | Suportado |
+| **ASP.NET Core** | 10.0 | Supported |
+| **Entity Framework Core** | 10.0 | Supported |
+| **Angular** | 18 | Supported |
+| **.NET** | 10.0 | Supported |
 
-### Componentes Principais
+### Main Components
 
 #### Middleware Core
-- **Eaf.Middleware.Core**: Camada de domínio central com entidades, serviços, configurações, autorização, auditoria e funcionalidades base do framework.
-- **Eaf.Middleware.Application**: Camada de aplicação com DTOs, serviços de aplicação, validações e lógica de negócio intermediária.
-- **Eaf.Middleware.Web.Core**: Componentes web para ASP.NET Core incluindo configuração de startup, middleware, filtros e integração HTTP.
+- **Eaf.Middleware.Core**: Central domain layer with entities, services, configurations, authorization, auditing, and base framework features.
+- **Eaf.Middleware.Application**: Application layer with DTOs, application services, validations, and intermediate business logic.
+- **Eaf.Middleware.Web.Core**: Web components for ASP.NET Core including startup configuration, middleware, filters, and HTTP integration.
 
-#### Autenticação e Autorização
-- **Eaf.Middleware.AzureActiveDirectory**: Integração completa com Azure Active Directory para autenticação externa e sincronização de usuários.
-- **Eaf.Middleware.Ldap**: Autenticação via LDAP/Active Directory para integração com diretórios existentes.
+#### Authentication and Authorization
+- **Eaf.Middleware.AzureActiveDirectory**: Complete integration with Azure Active Directory for external authentication and user synchronization.
+- **Eaf.Middleware.Ldap**: LDAP/Active Directory authentication for integration with existing directories.
 
-#### Cache e Persistência
-- **Eaf.SqlServerCache**: Implementação de cache distribuído usando SQL Server como backend para cenários de alta disponibilidade.
-- **Eaf.SqliteCache**: Implementação de cache local usando SQLite para cenários de desenvolvimento e baixa escala.
+#### Cache and Persistence
+- **Eaf.SqlServerCache**: Distributed cache implementation using SQL Server as backend for high availability scenarios.
+- **Eaf.SqliteCache**: Local cache implementation using SQLite for development and low-scale scenarios.
 
-#### Segurança
-- **Eaf.KeyVault**: Gerenciamento de segredos suportando Azure Key Vault e Oracle Cloud Infrastructure (OCI) para armazenamento seguro de credenciais.
-- **Eaf.KeyVault.AspNetCore**: Integração ASP.NET Core para carregamento automático de configurações e segredos do Key Vault.
+#### Security
+- **Eaf.KeyVault**: Secret management supporting Azure Key Vault and Oracle Cloud Infrastructure (OCI) for secure credential storage.
+- **Eaf.KeyVault.AspNetCore**: ASP.NET Core integration for automatic loading of configurations and secrets from Key Vault.
 
-#### Observabilidade
-- **Eaf.OpenTelemetry**: Implementação completa de OpenTelemetry para telemetria distribuída, tracing e métricas com suporte a múltiplos exporters.
-- **Eaf.Castle.Serilog**: Adaptador de logging integrando Castle Windsor com Serilog para logging estruturado e configurável.
+#### Observability
+- **Eaf.OpenTelemetry**: Complete OpenTelemetry implementation for distributed telemetry, tracing, and metrics with support for multiple exporters.
+- **Eaf.Castle.Serilog**: Logging adapter integrating Castle Windsor with Serilog for structured and configurable logging.
 
-#### Processamento
-- **Eaf.Middleware.Worker**: Serviços de background (Worker Services) para processamento assíncrono, jobs agendados e tarefas de longa duração.
-- **Eaf.Log4NetServiceBus**: Integração com Azure Service Bus usando log4net para logging de mensagens e eventos de mensageria.
+#### Processing
+- **Eaf.Middleware.Worker**: Background services (Worker Services) for asynchronous processing, scheduled jobs, and long-running tasks.
+- **Eaf.Log4NetServiceBus**: Integration with Azure Service Bus using log4net for message logging and messaging events.
 
 ---
 
-## Stack Tecnológico
+## Tech Stack
 
 ### Backend (.NET)
-- **.NET 10.0**: Framework principal
-- **ASP.NET Core 10.0**: Web API e MVC
-- **Entity Framework Core 10.0**: ORM para acesso a dados
-- **AutoMapper**: Mapeamento de objetos
-- **Castle Windsor**: Injeção de dependência
-- **Hangfire**: Processamento de tarefas em background
-- **SignalR**: Comunicação em tempo real
-- **Swagger/OpenAPI**: Documentação de API
-- **xUnit**: Framework de testes
-- **Shouldly**: Assertions fluentes
+- **.NET 10.0**: Main framework
+- **ASP.NET Core 10.0**: Web API and MVC
+- **Entity Framework Core 10.0**: ORM for data access
+- **AutoMapper**: Object mapping
+- **Castle Windsor**: Dependency injection
+- **Hangfire**: Background task processing
+- **SignalR**: Real-time communication
+- **Swagger/OpenAPI**: API documentation
+- **xUnit**: Testing framework
+- **Shouldly**: Fluent assertions
 - **NSubstitute**: Mocking framework
 
 ### Frontend (Template)
-- **Angular 18**: Framework SPA
-- **Node.js 20.20.0**: Runtime JavaScript
-- **TypeScript 5.2**: Linguagem principal
-- **Bootstrap 5**: Framework CSS
-- **PrimeNG 17**: Componentes UI
-- **Chart.js**: Gráficos e visualizações
-- **RxJS 7**: Programação reativa
+- **Angular 18**: SPA framework
+- **Node.js 20.20.0**: JavaScript runtime
+- **TypeScript 5.2**: Main language
+- **Bootstrap 5**: CSS framework
+- **PrimeNG 17**: UI components
+- **Chart.js**: Charts and visualizations
+- **RxJS 7**: Reactive programming
 
-### Infraestrutura
-- **SQLite**: Banco de dados local
-- **SQL Server**: Banco de dados principal
-- **Redis**: Cache distribuído
-- **Azure Key Vault**: Gerenciamento de segredos
-- **OpenTelemetry**: Observabilidade
-- **Serilog**: Logging estruturado
-
----
-
-## Documentação
-
-A documentação técnica detalhada do sistema EAF, cobrindo arquitetura, módulos, guias de desenvolvimento e mais, pode ser encontrada em nosso portal de documentação.
-
-[Acesse a Documentação Completa](./docs/README.md)
+### Infrastructure
+- **SQLite**: Local database
+- **SQL Server**: Main database
+- **Redis**: Distributed cache
+- **Azure Key Vault**: Secret management
+- **OpenTelemetry**: Observability
+- **Serilog**: Structured logging
 
 ---
 
-## Instalação e Configuração
+## Documentation
 
-### Pré-requisitos
+The detailed technical documentation of the EAF system, covering architecture, modules, development guides, and more, can be found in our documentation portal.
 
-**Obrigatórios:**
-- .NET 10.0 SDK ou superior
-- Node.js 20.20.0 (para desenvolvimento frontend)
+[Access Complete Documentation](./docs/README.md)
+
+---
+
+## Installation and Configuration
+
+### Prerequisites
+
+**Required:**
+- .NET 10.0 SDK or higher
+- Node.js 20.20.0 (for frontend development)
 - Git
 
-**Para Desenvolvimento Frontend:**
+**For Frontend Development:**
 ```bash
 npm install -g @angular/cli@19
 ```
 
-**Para Relatórios de Cobertura:**
+**For Coverage Reports:**
 ```bash
 dotnet tool install -g dotnet-reportgenerator-globaltool
 ```
 
-### Compatibilidade de Plataforma
+### Platform Compatibility
 
-| Plataforma | Status | Notas |
+| Platform | Status | Notes |
 |------------|--------|-------|
-| **Windows** | Suporte Completo | Use PowerShell ou Command Prompt |
-| **Linux** | Suporte Completo | Scripts bash fornecidos |
-| **macOS** | Suporte Completo | Use Terminal com bash |
+| **Windows** | Full Support | Use PowerShell or Command Prompt |
+| **Linux** | Full Support | Bash scripts provided |
+| **macOS** | Full Support | Use Terminal with bash |
 
-### Clonando o Repositório
+### Cloning the Repository
 
 ```bash
 git clone https://github.com/afonsoft/EAF.git
 cd EAF
 ```
 
-### Configuração do Ambiente
+### Environment Setup
 
-1. **Restaurar dependências:**
+1. **Restore dependencies:**
 ```bash
 dotnet restore Eaf.sln
 ```
 
-2. **Compilar o projeto:**
+2. **Build the project:**
 ```bash
 dotnet build Eaf.sln
 ```
 
 ---
 
-## Execução e Testes
+## Running and Testing
 
-### Início Rápido
+### Quick Start
 
 **Linux/macOS:**
 ```bash
-# Tornar o script executável
+# Make the script executable
 chmod +x build-and-test.sh
 
-# Executar build e testes com cobertura
+# Run build and tests with coverage
 ./build-and-test.sh
 ```
 
 **Windows (PowerShell):**
 ```powershell
-# Executar build e testes
+# Run build and tests
 dotnet build Eaf.sln
 dotnet test Eaf.sln --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 
-# Gerar relatório de cobertura (se reportgenerator estiver instalado)
+# Generate coverage report (if reportgenerator is installed)
 reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;TextSummary"
 ```
 
-### Executando Apenas os Testes
+### Running Only Tests
 
 **Linux/macOS:**
 ```bash
-# Tornar o script executável
+# Make the script executable
 chmod +x run-tests-with-coverage.sh
 
-# Executar todos os testes com cobertura
+# Run all tests with coverage
 ./run-tests-with-coverage.sh
 ```
 
 **Windows (PowerShell):**
 ```powershell
-# Executar todos os testes com cobertura
+# Run all tests with coverage
 dotnet test Eaf.sln --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 
-# Gerar relatório de cobertura
+# Generate coverage report
 reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;TextSummary"
 ```
 
-### Execução Manual de Testes
+### Manual Test Execution
 
 ```bash
-# Executar um projeto de teste específico com cobertura
+# Run a specific test project with coverage
 dotnet test test/Eaf.KeyVault.Tests/Eaf.KeyVault.Tests.csproj --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 
-# Executar todos os testes na solução
+# Run all tests in the solution
 dotnet test Eaf.sln --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 
-# Gerar relatório de cobertura
+# Generate coverage report
 reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;Badges;TextSummary"
 ```
 
-### Exemplo de Uso
+### Usage Example
 
-Vamos investigar uma classe simples para ver os benefícios do EAF:
+Let's examine a simple class to see the benefits of EAF:
 
 ```csharp
 public class TaskAppService : ApplicationService, ITaskAppService
@@ -358,93 +360,93 @@ public class TaskAppService : ApplicationService, ITaskAppService
 }
 ```
 
-Este exemplo demonstra vários recursos do EAF:
+This example demonstrates several EAF features:
 
-- **Injeção de Dependência**: O EAF usa e fornece uma infraestrutura de DI convencional
-- **Repository**: O EAF pode criar um repositório padrão para cada entidade
-- **Autorização**: O EAF pode verificar permissões declarativamente
-- **Validação**: O EAF verifica automaticamente se a entrada é nula
-- **Log de Auditoria**: Informações são salvas automaticamente para cada solicitação
-- **Unidade de Trabalho**: Cada método de serviço de aplicação é uma unidade de trabalho por padrão
+- **Dependency Injection**: EAF uses and provides a conventional DI infrastructure
+- **Repository**: EAF can create a default repository for each entity
+- **Authorization**: EAF can check permissions declaratively
+- **Validation**: EAF automatically checks if input is null
+- **Audit Logging**: Information is automatically saved for each request
+- **Unit of Work**: Each application service method is a unit of work by default
 
 ---
 
-## Cobertura de Código
+## Code Coverage
 
-### Status dos Testes (Atualizado)
+### Test Status (Updated)
 
-| Módulo | Cobertura de Linha | Cobertura de Branch | Novos Testes | Status |
-|--------|-------------------|---------------------|--------------|--------|
-| **Eaf.SqlServerCache** | 86.6% | 81.8% | +2 | Boa cobertura |
-| **Eaf.SqliteCache** | 75.5% | 34.9% | +4 | Boa cobertura |
-| **Eaf.OpenTelemetry** | 70.1% | 75.0% | +2 | Boa cobertura |
-| **Eaf.Middleware.Worker** | 24.6% | N/A | +4 | Precisa de +65.4% |
-| **Eaf.Middleware.Ldap** | 5.1% | N/A | +4 | Precisa de +84.9% |
-| **Eaf.Middleware.AzureActiveDirectory** | N/A | N/A | +4 | Testes adicionados |
-| **Eaf.Middleware.Web.Core** | 0.63% | 0.16% | +10 | Precisa de +89.4% |
-| **Eaf.Middleware.Core** | 15.31% | 5.59% | +7 | Precisa de +74.7% |
-| **Eaf.Middleware.Application** | 4.45% | 1.35% | +15 | Precisa de +85.6% |
-| **Eaf.KeyVault** | 66.0% | 51.6% | +3 | Testes adicionados |
-| **TOTAL** | **28.4%** | **21.3%** | **+47** | Em progresso |
+| Module | Line Coverage | Branch Coverage | New Tests | Status |
+|--------|--------------|-----------------|-----------|--------|
+| **Eaf.SqlServerCache** | 86.6% | 81.8% | +2 | Good coverage |
+| **Eaf.SqliteCache** | 75.5% | 34.9% | +4 | Good coverage |
+| **Eaf.OpenTelemetry** | 70.1% | 75.0% | +2 | Good coverage |
+| **Eaf.Middleware.Worker** | 24.6% | N/A | +4 | Needs +65.4% |
+| **Eaf.Middleware.Ldap** | 5.1% | N/A | +4 | Needs +84.9% |
+| **Eaf.Middleware.AzureActiveDirectory** | N/A | N/A | +4 | Tests added |
+| **Eaf.Middleware.Web.Core** | 0.63% | 0.16% | +10 | Needs +89.4% |
+| **Eaf.Middleware.Core** | 15.31% | 5.59% | +7 | Needs +74.7% |
+| **Eaf.Middleware.Application** | 4.45% | 1.35% | +15 | Needs +85.6% |
+| **Eaf.KeyVault** | 66.0% | 51.6% | +3 | Tests added |
+| **TOTAL** | **28.4%** | **21.3%** | **+47** | In progress |
 
-### Meta de Cobertura
-- **Objetivo**: 90% de cobertura de código
-- **Atual**: 24.1% linha, 15.5% branch, 54.5% método
-- **Status dos Testes (Maio 2026)**: 1492 total, 1491 passando, 1 ignorado, 0 falhas (100% sucesso)
-- **Próximos passos**: Implementar testes para módulos com baixa cobertura
+### Coverage Goal
+- **Target**: 90% code coverage
+- **Current**: 24.1% line, 15.5% branch, 54.5% method
+- **Test Status (May 2026)**: 1492 total, 1491 passing, 1 ignored, 0 failures (100% success)
+- **Next steps**: Implement tests for modules with low coverage
 
-### Melhorias Implementadas
-- **KeyVault**: 206+ testes BDD implementados (99.5% sucesso, 66% cobertura)
-- **Documentação XML**: Summaries em português adicionados
-- **Padrão BDD**: Dado/Quando/Então implementado
-- **Castle.Serilog**: 44 testes BDD implementados (100% sucesso, 90% cobertura)
-- **OpenTelemetry**: 45/45 testes passando (100% sucesso)
-- **SqlServerCache**: 38/38 testes passando (100% sucesso)
-- **Worker**: 63/63 testes passando (100% sucesso)
-- **Expansão de Testes (Abril 2026)**: +65 novos arquivos de testes implementados
-  - **Eaf.Middleware.Web.Core**: +10 testes (Swagger filters, TokenAuth, Impersonation models)
-  - **Eaf.MiddlewareCore**: +30 testes (Entities, DTOs, Extensions, Cache items)
-  - **Eaf.Middleware.Application**: +9 testes (constants, helpers, authorization)
-  - **Eaf.Middleware.Ldap**: +4 testes (configuration, authentication)
-  - **Eaf.Middleware.AzureActiveDirectory**: +4 testes (configuration, authentication)
-  - **Eaf.Middleware.Worker**: +4 testes (folders, emailing, base classes)
-  - **Eaf.KeyVault**: +3 testes (managers, interfaces)
-  - **Eaf.Castle.Serilog**: +4 testes (module, factory, logger)
-  - **Eaf.KeyVault.AspNetCore**: +1 teste (extensions)
-  - **Eaf.Log4NetServiceBus**: +3 testes (logging components)
-  - **Eaf.OpenTelemetry**: +2 testes (module, extensions)
-  - **Eaf.SqlServerCache**: +2 testes (helpers, extensions)
-  - **Eaf.SqliteCache**: +4 testes (pool, commands, options)
+### Implemented Improvements
+- **KeyVault**: 206+ BDD tests implemented (99.5% success, 66% coverage)
+- **XML Documentation**: Portuguese summaries added
+- **BDD Pattern**: Given/When/Then implemented
+- **Castle.Serilog**: 44 BDD tests implemented (100% success, 90% coverage)
+- **OpenTelemetry**: 45/45 tests passing (100% success)
+- **SqlServerCache**: 38/38 tests passing (100% success)
+- **Worker**: 63/63 tests passing (100% success)
+- **Test Expansion (April 2026)**: +65 new test files implemented
+  - **Eaf.Middleware.Web.Core**: +10 tests (Swagger filters, TokenAuth, Impersonation models)
+  - **Eaf.MiddlewareCore**: +30 tests (Entities, DTOs, Extensions, Cache items)
+  - **Eaf.Middleware.Application**: +9 tests (constants, helpers, authorization)
+  - **Eaf.Middleware.Ldap**: +4 tests (configuration, authentication)
+  - **Eaf.Middleware.AzureActiveDirectory**: +4 tests (configuration, authentication)
+  - **Eaf.Middleware.Worker**: +4 tests (folders, emailing, base classes)
+  - **Eaf.KeyVault**: +3 tests (managers, interfaces)
+  - **Eaf.Castle.Serilog**: +4 tests (module, factory, logger)
+  - **Eaf.KeyVault.AspNetCore**: +1 test (extensions)
+  - **Eaf.Log4NetServiceBus**: +3 tests (logging components)
+  - **Eaf.OpenTelemetry**: +2 tests (module, extensions)
+  - **Eaf.SqlServerCache**: +2 tests (helpers, extensions)
+  - **Eaf.SqliteCache**: +4 tests (pool, commands, options)
 
-### Correções Técnicas Implementadas
+### Technical Fixes Implemented
 
-#### SqliteCache - Correção de Inicialização Estática
-- **Problema**: IndexOutOfRangeException na inicialização do DbCommandPool
-- **Causa**: Ordem incorreta de inicialização das propriedades estáticas
-- **Solução**: Movido `Count` antes de `Commands` para garantir inicialização correta
-- **Resultado**: +21 testes passando (de 53 para 74), melhoria de 39%
+#### SqliteCache - Static Initialization Fix
+- **Problem**: IndexOutOfRangeException during DbCommandPool initialization
+- **Cause**: Incorrect order of static property initialization
+- **Solution**: Moved `Count` before `Commands` to ensure correct initialization
+- **Result**: +21 tests passing (from 53 to 74), 39% improvement
 
-#### Castle.Serilog - Resolução Completa
-- **Problema**: Conflitos entre Castle.Core.Logging.ILogger e Serilog.ILogger
-- **Solução**: Alias `SerilogILogger` para resolver ambiguidade de namespace
-- **Mocks Problemáticos**: Substituídos por instâncias reais do Serilog
-- **Testes Inválidos**: Removidos testes que dependiam de configuração runtime não suportada
-- **Resultado**: 44/44 testes passando com padrão BDD em português
+#### Castle.Serilog - Complete Resolution
+- **Problem**: Conflicts between Castle.Core.Logging.ILogger and Serilog.ILogger
+- **Solution**: Alias `SerilogILogger` to resolve namespace ambiguity
+- **Problematic Mocks**: Replaced with actual Serilog instances
+- **Invalid Tests**: Removed tests that depended on unsupported runtime configuration
+- **Result**: 44/44 tests passing with BDD pattern in Portuguese
 
-### Status da Documentação XML
-- **Arquivos Documentados**: 6/507 (1.2%)
-- **Classes Principais Documentadas**:
-  - **SerilogLoggerFactory** - Fábrica de loggers Serilog
-  - **SerilogLogger** - Implementação do logger
-  - **EafSqliteCache** - Cache baseado em SQLite
-  - **MiddlewareAppServiceBase** - Classe base para serviços
-  - **AzureActiveDirectoryAuthenticationSource** - Autenticação Azure AD
-- **Próximos Módulos**: Entity Framework, Web API, Authorization
+### XML Documentation Status
+- **Documented Files**: 6/507 (1.2%)
+- **Main Documented Classes**:
+  - **SerilogLoggerFactory** - Serilog logger factory
+  - **SerilogLogger** - Logger implementation
+  - **EafSqliteCache** - SQLite-based cache
+  - **MiddlewareAppServiceBase** - Base class for services
+  - **AzureActiveDirectoryAuthenticationSource** - Azure AD authentication
+- **Next Modules**: Entity Framework, Web API, Authorization
 
-### Cobertura por Assembly (Atualizada)
+### Coverage by Assembly (Updated)
 
-| Assembly | Cobertura de Linha | Cobertura de Branch | Cobertura de Método |
-|----------|-------------------|---------------------|---------------------|
+| Assembly | Line Coverage | Branch Coverage | Method Coverage |
+|----------|--------------|-----------------|----------------|
 | **Eaf.KeyVault** | 66.0% (200/303) | 51.6% (33/64) | 70.2% (40/57) |
 | **Eaf.SqlServerCache** | 78.3% (123/157) | 81.8% (18/22) | 71.4% (15/21) |
 | **Eaf.OpenTelemetry** | 68.9% (164/238) | 75.0% (60/80) | 95.2% (20/21) |
@@ -456,30 +458,30 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.Middleware.Core** | 15.31% (24/157) | 5.59% (5/90) | 16.9% (10/59) |
 | **Eaf.Middleware.Application** | 4.45% (7/157) | 1.35% (1/74) | 5.59% (5/90) |
 
-### Status dos Projetos de Teste
+### Test Project Status
 
-| Projeto | Status | Testes | Cobertura de Linha | Notas |
-|---------|--------|--------|-------------------|-------|
-| **Eaf.KeyVault.Tests** | Passando | 210 | 67.9% | Excelente cobertura |
-| **Eaf.SqlServerCache.Tests** | Passando | 57 | 86.6% | Excelente cobertura |
-| **Eaf.OpenTelemetry.Tests** | Passando | 10 | 68.9% | Boa cobertura |
-| **Eaf.KeyVault.AspNetCore.Tests** | Passando | 8 | 85.7% | Excelente cobertura |
-| **Eaf.Log4NetServiceBus.Tests** | Passando | 12 | 85.0% | Boa cobertura |
-| **Eaf.SqliteCache.Tests** | Passando | 94 | 75.6% | Boa cobertura |
-| **Eaf.Castle.Serilog.Tests** | Passando | 44 | 10.0% | Resolvido com BDD em português |
-| **Eaf.Middleware.Web.Core.Tests** | Passando | 78 | 0.63% | **EXPANDIDO**: +35 testes (Swagger, TokenAuth, Impersonation) |
-| **Eaf.Middleware.Application.Tests** | Passando | 58 | 4.45% | Cobertura básica |
-| **Eaf.Middleware.Worker.Tests** | Passando | 70 | 25.97% | Cobertura moderada |
-| **Eaf.MiddlewareCore.Tests** | Passando | 632 | 15.31% | **EXPANDIDO**: +30 testes (Entities, DTOs, Extensions) |
+| Project | Status | Tests | Line Coverage | Notes |
+|---------|--------|--------|--------------|-------|
+| **Eaf.KeyVault.Tests** | Passing | 210 | 67.9% | Excellent coverage |
+| **Eaf.SqlServerCache.Tests** | Passing | 57 | 86.6% | Excellent coverage |
+| **Eaf.OpenTelemetry.Tests** | Passing | 10 | 68.9% | Good coverage |
+| **Eaf.KeyVault.AspNetCore.Tests** | Passing | 8 | 85.7% | Excellent coverage |
+| **Eaf.Log4NetServiceBus.Tests** | Passing | 12 | 85.0% | Good coverage |
+| **Eaf.SqliteCache.Tests** | Passing | 94 | 75.6% | Good coverage |
+| **Eaf.Castle.Serilog.Tests** | Passing | 44 | 10.0% | Resolved with BDD in Portuguese |
+| **Eaf.Middleware.Web.Core.Tests** | Passing | 78 | 0.63% | **EXPANDED**: +35 tests (Swagger, TokenAuth, Impersonation) |
+| **Eaf.Middleware.Application.Tests** | Passing | 58 | 4.45% | Basic coverage |
+| **Eaf.Middleware.Worker.Tests** | Passing | 70 | 25.97% | Moderate coverage |
+| **Eaf.MiddlewareCore.Tests** | Passing | 632 | 15.31% | **EXPANDED**: +30 tests (Entities, DTOs, Extensions) |
 
-**Legenda:**
-- **Passando**: Todos os testes passam com sucesso
-- **Problemas**: Testes executam mas têm falhas ou avisos
-- **Erros de Build**: Projeto falha ao compilar
+**Legend:**
+- **Passing**: All tests pass successfully
+- **Problems**: Tests run but have failures or warnings
+- **Build Errors**: Project fails to compile
 
-### Padrão de Testes BDD
+### BDD Test Pattern
 
-Os testes seguem o padrão BDD (Behavior-Driven Development) em português:
+Tests follow the BDD (Behavior-Driven Development) pattern in Portuguese:
 
 ```csharp
 [Fact]
@@ -499,53 +501,53 @@ public void Dado_ParametroValido_Quando_ChamarMetodo_Entao_DeveRetornarSucesso()
 
 ---
 
-## Pacotes NuGet
+## NuGet Packages
 
-| Pacote | NuGet | Descrição |
-|--------|-------|-----------|
-| [Eaf.Middleware.Application](https://www.nuget.org/packages/Eaf.Middleware.Application/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Application.svg)](https://badge.fury.io/nu/Eaf.Middleware.Application) | Camada de aplicação |
-| [Eaf.Middleware.AzureActiveDirectory](https://www.nuget.org/packages/Eaf.Middleware.AzureActiveDirectory/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.AzureActiveDirectory.svg)](https://badge.fury.io/nu/Eaf.Middleware.AzureActiveDirectory) | Integração Azure AD |
-| [Eaf.Middleware.Core](https://www.nuget.org/packages/Eaf.Middleware.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Core) | Funcionalidades core |
-| [Eaf.Middleware.Ldap](https://www.nuget.org/packages/Eaf.Middleware.Ldap/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Ldap.svg)](https://badge.fury.io/nu/Eaf.Middleware.Ldap) | Autenticação LDAP |
-| [Eaf.Middleware.Web.Core](https://www.nuget.org/packages/Eaf.Middleware.Web.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Web.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Web.Core) | Componentes web |
-| [Eaf.Castle.Serilog](https://www.nuget.org/packages/Eaf.Castle.Serilog/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Castle.Serilog.svg)](https://badge.fury.io/nu/Eaf.Castle.Serilog) | Logging estruturado |
-| [Eaf.KeyVault](https://www.nuget.org/packages/Eaf.KeyVault/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.svg)](https://badge.fury.io/nu/Eaf.KeyVault) | Gerenciamento de segredos |
-| [Eaf.KeyVault.AspNetCore](https://www.nuget.org/packages/Eaf.KeyVault.AspNetCore/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore.svg)](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore) | Integração ASP.NET Core |
-| [Eaf.OpenTelemetry](https://www.nuget.org/packages/Eaf.OpenTelemetry/) | [![NuGet version](https://badge.fury.io/nu/Eaf.OpenTelemetry.svg)](https://badge.fury.io/nu/Eaf.OpenTelemetry) | Telemetria e observabilidade |
+| Package | NuGet | Description |
+|--------|-------|-------------|
+| [Eaf.Middleware.Application](https://www.nuget.org/packages/Eaf.Middleware.Application/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Application.svg)](https://badge.fury.io/nu/Eaf.Middleware.Application) | Application layer |
+| [Eaf.Middleware.AzureActiveDirectory](https://www.nuget.org/packages/Eaf.Middleware.AzureActiveDirectory/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.AzureActiveDirectory.svg)](https://badge.fury.io/nu/Eaf.Middleware.AzureActiveDirectory) | Azure AD integration |
+| [Eaf.Middleware.Core](https://www.nuget.org/packages/Eaf.Middleware.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Core) | Core features |
+| [Eaf.Middleware.Ldap](https://www.nuget.org/packages/Eaf.Middleware.Ldap/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Ldap.svg)](https://badge.fury.io/nu/Eaf.Middleware.Ldap) | LDAP authentication |
+| [Eaf.Middleware.Web.Core](https://www.nuget.org/packages/Eaf.Middleware.Web.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Web.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Web.Core) | Web components |
+| [Eaf.Castle.Serilog](https://www.nuget.org/packages/Eaf.Castle.Serilog/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Castle.Serilog.svg)](https://badge.fury.io/nu/Eaf.Castle.Serilog) | Structured logging |
+| [Eaf.KeyVault](https://www.nuget.org/packages/Eaf.KeyVault/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.svg)](https://badge.fury.io/nu/Eaf.KeyVault) | Secret management |
+| [Eaf.KeyVault.AspNetCore](https://www.nuget.org/packages/Eaf.KeyVault.AspNetCore/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore.svg)](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore) | ASP.NET Core integration |
+| [Eaf.OpenTelemetry](https://www.nuget.org/packages/Eaf.OpenTelemetry/) | [![NuGet version](https://badge.fury.io/nu/Eaf.OpenTelemetry.svg)](https://badge.fury.io/nu/Eaf.OpenTelemetry) | Telemetry and observability |
 | [Eaf.Log4NetServiceBus](https://www.nuget.org/packages/Eaf.Log4NetServiceBus/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Log4NetServiceBus.svg)](https://badge.fury.io/nu/Eaf.Log4NetServiceBus) | Service bus logging |
-| [Eaf.SqlServerCache](https://www.nuget.org/packages/Eaf.SqlServerCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqlServerCache.svg)](https://badge.fury.io/nu/Eaf.SqlServerCache) | Cache SQL Server |
-| [Eaf.SqliteCache](https://www.nuget.org/packages/Eaf.SqliteCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqliteCache.svg)](https://badge.fury.io/nu/Eaf.SqliteCache) | Cache SQLite |
+| [Eaf.SqlServerCache](https://www.nuget.org/packages/Eaf.SqlServerCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqlServerCache.svg)](https://badge.fury.io/nu/Eaf.SqlServerCache) | SQL Server cache |
+| [Eaf.SqliteCache](https://www.nuget.org/packages/Eaf.SqliteCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqliteCache.svg)](https://badge.fury.io/nu/Eaf.SqliteCache) | SQLite cache |
 | [Eaf.Middleware.Worker](https://www.nuget.org/packages/Eaf.Middleware.Worker/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Worker.svg)](https://badge.fury.io/nu/Eaf.Middleware.Worker) | Background services |
 
 ---
 
-## Contribuição
+## Contributing
 
-### Como Contribuir
+### How to Contribute
 
-1. **Fork** o repositório
-2. **Crie** uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. **Commit** suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** para a branch (`git push origin feature/AmazingFeature`)
-5. **Abra** um Pull Request
+1. **Fork** the repository
+2. **Create** a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
 
-### Padrões de Desenvolvimento
+### Development Standards
 
-- **Testes**: Todos os novos recursos devem ter testes unitários
-- **Cobertura**: Manter cobertura mínima de 90%
-- **Documentação**: Adicionar XML documentation em métodos públicos
-- **BDD**: Seguir padrão Dado/Quando/Então em português
+- **Tests**: All new features must have unit tests
+- **Coverage**: Maintain minimum 90% coverage
+- **Documentation**: Add XML documentation to public methods
+- **BDD**: Follow Given/When/Then pattern in Portuguese
 
-### Links Úteis
+### Useful Links
 
-- [Documentação Completa](src/README.md)
-- [Política de Segurança](SECURITY.md)
+- [Complete Documentation](src/README.md)
+- [Security Policy](SECURITY.md)
 - [Changelog](CHANGELOG.md)
-- [Guia de Testes](TESTING.md)
+- [Testing Guide](TESTING.md)
 
 ---
 
-## Qualidade e Métricas
+## Quality and Metrics
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/project/overview?id=afonsoft_EAF)
 
@@ -553,7 +555,7 @@ public void Dado_ParametroValido_Quando_ChamarMetodo_Entao_DeveRetornarSucesso()
 |------------|------|-------|------|---------|
 | [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=code_smells)](https://sonarcloud.io/dashboard?id=EAF) | [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=bugs)](https://sonarcloud.io/dashboard?id=EAF) | ![AppVeyor tests](https://img.shields.io/appveyor/tests/afonsoft/eaf) | ![GitHub top language](https://img.shields.io/github/languages/top/afonsoft/eaf) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=alert_status)](https://sonarcloud.io/dashboard?id=EAF) |
 
-### Estatísticas
+### Statistics
 
 | Lines of Code | Duplicated Lines | Coverage | Maintainability |
 |---------------|------------------|----------|-----------------|
@@ -573,6 +575,28 @@ public void Dado_ParametroValido_Quando_ChamarMetodo_Entao_DeveRetornarSucesso()
 
 ---
 
-**Desenvolvido com ❤️ pela comunidade opensource**
+**Developed with ❤️ by the opensource community**
 
-Além deste exemplo simples, o EAF fornece uma infraestrutura robusta e modelo de desenvolvimento para [modularidade](https://aspnetboilerplate.com/Pages/Documents/Module-System), [multi-tenancy](https://aspnetboilerplate.com/Pages/Documents/Multi-Tenancy), [cache](https://aspnetboilerplate.com/Pages/Documents/Caching), [jobs em background](https://aspnetboilerplate.com/Pages/Documents/Background-Jobs-And-Workers), [filtros de dados](https://aspnetboilerplate.com/Pages/Documents/Data-Filters), [gerenciamento de configurações](https://aspnetboilerplate.com/Pages/Documents/Setting-Management), [eventos de domínio](https://aspnetboilerplate.com/Pages/Documents/EventBus-Domain-Events), testes unitários e de integração, e muito mais! Você foca no seu código de negócio e não se repete!
+Beyond this simple example, EAF provides a robust infrastructure and development model for [modularity](https://aspnetboilerplate.com/Pages/Documents/Module-System), [multi-tenancy](https://aspnetboilerplate.com/Pages/Documents/Multi-Tenancy), [cache](https://aspnetboilerplate.com/Pages/Documents/Caching), [background jobs](https://aspnetboilerplate.com/Pages/Documents/Background-Jobs-And-Workers), [data filters](https://aspnetboilerplate.com/Pages/Documents/Data-Filters), [setting management](https://aspnetboilerplate.com/Pages/Documents/Setting-Management), [domain events](https://aspnetboilerplate.com/Pages/Documents/EventBus-Domain-Events), unit and integration tests, and much more! You focus on your business code and don't repeat yourself!
+
+---
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=afonsoft%2Feaf&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&legend=top-left" />
+ </picture>
+</a>
+
+## StarMapper
+
+<a href="https://starmapper.bruniaux.com/afonsoft/eaf">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://starmapper.bruniaux.com/api/map-image/afonsoft/eaf?theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://starmapper.bruniaux.com/api/map-image/afonsoft/eaf?theme=light" />
+    <img alt="StarMapper" src="https://starmapper.bruniaux.com/api/map-image/afonsoft/eaf" />
+  </picture>
+</a>
