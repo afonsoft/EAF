@@ -1,8 +1,8 @@
-# Migration Guide: Angular 18 to Angular 19
+# Migration Guide: Angular 19 to Angular 20
 
 ## EAF Angular UI Template
 
-This document provides a comprehensive step-by-step guide for migrating the EAF Angular UI Template from Angular 18 to Angular 19, including specific considerations for the EAF framework, standalone components migration, and third-party library compatibility.
+This document provides a comprehensive step-by-step guide for migrating the EAF Angular UI Template from Angular 19 to Angular 20, including specific considerations for the EAF framework, standalone components migration, and third-party library compatibility.
 
 ---
 
@@ -11,13 +11,12 @@ This document provides a comprehensive step-by-step guide for migrating the EAF 
 1. [Current State Analysis](#current-state-analysis)
 2. [Pre-Migration Checklist](#pre-migration-checklist)
 3. [Step 1: Update Dependencies](#step-1-update-dependencies)
-4. [Step 2: Standalone Components Migration](#step-2-standalone-components-migration)
+4. [Step 2: Breaking Changes](#step-2-breaking-changes)
 5. [Step 3: EAF Framework Considerations](#step-3-eaf-framework-considerations)
 6. [Step 4: Third-Party Library Updates](#step-4-third-party-library-updates)
-7. [Breaking Changes Summary](#breaking-changes-summary)
-8. [Testing Strategy](#testing-strategy)
-9. [Rollback Procedures](#rollback-procedures)
-10. [Troubleshooting](#troubleshooting)
+7. [Testing Strategy](#testing-strategy)
+8. [Rollback Procedures](#rollback-procedures)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -27,13 +26,13 @@ This document provides a comprehensive step-by-step guide for migrating the EAF 
 
 Based on analysis of the EAF Angular UI Template, the current state is:
 
-| Aspect | Current State | Target (Angular 19) |
+| Aspect | Current State | Target (Angular 20) |
 |--------|---------------|---------------------|
-| Angular Version | ^18.0.0 | ^19.0.0 |
-| TypeScript | ~5.4.0 | ~5.5.0 |
-| PrimeNG | ^17.17.0 | ^19.0.0 |
-| ngx-bootstrap | ^12.0.0 | ^12.0.0 (verify compatibility) |
-| Standalone Components | 0 (all module-based) | 59+ components |
+| Angular Version | ^19.0.0 | ^20.0.0 |
+| TypeScript | ~5.5.0 | ~5.6.0 |
+| PrimeNG | ^19.0.0 | ^20.0.0 |
+| ngx-bootstrap | ^12.0.0 | ^13.0.0 (verify compatibility) |
+| Standalone Components | Partially migrated | Continue migration |
 
 ### Component Inventory
 
@@ -70,20 +69,6 @@ The application has **59+ components** that need migration consideration:
 - `ForgotPasswordComponent`, `ResetPasswordComponent`
 - `EmailActivationComponent`, `ConfirmEmailComponent`
 
-### Module Structure
-
-```
-AppModule (root)
-├── AccountModule (lazy-loaded, separate entry point)
-├── AppRoutingModule
-│   ├── MainModule (lazy-loaded)
-│   ├── AdminModule (lazy-loaded)
-│   └── NotificationsComponent
-├── AppCommonModule (shared, with forRoot())
-├── UtilsModule (shared utilities)
-└── ServiceProxyModule (API services)
-```
-
 ### EAF Framework Integration
 
 The EAF framework has several custom integrations that require special attention:
@@ -101,22 +86,22 @@ The EAF framework has several custom integrations that require special attention
 
 ### Prerequisites
 
-- [ ] Ensure current Angular 18 application builds successfully: `npm run build`
+- [ ] Ensure current Angular 19 application builds successfully: `npm run build`
 - [ ] Run all tests and ensure they pass: `npm test`
 - [ ] Verify application runs in development: `npm run start`
-- [ ] Create a backup branch: `git checkout -b backup/before-angular-19-migration`
+- [ ] Create a backup branch: `git checkout -b backup/before-angular-20-migration`
 - [ ] Document current package versions in `package.json`
 
 ### Environment Requirements
 
-- **Node.js**: ^18.13.0 || ^20.9.0 || ^22.0.0 (Angular 19 supports Node 18, 20, and 22)
+- **Node.js**: ^18.13.0 || ^20.9.0 || ^22.0.0 (Angular 20 supports Node 18, 20, and 22)
 - **npm**: ^9.0.0 || ^10.0.0
-- **Angular CLI**: ^19.0.0
+- **Angular CLI**: ^20.0.0
 
 ### Current State Assessment
 
 - [ ] Count total components: `find src -name "*.component.ts" | wc -l`
-- [ ] Identify module-based components vs standalone (currently 0 standalone)
+- [ ] Identify module-based components vs standalone
 - [ ] Document custom EAF framework usages
 - [ ] List all third-party libraries and their current versions
 - [ ] Identify components extending `AppComponentBase`
@@ -127,67 +112,67 @@ The EAF framework has several custom integrations that require special attention
 
 ### 1.1 Update Angular Core Packages
 
-Update all Angular packages from ^18.0.0 to ^19.0.0:
+Update all Angular packages from ^19.0.0 to ^20.0.0:
 
 ```bash
 # Update Angular core packages
-npm install @angular/animations@^19.0.0 \
-  @angular/common@^19.0.0 \
-  @angular/compiler@^19.0.0 \
-  @angular/core@^19.0.0 \
-  @angular/forms@^19.0.0 \
-  @angular/platform-browser@^19.0.0 \
-  @angular/platform-browser-dynamic@^19.0.0 \
-  @angular/platform-server@^19.0.0 \
-  @angular/router@^19.0.0 \
-  @angular/service-worker@^19.0.0 \
-  @angular/pwa@^19.0.0 \
-  @angular/cdk@^19.0.0 \
-  @angular-devkit/core@^19.0.0
+npm install @angular/animations@^20.0.0 \
+  @angular/common@^20.0.0 \
+  @angular/compiler@^20.0.0 \
+  @angular/core@^20.0.0 \
+  @angular/forms@^20.0.0 \
+  @angular/platform-browser@^20.0.0 \
+  @angular/platform-browser-dynamic@^20.0.0 \
+  @angular/platform-server@^20.0.0 \
+  @angular/router@^20.0.0 \
+  @angular/service-worker@^20.0.0 \
+  @angular/pwa@^20.0.0 \
+  @angular/cdk@^20.0.0 \
+  @angular-devkit/core@^20.0.0
 ```
 
 ### 1.2 Update Angular CLI and DevKit
 
 ```bash
 # Update Angular CLI and build tools
-npm install @angular/cli@^19.0.0 \
-  @angular-devkit/build-angular@^19.0.0 \
-  @angular/compiler-cli@^19.0.0 \
-  @angular-eslint/builder@^19.0.0 \
-  @angular-eslint/eslint-plugin@^19.0.0 \
-  @angular-eslint/eslint-plugin-template@^19.0.0 \
-  @angular-eslint/schematics@^19.0.0 \
-  @angular-eslint/template-parser@^19.0.0
+npm install @angular/cli@^20.0.0 \
+  @angular-devkit/build-angular@^20.0.0 \
+  @angular/compiler-cli@^20.0.0 \
+  @angular-eslint/builder@^20.0.0 \
+  @angular-eslint/eslint-plugin@^20.0.0 \
+  @angular-eslint/eslint-plugin-template@^20.0.0 \
+  @angular-eslint/schematics@^20.0.0 \
+  @angular-eslint/template-parser@^20.0.0
 ```
 
 ### 1.3 Update TypeScript
 
 ```bash
-npm install typescript@~5.5.0
+npm install typescript@~5.6.0
 ```
 
-### 1.4 Update PrimeNG (Breaking Changes Expected)
+### 1.4 Update PrimeNG
 
-PrimeNG 19 has significant changes for Angular 19 compatibility:
+PrimeNG 20 has significant changes for Angular 20 compatibility:
 
 ```bash
-npm install primeng@^19.0.0
+npm install primeng@^20.0.0
 ```
 
-**PrimeNG 19 Breaking Changes:**
+**PrimeNG 20 Breaking Changes:**
 - All PrimeNG components are now standalone by default
 - Module imports (e.g., `TableModule`) are deprecated in favor of direct component imports
 - New import pattern:
 
 ```typescript
-// Before (Angular 18 + PrimeNG 17)
+// Before (Angular 19 + PrimeNG 19)
 import { TableModule } from 'primeng/table';
 
 @NgModule({
   imports: [TableModule]
 })
 
-// After (Angular 19 + PrimeNG 19)
+// After (Angular 20 + PrimeNG 20)
 import { Table, Column, Row } from 'primeng/table';
 
 @Component({
@@ -198,14 +183,14 @@ import { Table, Column, Row } from 'primeng/table';
 
 ### 1.5 Verify Third-Party Library Compatibility
 
-| Library | Current | Angular 19 Compatible | Action |
+| Library | Current | Angular 20 Compatible | Action |
 |---------|---------|----------------------|--------|
 | ngx-bootstrap | ^12.0.0 | Verify | Check for v13+ |
 | ngx-image-cropper | ^9.1.6 | Yes | No change needed |
 | angular-calendar | ^0.31.0 | Unknown | Verify before upgrade |
 | @ng-select/ng-select | ^12.0.0 | Verify | Check for v13+ |
 | ngx-mask | ^15.0.0 | Verify | Check for v17+ |
-| ngx-cookie-service | ^18.0.0 | Yes | Update to ^19.0.0 |
+| ngx-cookie-service | ^18.0.0 | Yes | Update to ^20.0.0 |
 | @microsoft/signalr | ^7.0.14 | Yes | No change needed |
 
 ### 1.6 Updated package.json Dependencies
@@ -213,244 +198,90 @@ import { Table, Column, Row } from 'primeng/table';
 ```json
 {
   "dependencies": {
-    "@angular/animations": "^19.0.0",
-    "@angular/common": "^19.0.0",
-    "@angular/compiler": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@angular/forms": "^19.0.0",
-    "@angular/platform-browser": "^19.0.0",
-    "@angular/platform-browser-dynamic": "^19.0.0",
-    "@angular/platform-server": "^19.0.0",
-    "@angular/pwa": "^19.0.0",
-    "@angular/router": "^19.0.0",
-    "@angular/service-worker": "^19.0.0",
-    "@angular/cdk": "^19.0.0",
-    "@angular-devkit/core": "^19.0.0",
-    "primeng": "^19.0.0",
-    "typescript": "~5.5.0"
+    "@angular/animations": "^20.0.0",
+    "@angular/common": "^20.0.0",
+    "@angular/compiler": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/forms": "^20.0.0",
+    "@angular/platform-browser": "^20.0.0",
+    "@angular/platform-browser-dynamic": "^20.0.0",
+    "@angular/platform-server": "^20.0.0",
+    "@angular/pwa": "^20.0.0",
+    "@angular/router": "^20.0.0",
+    "@angular/service-worker": "^20.0.0",
+    "@angular/cdk": "^20.0.0",
+    "@angular-devkit/core": "^20.0.0",
+    "primeng": "^20.0.0",
+    "typescript": "~5.6.0"
   },
   "devDependencies": {
-    "@angular/cli": "^19.0.0",
-    "@angular-devkit/build-angular": "^19.0.0",
-    "@angular/compiler-cli": "^19.0.0",
-    "@angular-eslint/builder": "^19.0.0",
-    "@angular-eslint/eslint-plugin": "^19.0.0",
-    "@angular-eslint/eslint-plugin-template": "^19.0.0",
-    "@angular-eslint/schematics": "^19.0.0",
-    "@angular-eslint/template-parser": "^19.0.0"
+    "@angular/cli": "^20.0.0",
+    "@angular-devkit/build-angular": "^20.0.0",
+    "@angular/compiler-cli": "^20.0.0",
+    "@angular-eslint/builder": "^20.0.0",
+    "@angular-eslint/eslint-plugin": "^20.0.0",
+    "@angular-eslint/eslint-plugin-template": "^20.0.0",
+    "@angular-eslint/schematics": "^20.0.0",
+    "@angular-eslint/template-parser": "^20.0.0"
   }
 }
 ```
 
 ---
 
-## Step 2: Standalone Components Migration
+## Step 2: Breaking Changes
 
-### 2.1 Migration Strategy
+### Angular 20 Breaking Changes
 
-For the EAF template with 59+ components, a gradual migration approach is recommended:
+#### 1. Enhanced Standalone Components
 
-**Phase 1: Simple Components (Low Risk)**
-- Leaf components with minimal dependencies
-- Modal components: `ChangePasswordModalComponent`, `MySettingsModalComponent`
-- Display components: `Theme2BrandComponent`, `DefaultBrandComponent`
+- **Impact**: Standalone components continue to be the default pattern
+- **EAF Impact**: Continue migration of remaining module-based components
+- **Priority**: Medium (can migrate gradually)
 
-**Phase 2: Feature Components (Medium Risk)**
-- Admin module components: `UsersComponent`, `RolesComponent`, `TenantsComponent`
-- Main module components: `DashboardComponent`, `AirplanesComponent`
+#### 2. TypeScript 5.6 Required
 
-**Phase 3: Complex Components (High Risk)**
-- `AppComponent` (root component with router outlet)
-- Layout components: `DefaultLayoutComponent`, `Theme2LayoutComponent`
-- Components with heavy jQuery integration
+- **Impact**: Stricter type checking, new TypeScript features
+- **EAF Impact**: May require type definition updates
+- **Priority**: High (must update)
 
-**Phase 4: Base Class Migration (Optional)**
-- Migrate `AppComponentBase` to standalone-compatible pattern
-- This is complex and may require significant refactoring
+#### 3. Router Updates
 
-### 2.2 Basic Component Migration Pattern
+- **Impact**: Router improvements and new features
+- **EAF Impact**: Minimal; current routing should continue to work
+- **Priority**: Low
 
-**Example: Migrating a Simple Component**
+#### 4. Forms API Enhancements
 
-```typescript
-// BEFORE: Module-based component
-// users.component.ts
-import { Component, Injector, OnInit } from '@angular/core';
-import { AppComponentBase } from '@shared/common/app-component-base';
+- **Impact**: Enhanced reactive forms with better type safety
+- **EAF Impact**: May require updates to custom form implementations
+- **Priority**: Medium
 
-@Component({
-  selector: 'app-users',
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.css']
-})
-export class UsersComponent extends AppComponentBase implements OnInit {
-  constructor(injector: Injector) {
-    super(injector);
-  }
-  
-  ngOnInit(): void {
-    // Component logic
-  }
-}
+#### 5. Performance Improvements
 
-// admin.module.ts
-@NgModule({
-  declarations: [UsersComponent, /* ... */],
-  imports: [
-    CommonModule,
-    FormsModule,
-    TableModule,
-    // ...
-  ]
-})
-export class AdminModule {}
-```
+- **Impact**: Better runtime performance and build optimization
+- **EAF Impact**: Positive impact, no code changes required
+- **Priority**: Low
 
-```typescript
-// AFTER: Standalone component
-// users.component.ts
-import { Component, Injector, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Table, Column, Row } from 'primeng/table';
-import { Paginator } from 'primeng/paginator';
-import { Button } from 'primeng/button';
-import { AppComponentBase } from '@shared/common/app-component-base';
+### PrimeNG 20 Breaking Changes
 
-@Component({
-  selector: 'app-users',
-  standalone: true,
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.css'],
-  imports: [
-    // Angular modules
-    CommonModule,
-    FormsModule,
-    // PrimeNG standalone components
-    Table,
-    Column,
-    Row,
-    Paginator,
-    Button
-  ]
-})
-export class UsersComponent extends AppComponentBase implements OnInit {
-  constructor(injector: Injector) {
-    super(injector);
-  }
-  
-  ngOnInit(): void {
-    // Component logic (unchanged)
-  }
-}
+#### 1. All Components Standalone
 
-// admin.module.ts
-@NgModule({
-  declarations: [
-    // Remove UsersComponent from declarations
-    /* Other non-standalone components */
-  ],
-  imports: [
-    CommonModule,
-    // Import standalone component as a module
-    UsersComponent,
-    // ... other imports
-  ]
-})
-export class AdminModule {}
-```
+- **Impact**: Module imports deprecated
+- **EAF Impact**: All PrimeNG imports must be updated
+- **Priority**: High (must update)
 
-### 2.3 AppComponentBase Consideration
+#### 2. Component Import Changes
 
-**Critical**: Components extending `AppComponentBase` require special handling:
+- **Impact**: Import individual components instead of modules
+- **EAF Impact**: Update all component files
+- **Priority**: High (must update)
 
-```typescript
-// AppComponentBase typically provides:
-// - Localization services
-// - Permission checking
-// - Notification helpers
-// - Busy state management
+#### 3. Theming Updates
 
-// When migrating to standalone, ensure base class services are available:
-@Component({
-  selector: 'app-users',
-  standalone: true,
-  imports: [CommonModule, FormsModule, Table],
-  providers: [
-    // Services provided by AppComponentBase must be available
-    // These are typically provided in root or imported via AppCommonModule
-  ]
-})
-export class UsersComponent extends AppComponentBase implements OnInit {
-  // Component logic
-}
-```
-
-**Recommendation**: Keep using `AppComponentBase` during migration. The base class services should remain available through the root injector or imported modules.
-
-### 2.4 Routing with Standalone Components
-
-**Lazy Loading with Standalone Components:**
-
-```typescript
-// BEFORE: Lazy load module
-const routes: Routes = [
-  {
-    path: 'admin',
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
-  }
-];
-
-// AFTER: Lazy load standalone component (optional optimization)
-const routes: Routes = [
-  {
-    path: 'admin',
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
-    // Or eventually:
-    // loadComponent: () => import('./admin/users.component').then(c => c.UsersComponent)
-  }
-];
-```
-
-**Note**: For the EAF template, keep module-based lazy loading initially. Migrate to `loadComponent` gradually after all components in a module are standalone.
-
-### 2.5 Module Migration Checklist
-
-For each module, follow this process:
-
-1. **Select a target module** (start with MainModule - fewer components)
-2. **Migrate components one by one**:
-   - Add `standalone: true` to @Component decorator
-   - Add required imports (CommonModule, FormsModule, PrimeNG components)
-   - Remove from module declarations
-   - Add to module imports
-   - Test component functionality
-3. **Update module imports**:
-   - Add migrated standalone components to imports array
-   - Keep non-migrated components in declarations
-4. **Test the entire module**
-
-### 2.6 PrimeNG 19 Component Import Mapping
-
-| PrimeNG 17 Module | PrimeNG 19 Standalone Components |
-|-------------------|----------------------------------|
-| `TableModule` | `Table`, `Column`, `Row`, `Cell` |
-| `TreeModule` | `Tree`, `TreeNode` |
-| `PaginatorModule` | `Paginator` |
-| `ButtonModule` | `Button` |
-| `DialogModule` | `Dialog`, `DialogHeader`, `DialogFooter` |
-| `DropdownModule` | `Dropdown`, `DropdownItem` |
-| `InputTextModule` | `InputText` |
-| `CalendarModule` | `DatePicker` |
-| `CheckboxModule` | `Checkbox` |
-| `RadioButtonModule` | `RadioButton` |
-| `AutoCompleteModule` | `AutoComplete` |
-| `FileUploadModule` | `FileUpload` |
-| `EditorModule` | `Editor` |
-| `InputMaskModule` | `InputMask` |
-| `ContextMenuModule` | `ContextMenu` |
-| `DragDropModule` | `Drag`, `Drop` |
-| `ProgressBarModule` | `ProgressBar` |
+- **Impact**: New theming system may require CSS updates
+- **EAF Impact**: Check custom styles in `styles.css`
+- **Priority**: Medium
 
 ---
 
@@ -473,7 +304,7 @@ The EAF template uses custom path mappings that must be preserved:
 }
 ```
 
-**Action**: Verify these paths work with Angular 19's stricter module resolution.
+**Action**: Verify these paths work with Angular 20's stricter module resolution.
 
 ### 3.2 EAF Module Integration
 
@@ -508,7 +339,7 @@ intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<an
 }
 ```
 
-**Angular 19 Compatibility**: This pattern is fully compatible with Angular 19. No changes needed.
+**Angular 20 Compatibility**: This pattern is fully compatible with Angular 20. No changes needed.
 
 ### 3.4 jQuery Integration
 
@@ -518,7 +349,7 @@ The EAF template uses jQuery for DOM manipulation:
 // File: src/assets/lib/eaf-web-resources/Eaf/Framework/scripts/libs/eaf.jquery.js
 ```
 
-**Angular 19 Considerations**:
+**Angular 20 Considerations**:
 - jQuery integration should continue to work
 - Test all jQuery-dependent features after migration
 - Watch for change detection conflicts
@@ -529,7 +360,7 @@ Auto-generated service proxies in `src/shared/service-proxies/`:
 
 - Use Blob processing for file downloads
 - Integrate with `EafHttpInterceptor`
-- No changes required for Angular 19
+- No changes required for Angular 20
 
 ---
 
@@ -537,19 +368,19 @@ Auto-generated service proxies in `src/shared/service-proxies/`:
 
 ### 4.1 ngx-bootstrap
 
-ngx-bootstrap 12.0.0 should be compatible with Angular 19, but verify:
+ngx-bootstrap 12.0.0 should be compatible with Angular 20, but verify:
 
 ```bash
 # Check for updates
 npm info ngx-bootstrap versions
 
-# If v13+ is available with Angular 19 support:
+# If v13+ is available with Angular 20 support:
 npm install ngx-bootstrap@^13.0.0
 ```
 
 ### 4.2 ngx-image-cropper
 
-ngx-image-cropper ^9.1.6 is already compatible with Angular 19, 20, and 21:
+ngx-image-cropper ^9.1.6 is already compatible with Angular 20:
 
 ```bash
 # No update needed, but can update to latest:
@@ -579,13 +410,13 @@ export class ChangeProfilePictureModalComponent {}
 
 ### 4.3 angular-calendar
 
-angular-calendar ^0.31.0 compatibility with Angular 19 is unknown:
+angular-calendar ^0.31.0 compatibility with Angular 20 is unknown:
 
 ```bash
 # Check latest version
 npm info angular-calendar versions
 
-# Verify Angular 19 support before updating
+# Verify Angular 20 support before updating
 ```
 
 **Alternative**: If not compatible, consider:
@@ -595,7 +426,7 @@ npm info angular-calendar versions
 ### 4.4 @ng-select/ng-select
 
 ```bash
-# Check for Angular 19 compatible version
+# Check for Angular 20 compatible version
 npm info @ng-select/ng-select versions
 
 # Update if v13+ available
@@ -605,69 +436,12 @@ npm install @ng-select/ng-select@^13.0.0
 ### 4.5 ngx-mask
 
 ```bash
-# Check for Angular 19 compatible version
+# Check for Angular 20 compatible version
 npm info ngx-mask versions
 
 # Update if v17+ available
 npm install ngx-mask@^17.0.0
 ```
-
----
-
-## Breaking Changes Summary
-
-### Angular 19 Breaking Changes
-
-#### 1. Standalone Components Default
-
-- **Impact**: New projects use standalone by default; existing NgModule projects still work
-- **EAF Impact**: All 59+ components are module-based; migration is optional but recommended
-- **Priority**: Medium (can migrate gradually)
-
-#### 2. TypeScript 5.5 Required
-
-- **Impact**: stricter type checking, new TypeScript features
-- **EAF Impact**: May require type definition updates
-- **Priority**: High (must update)
-
-#### 3. Zone.js Optional (Zoneless)
-
-- **Impact**: Zone.js becomes optional for new projects
-- **EAF Impact**: The EAF template relies heavily on Zone.js for change detection
-- **Recommendation**: Keep Zone.js for now; zoneless migration is a major undertaking
-- **Priority**: Low (optional optimization)
-
-#### 4. Router Updates
-
-- **Impact**: Router improvements and new features
-- **EAF Impact**: Minimal; current routing should continue to work
-- **Priority**: Low
-
-#### 5. New Forms APIs
-
-- **Impact**: Enhanced reactive forms with better type safety
-- **EAF Impact**: May require updates to custom form implementations
-- **Priority**: Medium
-
-### PrimeNG 19 Breaking Changes
-
-#### 1. All Components Standalone
-
-- **Impact**: Module imports deprecated
-- **EAF Impact**: All PrimeNG imports must be updated
-- **Priority**: High (must update)
-
-#### 2. Component Import Changes
-
-- **Impact**: Import individual components instead of modules
-- **EAF Impact**: Update all 59+ component files
-- **Priority**: High (must update)
-
-#### 3. Theming Updates
-
-- **Impact**: New theming system may require CSS updates
-- **EAF Impact**: Check custom styles in `styles.css`
-- **Priority**: Medium
 
 ---
 
@@ -758,7 +532,7 @@ Test complete user workflows:
 
 ```bash
 # Restore package.json from git
-git checkout backup/before-angular-19-migration -- package.json
+git checkout backup/before-angular-20-migration -- package.json
 
 # Clean and reinstall
 rm -rf node_modules package-lock.json
@@ -794,7 +568,7 @@ If a specific component fails after standalone migration:
 
 ```bash
 # Reset to pre-migration branch
-git checkout backup/before-angular-19-migration
+git checkout backup/before-angular-20-migration
 
 # Clean environment
 rm -rf node_modules package-lock.json
@@ -813,7 +587,7 @@ npm test
 
 #### Issue 1: "Cannot resolve module" errors
 
-**Cause**: Angular 19 stricter module resolution
+**Cause**: Angular 20 stricter module resolution
 
 **Solution**:
 ```json
@@ -833,7 +607,7 @@ npm test
 
 **Solution**:
 ```typescript
-// Correct import for PrimeNG 19
+// Correct import for PrimeNG 20
 import { Table, Column } from 'primeng/table';
 
 @Component({
@@ -860,7 +634,7 @@ import { Table, Column } from 'primeng/table';
 
 #### Issue 4: ngx-bootstrap components not working
 
-**Cause**: ngx-bootstrap version incompatible with Angular 19
+**Cause**: ngx-bootstrap version incompatible with Angular 20
 
 **Solution**:
 ```bash
@@ -873,7 +647,7 @@ npm install ngx-bootstrap@latest --legacy-peer-deps
 
 #### Issue 5: jQuery/$ not defined
 
-**Cause**: jQuery types not recognized in Angular 19
+**Cause**: jQuery types not recognized in Angular 20
 
 **Solution**:
 ```typescript
@@ -902,7 +676,7 @@ declare const jQuery: any;
 | 1. Preparation | 1 day | Backup, dependency analysis, environment setup |
 | 2. Dependency Updates | 1-2 days | Update Angular, PrimeNG, TypeScript |
 | 3. Build Fixes | 1-2 days | Resolve build errors, type issues |
-| 4. Component Migration | 5-10 days | Migrate 59+ components to standalone |
+| 4. Component Migration | 5-10 days | Migrate remaining components to standalone |
 | 5. Testing | 3-5 days | Component, integration, regression testing |
 | 6. Documentation | 1 day | Update docs, changelog |
 | **Total** | **12-21 days** | |
@@ -922,11 +696,11 @@ If skipping standalone migration:
 
 ## Post-Migration Checklist
 
-- [ ] All dependencies updated to Angular 19 compatible versions
+- [ ] All dependencies updated to Angular 20 compatible versions
 - [ ] Application builds without errors: `npm run build`
 - [ ] All tests pass: `npm test`
 - [ ] Development server runs: `npm run start`
-- [ ] All 59+ components render correctly
+- [ ] All components render correctly
 - [ ] PrimeNG components updated to standalone imports
 - [ ] EAF framework integration tested
 - [ ] SignalR real-time features working
@@ -940,15 +714,15 @@ If skipping standalone migration:
 
 ### Official Documentation
 
-- [Angular 19 Release Notes](https://github.com/angular/angular/releases/tag/19.0.0)
-- [Angular Update Guide](https://update.angular.io/?l=2&v=18.0-19.0)
+- [Angular 20 Release Notes](https://github.com/angular/angular/releases/tag/20.0.0)
+- [Angular Update Guide](https://update.angular.io/?l=2&v=19.0-20.0)
 - [Standalone Components Guide](https://angular.dev/guide/standalone-components)
-- [PrimeNG 19 Migration](https://primeng.org/migration)
+- [PrimeNG 20 Migration](https://primeng.org/migration)
 
 ### EAF-Specific Resources
 
-- `MIGRATION_SUMMARY_18.md` - Previous Angular 17→18 migration notes
-- `MIGRATION_ANGULAR_17_TO_18.md` - Detailed 17→18 guide
+- `MIGRATION_SUMMARY_19.md` - Previous Angular 18→19 migration notes
+- `MIGRATION_ANGULAR_18_TO_19.md` - Detailed 18→19 guide
 - EAF Framework Documentation (if available)
 
 ---
@@ -956,8 +730,8 @@ If skipping standalone migration:
 ## Last Updated
 
 **Date**: May 23, 2026
-**Version**: 2.1 (Updated with Angular 19 release notes)
-**Angular Source**: 18.0.0
-**Angular Target**: 19.0.0
+**Version**: 1.0 (Initial EAF Template Edition)
+**Angular Source**: 19.0.0
+**Angular Target**: 20.0.0
 **Components to Migrate**: 59+
 **Maintainer**: EAF Development Team

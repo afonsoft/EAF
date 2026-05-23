@@ -15,6 +15,8 @@ The Angular UI template has undergone several major version upgrades. Detailed m
 - **[Angular 17 to 18 Migration](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_17_TO_18.md)**: Guide for upgrading from Angular 17 to Angular 18
 - **[Angular 17 to 19 Migration](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_17_TO_19.md)**: Guide for upgrading from Angular 17 to Angular 19
 - **[Angular 18 to 19 Migration](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_18_TO_19.md)**: Guide for upgrading from Angular 18 to Angular 19
+- **[Angular 19 to 20 Migration](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_19_TO_20.md)**: Guide for upgrading from Angular 19 to Angular 20
+- **[Angular 20 to 21 Migration](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_20_TO_21.md)**: Guide for upgrading from Angular 20 to Angular 21
 
 ### Migration Summaries
 
@@ -23,6 +25,8 @@ Quick reference summaries for major version changes:
 - **[Angular 15 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_15.md)**: Summary of changes in Angular 15
 - **[Angular 17 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_17.md)**: Summary of changes in Angular 17
 - **[Angular 18 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_18.md)**: Summary of changes in Angular 18
+- **[Angular 19 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_19.md)**: Summary of changes in Angular 19
+- **[Angular 20 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_20.md)**: Summary of changes in Angular 20
 
 ## .NET Framework Migrations
 
