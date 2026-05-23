@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\common.props"></Import>
+	<PropertyGroup>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<AssemblyName>Eaf.Middleware.Core</AssemblyName>
+		<PackageId>Eaf.Middleware.Core</PackageId>
+		<UserSecretsId>Eaf-Middleware-894FDFC1-6482-4A56-926A-3C46C9FE0329</UserSecretsId>
+		<RootNamespace>Eaf.Middleware.Core</RootNamespace>
+		<OutputType>Library</OutputType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Localization\Source\*.xml;Net\Emailing\EmailTemplates\default.html" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Abp.ZeroCore" Version="10.4.0" />
+		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
+		<PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
+		<PackageReference Include="Abp.MailKit" Version="10.4.0" />
+		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.4.0" />
+		<PackageReference Include="MimeKit" Version="4.16.0" />
+
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Eaf.Middleware.AzureActiveDirectory\Eaf.Middleware.AzureActiveDirectory.csproj" />
+		<ProjectReference Include="..\Eaf.Middleware.Ldap\Eaf.Middleware.Ldap.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="TimeZoneConverter" Version="7.2.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.13.0" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.13.0" />
+		<PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="4.1.0" />
+		<PackageReference Include="Hangfire.Heartbeat" Version="0.6.0" />
+		<PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
+		<PackageReference Include="Hangfire.Console" Version="1.4.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Localization\Source\EafCore-pt-BR.xml">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	    <CustomToolNamespace>Eaf.Middleware.Core.Localization.Source</CustomToolNamespace>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Localization\Source\EafCore.xml">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	    <CustomToolNamespace>Eaf.Middleware.Core.Localization.Source</CustomToolNamespace>
+	  </EmbeddedResource>
+	</ItemGroup>
+</Project>

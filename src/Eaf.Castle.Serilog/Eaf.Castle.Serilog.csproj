@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\common.props" />
+
+	<PropertyGroup>
+		<RootNamespace>Eaf</RootNamespace>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>Eaf.Castle.Serilog</AssemblyName>
+		<PackageId>Eaf.Castle.Serilog</PackageId>
+		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;Serilog;castle;Eaf;Boilerplate;NET9</PackageTags>
+		<Description>Enterprise Application Foundation - Castle - Serilog</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Serilog" Version="4.3.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+</Project>

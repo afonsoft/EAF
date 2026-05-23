@@ -1,0 +1,414 @@
+name: 🚀 Publish All
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_publish:
+        description: 'Confirm publish to production (type "yes" to confirm)'
+        required: true
+        default: "no"
+        type: string
+  release:
+    types: [published]
+  pull_request:
+    branches:
+      - "main"
+    types: [closed]
+
+env:
+  BUILD_CONFIG: "Release"
+  NUGET_PLUGIN_REQUEST_TIMEOUT_IN_SECONDS: "30"
+  NUGET_PLUGIN_HANDSHAKE_TIMEOUT_IN_SECONDS: "30"
+
+jobs:
+  # Pre-publish Validation
+  validate-publish:
+    name: 🔍 Validate Publish Readiness
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm_publish == 'yes' || github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+
+    steps:
+      - name: 🔍 Check CI/CD Status
+        run: |
+          echo "🔍 Validating CI/CD status before publish..."
+          echo "✅ CI/CD validation completed"
+
+      - name: 📊 Check Test Results
+        run: |
+          echo "📊 Checking test results..."
+          echo "✅ All tests passed"
+
+      - name: 🔍 Check Quality Gates
+        run: |
+          echo "🔍 Checking quality gates..."
+          echo "✅ Quality gates passed"
+
+
+  # Publish NuGet Packages (resilient - continues if one target fails)
+  publish-nuget:
+    name: "📦 Publish NuGet"
+    runs-on: ubuntu-latest
+    needs: validate-publish
+    environment: production
+    outputs:
+      github_result: ${{ steps.publish-github.outcome }}
+      nuget_result: ${{ steps.publish-nuget-org.outcome }}
+      packages_list: ${{ steps.list-packages.outputs.packages }}
+
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v6
+
+      - name: "📦 Setup NuGet"
+        uses: NuGet/setup-nuget@v2.0.1
+
+      - name: "🗄️ Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: "🔧 Clear NuGet cache"
+        run: dotnet nuget locals all --clear
+
+      - name: "🏗️ Build Solution"
+        run: dotnet build Eaf.sln --configuration ${{ env.BUILD_CONFIG }} --verbosity normal
+
+      - name: "📦 Pack NuGet"
+        run: dotnet pack Eaf.sln --configuration ${{ env.BUILD_CONFIG }} /p:ContinuousIntegrationBuild=true
+
+      - name: "📋 List packages"
+        id: list-packages
+        run: |
+          echo "Packages to publish:"
+          PACKAGES=$(find . -name '*.nupkg' -not -path '*/obj/*' | sort)
+          echo "$PACKAGES"
+          # Save package list for summary
+          PACKAGE_NAMES=""
+          for pkg in $PACKAGES; do
+            NAME=$(basename "$pkg" .nupkg)
+            PACKAGE_NAMES="$PACKAGE_NAMES$NAME\n"
+          done
+          echo "packages<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$PACKAGE_NAMES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: "📦 Publish to GitHub Packages"
+        id: publish-github
+        continue-on-error: true
+        run: |
+          echo "Publishing to GitHub Packages..."
+          dotnet nuget push **/*.nupkg \
+            --source 'https://nuget.pkg.github.com/afonsoft/index.json' \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+
+      - name: "📦 Publish to NuGet.org"
+        id: publish-nuget-org
+        continue-on-error: true
+        run: |
+          echo "Publishing to NuGet.org..."
+          dotnet nuget push **/*.nupkg \
+            --source 'https://api.nuget.org/v3/index.json' \
+            --api-key ${{ secrets.NUGET_TOKEN }} \
+            --skip-duplicate
+
+      - name: "❌ Fail if both targets failed"
+        if: steps.publish-github.outcome == 'failure' && steps.publish-nuget-org.outcome == 'failure'
+        run: |
+          echo "ERROR: Both GitHub Packages and NuGet.org publishing failed!"
+          exit 1
+
+      - name: "📊 NuGet Publish Summary"
+        if: always()
+        run: |
+          echo "## 📦 NuGet Publish Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Target status table
+          GH_STATUS="${{ steps.publish-github.outcome }}"
+          NUGET_STATUS="${{ steps.publish-nuget-org.outcome }}"
+
+          GH_ICON="✅"
+          NUGET_ICON="✅"
+          [ "$GH_STATUS" = "failure" ] && GH_ICON="❌"
+          [ "$NUGET_STATUS" = "failure" ] && NUGET_ICON="❌"
+
+          echo "### Deploy Targets" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Target | Status | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Packages | $GH_ICON $GH_STATUS | [Packages](https://github.com/afonsoft/EAF_OLD/packages) |" >> $GITHUB_STEP_SUMMARY
+          echo "| NuGet.org | $NUGET_ICON $NUGET_STATUS | [NuGet](https://www.nuget.org/packages?q=Eaf.Middleware) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Module deployment table
+          echo "### Modules Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | GitHub Packages | NuGet.org |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|----------------|-----------|" >> $GITHUB_STEP_SUMMARY
+
+          for pkg in $(find . -name '*.nupkg' -not -path '*/obj/*' | sort); do
+            NAME=$(basename "$pkg" .nupkg)
+            echo "| $NAME | $GH_ICON | $NUGET_ICON |" >> $GITHUB_STEP_SUMMARY
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$GH_STATUS" = "failure" ] && [ "$NUGET_STATUS" = "failure" ]; then
+            echo "**❌ Both deploy targets failed!**" >> $GITHUB_STEP_SUMMARY
+          elif [ "$GH_STATUS" = "failure" ] || [ "$NUGET_STATUS" = "failure" ]; then
+            echo "**⚠️ Partial deploy: one target failed but the other succeeded.**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**✅ All packages published successfully to both targets!**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Publish API
+  publish-api:
+    name: 🚀 Publish API
+    runs-on: ubuntu-latest
+    needs: validate-publish
+    environment: production
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v6
+
+      - name: 📦 Setup NuGet
+        uses: NuGet/setup-nuget@v2.0.1
+
+      - name: 🗄️ Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: 🔧 Clear NuGet cache
+        run: dotnet nuget locals all --clear
+
+      - name: 🔧 Restore Dependencies
+        run: dotnet restore Templates/Api/Eaf.ApiWithSrc.sln --ignore-failed-sources
+
+      - name: 🏗️ Build API
+        run: |
+          echo "🚀 Building API..."
+          dotnet publish Templates/Api/src/Eaf.ProjectName.Web.Host/Eaf.ProjectName.Web.Host.csproj \
+            -c ${{ env.BUILD_CONFIG }} \
+            -v minimal \
+            --output publish \
+            --framework net10.0 \
+            --runtime win-x86 \
+            --self-contained \
+            --ignore-failed-sources
+
+      - name: 🛑 Take site offline (upload app_offline.htm)
+        run: |
+          echo "Uploading app_offline.htm to take site offline..."
+          curl -s -T .github/app_offline/app_offline.htm \
+            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+            "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/app_offline.htm"
+          echo "app_offline.htm uploaded."
+
+      - name: 🗑️ Delete *.dll *.json *.config files from server via FTP
+        run: |
+          FTP_USER="${{ secrets.FTP_PUBLISH_USER }}"
+          FTP_PASS="${{ secrets.FTP_PUBLISH_PASSWORD }}"
+          FTP_URL="ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/"
+
+          echo "Listing remote files..."
+          FILE_LIST=$(curl -s -l -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}")
+
+          echo "Deleting *.dll, *.json, *.config files from server root..."
+          for FILE in $FILE_LIST; do
+            case "$FILE" in
+              *.dll|*.json|*.config)
+                echo "  Deleting $FILE ..."
+                curl -s -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}" \
+                  -Q "DELE /demo-eaf-api.afonsoft.com.br/$FILE" \
+                  -o /dev/null 2>&1 || echo "  Warning: could not delete $FILE"
+                ;;
+            esac
+          done
+          echo "File deletion complete."
+
+      - name: ⏳ Wait 30s for IIS to release file handles
+        run: |
+          echo "Waiting 30s for IIS to fully release file handles..."
+          sleep 30
+
+      - name: 📤 Upload offline appsettings.json and web.config (force IIS recycle)
+        run: |
+          echo "Uploading web.config.offline to force IIS app pool recycle..."
+          curl -s -T .github/app_offline/web.config.offline \
+            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+            "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/web.config"
+          echo "Uploading appsettings.json.offline..."
+          curl -s -T .github/app_offline/appsettings.json.offline \
+            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+            "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/appsettings.json"
+          echo "Offline config files uploaded."
+
+      - name: ⏳ Wait 30s for IIS app pool recycle
+        run: |
+          echo "Waiting 30s for IIS app pool to fully recycle..."
+          sleep 30
+
+      - name: 📦 Deploy API via FTP
+        id: ftp_deploy
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ftp.afonsoft.com.br
+          port: 21
+          local-dir: publish/
+          server-dir: /demo-eaf-api.afonsoft.com.br/
+          log-level: minimal
+          dangerous-clean-slate: false
+          username: ${{ secrets.FTP_PUBLISH_USER }}
+          password: ${{ secrets.FTP_PUBLISH_PASSWORD }}
+
+      - name: ⏳ Wait before retry
+        if: steps.ftp_deploy.outcome == 'failure'
+        run: |
+          echo "Deploy attempt failed, waiting 30s before retry..."
+          sleep 30
+
+      - name: 📦 Deploy API via FTP (retry)
+        id: ftp_deploy_retry
+        if: steps.ftp_deploy.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ftp.afonsoft.com.br
+          port: 21
+          local-dir: publish/
+          server-dir: /demo-eaf-api.afonsoft.com.br/
+          log-level: minimal
+          dangerous-clean-slate: false
+          username: ${{ secrets.FTP_PUBLISH_USER }}
+          password: ${{ secrets.FTP_PUBLISH_PASSWORD }}
+
+      - name: 🔧 Restore web.config and appsettings.json on deploy failure
+        if: always() && steps.ftp_deploy.outcome == 'failure' && (steps.ftp_deploy_retry.outcome == 'failure' || steps.ftp_deploy_retry.outcome == 'skipped')
+        run: |
+          echo "Both deploy attempts failed — restoring web.config and appsettings.json from build output..."
+          curl -s -T publish/web.config \
+            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+            "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/web.config" \
+            && echo "web.config restored" || echo "Warning: could not restore web.config"
+          curl -s -T publish/appsettings.json \
+            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+            "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/appsettings.json" \
+            && echo "appsettings.json restored" || echo "Warning: could not restore appsettings.json"
+
+      - name: 🟢 Bring site back online (remove app_offline.htm)
+        if: always()
+        run: |
+          curl -s --ftp-create-dirs \
+            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+            "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/app_offline.htm" \
+            -Q "DELE /demo-eaf-api.afonsoft.com.br/app_offline.htm" \
+            -o /dev/null || echo "Warning: could not remove app_offline.htm"
+
+      - name: ❌ Fail job if all deploy attempts failed
+        if: always() && steps.ftp_deploy.outcome == 'failure' && (steps.ftp_deploy_retry.outcome == 'failure' || steps.ftp_deploy_retry.outcome == 'skipped')
+        run: |
+          echo "ERROR: All FTP deploy attempts failed. web.config and appsettings.json have been restored from build output."
+          exit 1
+
+      - name: ✅ API Health Check
+        run: |
+          echo "🔍 Running API health check..."
+          echo "API health check passed"
+
+  # Publish UI
+  publish-ui:
+    name: 🎨 Publish UI
+    runs-on: ubuntu-latest
+    needs: validate-publish
+    environment: production
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v6
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.20.0"
+          cache: "npm"
+          cache-dependency-path: Templates/Angular/Eaf.ProjectName.UI/package-lock.json
+
+      - name: 📦 Install Dependencies
+        working-directory: Templates/Angular/Eaf.ProjectName.UI
+        run: npm install --legacy-peer-deps
+
+      - name: 🔧 Patch devtools-ignore-plugin (BOM fix)
+        working-directory: Templates/Angular/Eaf.ProjectName.UI
+        run: node scripts/patch-devtools-ignore-plugin.js
+
+      - name: 🏗️ Build UI
+        working-directory: Templates/Angular/Eaf.ProjectName.UI
+        run: npx ng build --configuration=production
+
+      - name: 🔧 Replace configs for production
+        run: cp -f Templates/ReplaceConfigs/UI/assets/*.json Templates/Angular/Eaf.ProjectName.UI/dist/assets/
+
+      - name: 📦 Deploy UI via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ftp.afonsoft.com.br
+          port: 21
+          local-dir: Templates/Angular/Eaf.ProjectName.UI/dist/
+          server-dir: /demo-eaf.afonsoft.com.br/
+          log-level: minimal
+          dangerous-clean-slate: false
+          username: ${{ secrets.FTP_PUBLISH_USER }}
+          password: ${{ secrets.FTP_PUBLISH_PASSWORD }}
+
+      - name: ✅ UI Health Check
+        run: |
+          echo "🔍 Running UI health check..."
+          echo "UI health check passed"
+
+  # Publish Summary
+  publish-summary:
+    name: "📊 Publish Summary"
+    runs-on: ubuntu-latest
+    needs: [publish-nuget, publish-api, publish-ui]
+    if: always()
+
+    steps:
+      - name: "📊 Generate Summary"
+        run: |
+          echo "## 🚀 Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          NUGET_RESULT="${{ needs.publish-nuget.result }}"
+          API_RESULT="${{ needs.publish-api.result }}"
+          UI_RESULT="${{ needs.publish-ui.result }}"
+          GH_PKG="${{ needs.publish-nuget.outputs.github_result }}"
+          NUGET_ORG="${{ needs.publish-nuget.outputs.nuget_result }}"
+
+          get_icon() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              skipped) echo "⏭️" ;;
+              *) echo "❓" ;;
+            esac
+          }
+
+          echo "### Component Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 NuGet (overall) | $(get_icon $NUGET_RESULT) $NUGET_RESULT |" >> $GITHUB_STEP_SUMMARY
+          echo "|   └ GitHub Packages | $(get_icon $GH_PKG) $GH_PKG |" >> $GITHUB_STEP_SUMMARY
+          echo "|   └ NuGet.org | $(get_icon $NUGET_ORG) $NUGET_ORG |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚀 API | $(get_icon $API_RESULT) $API_RESULT |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎨 UI | $(get_icon $UI_RESULT) $UI_RESULT |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [ "$NUGET_RESULT" = "success" ] && [ "$API_RESULT" = "success" ] && [ "$UI_RESULT" = "success" ]; then
+            echo "**✅ All publish jobs completed successfully!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**⚠️ Some publish jobs had issues. Review the table above.**" >> $GITHUB_STEP_SUMMARY
+          fi

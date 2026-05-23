@@ -1,0 +1,78 @@
+# AI Agent Ignore File
+# Tells AI agents which files and folders to skip
+
+# Build outputs
+bin/
+obj/
+out/
+dist/
+build/
+
+# Dependencies
+node_modules/
+packages/
+.nupkg/
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+.coverage
+
+# IDE configs
+.git/
+.idea/
+.vscode/
+.vs/
+
+# Generated files
+*.generated.cs
+*.Designer.cs
+*.g.cs
+*.g.i.cs
+
+# Sonar
+sonar/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Large binaries
+*.dll
+*.exe
+*.so
+*.dylib
+*.a
+*.lib
+
+# NuGet packages
+**/packages/*
+!**/packages/build/
+*.nupkg
+*.snupkg
+
+# Documentation build outputs
+docs/_site/
+docs/.vuepress/dist/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+
+# Environment secrets
+*.env
+*.env.local
+secrets.json
+appsettings.Development.json
+appsettings.Production.json

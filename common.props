@@ -1,0 +1,84 @@
+<Project>
+	<PropertyGroup>
+		<Version>9.1.0</Version>
+		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277;CS8632</NoWarn>
+		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3253;MSB3277</MSBuildWarningsAsMessages>
+		<PackageProjectUrl>https://github.com/afonsoft/EAF</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/afonsoft/EAF</RepositoryUrl>
+		<Authors>Afonso Dutra Nogueira Filho</Authors>
+		<Copyright>AFONSOFT © 2026</Copyright>
+		<Company>AFONSOFT</Company>
+		<LangVersion>14.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GenerateAssemblyTitleAttribute>true</GenerateAssemblyTitleAttribute>
+		<GenerateAssemblyDescriptionAttribute>true</GenerateAssemblyDescriptionAttribute>
+		<GenerateAssemblyConfigurationAttribute>true</GenerateAssemblyConfigurationAttribute>
+		<GenerateAssemblyCompanyAttribute>true</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyProductAttribute>true</GenerateAssemblyProductAttribute>
+		<GenerateAssemblyCopyrightAttribute>true</GenerateAssemblyCopyrightAttribute>
+		<IsPackable>true</IsPackable>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<ApplicationIcon>EAF.ico</ApplicationIcon>
+		<PackageIcon>EAF.png</PackageIcon>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
+		<OpenApiGenerateDocumentsOnBuild>false</OpenApiGenerateDocumentsOnBuild>
+		<!-- Set the CheckEolTargetFramework property to false to fix the warning -->
+		<CheckEolTargetFramework>false</CheckEolTargetFramework>
+		<ServerGarbageCollection>true</ServerGarbageCollection>
+		<GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
+		<UseWindowsThreadPool>true</UseWindowsThreadPool>
+		<PublishAot>false</PublishAot>
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+		<Nullable>disable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' ">
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+	<PropertyGroup>
+		<!-- Include symbol files (*.pdb) in the built .nupkg -->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="EAF.ico" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="EAF.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="EAF.ico" Pack="true" PackagePath="\" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="EAF.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="README.md" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+</Project>

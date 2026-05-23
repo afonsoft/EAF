@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<RootNamespace>Eaf</RootNamespace>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Middleware\Localization\Eaf.json" />
+		<None Remove="Middleware\Localization\Sources\Extensions\Xml\Eaf.json" />
+		<None Remove="Middleware\Localization\Sources\Extensions\Xml\Eaf.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Middleware\Localization\Sources\Base\Eaf\Eaf.json" />
+		<EmbeddedResource Include="Middleware\Localization\Sources\Extensions\Xml\Eaf\Eaf.xml" />
+		<EmbeddedResource Include="Middleware\Localization\Sources\Extensions\Json\Eaf\Eaf.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Abp.TestBase" Version="10.4.0" />
+		<PackageReference Include="Abp.AspNetCore.PerRequestRedisCache" Version="10.4.0" />
+		<PackageReference Include="Abp.EntityFrameworkCore" Version="10.4.0" />
+		<PackageReference Include="Volo.Abp.AspNetCore.SignalR" Version="10.1.0-rc.3" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+		<PackageReference Include="Moq" Version="4.20.72" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.extensibility.execution" Version="2.9.3" />
+		<PackageReference Include="Shouldly" Version="4.3.0" />
+		<PackageReference Include="NSubstitute" Version="5.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Eaf.MiddlewareCore.SampleApp\Eaf.EntityFrameworkCore.SampleApp.Tests.csproj" />
+	  <ProjectReference Include="..\..\src\Eaf.Middleware.Core\Eaf.Middleware.Core.csproj" />
+	  <ProjectReference Include="..\..\src\Eaf.Middleware.AzureActiveDirectory\Eaf.Middleware.AzureActiveDirectory.csproj" />
+	  <ProjectReference Include="..\..\src\Eaf.Middleware.Ldap\Eaf.Middleware.Ldap.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="coverlet.collector" Version="8.0.0" />
+	  <PackageReference Update="coverlet.msbuild" Version="8.0.0" />
+	  <PackageReference Update="xunit.runner.visualstudio" Version="3.1.4" />
+	</ItemGroup>
+</Project>

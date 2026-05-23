@@ -1,0 +1,11 @@
+{
+  "Routes": [],
+  "GlobalConfiguration": {
+    "RequestIdKey": "X-Correlation-Id",
+    "AdministrationPath": "/administration"
+  },
+  "FileCacheOptions": {
+    "TtlSeconds": 15,
+    "Region": "europe-central"
+  }
+}

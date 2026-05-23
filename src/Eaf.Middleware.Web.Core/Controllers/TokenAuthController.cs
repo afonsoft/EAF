@@ -1,0 +1,1215 @@
+using Castle.Core.Logging;
+using Abp.Application.Services;
+using Abp.Authorization;
+using Abp.Authorization.Users;
+using Abp.Configuration;
+using Abp.Dependency;
+using Abp.Domain.Uow;
+using Abp.Json;
+using Eaf.Middleware.Authorization;
+using Eaf.Middleware.Authorization.Impersonation;
+using Eaf.Middleware.Authorization.Roles;
+using Eaf.Middleware.Authorization.TwoFactor;
+using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.AzureActiveDirectory.Configuration;
+using Eaf.Middleware.Configuration;
+using Eaf.Middleware.Core.Authentication;
+using Eaf.Middleware.Core.Authentication.External;
+using Eaf.Middleware.Ldap.Configuration;
+using Eaf.Middleware.MultiTenancy;
+using Eaf.Middleware.Security.Recaptcha;
+using Eaf.Middleware.Storage;
+using Eaf.Middleware.Web.Authentication;
+using Eaf.Middleware.Web.Authentication.Identity;
+using Eaf.Middleware.Web.Authentication.JwtBearer;
+using Eaf.Middleware.Web.Models.TokenAuth;
+using Eaf.Middleware.Web.Notifications;
+using Abp.MultiTenancy;
+using Abp.Net.Mail;
+using Abp.Notifications;
+using Abp.Runtime.Caching;
+using Abp.Runtime.Security;
+using Abp.UI;
+using Abp.Webhooks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Abp.Extensions;
+using Abp;
+using Abp.Runtime.Session;
+using Eaf.Security;
+
+namespace Eaf.Middleware.Web.Controllers
+{
+    [AbpAllowAnonymous]
+    [Route("api/[controller]/[action]")]
+    public class TokenAuthController : MiddlewareControllerBase, IApplicationService
+    {
+        private readonly ICacheManager _cacheManager;
+        private readonly TokenAuthConfiguration _configuration;
+        private readonly AbpLoginResultTypeHelper _AbpLoginResultTypeHelper;
+        private readonly IEmailSender _emailSender;
+        private readonly IExternalAuthConfiguration _externalAuthConfiguration;
+        private readonly IExternalAuthManager _externalAuthManager;
+        private readonly IdentityOptions _identityOptions;
+        private readonly IImpersonationManager _impersonationManager;
+        private readonly IIocManager _iocManager;
+        private readonly IOptions<JwtBearerOptions> _jwtOptions;
+        private readonly LogInManager _logInManager;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly ISettingManager _settingManager;
+        private readonly ITenantCache _tenantCache;
+        private readonly UserManager _userManager;
+        private readonly RoleManager _roleManager;
+        private readonly INotificationPublisher _notificationPublisher;
+        private readonly IBinaryObjectManager _binaryObjectManager;
+        private readonly IWebhookPublisher _webhookPublisher;
+        private readonly INotificationSubscriptionManager _notificationSubscriptionManager;
+
+        /// <summary>
+        /// TokenAuthController.
+        /// </summary>
+        /// <returns>Resultado da operação.</returns>
+        public TokenAuthController(
+            LogInManager logInManager,
+            AbpLoginResultTypeHelper AbpLoginResultTypeHelper,
+            TokenAuthConfiguration configuration,
+            UserManager userManager,
+            RoleManager roleManager,
+            ITenantCache tenantCache,
+            ICacheManager cacheManager,
+            IImpersonationManager impersonationManager,
+            IOptions<IdentityOptions> identityOptions,
+            ILogger logger,
+            ISettingManager settingManager,
+            IExternalAuthManager externalAuthManager,
+            IExternalAuthConfiguration externalAuthConfiguration,
+            IIocManager iocManager,
+            IPasswordHasher<User> passwordHasher,
+            IEmailSender emailSender,
+            IOptions<JwtBearerOptions> jwtOptions,
+            INotificationPublisher notificationPublisher,
+            IBinaryObjectManager binaryObjectManager,
+            INotificationSubscriptionManager notificationSubscriptionManager,
+            IWebhookPublisher webhookPublisher
+        )
+        {
+            _logInManager = logInManager;
+            _roleManager = roleManager;
+            _tenantCache = tenantCache;
+            _AbpLoginResultTypeHelper = AbpLoginResultTypeHelper;
+            _configuration = configuration;
+            _userManager = userManager;
+            _cacheManager = cacheManager;
+            _impersonationManager = impersonationManager;
+            _identityOptions = identityOptions.Value;
+            Logger = logger;
+            _externalAuthConfiguration = externalAuthConfiguration;
+            _settingManager = settingManager;
+            _externalAuthManager = externalAuthManager;
+            _iocManager = iocManager;
+            _passwordHasher = passwordHasher;
+            _emailSender = emailSender;
+            _jwtOptions = jwtOptions;
+            _notificationPublisher = notificationPublisher;
+            _binaryObjectManager = binaryObjectManager;
+            _webhookPublisher = webhookPublisher;
+            _notificationSubscriptionManager = notificationSubscriptionManager;
+            RecaptchaValidator = NullRecaptchaValidator.Instance;
+        }
+
+        /// <summary>
+        /// Obtém ou define RecaptchaValidator.
+        /// </summary>
+        public IRecaptchaValidator RecaptchaValidator { get; set; }
+
+        [AbpAllowAnonymous]
+        [HttpPost]
+        public async Task<AuthenticateResultModel> Authenticate([FromBody] AuthenticateModel model)
+        {
+            try
+            {
+                if (UseCaptchaOnLogin())
+                {
+                    await ValidateReCaptcha(model.CaptchaResponse);
+                }
+
+                var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+                var expiration = TimeSpan.FromSeconds(expirationSettings);
+                var currentUserName = model.UserNameOrEmailAddress.ToLower().Trim();
+
+                if (model.RememberClient)
+                    expiration = TimeSpan.FromDays(365);
+
+                var loginResult = await GetLoginResultAsync(
+                        currentUserName,
+                        model.Password,
+                        GetTenancyNameOrNull()
+                    );
+
+                var returnUrl = model.ReturnUrl;
+
+                if (model.SingleSignIn.HasValue && model.SingleSignIn.Value && loginResult.Result == AbpLoginResultType.Success)
+                {
+                    loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
+                    returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken, loginResult.User.Id, loginResult.User.TenantId);
+                }
+
+                //Password reset
+                if (loginResult.User.ShouldChangePasswordOnNextLogin)
+                {
+                    loginResult.User.SetNewPasswordResetCode();
+                    return new AuthenticateResultModel
+                    {
+                        ShouldResetPassword = true,
+                        PasswordResetCode = loginResult.User.PasswordResetCode,
+                        UserId = loginResult.User.Id,
+                        ReturnUrl = returnUrl
+                    };
+                }
+
+                //Two factor auth
+                await _userManager.InitializeOptionsAsync(loginResult.Tenant?.Id);
+
+                string twoFactorRememberClientToken = null;
+                if (await IsTwoFactorAuthRequiredAsync(loginResult, model))
+                {
+                    if (model.TwoFactorVerificationCode.IsNullOrEmpty())
+                    {
+                        //Add a cache item which will be checked in SendTwoFactorAuthCode to prevent sending unwanted two factor code to users.
+                        _cacheManager
+                            .GetTwoFactorCodeCache()
+                            .Set(
+                                loginResult.User.ToUserIdentifier().ToString(),
+                                new TwoFactorCodeCacheItem()
+                            );
+
+                        return new AuthenticateResultModel
+                        {
+                            RequiresTwoFactorVerification = true,
+                            UserId = loginResult.User.Id,
+                            TwoFactorAuthProviders = await _userManager.GetValidTwoFactorProvidersAsync(loginResult.User),
+                            ReturnUrl = returnUrl
+                        };
+                    }
+
+                    twoFactorRememberClientToken = await TwoFactorAuthenticateAsync(loginResult.User, model);
+                }
+
+                // One Concurrent Login
+                if (AllowOneConcurrentLoginPerUser())
+                {
+                    var identityResult = await _userManager.UpdateSecurityStampAsync(loginResult.User);
+                    if (identityResult.Succeeded)
+                    {
+                        loginResult.User.SecurityStamp = await _userManager.GetSecurityStampAsync(loginResult.User);
+                        loginResult.Identity.ReplaceClaim(new Claim(MiddlewareCoreConsts.SecurityStampKey, loginResult.User.SecurityStamp));
+                        loginResult.Identity.ReplaceClaim(new Claim(MiddlewareCoreConsts.TokenValidityValue, loginResult.User.SecurityStamp));
+                    }
+                }
+
+                //Login!
+                var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User), expiration);
+                return new AuthenticateResultModel
+                {
+                    AccessToken = accessToken,
+                    ExpireInSeconds = (int)expiration.TotalSeconds,
+                    EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                    TwoFactorRememberClientToken = twoFactorRememberClientToken,
+                    UserId = loginResult.User.Id,
+                    ReturnUrl = returnUrl
+                };
+            }
+            catch (Exception ex)
+            {
+                Logger.ErrorFormat(ex, "Authenticate : {0}", ex.Message);
+                throw;
+            }
+        }
+
+        [AbpAllowAnonymous]
+        [HttpPost]
+        public async Task<ExternalAuthenticateResultModel> ExternalAuthenticate(
+            [FromBody] ExternalAuthenticateModel model)
+        {
+            try
+            {
+                var externalUser = await GetExternalUserInfo(model);
+
+                var loginResult = await _logInManager.LoginAsync(
+                    new UserLoginInfo(model.AuthProvider, externalUser.ProviderKey, model.AuthProvider),
+                    GetTenancyNameOrNull()
+                );
+                Logger.DebugFormat("ExternalAuthenticate {0}", loginResult.Result);
+
+                var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+                var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+                switch (loginResult.Result)
+                {
+                    case AbpLoginResultType.Success:
+                        {
+                            await UpdateExternalUserAsync(loginResult.User, externalUser);
+
+                            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User, model.AuthProvider));
+
+                            var returnUrl = model.ReturnUrl;
+
+                            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value &&
+                                loginResult.Result == AbpLoginResultType.Success)
+                            {
+                                loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
+                                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken,
+                                    loginResult.User.Id, loginResult.User.TenantId);
+                            }
+
+                            _cacheManager
+                                  .GetCache("ExternalTokenInformationCache")
+                                  .Set(loginResult.User.ToUserIdentifier().ToString(),
+                                      model.ProviderAccessCode,
+                                      slidingExpireTime: TimeSpan.FromDays(1));
+
+                            return new ExternalAuthenticateResultModel
+                            {
+                                AccessToken = accessToken,
+                                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                                ExpireInSeconds = (int)expiration.TotalSeconds,
+                                ReturnUrl = returnUrl,
+                                WaitingForActivation = false,
+                                UserId = loginResult.User.Id
+                            };
+                        }
+                    case AbpLoginResultType.UnknownExternalLogin:
+                        {
+                            var newUser = await RegisterExternalUserAsync(externalUser);
+                            if (!newUser.IsActive)
+                            {
+                                return new ExternalAuthenticateResultModel
+                                {
+                                    WaitingForActivation = true
+                                };
+                            }
+
+                            //Try to login again with newly registered user!
+                            loginResult = await _logInManager.LoginAsync(
+                                new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider),
+                                GetTenancyNameOrNull()
+                            );
+
+                            Logger.DebugFormat("ExternalAuthenticate - UnknownExternalLogin {0}", loginResult.Result);
+
+                            if (loginResult.Result != AbpLoginResultType.Success)
+                            {
+                                loginResult = await _logInManager.CreateLoginResultAsync(newUser);
+                                if (loginResult.Result != AbpLoginResultType.Success)
+                                {
+                                    throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
+                                        loginResult.Result,
+                                        model.ProviderKey,
+                                        GetTenancyNameOrNull()
+                                    );
+                                }
+                            }
+
+                            _cacheManager
+                                .GetCache("ExternalTokenInformationCache")
+                                .Set(loginResult.User.ToUserIdentifier().ToString(),
+                                    model.ProviderAccessCode,
+                                    slidingExpireTime: TimeSpan.FromDays(1));
+
+                            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User, model.AuthProvider));
+
+                            var returnUrl = model.ReturnUrl;
+
+                            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value &&
+                               loginResult.Result == AbpLoginResultType.Success)
+                            {
+                                loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
+                                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken,
+                                    loginResult.User.Id, loginResult.User.TenantId);
+                            }
+
+                            return new ExternalAuthenticateResultModel
+                            {
+                                AccessToken = accessToken,
+                                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                                ExpireInSeconds = (int)expiration.TotalSeconds,
+                                ReturnUrl = returnUrl,
+                                WaitingForActivation = false,
+                                UserId = loginResult.User.Id
+                            };
+                        }
+                    default:
+                        {
+                            throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
+                                loginResult.Result,
+                                model.ProviderKey,
+                                GetTenancyNameOrNull()
+                            );
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.ErrorFormat(ex, "Error in ExternalAuthenticate {0}", ex.Message);
+                throw;
+            }
+        }
+
+        [AbpAllowAnonymous]
+        [HttpPost]
+        public async Task<ExternalAuthenticateResultModel> TeamsAuthenticate(
+           [FromBody] string idToken)
+        {
+            try
+            {
+                bool MicrosoftEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled);
+
+                if (!MicrosoftEnabled)
+                    throw new AbpException("Microsoft Provider is not enabled in HostSettings");
+
+                var microsoftSettings = await SettingManager.GetSettingValueForApplicationAsync(AppSettings.ExternalLoginProvider.Host.Microsoft);
+
+                if (microsoftSettings.IsNullOrWhiteSpace())
+                    throw new AbpException("Microsoft Provider is not configured in HostSettings");
+
+                var Microsoft = microsoftSettings.FromJsonString<MicrosoftExternalLoginProviderSettings>();
+
+                var authenticationResult = await GetAccessTokenOnBehalfUserAsync(idToken, Microsoft.ClientId, Microsoft.ClientSecret, Microsoft.TenantId);
+                Logger.DebugFormat("TeamsAuthenticate - authenticationResult {0}", authenticationResult);
+
+                if (authenticationResult == null
+                    || authenticationResult.AccessToken.IsNullOrWhiteSpace())
+                    throw new AbpException("authenticationResult is null in GetAccessTokenOnBehalfUser");
+
+                var model = new ExternalAuthenticateModel
+                {
+                    AuthProvider = "Microsoft",
+                    ReturnUrl = "",
+                    SingleSignIn = false,
+                    ProviderKey = authenticationResult.UniqueId ?? authenticationResult.IdToken,
+                    ProviderAccessCode = authenticationResult.AccessToken
+                };
+
+                Logger.DebugFormat("TeamsAuthenticate Final -> ExternalAuthenticate {0}", model);
+                return await ExternalAuthenticate(model);
+            }
+            catch (Exception ex)
+            {
+                Logger.ErrorFormat(ex, "TeamsAuthenticate Error {0}", ex.Message);
+                throw;
+            }
+        }
+
+        [AbpAllowAnonymous]
+        [HttpGet]
+        public ProviderModel GetAuthenticationProviders(string usernameOrEmailAddress)
+        {
+            var provider = new ProviderModel
+            {
+                UsernameOrEmailAddress = usernameOrEmailAddress,
+                AuthenticationSource = GetDefaultEnabledProvider()
+            };
+            User user = null;
+
+            if (!string.IsNullOrEmpty(usernameOrEmailAddress))
+            {
+                usernameOrEmailAddress = usernameOrEmailAddress.ToUpperInvariant().Trim();
+
+                user = _userManager.Users
+                  .FirstOrDefault(u => u.NormalizedUserName == usernameOrEmailAddress
+                                   || u.NormalizedEmailAddress == usernameOrEmailAddress);
+                if (user != null)
+                {
+                    if (user.AuthenticationSource == null)
+                        provider.AuthenticationSource = "System";
+                    else
+                        provider.AuthenticationSource = user.AuthenticationSource;
+                }
+            }
+            provider.Tenant = GetTenant(user?.TenantId ?? 1);
+
+            return provider;
+        }
+
+        private TenantModal GetTenant(int id)
+        {
+            TenantModal modal = new TenantModal { Id = id, Name = "Default", TenancyName = "Default" };
+            var tenant = _tenantCache.Get(id);
+            modal.Id = tenant?.Id ?? id;
+            modal.Name = tenant?.Name ?? modal.Name;
+            modal.TenancyName = tenant?.TenancyName ?? modal.TenancyName;
+            return modal;
+        }
+
+        private string GetDefaultEnabledProvider()
+        {
+            if (SettingManager.GetSettingValueForApplication<bool>(LdapSettingNames.IsEnabled))
+                return "LDAP";
+            else if (SettingManager.GetSettingValueForApplication<bool>(AzureActiveDirectorySettingNames.IsEnabled))
+                return "ActiveDirectory";
+            else if (SettingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled))
+                return "Microsoft";
+            else if (SettingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled))
+                return "Google";
+            else if (SettingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled))
+                return "AuthZero";
+            else if (SettingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled))
+                return "OpenIdConnect";
+            else
+                return "System";
+        }
+
+        [AbpAllowAnonymous]
+        [HttpGet]
+        public List<ExternalLoginProviderInfoModel> GetExternalAuthenticationProviders()
+        {
+            var allProviders = _externalAuthConfiguration.ExternalLoginInfoProviders
+                .Select(infoProvider => infoProvider.GetExternalLoginInfo())
+                .Where(IsSchemeEnabled)
+                .ToList();
+            return ObjectMapper.Map<List<ExternalLoginProviderInfoModel>>(allProviders);
+        }
+
+        [HttpPost]
+        public async Task<ImpersonatedAuthenticateResultModel> ImpersonatedAuthenticate(string impersonationToken)
+        {
+            var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+            var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+            var result = await _impersonationManager.GetImpersonatedUserAndIdentity(impersonationToken);
+            var accessToken = CreateAccessToken(await CreateJwtClaims(result.Identity, result.User));
+
+            return new ImpersonatedAuthenticateResultModel
+            {
+                AccessToken = accessToken,
+                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                ExpireInSeconds = (int)expiration.TotalSeconds
+            };
+        }
+
+        [HttpGet]
+        public async Task LogOut()
+        {
+            try
+            {
+                if (AbpSession?.UserId != null)
+                {
+                    var user = _userManager.GetUser(AbpSession.ToUserIdentifier());
+                    _cacheManager.GetCache("ExternalTokenInformationCache").Remove(user.ToUserIdentifier().ToString());
+                    await _userManager.UpdateSecurityStampAsync(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.DebugFormat(ex, "Logout (EafSession): {0}", ex.Message);
+            }
+
+            try
+            {
+                var claims = IocManager.Instance.Resolve<IPrincipalAccessor>()?.Principal;
+                if (claims != null)
+                {
+                    var tokenValidityKeyInClaims = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
+                    var userIdentifierString = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.UserIdentifier)?.Value ?? "";
+                    if (!string.IsNullOrEmpty(tokenValidityKeyInClaims))
+                    {
+                        _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).Remove(tokenValidityKeyInClaims);
+                        if (!string.IsNullOrEmpty(userIdentifierString))
+                            await _userManager.RemoveTokenValidityKeyAsync(_userManager.GetUser(UserIdentifier.Parse(userIdentifierString)), tokenValidityKeyInClaims);
+                    }
+                    if (!string.IsNullOrEmpty(userIdentifierString))
+                    {
+                        _cacheManager.GetCache("ExternalTokenInformationCache").Remove(UserIdentifier.Parse(userIdentifierString).ToString());
+                        var user = _userManager.GetUser(UserIdentifier.Parse(userIdentifierString));
+                        await _userManager.UpdateSecurityStampAsync(user);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.DebugFormat(ex, "Logout (IPrincipalAccessor): {0}", ex.Message);
+            }
+
+            try
+            {
+                if (User?.Claims != null && User.Claims.Any())
+                {
+                    var userIdentifier = User.Identity.GetUserIdentifierOrNull();
+                    var tokenValidityKeyInClaims = User.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
+                    if (!string.IsNullOrEmpty(tokenValidityKeyInClaims))
+                    {
+                        _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).Remove(tokenValidityKeyInClaims);
+                        if (userIdentifier != null)
+                            await _userManager.RemoveTokenValidityKeyAsync(_userManager.GetUser(userIdentifier), tokenValidityKeyInClaims);
+                    }
+                    if (userIdentifier != null)
+                    {
+                        _cacheManager.GetCache("ExternalTokenInformationCache").Remove(userIdentifier.ToString());
+                        var user = _userManager.GetUser(userIdentifier);
+                        await _userManager.UpdateSecurityStampAsync(user);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.DebugFormat(ex, "Logout (Identity): {0}", ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task SendTwoFactorAuthCode([FromBody] SendTwoFactorAuthCodeModel model)
+        {
+            var cacheKey = new UserIdentifier(AbpSession.TenantId, model.UserId).ToString();
+
+            var cacheItem = await _cacheManager
+                .GetTwoFactorCodeCache()
+                .GetOrDefaultAsync(cacheKey);
+
+            if (cacheItem == null)
+            {
+                //There should be a cache item added in Authenticate method! This check is needed to prevent sending unwanted two factor code to users.
+                throw new UserFriendlyException(L("SendSecurityCodeErrorMessage"));
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+
+            cacheItem.Code = await _userManager.GenerateTwoFactorTokenAsync(user, model.Provider);
+            var message = L("EmailSecurityCodeBody", cacheItem.Code);
+
+            if (model.Provider == "Email")
+            {
+                await _emailSender.SendAsync(await _userManager.GetEmailAsync(user), L("EmailSecurityCodeSubject"),
+                    message);
+            }
+
+            await _cacheManager.GetTwoFactorCodeCache().SetAsync(
+                cacheKey,
+                cacheItem
+            );
+
+            await _cacheManager.GetCache("ProviderCache").SetAsync(
+                "Provider",
+                model.Provider
+            );
+        }
+
+        private static string GetEncryptedAccessToken(string accessToken)
+        {
+            return SimpleStringCipher.Instance.Encrypt(accessToken, MiddlewareCoreConsts.DefaultPassPhrase);
+        }
+
+        private static bool ProviderKeysAreEqual(ExternalAuthenticateModel model, ExternalAuthUserInfo userInfo)
+        {
+            if (string.IsNullOrEmpty(userInfo?.ProviderKey) || string.IsNullOrEmpty(model?.ProviderKey))
+                return false;
+
+            if (userInfo.ProviderKey == model.ProviderKey)
+                return true;
+
+            return userInfo.ProviderKey.Replace("-", "").TrimStart('0').Trim().ToUpper() == model.ProviderKey.Replace("-", "").TrimStart('0').Trim().ToUpper();
+        }
+
+        private static string AddSingleSignInParametersToReturnUrl(string returnUrl, string signInToken, long userId, int? tenantId)
+        {
+            if (string.IsNullOrEmpty(returnUrl))
+                returnUrl = "";
+
+            returnUrl += (returnUrl.Contains("?") ? "&" : "?") +
+                         "accessToken=" + signInToken +
+                         "&userId=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(userId.ToString()));
+
+            if (tenantId.HasValue)
+                returnUrl += "&tenantId=" + Convert.ToBase64String(Encoding.UTF8.GetBytes(tenantId.Value.ToString()));
+
+            return returnUrl;
+        }
+
+        private bool AllowOneConcurrentLoginPerUser()
+        {
+            return SettingManager.GetSettingValue<bool>(AppSettings.UserManagement.AllowOneConcurrentLoginPerUser);
+        }
+
+        private string CreateAccessToken(IEnumerable<Claim> claims, TimeSpan expiration)
+        {
+            var jwtSecurityToken = new JwtSecurityToken(
+                issuer: _configuration.Issuer,
+                audience: _configuration.Audience,
+                claims: claims,
+                notBefore: DateTime.UtcNow.AddMinutes(-1),
+                expires: DateTime.UtcNow.Add(expiration),
+                signingCredentials: _configuration.SigningCredentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        }
+
+        private string CreateAccessToken(IEnumerable<Claim> claims)
+        {
+            var expirationSettings = SettingManager.GetSettingValue<int>(AppSettings.UserManagement.TokenExpiration);
+            var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+            return CreateAccessToken(claims, expiration);
+        }
+
+        [UnitOfWork]
+        private async Task<IEnumerable<Claim>> CreateJwtClaims(ClaimsIdentity identity, User user, string externalAuthProviderformation = "")
+        {
+            var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+            var isTwoFactorEnabled = await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.TwoFactorLogin.IsEnabled);
+
+            var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+            var tokenValidityKey = Guid.NewGuid().ToString();
+            var claims = identity.Claims.ToList();
+            var nameIdClaim = claims.First(c => c.Type == _identityOptions.ClaimsIdentity.UserIdClaimType);
+
+            if (_identityOptions.ClaimsIdentity.UserIdClaimType != JwtRegisteredClaimNames.Sub)
+            {
+                claims.Add(new Claim(JwtRegisteredClaimNames.Sub, nameIdClaim.Value));
+            }
+
+            var userIdentifier = new UserIdentifier(AbpSession.TenantId, Convert.ToInt64(nameIdClaim.Value));
+            var guid = Guid.NewGuid();
+            claims.AddRange(new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Jti,guid.ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.Now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim(MiddlewareCoreConsts.TokenValidityKey, tokenValidityKey),
+                new Claim(MiddlewareCoreConsts.UserIdentifier, userIdentifier.ToUserIdentifierString())
+            });
+
+            if (!string.IsNullOrEmpty(externalAuthProviderformation))
+                claims.ReplaceClaim(new Claim(EafClaimTypes.ExternalAuthProviderformation, externalAuthProviderformation));
+
+            if (isTwoFactorEnabled || !string.IsNullOrEmpty(externalAuthProviderformation))
+                claims.ReplaceClaim(new Claim("amr", "mfa"));
+            else
+                claims.ReplaceClaim(new Claim("amr", "pwd"));
+
+            if (string.IsNullOrEmpty(user.SecurityStamp))
+                user.SecurityStamp = SequentialGuidGenerator.Instance.Create().ToString();
+
+            claims.Add(new Claim(MiddlewareCoreConsts.TokenValidityValue, user.SecurityStamp));
+
+            await _userManager.UpdateAsync(user);
+            await _userManager.AddTokenValidityKeyAsync(user, tokenValidityKey, DateTime.UtcNow.Add(expiration).AddSeconds(10));
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            _cacheManager
+              .GetCache(MiddlewareCoreConsts.TokenValidityKey)
+              .Set(tokenValidityKey, user.SecurityStamp,
+              slidingExpireTime: expiration,
+              absoluteExpireTime: DateTimeOffset.UtcNow.Add(expiration).AddHours(1));
+
+            try
+            {
+                await _userManager.UpdateAsync(user);
+                await CurrentUnitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat(ex, "Error on Update User {0}", user.UserName);
+            }
+
+            return claims;
+        }
+
+        private async Task<ExternalAuthUserInfo> GetExternalUserInfo(ExternalAuthenticateModel model)
+        {
+            var userInfo = await _externalAuthManager.GetUserInfo(model.AuthProvider, model.ProviderAccessCode);
+            if (!ProviderKeysAreEqual(model, userInfo))
+            {
+                Logger.DebugFormat("ProviderKey Invalid model {0} != {1}", model?.ProviderKey, userInfo?.ProviderKey);
+                throw new UserFriendlyException(L("CouldNotValidateExternalUser"));
+            }
+
+            return userInfo;
+        }
+
+        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultAsync(string usernameOrEmailAddress, string password, string tenancyName)
+        {
+            var loginResult = await _logInManager.LoginAsync(usernameOrEmailAddress, password, tenancyName);
+
+            return loginResult.Result switch
+            {
+                AbpLoginResultType.Success => loginResult,
+                _ => throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, usernameOrEmailAddress, tenancyName),
+            };
+        }
+
+        private string GetTenancyNameOrNull()
+        {
+            if (!AbpSession.TenantId.HasValue)
+            {
+                return null;
+            }
+
+            return _tenantCache.GetOrNull(AbpSession.TenantId.Value)?.TenancyName;
+        }
+
+        private bool IsSchemeEnabled(ExternalLoginProviderInfo scheme)
+        {
+            if (!AbpSession.TenantId.HasValue && !string.IsNullOrEmpty(scheme.ClientId) && !string.IsNullOrEmpty(scheme.ClientSecret))
+                return true;
+
+            if (string.IsNullOrEmpty(scheme.ClientId) || string.IsNullOrEmpty(scheme.ClientSecret))
+                return false;
+
+            return scheme.Name switch
+            {
+                "OpenIdConnect" => _settingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled),
+                "Microsoft" => _settingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled),
+                "Google" => _settingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled),
+                "AuthZero" => _settingManager.GetSettingValueForApplication<bool>(AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled),
+                _ => true,
+            };
+        }
+
+        private async Task<bool> IsTwoFactorAuthRequiredAsync(AbpLoginResult<Tenant, User> loginResult,
+           AuthenticateModel authenticateModel)
+        {
+            if (!await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.TwoFactorLogin
+                .IsEnabled))
+            {
+                return false;
+            }
+
+            if (!loginResult.User.IsTwoFactorEnabled)
+            {
+                return false;
+            }
+
+            if ((await _userManager.GetValidTwoFactorProvidersAsync(loginResult.User)).Count <= 0)
+            {
+                return false;
+            }
+
+            if (await TwoFactorClientRememberedAsync(loginResult.User.ToUserIdentifier(), authenticateModel))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        [UnitOfWork]
+        private async Task UpdateExternalUserAsync(User user, ExternalAuthUserInfo externalLoginInfo)
+        {
+            string name = externalLoginInfo.Name.Split(' ').First();
+            string surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last();
+
+            try
+            {
+                if (user.Name != name
+                    || user.Surname != surname
+                    || user.ExternalAuthProviderformation != externalLoginInfo.Provider)
+                {
+                    user.Name = name;
+                    user.Surname = surname;
+                    user.ExternalAuthProviderformation = externalLoginInfo.Provider;
+                    user.AuthenticationSource = externalLoginInfo.Provider;
+                    await _userManager.UpdateAsync(user);
+                    await CurrentUnitOfWork.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.ErrorFormat(ex, "Error on Update External Profile from user {0}", user.FullName);
+            }
+
+            try
+            {
+                if (!externalLoginInfo.Picture.IsNullOrEmpty())
+                {
+                    var contentType = ".bmp";
+                    var fileName = $"{Guid.NewGuid()}.bmp";
+                    BinaryObject storedFile = null;
+
+                    var byteArray = Convert.FromBase64String(externalLoginInfo.Picture);
+
+                    using (CurrentUnitOfWork.SetTenantId(null))
+                    {
+                        bool savePicture = false;
+                        if (user.ProfilePictureId.HasValue)
+                        {
+                            var profilePictureBinary = await _binaryObjectManager.GetOrNullAsync(user.ProfilePictureId.Value);
+                            if (profilePictureBinary != null && !ByteArrayCompare(profilePictureBinary.Bytes, byteArray))
+                            {
+                                await _binaryObjectManager.DeleteAsync(user.ProfilePictureId.Value);
+                                savePicture = true;
+                            }
+                        }
+                        else
+                            savePicture = true;
+
+                        if (savePicture)
+                        {
+                            storedFile = new BinaryObject(null, byteArray, contentType, fileName);
+                            await _binaryObjectManager.SaveAsync(storedFile);
+                            await CurrentUnitOfWork.SaveChangesAsync();
+                        }
+                    }
+
+                    if (storedFile != null)
+                    {
+                        user.ProfilePictureId = storedFile.Id;
+                        await CurrentUnitOfWork.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat(ex, "Error on Update External Profile Picture from user {0}", user.FullName);
+            }
+        }
+
+        [UnitOfWork]
+        private async Task<User> RegisterExternalUserAsync(ExternalAuthUserInfo externalLoginInfo)
+        {
+            string username;
+            try
+            {
+                using (var providerManager = _iocManager.ResolveAsDisposable<DefaultExternalLoginInfoManager>())
+                {
+                    username = providerManager.Object.GetUserNameFromExternalAuthUserInfo(externalLoginInfo);
+                }
+
+                var randomPassword = Authorization.Users.User.CreateRandomPassword();
+
+                var userExist = await _userManager.FindByNameOrEmailAsync(username);
+                if (userExist == null)
+                    userExist = await _userManager.FindByNameOrEmailAsync(externalLoginInfo.EmailAddress);
+
+                if (userExist == null)
+                {
+                    Logger.DebugFormat("RegisterExternalUser Create {0}:{1} ", username, externalLoginInfo.EmailAddress);
+                    var user = new User
+                    {
+                        TenantId = AbpSession.TenantId,
+                        UserName = username,
+                        EmailAddress = externalLoginInfo.EmailAddress,
+                        Name = externalLoginInfo.Name.Split(' ').First(),
+                        Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last(),
+                    };
+
+                    user.Password = _passwordHasher.HashPassword(user, randomPassword);
+                    user.AuthenticationSource = externalLoginInfo.Provider;
+                    user.ExternalAuthProviderformation = externalLoginInfo.Provider;
+                    user.IsActive = true;
+                    user.IsTwoFactorEnabled = false;
+                    user.IsEmailConfirmed = true;
+                    user.IsLockoutEnabled = false;
+                    user.IsDeleted = false;
+                    user.TenantId = AbpSession?.TenantId;
+
+                    user.SetNormalizedNames();
+
+                    user.Logins = new List<UserLogin>
+                    {
+                        new UserLogin
+                            {
+                                LoginProvider = externalLoginInfo.Provider,
+                                ProviderKey = externalLoginInfo.ProviderKey,
+                                TenantId = user.TenantId
+                            }
+                    };
+
+                    if (user.Roles == null)
+                    {
+                        user.Roles = new List<UserRole>();
+                        foreach (var defaultRole in _roleManager.Roles.Where(r => r.TenantId == user.TenantId && r.IsDefault).ToList())
+                        {
+                            user.Roles.Add(new UserRole(AbpSession?.TenantId, user.Id, defaultRole.Id));
+                        }
+                    }
+
+                    var result = await _userManager.CreateAsync(user);
+
+                    if (!result.Succeeded && result.Errors.Any())
+                    {
+                        throw new UserFriendlyException(Convert.ToInt32(result.Errors.First().Code), result.Errors.First().Description);
+                    }
+
+                    await CurrentUnitOfWork.SaveChangesAsync();
+                    await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(user.ToUserIdentifier());
+                    await NotificationNewUser(user);
+                    await WelcomeToTheApplicationAsync(user);
+                    userExist = user;
+                }
+                else
+                {
+                    Logger.DebugFormat("RegisterExternalUser Update {0}:{1} ", username, externalLoginInfo.EmailAddress);
+                    userExist.EmailAddress = externalLoginInfo.EmailAddress;
+                    userExist.Name = externalLoginInfo.Name.Split(' ').First();
+                    userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last();
+                    userExist.UserName = username;
+                    userExist.AuthenticationSource = externalLoginInfo.Provider;
+                    userExist.ExternalAuthProviderformation = externalLoginInfo.Provider;
+                    userExist.IsActive = true;
+                    userExist.IsTwoFactorEnabled = false;
+                    userExist.IsEmailConfirmed = true;
+                    userExist.IsLockoutEnabled = false;
+                    userExist.IsDeleted = false;
+                    userExist.TenantId = AbpSession?.TenantId;
+
+                    userExist.SetNormalizedNames();
+
+                    userExist.Logins = new List<UserLogin>
+                    {
+                        new UserLogin
+                            {
+                                LoginProvider = externalLoginInfo.Provider,
+                                ProviderKey = externalLoginInfo.ProviderKey,
+                                TenantId = userExist.TenantId
+                            }
+                    };
+
+                    if (userExist.Roles == null)
+                    {
+                        userExist.Roles = new List<UserRole>();
+                        foreach (var defaultRole in _roleManager.Roles.Where(r => r.TenantId == userExist.TenantId && r.IsDefault).ToList())
+                        {
+                            if (!await _userManager.IsInRoleAsync(userExist, defaultRole.NormalizedName))
+                                userExist.Roles.Add(new UserRole(AbpSession?.TenantId, userExist.Id, defaultRole.Id));
+                        }
+                    }
+
+                    var result = await _userManager.UpdateWithValidateAsync(userExist);
+
+                    if (!result.Succeeded && result.Errors.Any())
+                    {
+                        throw new UserFriendlyException(Convert.ToInt32(result.Errors.First().Code), result.Errors.First().Description);
+                    }
+
+                    await CurrentUnitOfWork.SaveChangesAsync();
+                    await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(userExist.ToUserIdentifier());
+                    await NotificationNewUser(userExist);
+                    await WelcomeToTheApplicationAsync(userExist);
+                }
+
+                try
+                {
+                    if (!externalLoginInfo.Picture.IsNullOrEmpty())
+                    {
+                        var contentType = ".bmp";
+                        var fileName = $"{Guid.NewGuid()}.bmp";
+                        BinaryObject storedFile;
+
+                        var byteArray = Convert.FromBase64String(externalLoginInfo.Picture);
+
+                        using (CurrentUnitOfWork.SetTenantId(null))
+                        {
+                            storedFile = new BinaryObject(null, byteArray, contentType, fileName);
+                            if (userExist.ProfilePictureId.HasValue)
+                                await _binaryObjectManager.DeleteAsync(userExist.ProfilePictureId.Value);
+                            await _binaryObjectManager.SaveAsync(storedFile);
+                            await CurrentUnitOfWork.SaveChangesAsync();
+                        }
+
+                        userExist.ProfilePictureId = storedFile.Id;
+                        await CurrentUnitOfWork.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.WarnFormat(ex, "Error on Update External Profile Picture from user {0}", userExist.FullName);
+                }
+
+                return userExist;
+            }
+            catch (Exception ex)
+            {
+                Logger.ErrorFormat(ex, "Error on RegisterExternalUserAsync {0}", externalLoginInfo.EmailAddress);
+                throw;
+            }
+        }
+
+        private async Task<string> TwoFactorAuthenticateAsync(User user, AuthenticateModel authenticateModel)
+        {
+            var twoFactorCodeCache = _cacheManager.GetTwoFactorCodeCache();
+            var userIdentifier = user.ToUserIdentifier().ToString();
+            var cachedCode = await twoFactorCodeCache.GetOrDefaultAsync(userIdentifier);
+
+            if (cachedCode?.Code == null || cachedCode.Code != authenticateModel.TwoFactorVerificationCode)
+            {
+                throw new UserFriendlyException(L("InvalidSecurityCode"));
+            }
+
+            //Delete from the cache since it was a single usage code
+            await twoFactorCodeCache.RemoveAsync(userIdentifier);
+
+            if (authenticateModel.RememberClient &&
+                await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled))
+            {
+                return CreateAccessToken(new[]
+                    {
+                            new Claim(EafClaimTypes.UserIdentifierClaimType, user.ToUserIdentifier().ToString())
+                        },
+                    TimeSpan.FromDays(365)
+                );
+            }
+
+            return null;
+        }
+
+        private async Task<bool> TwoFactorClientRememberedAsync(UserIdentifier userIdentifier,
+            AuthenticateModel authenticateModel)
+        {
+            if (!await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(authenticateModel.TwoFactorRememberClientToken))
+            {
+                return false;
+            }
+
+            try
+            {
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidAudience = _configuration.Audience,
+                    ValidIssuer = _configuration.Issuer,
+                    IssuerSigningKey = _configuration.SecurityKey
+                };
+
+                foreach (var validator in _jwtOptions.Value.SecurityTokenValidators)
+                {
+                    if (validator.CanReadToken(authenticateModel.TwoFactorRememberClientToken))
+                    {
+                        try
+                        {
+                            var principal = validator.ValidateToken(authenticateModel.TwoFactorRememberClientToken, validationParameters, out _);
+                            var useridentifierClaim = principal.FindFirst(c => c.Type == EafClaimTypes.UserIdentifierClaimType);
+                            if (useridentifierClaim == null)
+                            {
+                                return false;
+                            }
+
+                            return useridentifierClaim.Value == userIdentifier.ToString();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Debug(ex.ToString(), ex);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug(ex.ToString(), ex);
+            }
+
+            return false;
+        }
+
+        private bool UseCaptchaOnLogin()
+        {
+            return SettingManager.GetSettingValue<bool>(AppSettings.UserManagement.UseCaptchaOnLogin);
+        }
+
+        private async Task ValidateReCaptcha(string captchaResponse)
+        {
+            await RecaptchaValidator.ValidateAsync(captchaResponse);
+        }
+
+        private async Task NotificationNewUser(User user)
+        {
+            try
+            {
+                await _notificationPublisher.PublishAsync(
+                  MiddlewareNotificationNames.NewUserRegistered,
+                  new MessageNotificationData(L("NewUserRegistered", user.FullName)),
+                  severity: NotificationSeverity.Info,
+                  tenantIds: new[] { user.TenantId }
+                  );
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat(ex, "NotificationPublisher error {0}", ex.Message);
+            }
+            try
+            {
+                await _webhookPublisher.PublishAsync(EafWebHookNames.NewUserRegistered, user);
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat(ex, "WebhookPublisher error {0}", ex.Message);
+            }
+        }
+
+        private async Task WelcomeToTheApplicationAsync(User user)
+        {
+            await _notificationPublisher.PublishAsync(
+               MiddlewareNotificationNames.WelcomeToTheApplication,
+               new MessageNotificationData(L("WelcomeToTheApplicationNotificationMessage")),
+               severity: NotificationSeverity.Success,
+               userIds: new[] { user.ToUserIdentifier() }
+               );
+        }
+
+        private bool ByteArrayCompare(byte[]? a1, byte[]? a2)
+        {
+            try
+            {
+                if (a1 == null || a2 == null)
+                    return false;
+
+                if (a1.Length != a2.Length)
+                    return false;
+
+                for (int i = 0; i < a1.Length; i++)
+                {
+                    if (a1[i] != a2[i])
+                        return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<AuthenticationResult> GetAccessTokenOnBehalfUserAsync(string idToken,
+            string ClientId,
+            string ClientSecret,
+            string TenantId)
+        {
+            try
+            {
+                Logger.DebugFormat("ClientId {0} | ClientSecret {1}", ClientId, ClientSecret);
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientId)
+                                                .WithClientSecret(ClientSecret)
+                                                .WithAuthority($"https://login.microsoftonline.com/{TenantId}")
+                                                .Build();
+                UserAssertion assert = new UserAssertion(idToken);
+                List<string> scopes = new List<string>
+                {
+                    "https://graph.microsoft.com/User.Read"
+                };
+                // Acquires an access token for this application (usually a Web API) from the authority configured in the application.
+                var responseToken = await app.AcquireTokenOnBehalfOf(scopes, assert).ExecuteAsync();
+                return responseToken;
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat(ex, "GetAccessTokenOnBehalfUserAsync: {0}", ex.Message);
+                throw;
+            }
+        }
+    }
+}

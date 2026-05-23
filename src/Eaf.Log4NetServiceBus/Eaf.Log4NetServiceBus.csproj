@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\common.props" />
+
+	<PropertyGroup>
+		<RootNamespace>Eaf</RootNamespace>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>Eaf.Log4NetServiceBus</AssemblyName>
+		<PackageId>Eaf.Log4NetServiceBus</PackageId>
+		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;HangFire;background jobs; aspnet core;Eaf;Boilerplate;NET5</PackageTags>
+		<Description>Enterprise Application Foundation - Log4Net - ServiceBus</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Castle.Core" Version="5.2.1" />
+		<PackageReference Include="log4net" Version="3.2.0" />
+		<PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.2.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+</Project>

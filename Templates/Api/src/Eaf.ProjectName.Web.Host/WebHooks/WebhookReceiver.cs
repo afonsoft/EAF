@@ -1,0 +1,15 @@
+﻿using Eaf.WebHooks;
+using System.Threading.Tasks;
+
+namespace Eaf.ProjectName.Web.WebHooks
+{
+    public class WebHookReceiver : EafWebHookReceiver
+    {
+        public override async Task ProcessRequest(string requestBody)
+        {
+            //TODO: Write code for received request body for WebHook
+            Logger.InfoFormat("WebHook '{0}' Body: {1}", ReceiverName, requestBody);
+            await Task.CompletedTask;
+        }
+    }
+}

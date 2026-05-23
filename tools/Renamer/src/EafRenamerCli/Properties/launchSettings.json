@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EafRenamerCli": {
+      "commandName": "Project",
+      "commandLineArgs": "/i:Eaf.ProjectName /u:eaf-projectname-ui /d:\"C:\\teste\\\""
+    }
+  }
+}

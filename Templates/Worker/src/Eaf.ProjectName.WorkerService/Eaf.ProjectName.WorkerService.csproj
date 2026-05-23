@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+    <Import Project="..\..\common.props"></Import>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <UserSecretsId>dotnet-Eaf.ProjectName.WorkerService-87CE33E2-76E2-4B06-8919-C1EEB905A703</UserSecretsId>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileContext>..\..</DockerfileContext>
+		<DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    </PropertyGroup>
+    <ItemGroup>
+		<!--<PackageReference Include="Eaf.Castle.Serilog" Version=" 6.1.9" />
+		<PackageReference Include="Eaf.OpenTelemetry" Version=" 6.1.9" />
+		<PackageReference Include="Eaf.Middleware.Worker" Version=" 6.1.9" />-->
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Eaf.ProjectName.Core\Eaf.ProjectName.Core.csproj" />
+		<ProjectReference Include="..\Eaf.ProjectName.EntityFrameworkCore\Eaf.ProjectName.EntityFrameworkCore.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,162 @@
+name: "🚀 Release Branch Manager"
+
+on:
+  push:
+    branches:
+      - "develop"
+  pull_request:
+    branches:
+      - "main"
+    types: [closed]
+
+jobs:
+  manage-release-branches:
+    name: "🔄 Manage Release Branches"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "🔧 Configure Git"
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: "🔍 Check for unmerged release branches"
+        id: check-release
+        run: |
+          echo "Checking for release branches not yet merged to main..."
+
+          # Get all remote release branches
+          RELEASE_BRANCHES=$(git branch -r | grep 'origin/release/v' | sed 's/.*origin\///' | xargs)
+
+          if [ -z "$RELEASE_BRANCHES" ]; then
+            echo "No release branches found"
+            echo "has_unmerged=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Found release branches: $RELEASE_BRANCHES"
+
+          # Get release branches that have been merged to main
+          MERGED_TO_MAIN=$(git branch -r --merged origin/main | grep 'origin/release/v' | sed 's/.*origin\///' | xargs)
+          echo "Merged to main: $MERGED_TO_MAIN"
+
+          # Find any unmerged release branch
+          UNMERGED=""
+          for branch in $RELEASE_BRANCHES; do
+            IS_MERGED=false
+            for merged in $MERGED_TO_MAIN; do
+              if [ "$branch" = "$merged" ]; then
+                IS_MERGED=true
+                break
+              fi
+            done
+            if [ "$IS_MERGED" = false ]; then
+              UNMERGED="$branch"
+              break
+            fi
+          done
+
+          if [ -n "$UNMERGED" ]; then
+            echo "Found unmerged release branch: $UNMERGED"
+            echo "has_unmerged=true" >> $GITHUB_OUTPUT
+            echo "unmerged_branch=$UNMERGED" >> $GITHUB_OUTPUT
+          else
+            echo "All release branches have been merged to main"
+            echo "has_unmerged=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "⏹️ Stop if unmerged release exists"
+        if: steps.check-release.outputs.has_unmerged == 'true'
+        run: |
+          echo "An unmerged release branch exists: ${{ steps.check-release.outputs.unmerged_branch }}"
+          echo "Skipping creation of new release branch."
+          echo "## ⏹️ Release Branch Manager" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "An unmerged release branch already exists: \`${{ steps.check-release.outputs.unmerged_branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No new release branch was created." >> $GITHUB_STEP_SUMMARY
+
+      - name: "📦 Calculate next version"
+        id: version
+        if: steps.check-release.outputs.has_unmerged == 'false'
+        run: |
+          # Find the last release branch that was merged to main
+          MERGED_RELEASES=$(git branch -r --merged origin/main | grep 'origin/release/v' | sed 's/.*origin\/release\///' | sort -V)
+
+          if [ -z "$MERGED_RELEASES" ]; then
+            echo "No previous releases merged to main, starting at v0.0.1"
+            NEW_VERSION="v0.0.1"
+          else
+            LATEST_MERGED=$(echo "$MERGED_RELEASES" | tail -n 1)
+            echo "Latest release merged to main: $LATEST_MERGED"
+
+            VERSION_NUMBERS=${LATEST_MERGED#v}
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NUMBERS"
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: "🌿 Create new release branch from develop"
+        id: create-branch
+        if: steps.check-release.outputs.has_unmerged == 'false'
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          NEW_BRANCH="release/${NEW_VERSION}"
+
+          echo "Creating new release branch: $NEW_BRANCH from develop"
+
+          git checkout -b $NEW_BRANCH origin/develop
+          git push origin $NEW_BRANCH
+
+          echo "new_branch=$NEW_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: "📧 Release Summary"
+        if: steps.check-release.outputs.has_unmerged == 'false'
+        run: |
+          echo "## 🚀 Release Branch Manager" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **New Version** | \`${{ steps.version.outputs.new_version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **New Branch** | \`${{ steps.create-branch.outputs.new_branch }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Created From** | \`develop\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release branch has been created and is ready for testing." >> $GITHUB_STEP_SUMMARY
+
+  delete-release-branch:
+    name: "🗑️ Delete Release Branch"
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' && 
+      github.event.action == 'closed' && 
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "🔧 Configure Git"
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: "🗑️ Delete release branch"
+        run: |
+          RELEASE_BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Deleting release branch: $RELEASE_BRANCH"
+          git push origin --delete $RELEASE_BRANCH
+          echo "Branch $RELEASE_BRANCH deleted successfully"

@@ -1,0 +1,619 @@
+using Abp;
+using Abp.Authorization.Users;
+using Abp.Dependency;
+using Abp.Domain.Uow;
+using Abp.Extensions;
+using Abp.Logging;
+using Abp.MultiTenancy;
+using Abp.Runtime.Security;
+using Eaf.Middleware.Ldap.Configuration;
+using Novell.Directory.Ldap;
+using System;
+using System.Collections.Generic;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Eaf.Middleware.Ldap.Authentication
+{
+    /// <summary>
+    /// Implements <see cref="IExternalAuthenticationSource{TTenant,TUser}"/> to authenticate users
+    /// from LDAP. Extend this class using application's User and Tenant classes as type parameters.
+    /// Also, all needed methods can be overridden and changed upon your needs.
+    /// </summary>
+    /// <typeparam name="TTenant">Tenant type</typeparam>
+    /// <typeparam name="TUser">User type</typeparam>
+    public abstract class LdapAuthenticationSource<TTenant, TUser> : DefaultExternalAuthenticationSource<TTenant, TUser>, ITransientDependency
+        where TTenant : AbpTenant<TUser>
+        where TUser : AbpUserBase, new()
+    {
+        /// <summary>
+        /// LDAP
+        /// </summary>
+        public const string SourceName = "LDAP";
+
+        private readonly IEafMiddlewareLdapModuleConfig _ldapModuleConfig;
+        private readonly ILdapSettings _settings;
+
+        protected LdapAuthenticationSource(ILdapSettings settings, IEafMiddlewareLdapModuleConfig ldapModuleConfig)
+        {
+            _settings = settings;
+            _ldapModuleConfig = ldapModuleConfig;
+        }
+
+        public override string Name => SourceName;
+
+        [UnitOfWork]
+        public override async Task<TUser> CreateUserAsync(string userNameOrEmailAddress, TTenant tenant)
+        {
+            await CheckIsEnabled(tenant);
+
+            if (userNameOrEmailAddress.IndexOf("@") != -1)
+                userNameOrEmailAddress = userNameOrEmailAddress.Split("@").First();
+
+            var user = await base.CreateUserAsync(userNameOrEmailAddress, tenant);
+
+            if (OperatingSystem.IsWindows() && !_ldapModuleConfig.UseNovellProvider)
+            {
+                #region Windows
+
+                using (var principalContext = await CreatePrincipalContext(tenant))
+                {
+                    var userPrincipal = UserPrincipal.FindByIdentity(principalContext, IdentityType.SamAccountName, userNameOrEmailAddress);
+
+                    if (userPrincipal != null)
+                    {
+                        UpdateUserFromPrincipal(user, userPrincipal);
+                        user.IsEmailConfirmed = true;
+                        user.IsActive = true;
+                    }
+                }
+
+                #endregion Windows
+            }
+            else
+            {
+                #region NoWindows
+
+                var principalContext = await CreateLdapContext(tenant);
+                string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
+                if (container.Contains(".") && !container.Contains("DC="))
+                    container = "DC=" + string.Join(", DC=", container.Split("."));
+
+                string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
+                var filter1 = $"(&(objectClass=user)(SAMAccountName={userNameOrEmailAddress}))";
+                var searcher1 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
+                var ldapEntry = FillUsersLdap(searcher1).Result.Item1.FirstOrDefault();
+
+                if (ldapEntry != null)
+                {
+                    UpdateUserFromLdap(user, ldapEntry);
+                    user.IsEmailConfirmed = true;
+                    user.IsActive = true;
+                }
+                principalContext.Disconnect();
+
+                #endregion NoWindows
+            }
+            return user;
+        }
+
+        /// <summary>
+        /// GetUsersAsync.
+        /// </summary>
+        /// <param name="userNameOrEmailAddress">Parâmetro userNameOrEmailAddress.</param>
+        /// <returns>Resultado da operação.</returns>
+        public async Task<List<TUser>> GetUsersAsync(string userNameOrEmailAddress)
+        {
+            List<TUser> users = new();
+
+            if (string.IsNullOrEmpty(userNameOrEmailAddress))
+                return users;
+
+            if (OperatingSystem.IsWindows() && !_ldapModuleConfig.UseNovellProvider)
+            {
+                #region Windows
+
+                using (var principalContext = await CreatePrincipalContext(null))
+                {
+                    var searchString = string.Format("*{0}*", userNameOrEmailAddress);
+
+                    using (var searchMaskDisplayname = new UserPrincipal(principalContext) { DisplayName = searchString, Enabled = true })
+                    using (var searchMaskUsername = new UserPrincipal(principalContext) { SamAccountName = searchString, Enabled = true })
+                    using (var searchMaskEmail = new UserPrincipal(principalContext) { EmailAddress = searchString, Enabled = true })
+                    using (var searcherDisplayname = new PrincipalSearcher(searchMaskDisplayname))
+                    using (var searcherUsername = new PrincipalSearcher(searchMaskUsername))
+                    using (var searcherEmail = new PrincipalSearcher(searchMaskEmail))
+                    using (var taskDisplayname = Task.Run(() =>
+                    {
+                        if (searcherDisplayname.GetUnderlyingSearcher() is DirectorySearcher search)
+                            search.SizeLimit = 10;
+
+                        return searcherDisplayname.FindAll();
+                    }))
+                    using (var taskUsername = Task.Run(() =>
+                    {
+                        if (searcherUsername.GetUnderlyingSearcher() is DirectorySearcher search)
+                            search.SizeLimit = 10;
+
+                        return searcherUsername.FindAll();
+                    }))
+
+                    using (var taskEmail = Task.Run(() =>
+                    {
+                        if (searcherEmail.GetUnderlyingSearcher() is DirectorySearcher search)
+                            search.SizeLimit = 10;
+
+                        return searcherUsername.FindAll();
+                    }))
+                    {
+                        foreach (Principal result in (await taskDisplayname).Union(await taskUsername).Union(await taskEmail))
+                        {
+                            users.Add(new TUser
+                            {
+                                UserName = result.SamAccountName,
+                                Name = result.DisplayName,
+                                EmailAddress = (result is UserPrincipal principal) ? principal.EmailAddress : ""
+                            });
+                        }
+                    }
+
+                    return users.DistinctBy(o => o.UserName).Take(10).ToList();
+                }
+
+                #endregion Windows
+            }
+            else
+            {
+                #region NoWindows
+
+                string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(null));
+                if (container.Contains(".") && !container.Contains("DC="))
+                    container = "DC=" + string.Join(", DC=", container.Split("."));
+
+                string userName = userNameOrEmailAddress;
+                if (userNameOrEmailAddress.IndexOf("@") != -1)
+                    userName = userNameOrEmailAddress.Split("@")[0];
+
+                string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
+
+                var result1 = Task.Run(async () =>
+                {
+                    using (var principalContext = await CreateLdapContext(null))
+                    {
+                        var filter1 = $"(&(objectClass=user)(samAccountName={userName}))";
+                        var searcher1 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
+                        return await FillUsersLdap(searcher1);
+                    }
+                });
+
+                var result2 = Task.Run(async () =>
+                {
+                    using (var principalContext = await CreateLdapContext(null))
+                    {
+                        var filter4 = $"(&(objectClass=user)(mail={userNameOrEmailAddress}))";
+                        var searcher4 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter4, attrib, false);
+                        return await FillUsersLdap(searcher4);
+                    }
+                });
+
+                var result3 = Task.Run(async () =>
+                {
+                    using (var principalContext = await CreateLdapContext(null))
+                    {
+                        var filter2 = $"(&(objectClass=user)(displayName={userName}*))";
+                        var searcher2 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter2, attrib, false);
+                        return await FillUsersLdap(searcher2);
+                    }
+                });
+
+                var result4 = Task.Run(async () =>
+                {
+                    using (var principalContext = await CreateLdapContext(null))
+                    {
+                        var filter3 = $"(&(objectClass=user)(userPrincipalName={userName}*))";
+                        var searcher3 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter3, attrib, false);
+                        return await FillUsersLdap(searcher3);
+                    }
+                });
+
+                var r1 = await result1;
+                var r2 = await result2;
+                var r3 = await result3;
+                var r4 = await result4;
+
+                users = (r1.Item1).Union(r2.Item1).Union(r3.Item1).Union(r4.Item1).ToList();
+                var exptions = (r1.Item2).Union(r2.Item2).Union(r3.Item2).Union(r4.Item2).ToList();
+
+                if (exptions != null && exptions.Any() && !users.Any())
+                {
+                    throw new AggregateException(exptions);
+                }
+
+                return users.DistinctBy(o => o.Logins).Take(10).ToList();
+
+                #endregion NoWindows
+            }
+        }
+
+        private async Task<Tuple<List<TUser>, List<Exception>>> FillUsersLdap(ILdapSearchResults serach)
+        {
+            List<TUser> users = new();
+            List<Exception> exceptions = new();
+            int limit = 0;
+            while (await serach.HasMoreAsync() && limit < 100)
+            {
+                limit++;
+                try
+                {
+                    LdapEntry nextEntry = null;
+                    try
+                    {
+                        nextEntry = await serach.NextAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.Logger.WarnFormat(ex, "Error serach.Next() in FillUsersLdap {0}", ex.Message);
+                        continue;
+                    }
+
+                    var usr = new TUser
+                    {
+                        UserName = GetAttribute(nextEntry, "SamAccountName"),
+                        Name = GetAttribute(nextEntry, "DisplayName"),
+                        EmailAddress = GetAttribute(nextEntry, "mail")
+                    };
+
+                    if (string.IsNullOrEmpty(usr.EmailAddress))
+                        usr.EmailAddress = GetAttribute(nextEntry, "UserPrincipalName");
+
+                    usr.Name = usr.Name.Split(" ")[0];
+                    usr.Surname = usr.Name.Replace(usr.Name, "").Trim();
+
+                    users.Add(usr);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                    LogHelper.Logger.WarnFormat(ex, "Error on fill TUser in FillUsersLdap {0}", ex.Message);
+                }
+            }
+            return new Tuple<List<TUser>, List<Exception>>(users, exceptions);
+        }
+
+        private static string GetAttribute(LdapEntry entry, string attrName)
+        {
+            if (entry.GetAttributeSet().ContainsKey(attrName))
+            {
+                var attr = entry.GetStringValueOrDefault(attrName);
+                if (!string.IsNullOrEmpty(attr))
+                    return attr;
+            }
+            return "";
+        }
+
+        /// <inheritdoc/>
+        public override async Task<bool> TryAuthenticateAsync(string userNameOrEmailAddress, string plainPassword, TTenant tenant)
+        {
+            if (!_ldapModuleConfig.IsEnabled || !(await _settings.GetIsEnabled(tenant?.Id)))
+            {
+                return false;
+            }
+
+            if (userNameOrEmailAddress.IndexOf("@") != -1)
+                userNameOrEmailAddress = userNameOrEmailAddress.Split("@").First();
+
+            if (OperatingSystem.IsWindows() && !_ldapModuleConfig.UseNovellProvider)
+            {
+                #region Windows
+
+                using (var principalContext = await CreatePrincipalContext(tenant))
+                {
+                    UserPrincipal user = UserPrincipal.FindByIdentity(principalContext, IdentityType.SamAccountName, userNameOrEmailAddress);
+                    if (user == null) return false;
+
+                    bool initialValidation;
+
+                    // maybe validation failed because "user must change password at next logon". let's
+                    // see if that is the case.
+                    if (user.LastPasswordSet == null)
+                    {
+                        // the user must change his password at next logon. So this might be why
+                        // validation returned false uncheck the "change password" checkbox and attempt
+                        // validation again
+
+                        var deUser = user.GetUnderlyingObject() as DirectoryEntry;
+                        var property = deUser.Properties["pwdLastSet"];
+                        property.Value = -1;
+                        deUser.CommitChanges();
+
+                        // property was unset, retry validation
+                        initialValidation = ValidateCredentials(principalContext, user.SamAccountName, plainPassword);
+
+                        // re check the checkbox
+                        property.Value = 0;
+                        deUser.CommitChanges();
+                    }
+                    else
+                    {
+                        initialValidation = ValidateCredentials(principalContext, user.SamAccountName, plainPassword);
+                    }
+
+                    return initialValidation;
+                }
+
+                #endregion Windows
+            }
+            else
+            {
+                #region NoWindows
+
+                var ldap = await CreateLdapContext(tenant, userNameOrEmailAddress, plainPassword);
+                return ldap.Connected;
+
+                #endregion NoWindows
+            }
+        }
+
+        [UnitOfWork]
+        public override async Task UpdateUserAsync(TUser user, TTenant tenant)
+        {
+            await CheckIsEnabled(tenant);
+
+            await base.UpdateUserAsync(user, tenant);
+            try
+            {
+                if (OperatingSystem.IsWindows() && !_ldapModuleConfig.UseNovellProvider)
+                {
+                    #region Windows
+
+                    using (var principalContext = await CreatePrincipalContext(tenant))
+                    {
+                        var userPrincipal = UserPrincipal.FindByIdentity(principalContext, IdentityType.SamAccountName, user.UserName);
+
+                        if (userPrincipal != null)
+                            UpdateUserFromPrincipal(user, userPrincipal);
+                    }
+
+                    #endregion Windows
+                }
+                else
+                {
+                    #region NoWindows
+
+                    var principalContext = await CreateLdapContext(tenant);
+                    string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
+                    if (container.Contains(".") && !container.Contains("DC="))
+                        container = "DC=" + string.Join(", DC=", container.Split("."));
+
+                    string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
+                    var filter1 = $"(&(objectClass=user)(SAMAccountName={user.UserName}))";
+                    var searcher1 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
+                    var ldapEntry = FillUsersLdap(searcher1).Result.Item1.FirstOrDefault();
+
+                    if (ldapEntry != null)
+                    {
+                        UpdateUserFromLdap(user, ldapEntry);
+                    }
+                    principalContext.Disconnect();
+
+                    #endregion NoWindows
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Logger.Error("UpdateUserAsync : UserName : " + user.UserName, ex);
+            }
+        }
+
+        protected static string ConvertToNullIfEmpty(string str)
+        {
+            return str.IsNullOrWhiteSpace()
+                ? null
+                : str;
+        }
+
+        protected virtual async Task CheckIsEnabled(TTenant tenant)
+        {
+            if (!_ldapModuleConfig.IsEnabled)
+            {
+                throw new AbpException("Ldap Authentication module is disabled globally!");
+            }
+
+            var tenantId = tenant?.Id;
+            if (!await _settings.GetIsEnabled(tenantId))
+            {
+                throw new AbpException("Ldap Authentication is disabled for given tenant (id:" + tenantId + ")! You can enable it by setting '" + LdapSettingNames.IsEnabled + "' to true");
+            }
+        }
+
+        #region NoWindows
+
+        protected virtual async Task<LdapConnection> CreateLdapContext(TTenant tenant)
+        {
+            return await CreateLdapContext(tenant, null, null);
+        }
+
+        protected virtual async Task<LdapConnection> CreateLdapContext(TTenant tenant, string userNameOrEmailAddress, string plainPassword)
+        {
+            string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetContainer(tenant?.Id));
+            if (container.IsNullOrEmpty() || !container.Contains("DC="))
+                container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
+            if (!container.IsNullOrEmpty() && container.Contains(".") && !container.Contains("DC="))
+                container = "DC=" + string.Join(", DC=", container.Split("."));
+
+            string domain = await _settings.GetDomain(tenant?.Id);
+
+            string userName = userNameOrEmailAddress ?? ConvertToNullIfEmpty(await _settings.GetUserName(tenant?.Id));
+            string pwd = plainPassword ?? ConvertToNullIfEmpty(await _settings.GetPassword(tenant?.Id));
+
+            if (userName != null && !userName.Contains(domain) && !userName.Contains("\\") && !domain.Contains("DC=") && !domain.Contains("."))
+                userName = domain + "\\" + userName;
+
+            var ldapConn = new LdapConnection();
+            ldapConn.UserDefinedServerCertValidationDelegate += (sender, certificate, chain, sslPolicyErrors) => true;
+
+            try
+            {
+                await ldapConn.ConnectAsync(domain, LdapConnection.DefaultPort);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    await ldapConn.ConnectAsync(domain, LdapConnection.DefaultSslPort);
+                }
+                catch (Exception ex2)
+                {
+                    throw new AbpException(ex.Message, ex2);
+                }
+            }
+
+            if (ldapConn.Connected)
+            {
+                try
+                {
+                    await ldapConn.BindAsync(userName, pwd);
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        await ldapConn.BindAsync("uid=" + userName + ", " + container, pwd);
+                    }
+                    catch (Exception ex2)
+                    {
+                        throw new AbpException(ex.Message, ex2);
+                    }
+                }
+            }
+
+            LdapSearchConstraints cons = ldapConn?.SearchConstraints ?? new LdapSearchConstraints();
+            cons.MaxResults = 100;
+            cons.ServerTimeLimit = 30;
+            cons.ReferralFollowing = false;
+            ldapConn.Constraints = cons;
+            ldapConn.ConnectionTimeout = 30000;
+
+            return ldapConn;
+        }
+
+        protected virtual void UpdateUserFromLdap(TUser user, TUser userPrincipal)
+        {
+            if (!string.IsNullOrEmpty(userPrincipal?.UserName))
+            {
+                user.UserName = userPrincipal.UserName.ToLower();
+            }
+
+            user.Name = userPrincipal?.Name ?? user.Name;
+            user.Surname = userPrincipal?.Surname ?? user.Surname;
+
+            var mail = userPrincipal?.EmailAddress;
+
+            user.EmailAddress = string.IsNullOrEmpty(mail)
+                ? user.EmailAddress.ToLower()
+                : mail.ToLower();
+
+            user.IsActive = true;
+            LogHelper.Logger.DebugFormat("UpdateUserFromPrincipal: {0} / {1}", user.UserName, userPrincipal?.UserName);
+        }
+
+        #endregion NoWindows
+
+        #region Windows
+
+        protected virtual async Task<PrincipalContext> CreatePrincipalContext(TTenant tenant)
+        {
+            return await CreatePrincipalContext(tenant, null, null);
+        }
+
+        protected virtual async Task<PrincipalContext> CreatePrincipalContext(TTenant tenant, string userNameOrEmailAddress, string plainPassword)
+        {
+            if (!OperatingSystem.IsWindows())
+                throw new NotImplementedException("This Method is only supported on: 'windows'");
+
+            string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetContainer(tenant?.Id));
+            if (container.IsNullOrEmpty() || !container.Contains("DC="))
+                container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
+            if (!container.IsNullOrEmpty() && container.Contains(".") && !container.Contains("DC="))
+                container = "DC=" + string.Join(", DC=", container.Split("."));
+
+            var contextType = await _settings.GetContextType(tenant?.Id);
+            contextType ??= ContextType.Domain;
+
+            ContextOptions options = ContextOptions.Negotiate | ContextOptions.ServerBind;
+
+            PrincipalContext principalContext = new(
+                (ContextType)contextType,
+                ConvertToNullIfEmpty(await _settings.GetDomain(tenant?.Id)),
+                ConvertToNullIfEmpty(await _settings.GetContainer(tenant?.Id) ?? container),
+                options,
+                userNameOrEmailAddress ?? ConvertToNullIfEmpty(await _settings.GetUserName(tenant?.Id)),
+                plainPassword ?? ConvertToNullIfEmpty(await _settings.GetPassword(tenant?.Id)));
+
+            return principalContext;
+        }
+
+        protected virtual void UpdateUserFromPrincipal(TUser user, UserPrincipal userPrincipal)
+        {
+            if (!OperatingSystem.IsWindows())
+                return;
+
+            if (!string.IsNullOrEmpty(userPrincipal?.SamAccountName))
+            {
+                user.UserName = userPrincipal.SamAccountName.ToLower();
+            }
+
+            user.Name = userPrincipal?.GivenName ?? user.Name;
+            user.Surname = userPrincipal?.Surname ?? user.Surname;
+            user.EmailAddress = string.IsNullOrEmpty(userPrincipal?.EmailAddress)
+                ? user.EmailAddress.ToLower()
+                : userPrincipal.EmailAddress.ToLower();
+
+            LogHelper.Logger.DebugFormat("UpdateUserFromPrincipal: {0} / {1}", user.UserName, userPrincipal?.SamAccountName);
+            if (userPrincipal?.Enabled != null)
+            {
+                user.IsActive = userPrincipal.Enabled.Value;
+            }
+        }
+
+        protected virtual bool ValidateCredentials(PrincipalContext principalContext, string userNameOrEmailAddress, string plainPassword)
+        {
+            if (!OperatingSystem.IsWindows())
+                return false;
+
+            ContextOptions options = ContextOptions.Negotiate | ContextOptions.ServerBind;
+            bool validate = principalContext.ValidateCredentials(userNameOrEmailAddress, plainPassword, options);
+
+            if (!validate)
+            {
+                //if false check with ldap
+                string path = $"LDAP://{principalContext.ConnectedServer}/{principalContext.Container}";
+                using (DirectoryEntry adsEntry = new(path, userNameOrEmailAddress, plainPassword))
+                {
+                    using (DirectorySearcher adsSearcher = new(adsEntry))
+                    {
+                        adsSearcher.Filter = "(sAMAccountName=" + userNameOrEmailAddress + ")";
+                        try
+                        {
+                            //Valida se loga no ldap
+                            SearchResult adsSearchResult = adsSearcher.FindOne();
+                            if (adsSearchResult != null)
+                                validate = true;
+                        }
+                        catch (DirectoryServicesCOMException ex)
+                        {
+                            //Se ter erro vai mostar qual o motivo no ExtendedErrorMessage
+                            validate = false;
+                            throw new AbpException(ex.Message + Environment.NewLine + ex.ExtendedErrorMessage, ex);
+                        }
+                    }
+                }
+            }
+            return validate;
+        }
+
+        #endregion Windows
+    }
+}

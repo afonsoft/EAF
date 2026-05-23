@@ -1,0 +1,53 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "SwaggerKey": "Eaf-Api",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "demo-eaf-api.afonsoft.com.br",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS", "HEAD" ],
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "RouteIsCaseSensitive": false,
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 1000,
+        "TimeoutValue": 300000
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/{catchAll}",
+      "DownstreamScheme": "wss",
+      "SwaggerKey": "Eaf-Api",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "demo-eaf-api.afonsoft.com.br",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/{catchAll}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS", "HEAD" ],
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "RouteIsCaseSensitive": false,
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 5,
+        "DurationOfBreak": 1000,
+        "TimeoutValue": 300000
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "RequestIdKey": "X-Correlation-Id",
+    "AdministrationPath": "/administration",
+    "BaseUrl": "https://localhost:8081"
+  },
+  "FileCacheOptions": {
+    "TtlSeconds": 15,
+    "Region": "europe-central"
+  }
+}

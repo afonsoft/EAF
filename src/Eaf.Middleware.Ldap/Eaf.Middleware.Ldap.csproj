@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\common.props" />
+
+	<PropertyGroup>
+		<RootNamespace>Eaf.Middleware</RootNamespace>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>Eaf.Middleware.Ldap</AssemblyName>
+		<PackageId>Eaf.Middleware.Ldap</PackageId>
+		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;multitenancy;user management;role management;identity;ldap;active directory</PackageTags>
+		<Description>Enterprise Application Foundation - Module Middleware - Active Directory Integration</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Ldap\Localization\Source\EafLdap-pt-BR.xml">
+		  <CustomToolNamespace>Eaf.Middleware.Ldap.Localization.Source</CustomToolNamespace>
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Ldap\Localization\Source\EafLdap.xml">
+		  <CustomToolNamespace>Eaf.Middleware.Ldap.Localization.Source</CustomToolNamespace>
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<PackageReference Include="Novell.Directory.Ldap.NETStandard" Version="4.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
+		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="System.DirectoryServices" Version="9.0.8" />
+		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.8" />
+		<PackageReference Include="System.DirectoryServices.Protocols" Version="9.0.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+</Project>

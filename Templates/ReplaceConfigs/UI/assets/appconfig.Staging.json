@@ -1,0 +1,10 @@
+﻿{
+  "remoteServiceBaseUrl": "https://demo-eaf-api.afonsoft.com.br",
+  "appBaseUrl": "https://demo-eaf.afonsoft.com.br",
+  "localeMappings": [
+    {
+      "from": "pt-BR",
+      "to": "pt"
+    }
+  ]
+}

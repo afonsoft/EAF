@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <OutputType>Exe</OutputType>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	  <ApplicationIcon>eaf72.ico</ApplicationIcon>
+	  <Version>1.0.1</Version>
+	  <NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277</NoWarn>
+	  <Authors>Afonso Dutra Nogueira Filho</Authors>
+	  <Copyright>AFONSOFT © 2024</Copyright>
+	  <Company>AFONSOFT</Company>
+	  <LangVersion>9.0</LangVersion>
+	  <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <GenerateAssemblyTitleAttribute>true</GenerateAssemblyTitleAttribute>
+	  <GenerateAssemblyDescriptionAttribute>true</GenerateAssemblyDescriptionAttribute>
+	  <GenerateAssemblyConfigurationAttribute>true</GenerateAssemblyConfigurationAttribute>
+	  <GenerateAssemblyCompanyAttribute>true</GenerateAssemblyCompanyAttribute>
+	  <GenerateAssemblyProductAttribute>true</GenerateAssemblyProductAttribute>
+	  <GenerateAssemblyCopyrightAttribute>true</GenerateAssemblyCopyrightAttribute>
+	  <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+	  <Deterministic>true</Deterministic>
+	  <OpenApiGenerateDocumentsOnBuild>false</OpenApiGenerateDocumentsOnBuild>
+	  <CheckEolTargetFramework>false</CheckEolTargetFramework>
+	  <EmbedUntrackedSources>true</EmbedUntrackedSources>
+	  <IncludeSymbols>true</IncludeSymbols>
+	  <PublishRepositoryUrl>true</PublishRepositoryUrl>
+	  <AssemblyName>Eaf.Cli</AssemblyName>
+	  <PackAsTool>true</PackAsTool>
+	  <ToolCommandName>Eaf.Cli</ToolCommandName>
+	  <PackageOutputPath>./nupkg</PackageOutputPath>
+	  <PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;multitenancy;user management;role management;identity server;entity framework; EAF, Eal.Cli</PackageTags>
+	  <Description>Enterprise Application Foundation - Tools - New Template</Description>
+	  <StartupObject>EafRenamerCli.Program</StartupObject>
+	  <Title>Eaf.Cli</Title>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <PackageIcon>eaf72.png</PackageIcon>
+	  <SignAssembly>False</SignAssembly>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <NeutralLanguage>pt-BR</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="eaf72.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.50.0" />
+	<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eaf.Rename\Eaf.Renamer.Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="eaf72.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+</Project>

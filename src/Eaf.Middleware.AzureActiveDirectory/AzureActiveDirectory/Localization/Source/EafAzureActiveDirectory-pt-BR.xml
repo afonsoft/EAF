@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="pt-BR">
+  <texts>
+    <text name="AzureActiveDirectory_IsEnabled" value="Habilitado" />
+    <text name="AzureActiveDirectory_ClientId" value="Tipo de Contexto" />
+    <text name="AzureActiveDirectory_Tenant" value="Tenant" />
+    <text name="AzureActiveDirectory_ClientSecret" value="Client Secret" />
+  </texts>
+</localizationDictionary>

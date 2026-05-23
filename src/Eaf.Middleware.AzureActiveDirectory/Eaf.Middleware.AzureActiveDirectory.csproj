@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\..\common.props" />
+
+	<PropertyGroup>
+		<RootNamespace>Eaf.Middleware</RootNamespace>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>Eaf.Middleware.AzureActiveDirectory</AssemblyName>
+		<PackageId>Eaf.Middleware.AzureActiveDirectory</PackageId>
+		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;multitenancy;user management;role management;identity;ldap;active directory</PackageTags>
+		<Description>Enterprise Application Foundation - Module Middleware - Azure Active Directory Integration</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DocumentationFile>obj\Debug\net5.0\Eaf.Middleware.AzureActiveDirectory.xml</DocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="AzureActiveDirectory\Localization\Source\*.xml" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+		<PackageReference Include="Microsoft.Graph" Version="[4.54.0,5.0.0)" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.74.1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
+		<EmbeddedResource Update="AzureActiveDirectory\Localization\Source\EafAzureActiveDirectory-pt-BR.xml">
+		  <CustomToolNamespace>Eaf.Middleware.AzureActiveDirectory.Localization.Source</CustomToolNamespace>
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Update="AzureActiveDirectory\Localization\Source\EafAzureActiveDirectory.xml">
+		  <CustomToolNamespace>Eaf.Middleware.AzureActiveDirectory.Localization.Source</CustomToolNamespace>
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+</Project>

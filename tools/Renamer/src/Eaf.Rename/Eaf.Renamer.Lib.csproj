@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;netstandard2.0;net48;net8.0;net9.0</TargetFrameworks>
+		<ApplicationIcon>eaf72.ico</ApplicationIcon>
+		<Version>1.0.0</Version>
+		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277</NoWarn>
+		<Authors>Afonso Dutra Nogueira Filho</Authors>
+		<Copyright>AFONSOFT © 2024</Copyright>
+		<Company>AFONSOFT</Company>
+		<LangVersion>9.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GenerateAssemblyTitleAttribute>true</GenerateAssemblyTitleAttribute>
+		<GenerateAssemblyDescriptionAttribute>true</GenerateAssemblyDescriptionAttribute>
+		<GenerateAssemblyConfigurationAttribute>true</GenerateAssemblyConfigurationAttribute>
+		<GenerateAssemblyCompanyAttribute>true</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyProductAttribute>true</GenerateAssemblyProductAttribute>
+		<GenerateAssemblyCopyrightAttribute>true</GenerateAssemblyCopyrightAttribute>
+		<IsPackable>true</IsPackable>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<Deterministic>true</Deterministic>
+		<OpenApiGenerateDocumentsOnBuild>false</OpenApiGenerateDocumentsOnBuild>
+		<CheckEolTargetFramework>false</CheckEolTargetFramework>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' ">
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+		<AssemblyName>Eaf.Renamer.Lib</AssemblyName>
+		<RootNamespace>Eaf.Renamer.Lib</RootNamespace>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
+	  <WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
+	  <WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+	  <WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+	  <WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+  <ItemGroup>
+    <Content Include="eaf72.ico" />
+  </ItemGroup>
+  <ItemGroup>
+	<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
+  </ItemGroup>
+
+</Project>

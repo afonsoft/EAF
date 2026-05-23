@@ -1,0 +1,26 @@
+{
+  "SwaggerEndPoints": [
+    {
+      "Key": "bffweb",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "BFF.Web",
+          "Version": "1.0",
+          "Url": "https://localhost:8081/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "Eaf-Api",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Eaf.Api",
+          "Version": "1.0",
+          "Url": "https://demo-eaf-api.afonsoft.com.br/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ]
+}

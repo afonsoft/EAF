@@ -1,0 +1,40 @@
+language: csharp
+dist: focal
+sudo: required
+mono: none
+dotnet: 8.0.101
+
+os:
+  - linux
+  - osx
+  - windows
+  
+solution: Eaf.sln
+env:
+  global:
+    - ResolveNuGetPackageAssets=true
+    - EnableNuGetPackageRestore=true
+    - DOTNETCORE=8
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+    - DOTNET_CLI_TELEMETRY_OPTOUT=1
+before_install:
+- |
+    if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+      choco install dotnet-sdk --version=8.0.101
+      dotnet restore Eaf.sln --ignore-failed-sources --configfile nuget.config
+    fi
+    if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+      curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
+      PATH=$PATH:/home/travis/.dotnet
+    fi
+    if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+      curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0
+      PATH=$PATH:/Users/travis/.dotnet
+    fi
+install:
+  - dotnet restore Eaf.sln --ignore-failed-sources
+script:
+  - dotnet build Eaf.sln --configuration Release --verbosity minimal --no-incremental --ignore-failed-sources
+cache:
+  directories:
+    - bin

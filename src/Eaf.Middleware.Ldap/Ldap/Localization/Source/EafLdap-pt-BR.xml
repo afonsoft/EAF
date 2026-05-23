@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="pt-BR">
+  <texts>
+    <text name="Ldap_IsEnabled" value="Habilitado" />
+    <text name="Ldap_ContextType" value="Tipo de Contexto" />
+    <text name="Ldap_Container" value="Container" />
+    <text name="Ldap_Domain" value="Domínio" />
+    <text name="Ldap_UserName" value="Usuário" />
+    <text name="Ldap_Password" value="Senha" />
+  </texts>
+</localizationDictionary>

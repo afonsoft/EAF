@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+    <Import Project="..\..\common.props" />
+    <PropertyGroup>
+        <RootNamespace>Eaf</RootNamespace>
+        <TargetFrameworks>net10.0</TargetFrameworks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <AssemblyName>Eaf.Middleware.Worker</AssemblyName>
+        <PackageId>Eaf.Middleware.Worker</PackageId>
+        <PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;multitenancy;user management;role management;identity</PackageTags>
+        <Description>Enterprise Application Foundation - Module Middleware - Worker Classes</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+        <PackageReference Include="MimeKit" Version="4.16.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+        <PackageReference Include="System.ValueTuple" Version="4.6.1" />
+        <PackageReference Include="Serilog.Enrichers.Context" Version="4.6.5" />
+        <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+        <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+        <PackageReference Include="Castle.LoggingFacility.MsLogging" Version="3.1.0" />
+
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+        <PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="4.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Abp" Version="10.4.0" />
+        <PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
+        <PackageReference Include="Abp.MailKit" Version="10.4.0" />
+        <PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+</Project>

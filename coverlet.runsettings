@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>opencover,cobertura,json,lcov</Format>
+          <Exclude>[*]*.Migrations.*,[*]*Tests*,[*]*Test*,[*]*.Program,[*]*.Startup</Exclude>
+          <ExcludeByFile>**/Migrations/**/*.cs,**/*Designer.cs,**/Program.cs,**/Startup.cs</ExcludeByFile>
+          <Include>[Eaf.*]*</Include>
+          <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          <SingleHit>false</SingleHit>
+          <IncludeDirectory>../src/</IncludeDirectory>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+  <RunConfiguration>
+    <ResultsDirectory>./TestResults</ResultsDirectory>
+    <CollectSourceInformation>true</CollectSourceInformation>
+  </RunConfiguration>
+</RunSettings>

@@ -1,0 +1,28 @@
+<Project>
+
+	<PropertyGroup>
+		<Version>9.0.0</Version>
+		<TemplateVersion>9.0.0.0</TemplateVersion>
+		<PackageProjectUrl>http://www.projectname.com.br/</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/afonsoft/projectname/</PackageLicenseUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/afonsoft/projectname/</RepositoryUrl>
+		<Authors>AFONSOFT</Authors>
+		<Company>EAF</Company>
+		<Copyright>Copyright © 2025</Copyright>
+		<LangVersion>14.0</LangVersion>
+		<PreserveCompilationContext>true</PreserveCompilationContext>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+		<Platform>Any CPU</Platform>
+		<SelfContained>false</SelfContained>
+		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277</NoWarn>
+		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3253;MSB3277</MSBuildWarningsAsMessages>
+		<CheckEolTargetFramework>false</CheckEolTargetFramework>
+		<ServerGarbageCollection>true</ServerGarbageCollection>
+		<GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
+		<UseWindowsThreadPool>true</UseWindowsThreadPool>
+		<PublishAot>false</PublishAot>
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	</PropertyGroup>
+</Project>

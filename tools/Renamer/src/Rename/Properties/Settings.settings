@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="EAFRenamer.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="setFilter" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.cs,.cshtml,.js,.ts,.csproj,.sln,.xml,.config,.DotSettings,.json,.xaml,.txt,.html,.gitignore,.ps1,.md,.plist,.tpl</Value>
+    </Setting>
+    <Setting Name="setOldCompanyName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Eaf.ProjectName</Value>
+    </Setting>
+    <Setting Name="setOldProjectName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">eaf-ProjectName-ui</Value>
+    </Setting>
+    <Setting Name="setRootDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="setNewCompanyName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Eaf.ProjectName</Value>
+    </Setting>
+    <Setting Name="setNewProjectName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">eaf-ProjectName-ui</Value>
+    </Setting>
+    <Setting Name="setOldAreaName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">AppAreaName</Value>
+    </Setting>
+    <Setting Name="setNewAreaName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">App</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

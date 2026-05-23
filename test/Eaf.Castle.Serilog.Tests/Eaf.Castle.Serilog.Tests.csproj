@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Eaf.Castle.Serilog\Eaf.Castle.Serilog.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+	  <PackageReference Include="Abp" Version="10.4.0" />
+	  <PackageReference Include="Serilog" Version="4.3.0" />
+	  <PackageReference Include="Shouldly" Version="4.3.0" />
+	  <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+	  <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+	  <PackageReference Update="coverlet.collector" Version="8.0.0" />
+	  <PackageReference Update="coverlet.msbuild" Version="8.0.0" />
+    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+</Project>

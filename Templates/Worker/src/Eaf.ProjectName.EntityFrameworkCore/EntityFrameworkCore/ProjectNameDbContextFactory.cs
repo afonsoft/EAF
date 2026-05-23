@@ -1,0 +1,65 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Linq;
+
+namespace Eaf.ProjectName.EntityFrameworkCore
+{
+    /* THIS CLASS IS NEEDED TO RUN "DOTNET EF ..." COMMANDS FROM COMMAND LINE ON DEVELOPMENT. NOT USED ANYWHERE ELSE */
+
+    public class ProjectNameDbContextFactory : IDesignTimeDbContextFactory<ProjectNameDbContext>
+    {
+        private static readonly ConcurrentDictionary<string, IConfigurationRoot> _configurationCache = new ConcurrentDictionary<string, IConfigurationRoot>();
+
+        public ProjectNameDbContext CreateDbContext(string[] args)
+        {
+            var builder = new DbContextOptionsBuilder<ProjectNameDbContext>();
+            var configuration = GetConfigurationRoot();
+            var isOracleEnabled = Convert.ToBoolean(configuration["Database:IsOracleEnabled"]);
+
+            ProjectNameDbContextConfigurer.Configure(builder, configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName), isOracleEnabled);
+
+            return new ProjectNameDbContext(builder.Options);
+        }
+
+        public static IConfigurationRoot GetConfigurationRoot()
+        {
+            var path = CalculateContentRootFolder();
+            return _configurationCache.GetOrAdd(path, _ => buildConfiguration(path));
+        }
+
+        private static IConfigurationRoot buildConfiguration(string path)
+        {
+            return Configuration.AppConfigurations.Get(path);
+        }
+
+        private static string CalculateContentRootFolder()
+        {
+            var coreAssemblyDirectoryPath = Path.GetDirectoryName(typeof(ProjectNameDbContextFactory).Assembly.Location);
+            if (coreAssemblyDirectoryPath == null)
+            {
+                throw new ArgumentNullException($"Could not find location of Suite.Docs.Core assembly!");
+            }
+
+            var directoryInfo = new DirectoryInfo(coreAssemblyDirectoryPath);
+
+            while (!DirectoryContains(directoryInfo.FullName, "appsettings.json"))
+            {
+                if (directoryInfo.Parent == null)
+                    throw new ArgumentNullException($"Could not find content root folder!");
+
+                directoryInfo = directoryInfo.Parent;
+            }
+
+            return directoryInfo.FullName;
+        }
+
+        private static bool DirectoryContains(string directory, string fileName)
+        {
+            return Directory.GetFiles(directory).Any(filePath => string.Equals(Path.GetFileName(filePath), fileName));
+        }
+    }
+}

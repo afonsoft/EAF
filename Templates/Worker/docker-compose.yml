@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  eaf.projectname.web.host:
+    image: ${DOCKER_REGISTRY-}eafprojectnamewebhost
+    build:
+      context: .
+      dockerfile: src/Eaf.ProjectName.WorkerService/Dockerfile

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\common.props"></Import>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<AssemblyName>Eaf.ProjectName.Core</AssemblyName>
+		<PackageId>Eaf.ProjectName.Core</PackageId>
+		<UserSecretsId>Eaf-ProjectName-894FDFC1-6482-4A56-926A-3C46C9FE0329</UserSecretsId>
+		<RootNamespace>Eaf.ProjectName</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Application\Localization\ProjectName\ProjectName-pt-BR.xml" />
+		<EmbeddedResource Include="Application\Localization\ProjectName\ProjectName.xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
+		<PackageReference Include="Abp.MailKit" Version="10.4.0" />
+		<PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="4.1.0" />
+		<PackageReference Include="TimeZoneConverter" Version="7.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+	</ItemGroup>
+</Project>

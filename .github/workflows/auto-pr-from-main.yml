@@ -1,0 +1,253 @@
+name: 🔄 Auto PR from Main to Branches
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  create-prs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⚙️ Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 🌿 Get Target Branches
+        id: branches
+        run: |
+          # Descobre todas as branches remotas ativas (excluindo main e HEAD)
+          ALL_BRANCHES=$(git ls-remote --heads origin | sed 's/.*refs\/heads\///' | grep -v '^main$' | tr '\n' ' ')
+
+          # Obtém a lista de branches já mergeadas na main
+          MERGED_BRANCHES=$(git branch -r --merged origin/main | sed 's/origin\///' | xargs)
+
+          # Filtra apenas as branches que devem receber atualizações da main
+          # e que ainda NÃO foram mergeadas com a main
+          BRANCHES=""
+          for branch in $ALL_BRANCHES; do
+            # Verifica se o padrão da branch é válido
+            case "$branch" in
+              develop|staging|testing|feature/*|bug/*|hotfix/*|release/*|devin/*)
+                # Verifica se a branch NÃO foi mergeada com a main
+                IS_MERGED=false
+                for merged in $MERGED_BRANCHES; do
+                  if [ "$branch" = "$merged" ]; then
+                    IS_MERGED=true
+                    break
+                  fi
+                done
+
+                if [ "$IS_MERGED" = false ]; then
+                  BRANCHES="$BRANCHES $branch"
+                  echo "✅ Branch '$branch' será atualizada (não mergeada com main)"
+                else
+                  echo "⏭️ Branch '$branch' ignorada (já mergeada com main)"
+                fi
+                ;;
+            esac
+          done
+
+          # Remove espaço inicial
+          BRANCHES=$(echo "$BRANCHES" | xargs)
+
+          echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
+          echo "Target branches: $BRANCHES"
+
+      - name: 🔄 Create PR for Each Branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAIN_SHA: ${{ github.sha }}
+          MAIN_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          IFS=' ' read -ra BRANCH_ARRAY <<< "${{ steps.branches.outputs.branches }}"
+
+          for branch in "${BRANCH_ARRAY[@]}"; do
+            echo "Processing branch: $branch"
+            
+            # Verifica se a branch existe
+            if git ls-remote --exit-code --heads origin $branch; then
+              echo "Branch $branch exists"
+              
+              # Faz checkout da branch de destino
+              git checkout $branch 2>/dev/null || git checkout -b $branch origin/$branch
+              
+              # Merge as mudanças da main
+              if git merge origin/main --no-ff -m "🔄 Auto-merge from main: $MAIN_MESSAGE"; then
+                echo "Merge successful for $branch"
+                
+                # Push para a branch
+                git push origin $branch
+                
+                # Cria ou atualiza o PR
+                PR_TITLE="🔄 Auto-update from main to $branch"
+                PR_BODY="## 🔄 Automatic Update from Main
+                
+                **Commit:** [$MAIN_SHA](${{ github.server_url }}/${{ github.repository }}/commit/$MAIN_SHA)
+                **Message:** $MAIN_MESSAGE
+                **Author:** ${{ github.event.head_commit.author.name }}
+                
+                ---
+                
+                🤖 This PR was automatically created when main was updated.
+                
+                ### Changes:
+                - Latest changes from main branch merged into $branch
+                - Auto-generated on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+                
+                ### Review Checklist:
+                - [ ] Review merged changes
+                - [ ] Check for conflicts
+                - ] Verify build and tests pass
+                - [ ] Approve if everything looks good"
+                
+                # Verifica se já existe um PR aberto
+                EXISTING_PR=$(gh pr list --head $branch --base main --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+                
+                if [ -n "$EXISTING_PR" ]; then
+                  echo "Updating existing PR #$EXISTING_PR"
+                  gh pr edit $EXISTING_PR --title "$PR_TITLE" --body "$PR_BODY"
+                else
+                  echo "Creating new PR for $branch"
+                  # Cria PR usando a branch temporária para representar o estado atual da main
+                  TEMP_BRANCH="auto-update-$branch-$(date +%s)"
+                  git checkout -b $TEMP_BRANCH origin/main
+                  git push origin $TEMP_BRANCH
+                  
+                  gh pr create \
+                    --title "$PR_TITLE" \
+                    --body "$PR_BODY" \
+                    --base $branch \
+                    --head $TEMP_BRANCH \
+                    --assignee ${{ github.event.head_commit.author.username }} || {
+                    echo "PR creation failed, might already exist"
+                    # Tenta criar PR na direção oposta se o anterior falhar
+                    gh pr create \
+                      --title "$PR_TITLE" \
+                      --body "$PR_BODY" \
+                      --base main \
+                      --head $branch \
+                      --assignee ${{ github.event.head_commit.author.username }} || echo "PR already exists or creation failed"
+                  }
+                  
+                  # Deleta a branch temporária se o PR foi criado com sucesso
+                  git push origin --delete $TEMP_BRANCH 2>/dev/null || true
+                fi
+                
+                echo "✅ PR created/updated for $branch"
+              else
+                echo "❌ Merge failed for $branch, there might be conflicts"
+                # Cria um PR mesmo com conflitos para notificação
+                PR_TITLE="❌ Auto-update from main to $branch (CONFLICTS)"
+                PR_BODY="## ❌ Merge Conflicts Detected
+                
+                **Commit:** [$MAIN_SHA](${{ github.server_url }}/${{ github.repository }}/commit/$MAIN_SHA)
+                **Message:** $MAIN_MESSAGE
+                
+                ---
+                
+                🚨 This PR has merge conflicts that need to be resolved manually.
+                
+                ### Next Steps:
+                1. Resolve conflicts in $branch
+                2. Test the changes
+                3. Approve the PR"
+                
+                # Cria PR usando uma branch temporária para representar o estado atual da main
+                TEMP_BRANCH="conflict-$branch-$(date +%s)"
+                git checkout -b $TEMP_BRANCH origin/main
+                git push origin $TEMP_BRANCH
+                
+                gh pr create \
+                  --title "$PR_TITLE" \
+                  --body "$PR_BODY" \
+                  --base $branch \
+                  --head $TEMP_BRANCH \
+                  --assignee ${{ github.event.head_commit.author.username }} || echo "Conflict PR already exists"
+                
+                # Não deleta a branch temporária de conflitos para que o usuário possa resolver
+              fi
+            else
+              echo "⚠️ Branch $branch does not exist, skipping"
+            fi
+            
+            echo "---"
+          done
+
+      - name: 📧 Notification Summary
+        run: |
+          echo "## 🔄 Auto-PR Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.event.head_commit.message }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Author:** ${{ github.event.head_commit.author.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Branches:** ${{ steps.branches.outputs.branches }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ PR creation process completed" >> $GITHUB_STEP_SUMMARY
+
+  # Job para criar PR reverso (develop → main) quando solicitado
+  create-reverse-pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⚙️ Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 🔄 Create Reverse PR (Develop → Main)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Creating reverse PR from develop to main..."
+
+          # Checkout da develop
+          git checkout -b reverse-pr origin/develop
+
+          # Cria PR da develop para main
+          PR_TITLE="🔄 Reverse PR: Develop → Main"
+          PR_BODY="## 🔄 Reverse Pull Request
+
+          **Type:** Manual reverse sync from develop to main
+          **Created by:** ${{ github.actor }}
+          **Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+
+          ---
+
+          🤖 This PR was manually created to sync changes from develop back to main.
+
+          ### Purpose:
+          - Hotfixes that need to go to main
+          - Critical features from develop
+          - Emergency deployments
+
+          ### Review Checklist:
+          - [ ] Verify this is intentional (not accidental)
+          - [ ] Review all changes carefully
+          - [ ] Ensure no breaking changes
+          - [ ] Test thoroughly before merging"
+
+          gh pr create \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --base main \
+            --head develop \
+            --assignee ${{ github.actor }} || echo "Reverse PR already exists or creation failed"
+            
+          echo "✅ Reverse PR creation process completed"

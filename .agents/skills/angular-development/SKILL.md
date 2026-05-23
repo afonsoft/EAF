@@ -1,0 +1,182 @@
+---
+name: angular-development
+description: Expert guidance for TypeScript and Angular development for the EAF (Enterprise Application Foundation) project. Covers Angular 18, standalone components, signals, reactive forms, PrimeNG integration, jQuery legacy integration, SignalR real-time features, accessibility (WCAG AA), and EAF-specific framework integration. Use this skill when developing Angular components, integrating with EAF backend, or troubleshooting frontend issues. Do NOT use for backend API development, non-Angular frontend frameworks, or general TypeScript projects.
+---
+
+# Angular Development Skill
+
+You are an expert in TypeScript, Angular, and scalable web application development for the EAF (Enterprise Application Foundation) project. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+
+## Project Context
+
+The EAF project is an enterprise application framework based on ASP.NET Boilerplate (ABP) with Angular frontend. The project structure includes:
+- **Backend**: .NET 10.0 with ASP.NET Core
+- **Frontend**: Angular 18 in `Templates/Angular/Eaf.ProjectName.UI`
+- **UI Libraries**: PrimeNG, ngx-bootstrap, Angular Material (planned)
+- **Integration**: SignalR for real-time, jQuery for legacy components, EAF.js framework
+
+## TypeScript Best Practices
+
+- Use strict type checking in `tsconfig.json`
+- Prefer type inference when the type is obvious
+- Avoid the `any` type; use `unknown` when type is uncertain
+- Use `readonly` for properties that shouldn't change
+- Prefer `const` assertions for literal types
+- Use type guards for runtime type checking
+
+## Angular Best Practices
+
+### Component Architecture
+- Always use standalone components over NgModules (Angular 18+)
+- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
+- Keep components small and focused on a single responsibility
+- Use `input()` and `output()` functions instead of decorators
+- Use `computed()` for derived state
+- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
+- Prefer inline templates for small components
+- Prefer Reactive forms instead of Template-driven ones
+
+### Template Guidelines
+- Keep templates simple and avoid complex logic
+- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
+- Use the async pipe to handle observables
+- Do not assume globals like (`new Date()`) are available
+- Do NOT use `ngClass`, use `class` bindings instead
+- Do NOT use `ngStyle`, use `style` bindings instead
+- When using external templates/styles, use paths relative to the component TS file
+
+### Decorator Guidelines
+- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
+- Group Angular-specific properties before methods
+- Keep lifecycle methods simple
+- Use lifecycle hook interfaces
+
+### State Management
+- Use signals for local component state
+- Use `computed()` for derived state
+- Keep state transformations pure and predictable
+- Do NOT use `mutate` on signals, use `update` or `set` instead
+- Implement lazy loading for feature routes
+
+### Service Guidelines
+- Design services around a single responsibility
+- Use the `providedIn: 'root'` option for singleton services
+- Use the `inject()` function instead of constructor injection
+- Use `NgOptimizedImage` for all static images
+- `NgOptimizedImage` does not work for inline base64 images
+
+### Accessibility Requirements
+- It MUST pass all AXE checks
+- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes
+- Use semantic HTML elements
+- Ensure keyboard navigation works
+- Provide alternative text for images
+- Use ARIA labels for interactive elements
+
+## EAF-Specific Guidelines
+
+### EAF Framework Integration
+- The EAF project uses custom module loading with `@eaf/*` path mappings
+- EAF.js framework integration is in `src/assets/lib/eaf-web-resources/`
+- Test all EAF module imports and path mappings after Angular upgrades
+- EAF initialization sequence must be tested after Angular 19 bootstrap changes
+
+### jQuery Integration
+- Heavy jQuery usage alongside Angular exists in the codebase
+- Isolate jQuery usage to avoid conflicts with Angular change detection
+- Test Angular change detection with jQuery DOM manipulation
+- Consider gradual migration from jQuery to pure Angular
+
+### SignalR Integration
+- @microsoft/signalr version is ^7.0.14
+- Test all SignalR connections and real-time updates after Angular upgrades
+- Real-time features may break with Angular 19's change detection
+
+### PrimeNG Components
+- PrimeNG 17.0.0 is currently used
+- Test all PrimeNG components visually and functionally after upgrades
+- PrimeNG 19 may have breaking changes
+- Consider migrating to Angular Material for better Angular 19 compatibility
+
+## File Structure Conventions
+
+### Naming Conventions
+- Separate words in file names with hyphens
+- Use the same name for a file's tests with .spec at the end
+- Match file names to the TypeScript identifier within
+- Use the same file name for a component's TypeScript, template, and styles
+
+### Project Structure
+- All the application's code goes in a directory named `src`
+- Bootstrap your application in a file named `main.ts` directly inside src
+- Group closely related files together in the same directory
+- Organize your project by feature areas
+- One concept per file
+
+## Migration Guidelines
+
+### Angular 17 to 19 Migration
+- Follow the automated migration guide in `Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_17_TO_19.md`
+- Use Angular CLI schematics for automatic migrations where possible
+- Migrate control flow syntax: `*ngIf` → `@if`, `*ngFor` → `@for`, `*ngSwitch` → `@switch`
+- Gradually migrate to standalone components
+- Update TypeScript to 5.5 for Angular 19
+- Test EAF framework integration after each migration step
+
+### Material Design Implementation
+- Install Angular Material 19: `npm install @angular/material@^19.0.0 @angular/cdk@^19.0.0`
+- Configure Material theme in `src/styles.scss`
+- Replace PrimeNG components with Material equivalents gradually
+- Test visual consistency during migration
+- Maintain existing EAF theming system
+
+## Testing Guidelines
+
+### Test Coverage Target
+- Aim for 90%+ code coverage
+- Generate tests for all 37 components in the UI template
+- Test component rendering, user interactions, and data flow
+- Mock services and dependencies appropriately
+- Test integration with EAF framework
+
+### Test Structure
+- Use Jasmine/Karma for unit testing
+- Use TestBed for component testing
+- Use RouterTestingModule for routing tests
+- Use BrowserAnimationsModule for animations
+- Mock services with jasmine.createSpyObj
+
+## Performance Optimization
+
+- Use `NgOptimizedImage` for all static images
+- Implement lazy loading for feature routes
+- Use OnPush change detection strategy
+- Consider zoneless mode (Angular 19) for performance
+- Optimize bundle size with tree-shaking
+- Use deferred loading (@defer) for heavy components
+
+## Security Best Practices
+
+- Sanitize all user inputs
+- Use Angular's built-in sanitization for HTML
+- Implement proper authentication and authorization
+- Use HTTPS for all API calls
+- Validate data on both client and server
+- Keep dependencies updated
+
+## Common Patterns to Avoid
+
+- Do NOT use jQuery for DOM manipulation in new code
+- Do NOT use `any` type
+- Do NOT use `ngClass` or `ngStyle` directives
+- Do NOT use `@HostBinding` or `@HostListener` decorators
+- Do NOT use `mutate` on signals
+- Do NOT assume global variables are available in templates
+
+## When in Doubt
+
+- Prefer consistency with existing code patterns
+- Follow Angular official documentation
+- Test changes thoroughly before committing
+- Consider backward compatibility
+- Consult the EAF team for architectural decisions

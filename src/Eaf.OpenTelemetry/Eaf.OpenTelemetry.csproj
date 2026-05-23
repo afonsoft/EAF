@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<Import Project="..\..\common.props" />
+
+	<PropertyGroup>
+		<RootNamespace>Eaf</RootNamespace>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>Eaf.OpenTelemetry</AssemblyName>
+		<PackageId>Eaf.OpenTelemetry</PackageId>
+		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;OpenTelemetry;Caching;Eaf;Boilerplate</PackageTags>
+		<Description>Enterprise Application Foundation - OpenTelemetry implementation</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Abp.AspNetCore" Version="10.4.0" />
+		<PackageReference Include="OpenTelemetry" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Hangfire" Version="1.9.0-beta.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.2" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="OTEL_DIAGNOSTICS.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+
+
+</Project>

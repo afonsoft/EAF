@@ -1,0 +1,50 @@
+version: 1.0.{build}
+image:
+- Visual Studio 2026
+- Ubuntu
+- macOS
+configuration: Release
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  version_prefix: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+environment:
+  EnableNuGetPackageRestore: true
+  ResolveNuGetPackageAssets: true
+  DOTNETCORE: 10
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+nuget:
+  account_feed: true
+  project_feed: true
+  disable_publish_on_pr: true
+  disable_publish_octopus: true
+before_build:
+- cmd: dotnet restore Eaf.sln --ignore-failed-sources
+build:
+  publish_nuget: true
+  publish_nuget_symbols: true
+  use_snupkg_format: true
+  include_nuget_references: true
+  verbosity: minimal
+build_script:
+  - dotnet build Eaf.sln --configuration Release --verbosity normal
+test_script:
+  - dotnet test test/Eaf.Castle.Serilog.Tests/Eaf.Castle.Serilog.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.KeyVault.Tests/Eaf.KeyVault.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.KeyVault.AspNetCore.Tests/Eaf.KeyVault.AspNetCore.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.Log4NetServiceBus.Tests/Eaf.Log4NetServiceBus.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.Middleware.Application.Tests/Eaf.Middleware.Application.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.Middleware.AzureActiveDirectory.Tests/Eaf.Middleware.AzureActiveDirectory.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.Middleware.Ldap.Tests/Eaf.Middleware.Ldap.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.Middleware.Worker.Tests/Eaf.Middleware.Worker.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.Middleware.Web.Core.Tests/Eaf.Middleware.Web.Core.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.MiddlewareCore.Tests/Eaf.MiddlewareCore.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.OpenTelemetry.Tests/Eaf.OpenTelemetry.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.SqliteCache.Tests/Eaf.SqliteCache.Tests.csproj --configuration Release --no-build
+  - dotnet test test/Eaf.SqlServerCache.Tests/Eaf.SqlServerCache.Tests.csproj --configuration Release --no-build

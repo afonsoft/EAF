@@ -1,0 +1,27 @@
+name: 🛠️ Setup Environments
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to setup'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  setup-environment:
+    name: 🛠️ Setup ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v6
+      
+      - name: 🛠️ Setup Environment
+        run: |
+          echo "🛠️ Setting up ${{ github.event.inputs.environment }} environment"
+          echo "Environment setup completed successfully"

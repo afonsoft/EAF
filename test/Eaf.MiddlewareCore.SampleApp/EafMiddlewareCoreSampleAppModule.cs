@@ -1,0 +1,74 @@
+﻿using AutoMapper;
+using Abp.AutoMapper;
+using Abp.Configuration;
+using Abp.EntityFrameworkCore.Configuration;
+using Abp.Modules;
+using System;
+using Abp.Reflection.Extensions;
+using Abp.Zero.EntityFrameworkCore;
+using Eaf.MiddlewareCore.SampleApp.EntityFramework.Seed;
+using Eaf.MiddlewareCore.SampleApp.EntityFramework;
+using Eaf.MiddlewareCore.SampleApp.Application;
+using Eaf.MiddlewareCore.SampleApp.Core.Shop;
+using Eaf.MiddlewareCore.SampleApp.Application.Shop;
+
+namespace Eaf.MiddlewareCore.SampleApp
+{
+    [DependsOn(typeof(AbpZeroCoreEntityFrameworkCoreModule), typeof(AbpAutoMapperModule))]
+    public class EafMiddlewareCoreSampleAppModule : AbpModule
+    {
+        /* Used it tests to skip dbcontext registration, in order to use in-memory database of EF Core */
+        public bool SkipDbContextRegistration { get; set; }
+
+        public override void Initialize()
+        {
+            IocManager.RegisterAssemblyByConvention(typeof(EafMiddlewareCoreSampleAppModule).GetAssembly());
+
+            Configuration.Modules.AbpAutoMapper().Configurators.Add(configuration =>
+            {
+                CustomDtoMapper.CreateMappings(configuration, new MultiLingualMapContext(
+                    IocManager.Resolve<ISettingManager>()
+                ));
+            });
+        }
+
+        public override void PostInitialize()
+        {
+            SeedHelper.SeedHostDb(IocManager);
+        }
+
+        public override void PreInitialize()
+        {
+            if (!SkipDbContextRegistration)
+            {
+                Configuration.Modules.AbpEfCore().AddDbContext<SampleAppDbContext>(configuration =>
+                {
+                    EafMiddlewareTemplateDbContextConfigurer.Configure(configuration.DbContextOptions, configuration.ConnectionString);
+                });
+            }
+
+            Configuration.Authorization.Providers.Add<AppAuthorizationProvider>();
+
+            Configuration.Features.Providers.Add<AppFeatureProvider>();
+
+            Configuration.CustomConfigProviders.Add(new TestCustomConfigProvider());
+            Configuration.CustomConfigProviders.Add(new TestCustomConfigProvider2());
+        }
+    }
+
+    internal static class CustomDtoMapper
+    {
+        public static void CreateMappings(IMapperConfigurationExpression configuration, MultiLingualMapContext context)
+        {
+            configuration.CreateMultiLingualMap<Product, ProductTranslation, ProductListDto>(context, true);
+
+            configuration.CreateMap<ProductCreateDto, Product>();
+            configuration.CreateMap<ProductUpdateDto, Product>();
+
+            configuration.CreateMap<ProductTranslationDto, ProductTranslation>();
+
+            configuration.CreateMultiLingualMap<Order, OrderTranslation, OrderListDto>(context, true)
+                .EntityMap.ForMember(dest => dest.ProductCount, opt => opt.MapFrom(src => src.Products.Count));
+        }
+    }
+}

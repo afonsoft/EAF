@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\common.props"></Import>
+
+    <PropertyGroup>
+        <TargetFrameworks>net10.0</TargetFrameworks>
+        <AssemblyName>Eaf.Middleware.Application</AssemblyName>
+        <PackageId>Eaf.Middleware.Application</PackageId>
+        <RootNamespace>Eaf.Middleware</RootNamespace>
+        <OutputType>Library</OutputType>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+        <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+        <IsPackable>true</IsPackable>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DocumentationFile></DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+		<PackageReference Include="EPPlus" Version="8.5.3" />
+		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+		<PackageReference Include="MimeKit" Version="4.16.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Eaf.Middleware.Core\Eaf.Middleware.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+    </ItemGroup>
+    <ItemGroup>
+		<PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
+        <PackageReference Include="Abp.MailKit" Version="10.4.0" />
+        <PackageReference Include="Abp.Web.Common" Version="10.4.0" />
+        <PackageReference Include="Owl.reCAPTCHA" Version="9.0.0" />
+    </ItemGroup>
+</Project>

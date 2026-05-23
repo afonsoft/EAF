@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <UserSecretsId>bc3b02f2-5df0-47db-9014-5a24da610206</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Authors>EAF</Authors>
+    <Company>EAF</Company>
+    <Product>Eaf.Gateways.API</Product>
+    <Description>Eaf.Gateways.API</Description>
+    <Copyright>EAF</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="MMLib.SwaggerForOcelot" Version="9.0.0" />
+    <PackageReference Include="Ocelot" Version="23.4.3" />
+	<PackageReference Include="Ocelot.Cache.CacheManager" Version="23.4.3" />
+	<PackageReference Include="Ocelot.Provider.Polly" Version="23.4.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+	<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
+	<PackageReference Include="OpenTelemetry" Version="1.10.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />
+	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.10.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.1" />
+	<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="1.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="OTEL_DIAGNOSTICS.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.Production.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.Staging.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.SwaggerEndPoints.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.SwaggerEndPoints.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.SwaggerEndPoints.Production.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Routes\ocelot.SwaggerEndPoints.Staging.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

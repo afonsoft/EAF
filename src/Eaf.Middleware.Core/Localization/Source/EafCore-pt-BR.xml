@@ -1,0 +1,419 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="pt-BR">
+	<texts>
+		<text name="Details">Detalhes</text>
+		<text name="ModificationTime">Data de atualização</text>
+		<text name="AdminEmailAddress">Email responsável</text>
+		<text name="ThisFieldIsRequired">Campo obrigatório</text>
+		<text name="InvalidPattern">Formato inválido</text>
+		<text name="Unlock">Desbloquear</text>
+		<text name="UnlockedTheUser">Usuário {0} desbloqueado com sucesso.</text>
+		<text name="Note_RefreshPageForPermissionChanges">Se você estiver alterando suas próprias permissões, será necessário atualizar a página (F5) para que alterações sejam aplicadas!</text>
+		<text name="Note_MaxUserSearch">A pesquisa é limitada a 10 usuários, caso não encontre o usuário desejado, refina sua busca.</text>
+		<text name="IsLockoutEnabled">Ativar bloqueio por tentativas falhas de login</text>
+		<text name="ExecutionTime">Data de execução</text>
+		<text name="ChangeTime">Data de alteração</text>
+		<text name="Object">Entidade</text>
+		<text name="Administration" value="Administração" />
+		<text name="Roles" value="Perfis" />
+		<text name="Users" value="Usuários" />
+		<text name="Create" value="Criar" />
+		<text name="InvalidUserNameOrPassword" value="Usuário ou senha Inválidos" />
+		<text name="ThereIsNoTenantDefinedWithName{0}" value="Não existe nenhum canal com o nome {0}" />
+		<text name="TenantIsNotActive" value="Canal {0} não está ativo." />
+		<text name="UserIsNotActiveAndCanNotLogin" value="Usuário {0} não está ativo e não pode logar." />
+		<text name="TenancyName" value="Nome da canal" />
+		<text name="UserNameOrEmail" value="Usuário ou email" />
+		<text name="Password" value="Senha" />
+		<text name="RememberMe" value="Lembrar" />
+		<text name="LogIn" value="Entrar" />
+		<text name="ForgotPassword" value="Esqueceu a senha?" />
+		<text name="Pages" value="Páginas" />
+		<text name="RoleName" value="Nome do perfil" />
+		<text name="Permissions" value="Permissões" />
+		<text name="Save" value="Salvar" />
+		<text name="Cancel" value="Cancelar" />
+		<text name="RolesHeaderInfo" value="Usar perfis para agrupar permissões." />
+		<text name="Static" value="Estático" />
+		<text name="Actions" value="Ações" />
+		<text name="Delete" value="Excluir" />
+		<text name="SavedSuccessfully" value="Salvo com sucesso!" />
+		<text name="AreYouSure" value="Você tem certeza?" />
+		<text name="DeletingUser" value="Excluir usuário" />
+		<text name="UsersHeaderInfo" value="Gerenciar usuários e permissões." />
+		<text name="UserName" value="Login" />
+		<text name="Name" value="Nome" />
+		<text name="Surname" value="Sobrenome" />
+		<text name="EmailAddress" value="Endereço de email" />
+		<text name="LastLoginTime" value="Data de último login" />
+		<text name="UserInformations" value="Usuário de Sistema" />
+		<text name="PasswordRepeat" value="Senha (repetir)" />
+		<text name="SuccessfullyDeleted" value="Excluido com sucesso." />
+		<text name="RoleDeleteWarningMessage" value="O perfil {0} vai ser deletado e removido de todos os usuários." />
+		<text name="UserDeleteWarningMessage" value="O usuário {0} vai ser deletado." />
+		<text name="Active" value="Ativo" />
+		<text name="EmailConfirm" value="Confirmar Email" />
+		<text name="EmailConfirmed" value="Email confirmado" />
+		<text name="Yes" value="Sim" />
+		<text name="No" value="Não" />
+		<text name="MySettings" value="Minhas configurações" />
+		<text name="Logout" value="Deslogar" />
+		<text name="ResetPermissionsTooltip" value="Esse botão reseta imediatamente as configurações de permissão específicas do usuário e salva as alteraçõs. O usuário apenas terá permissões dos perfis que ele está incluído." />
+		<text name="ResetSuccessfully" value="Resetado com sucesso." />
+		<text name="Tenant" value="Canal" />
+		<text name="Tenants" value="Canais" />
+		<text name="TenantsHeaderInfo" value="Gerenciar suas canais." />
+		<text name="TenantDeleteWarningMessage" value="Canal {0} vai ser deletada." />
+		<text name="AdminPassword" value="Senha do admin" />
+		<text name="AdminPasswordRepeat" value="Senha do admin (repetir)" />
+		<text name="ChangingPermissions" value="Mudando permissões" />
+		<text name="CreatingNewUser" value="Criar novo usuário" />
+		<text name="Edit" value="Editar" />
+		<text name="CreatingNewTenant" value="Criar novo canal" />
+		<text name="DeletingTenant" value="Excluir canal" />
+		<text name="CreatingNewRole" value="Criar novo perfil" />
+		<text name="DeletingRole" value="Excluir perfil" />
+		<text name="CreationTime" value="Data de criação" />
+		<text name="SearchWithThreeDot" value="Pesquisar..." />
+		<text name="ResetSpecialPermissions" value="Resetar permissões especiais." />
+		<text name="SavingWithThreeDot" value="Salvando..." />
+		<text name="Settings" value="Configurações" />
+		<text name="SaveAll" value="Salvar todos" />
+		<text name="SettingsHeaderInfo" value="Gerenciar configurações da aplicação." />
+		<text name="EmailSmtp" value="Email (SMTP)" />
+		<text name="DefaultFromAddress" value="Endereço de email padrão para envio" />
+		<text name="DefaultFromDisplayName" value="Nome de exibição padrão para envio de email" />
+		<text name="SmtpHost" value="host SMTP" />
+		<text name="SmtpPort" value="porta SMTP" />
+		<text name="UseDefaultCredentials" value="Usar credencial padrão" />
+		<text name="DomainName" value="Domínio" />
+		<text name="UseSsl" value="Usar SSL" />
+		<text name="General" value="Geral" />
+		<text name="SendPasswordResetLink_Information" value="Um link para você resetar a senha vai ser enviado para seu email. Se você não receber o email em alguns momentos, por favor, tente novamente." />
+		<text name="PasswordResetEmail_Subject" value="Resetar senha" />
+		<text name="PasswordResetEmail_Title" value="Resetar senha." />
+		<text name="PasswordResetEmail_SubTitle" value="Esse email é enviado para você, para resetar e recriar sua senha." />
+		<text name="PasswordResetEmail_ClickTheLinkBelowToResetYourPassword" value="Por favor, clique no link abaixo para resetar a senha:" />
+		<text name="EmailActivation_Subject" value="Email de ativação de conta" />
+		<text name="EmailActivation_Title" value="Bem vindo!" />
+		<text name="EmailActivation_SubTitle" value="Esse email é enviado para verificar seu endereço de email." />
+		<text name="EmailActivation_ClickTheLinkBelowToVerifyYourEmail" value="Por favor clique no link abaixo para verificar seu endereço de email:" />
+		<text name="InvalidEmailAddress" value="Endereço de email inválido" />
+		<text name="InvalidPasswordResetCode" value="Código para resetar senha inválido" />
+		<text name="InvalidPasswordResetCode_Detail" value="Por favor tenha certeza que você entrou nessa página clicando no link enviado para seu email. Se isso não resolver, você pode resetar sua senha novamente." />
+		<text name="PleaseEnterYourNewPassword" value="Por favor insira sua nova senha." />
+		<text name="UserEmailIsNotConfirmedAndCanNotLogin" value="O seu endereço de email não está confirmado. Por favor verifique sua caixa de entrada e acesse o link de confirmação de email para ativar sua conta. Se voce não recebeu o email de ativição clique em 'confirmação de email' para receber um novo email." />
+		<text name="LoginFailed" value="Falha no login!" />
+		<text name="InvalidEmailConfirmationCode" value="Código de confirmação de email inválido" />
+		<text name="InvalidEmailConfirmationCode_Detail" value="Por favor tenha certeza que você entrou nessa página clicando no link enviado para seu email. Se isso não resolver o email você pode tentar novamente requerir um código de confirmação." />
+		<text name="YourEmailIsConfirmedMessage" value="O seu endereço de email foi verificado com sucesso." />
+		<text name="ShouldChangePasswordOnNextLogin" value="Deve mudar a senha no próximo login." />
+		<text name="SetRandomPassword" value="Gerar senha aleatória." />
+		<text name="EmailActivation" value="Ativação de email" />
+		<text name="SendEmailActivationLink_Information" value="Um link vai ser enviado para seu email para confirmação do endereço de email. Se você não receber um email em alguns minutos, por favor, tente novamente." />
+		<text name="SendActivationEmail" value="Enviar email de ativação." />
+		<text name="ChangePassword" value="Mudar senha" />
+		<text name="CurrentPassword" value="Senha atual" />
+		<text name="NewPassword" value="Nova senha" />
+		<text name="NewPasswordRepeat" value="Nova senha (repetir)" />
+		<text name="YourPasswordHasChangedSuccessfully" value="Sua senha foi atualizada com sucesso." />
+		<text name="NameSurname" value="Nome e sobrenome" />
+		<text name="UserManagement" value="Gerenciamento de usuário" />
+		<text name="Default" value="Padrão" />
+		<text name="DefaultRole_Description" value="Atribuir a novos usuários como padrão." />
+		<text name="StaticRole_Tooltip" value="Perfis estáticos não podem ser excluídos." />
+		<text name="EmailConfirmationRequiredForLogin" value="Confirmação de email requerida para login" />
+		<text name="{0}UserCannotBeDeleted" value="usuário {0} não pode ser excluído." />
+		<text name="ExportToExcel" value="Exportar para excel" />
+		<text name="ChangeProfilePicture" value="Mudar a foto do perfil" />
+		<text name="TenantName_Regex_Description" value="Nome do canal deve ter no mínimo 2 caracteres, começa com uma letra e continuar com letra, número, traço ou sublinhado." />
+		<text name="ProfilePicture_Change_Info" value="Você pode selecionar um arquivo JPG / JPEG / PNG com um tamanho máximo de {0}MB." />
+		<text name="ProfilePicture_Change_Error" value="Sua imagem de perfil não pode ser alterada." />
+		<text name="ProfilePicture_Warn_SizeLimit" value="O tamanho da imagem deve ser menor que {0}MB. Por favor, selecione outro arquivo." />
+		<text name="Dashboard" value="Dashboard" />
+		<text name="Back" value="Voltar" />
+		<text name="Submit" value="Enviar" />
+		<text name="CanNotChangeAdminUserName" value="Não é possível alterar o nome de usuário do administrador." />
+		<text name="RequestedFileDoesNotExists" value="O arquivo solicitado não existe!" />
+		<text name="MailSent" value="Email enviado" />
+		<text name="PasswordResetMailSentMessage" value="Um link de redefinição de senha foi enviado para seu endereço de e-mail. Por favor, verifique seu e-mail." />
+		<text name="ActivationMailSentMessage" value="Um link de ativação de e-mail foi enviado para seu endereço de e-mail. Por favor, verifique seu e-mail." />
+		<text name="AuditLogs" value="Logs de Auditoria" />
+		<text name="AuditLogsHeaderInfo" value="Detalhamento dos logs de auditoria e histórico de registro" />
+		<text name="Success" value="Successo" />
+		<text name="Time" value="Tempo" />
+		<text name="Service" value="Serviço" />
+		<text name="Action" value="Ação" />
+		<text name="Duration" value="Duração" />
+		<text name="IpAddress" value="Endereço IP" />
+		<text name="Client" value="Cliente" />
+		<text name="Browser" value="Navegador" />
+		<text name="Xms" value="{0} ms" />
+		<text name="Close" value="Fechar" />
+		<text name="ErrorState" value="Estado de erro" />
+		<text name="All" value="Tudo" />
+		<text name="AuditLogDetail" value="Detalhe do log de auditoria" />
+		<text name="Parameters" value="Parâmetros" />
+		<text name="DateRange" value="Intervalo de datas" />
+		<text name="ActionInformations" value="Informações de ação" />
+		<text name="Today" value="Hoje" />
+		<text name="Yesterday" value="Ontem" />
+		<text name="Last7Days" value="Últimos 7 dias" />
+		<text name="Last30Days" value="Últimos 30 dias" />
+		<text name="ThisMonth" value="Este mês" />
+		<text name="LastMonth" value="Mês passado" />
+		<text name="LoginWith" value="Entrar com:" />
+		<text name="Apply" value="Aplicar" />
+		<text name="CustomRange" value="Intervalo personalizado" />
+		<text name="Features" value="Funcionalidades" />
+		<text name="ChangingFeatures" value="Mudar funcionalidades" />
+		<text name="ResetSpecialFeatures" value="Resetar funcionalidades especiais" />
+		<text name="ResetFeaturesTooltip" value="Esse botão reseta imediatamente as funcionalidades específicas do canal e salva as mudanças. O canal vai ter as funcionalidades atribuídas do plano." />
+		<text name="InvalidFeaturesWarning" value="Um ou mais valores de funcionalidades não são válidas!" />
+		<text name="Languages" value="Linguagens" />
+		<text name="LanguagesHeaderInfo" value="Gerenciar linguagens da interface." />
+		<text name="Code" value="Código" />
+		<text name="EditingUser">Editar usuário</text>
+		<text name="EditingRole">Editar perfil</text>
+		<text name="EditingTenant">Editar canal</text>
+
+		<text name="CreatingNewLanguage" value="Criar novo idioma" />
+		<text name="EditingLanguage" value="Editar idioma" />
+		<text name="DeletingLanguages" value="Excluir idioma" />
+		<text name="ChangingTexts" value="Mudando textos" />
+		<text name="SuccessfullySaved" value="Salvo com sucesso." />
+		<text name="Language" value="Idioma" />
+		<text name="SetAsDefaultLanguage" value="Marcar como idioma padrão" />
+		<text name="ChangeTexts" value="Mudar textos" />
+		<text name="TargetValue" value="Valor alvo" />
+		<text name="BaseValue" value="Valor base" />
+		<text name="Key" value="Chave" />
+		<text name="LanguageTexts" value="Textos do idioma" />
+		<text name="LanguageTextsHeaderInfo" value="Editar textos do idioma." />
+		<text name="EmptyOnes" value="Vazios" />
+		<text name="Source" value="Fonte" />
+		<text name="BaseLanguage" value="Idioma base" />
+		<text name="TargetLanguage" value="Linguagem alvo" />
+		<text name="LanguageDeleteWarningMessage" value="Você tem certeza que quer deletar o idioma {0}?" />
+		<text name="CanNotEditOrDeleteDefaultLanguages" value="Não é possível editar ou excluir idiomas padrão. Você só pode editar ou excluir as línguas que você adicionou. Mas você pode mudar os textos de todas as línguas." />
+		<text name="ThisLanguageAlreadyExists" value="Essa linguagem já existe!" />
+		<text name="SelectAnItem" value="Selecione um item" />
+		<text name="SelectAUser" value="Selecione um usuário" />
+		<text name="Select" value="Selecione" />
+		<text name="LoginForUsers" value="Login para usuários" />
+		<text name="BackToMyAccount" value="Voltar para minha conta" />
+		<text name="LoginForTenants" value="Login em canais" />
+		<text name="LoginAsThisTenant" value="Logar como este canal" />
+		<text name="AuditLogImpersonatedOperationInfo" value="Observação: Esta operação é executada por outro usuário em nome do presente usuário." />
+		<text name="CustomData" value="Dados customizados" />
+		<text name="None" value="Nenhum" />
+		<text name="CascadeImpersonationErrorMessage" value="Não foi possível realizar login. Você já está em um login de outro usuário!" />
+		<text name="FromTenantToHostImpersonationErrorMessage" value="Não é possível logar um usuário hospedeiro com um usuário do canal!" />
+		<text name="DifferentTenantImpersonationErrorMessage" value="Não é possível logar com um usuário de um canal diferente!" />
+		<text name="ImpersonationTokenErrorMessage" value="Token de login para outro usuário é inválido ou está expirado!" />
+		<text name="NotImpersonatedLoginErrorMessage" value="Este não é um login como outro usuário!" />
+		<text name="WelcomeToTheApplicationNotificationMessage" value="Bem vindo! O sistema de notificação é usado para te informar de eventos de seu interesse. Você pode selecionar quais os tipos de notificação você deseja receber na configuração de notificações." />
+		<text name="NewUserRegisteredNotificationDefinition" value="Quando um novo usuário for registrado no sistema." />
+		<text name="NewUserRegisteredNotificationMessage" value="Um novo usuário foi registrado no sistema. Login {userName}, Email: {emailAddress}." />
+		<text name="SeeAllNotifications" value="Ver todas as notificações" />
+		<text name="SetAsRead" value="Marcar como lida" />
+		<text name="SetAllAsRead" value="Marcar todas como lidas" />
+		<text name="NotificationSettings" value="Configurações de notificação" />
+		<text name="ReceiveNotifications" value="Receber notificação" />
+		<text name="ReceiveNotifications_Definition" value="Esta opção pode ser usada para desligar/ligar completamente o recebimento de notificações." />
+		<text name="NotificationTypes" value="Tipos de notificação" />
+		<text name="ReceiveNotifications_DisableInfo" value="Você desabilitou o recebimento de todas notificações. Você pode reabilitar e selecionar quais os tipos de notificação deseja receber." />
+		<text name="Notifications" value="Notificações" />
+		<text name="ThereIsNoNotification" value="Não existem notificações." />
+		<text name="Unread" value="Não lida" />
+		<text name="YouCanNotDeleteOwnAccount" value="Você não pode deletar sua própria conta de usuário!" />
+		<text name="Maintenance">Manutenção</text>
+		<text name="TestEmailSettingsHeader">Testar configurações de email</text>
+		<text name="SendTestEmail">Enviar teste de email</text>
+		<text name="TestEmail_Subject">Email de teste do EAF</text>
+		<text name="TestEmail_Body">Esse é um, email de teste.</text>
+		<text name="TestEmailSentSuccessfully">Teste de email enviado com sucesso.</text>
+		<text name="LoginAttempts">Histórico de Logins</text>
+		<text name="Failed">Falha</text>
+		<text name="ResizedProfilePicture_Warn_SizeLimit" value="O tamanho da imagem carregada deve conter {0}KB. Por favor, redimensione a imagem e tente novamente." />
+		<text name="Timezone">Fuso Horário</text>
+		<text name="TimeZoneSettingChangedRefreshPageNotification">A configuração do fuso horário mudou. Clique no botão OK para atualizar a página.</text>
+		<text name="TimezoneSettings">Configurações de fuso horário</text>
+		<text name="DefaultTimezone">Fuso horário padrão</text>
+		<text name="Ok">Ok</text>
+		<text name="Permission">Permissão</text>
+		<text name="Role">Perfil</text>
+		<text name="Security">Segurança</text>
+		<text name="PasswordComplexity">Regras de Senhas</text>
+		<text name="UseDefaultSettings">Usar configurações padrão</text>
+		<text name="Message">Mensagem</text>
+		<text name="FilterByRole">Filtrar por perfil</text>
+		<text name="HangfireDashboard" value="Hangfire dashboard" />
+		<text name="UserLockedOutMessage">A conta de usuário foi bloqueada. Por favor, tente novamente mais tarde.</text>
+		<text name="UserLockOut">Bloqueio do usuário</text>
+		<text name="EnableUserAccountLockingOnFailedLoginAttemts">Habilitar o bloqueio do usuário, pela quantidade de tentativas de login</text>
+		<text name="MaxFailedAccessAttemptsBeforeLockout">Número máximo de logins falhos, antes de bloquear a conta</text>
+		<text name="DefaultAccountLockoutDurationAsSeconds">Tempo padrão de bloqueio de conta (em segundos)</text>
+		<text name="UnknownTenantId{0}" value="id canal desconhecido: {0}" />
+		<text name="TenantIdIsNotActive{0}" value="ID inativa do canal: {0}" />
+		<text name="ResetCode">Reiniciar código</text>
+		<text name="CouldNotValidateExternalUser">Não foi possível validar o login externo do usuário </text>
+		<text name="PleaseWaitToConfirmYourEmailMessage">Por favor, aguarde enquanto confirmamos seu endereço de e-mail...</text>
+		<text name="Browse">Navegador</text>
+		<text name="MaximumUserCount">Contagem máxima de usuários</text>
+		<text name="MaximumUserCount_Description">0 = ilimitado</text>
+		<text name="MaximumUserCount_Error_Message">Foi alcançado o número máximo de usuários permitido para a sua assinatura</text>
+		<text name="MaximumUserCount_Error_Detail">Este canal pode ter um máximo de {0} usuários.</text>
+		<text name="UnlockedTenandAdmin">Usuário de administrador desbloqueado para {0}</text>
+		<text name="PasswordComplexity_RequireDigit_Hint">As senhas devem ter pelo menos um dígito ('0'-'9').</text>
+		<text name="PasswordComplexity_RequireLowercase_Hint">As senhas devem ter pelo menos uma senha minúscula('a'-'z').</text>
+		<text name="PasswordComplexity_RequireNonAlphanumeric_Hint">As senhas devem ter pelo menos um número.</text>
+		<text name="PasswordComplexity_RequireUppercase_Hint">As senhas devem ter pelo menos uma letra maiúscula ('A'-'Z').</text>
+		<text name="PasswordComplexity_RequiredLength_Hint">As senhas devem ter mais que {0} caracteres.</text>
+		<text name="PasswordComplexity_RequireDigit">Dígito obrigatório</text>
+		<text name="PasswordComplexity_RequireLowercase">Letra minúscula obrigatória</text>
+		<text name="PasswordComplexity_RequireNonAlphanumeric">Número obrigatório</text>
+		<text name="PasswordComplexity_RequireUppercase">Letra maiúscula obrigatória</text>
+		<text name="PasswordComplexity_RequiredLength">Tamanho obrigatório</text>
+		<text name="NoData">Sem dados</text>
+		<text name="TenantNameOrTenancyCode">Nome do canal / código do canal</text>
+		<text name="Unlimited">Ilimitado</text>
+		<text name="Allow">Permitir</text>
+		<text name="IsDisabled">Está desabilitado</text>
+		<text name="ThereIsNoLoggedInUser">Não há usuário registrado.</text>
+		<text name="SubscriptionEndDateUtc">Data de término da inscrição (Utc)</text>
+		<text name="IsEnabled">Está ativado</text>
+		<text name="Profile">Perfil</text>
+		<text name="AdminRoleCannotRemoveFromAdminUser">O perfil administrador não pode ser removida do usuário administrador</text>
+		<text name="YouCannotRemoveUserRolePermissionsFromAdminRole">Você não pode editar usuário/perfil do perfil administrador</text>
+		<text name="YouCannotRemoveUserRolePermissionsFromAdminUser">Você não pode editar usuário/perfil do usuário administrador</text>
+		<text name="Notification">Notificação</text>
+		<text name="TotalRecordsCount">Total: {0}</text>
+		<text name="Status">Status</text>
+		<text name="LastModificationTime">Última hora de modificação</text>
+		<text name="OrganizationUnits">Unidades Organizacionais</text>
+		<text name="Remove">Remover</text>
+		<text name="File">Arquivo</text>
+		<text name="UiCustomizationHeaderInfo">Gerenciar as configurações visuais da tela</text>
+		<text name="UiCustomization_DesktopFixedHeader">Cabeçalho fixo</text>
+		<text name="UiCustomization_MobileFixedHeader">Cabeçalho fixo</text>
+		<text name="UiCustomization_Light">Claro</text>
+		<text name="UiCustomization_Dark">Escuro</text>
+		<text name="UiCustomization_Color">Colorido</text>
+		<text name="UiCustomization_Gray">Cinza</text>
+		<text name="UiCustomization_Menu">Menu</text>
+		<text name="UiCustomization_MenuSkin">Tela do menu</text>
+		<text name="UiCustomization_FixedMenu">Menu fixo</text>
+		<text name="UiCustomization_AllowAsideMinimizing">Permitir recolher menu</text>
+		<text name="UiCustomization_Header">Barra de cabeçalho</text>
+		<text name="VisualSettings">Configurações visuais</text>
+		<text name="SaveAsSystemDefault">Salvar como padrão do sistema</text>
+		<text name="UseSystemDefaults">Usar padrões do sistema</text>
+		<text name="NewNotifications">Novas notificações</text>
+		<text name="PasswordsDontMatch">As senhas não coincidem!</text>
+		<text name="UiCustomization_Mobile">Mobile</text>
+		<text name="UiCustomization_Desktop">Desktop</text>
+		<text name="PleaseEnterAtLeastNCharacter">Por favor, insira pelo menos{0} caracteres.</text>
+		<text name="PleaseEnterNoMoreThanNCharacter">Por favor insira não mais que {0} caracteres.</text>
+		<text name="OperationLogs">Registros de operação</text>
+		<text name="ChangeLogs">Alterar registros</text>
+		<text name="Property">Propriedade</text>
+		<text name="OriginalValue">Valor original</text>
+		<text name="NewValue">Novo valor</text>
+		<text name="Detail">Detalhe</text>
+		<text name="CreatedAtByUser"><![CDATA[Criado em <b>{0}</b> por <b>{1}</b>]]></text>
+		<text name="Search">Procurar</text>
+		<text name="TopMenu">Menu de cima</text>
+		<text name="LeftMenu">Menu à esquerda</text>
+		<text name="UiCustomization_HeaderSkin">Interface</text>
+		<text name="TenantsCannotCreateLanguage">Canais não podem criar linguagem.</text>
+		<text name="UserAccount">Conta de usuário</text>
+		<text name="Expand">Expandir</text>
+		<text name="Collapse">Colapso</text>
+		<text name="MainMenu">Menu principal</text>
+		<text name="IncorrectImageFormat">Formato de imagem incorreto!</text>
+		<text name="NotificationDeleteWarningMessage">Esta notificação será eliminada</text>
+		<text name="ProcessingWithThreeDot">Processando...</text>
+		<text name="ThisNotificationDoesntBelongToYou">Esta notificação não pertence a você.</text>
+		<text name="CookieConsent_Message">Este site usa cookies para garantir que você obtenha a melhor experiência em nosso site.</text>
+		<text name="CookieConsent_Dismiss">OK!</text>
+		<text name="History">Histórico</text>
+		<text name="IsCookieConsentEnabled">Consentimento de cookies ativado</text>
+		<text name="ActiveDirectorySettings">Configurações Active Directory</text>
+		<text name="EnableAzureActiveDirectoryAuthentication">Habilitar a autenticação no Active Directory.</text>
+		<text name="LdapSettings">Configurações Ldap</text>
+		<text name="EnableLdapAuthentication">Habilitar a autenticação Ldap.</text>
+		<text name="AzureTenant">Nome do Tenant</text>
+		<text name="AzureClientId">ID da aplicação (cliente)</text>
+		<text name="AzureClientSecret">Chave secreta da aplicação (cliente)</text>
+		<text name="NewSkiesSettings">Configurações NewSkies</text>
+		<text name="EnableNewSkiesAuthentication">Habilitar a autenticação no NewSkies.</text>
+		<text name="NewSkiesRemoteAddress">Endereço remoto</text>
+		<text name="NewSkiesContractVersion">Versão da API</text>
+		<text name="NewSkiesDomainCode">Código de domínio</text>
+		<text name="NewSkiesAgentName">Login do agente</text>
+		<text name="NewSkiesPassword">Senha do agente</text>
+		<text name="LoginSettings">Configurações de Login</text>
+		<text name="CookieSettings">Configurações de Cookie</text>
+		<text name="RegisterRequiredForLogin">Cadastro prévio obrigatório para login</text>
+		<text name="StoreExternalTokenInformation">Armazenar informações de External Token no perfil do usuário</text>
+		<text name="SaveActiveDirectory">Salvar Active Directory</text>
+		<text name="SaveLdap">Salvar Ldap</text>
+		<text name="SaveNewSkies">Salvar New Skies</text>
+		<text name="AuthenticationSource">Tipo</text>
+		<text name="NewSkiesName">New Skies</text>
+		<text name="ActiveDirectoryName">Active Directory</text>
+		<text name="SystemName">Sistema</text>
+		<text name="UserNewSkiesDeleteAllWarningMessage" value="Todos os usuários com autenticação New Skies serão deletados." />
+		<text name="UserActiveDirectoryDeleteAllWarningMessage" value="Todos os usuários com autenticação AD serão deletados." />
+		<text name="UserLdapDeleteAllWarningMessage" value="Todos os usuários com autenticação Ldap serão deletados." />
+		<text name="UserExpiredPassword">Senha expirada</text>
+		<text name="SessionSettings">Configurações de sessão do usuário</text>
+		<text name="TokenExpirationSettings">Tempo padrão que a sessão do usuário é mantida (Em minutos)</text>
+		<text name="TestCheckFeature">Feature de teste (Demo)</text>
+		<text name="CloseSession">Limpar sessão</text>
+		<text name="CloseSessionTheUser">Sessão do usuário {0} limpa com sucesso.</text>
+		<text name="Caches">Caches</text>
+		<text name="CacheSuccessfullyCleared">Cache limpo com sucesso.</text>
+		<text name="AllCachesSuccessfullyCleared">Todos os caches foram limpos com sucesso.</text>
+		<text name="ClearAll">Limpar tudo</text>
+		<text name="Clear">Limpar</text>
+		<text name="CachesHeaderInfo">Módulo é responsável pelo gerenciamento de cache da aplicação.</text>
+		<text name="ExternalTokenSettingsAuthentication">Para utilizar salvar o token external.</text>
+		<text name="LoginAsThisUser">Login como este usuário</text>
+		<text name="EnableOpenIdConnectAuthentication">Habilitar a autenticação OpenId</text>
+		<text name="EnableMicrosoftAuthentication">Habilitar a autenticação Microsoft</text>
+		<text name="EnableGoogleAuthentication">Habilitar a autenticação Google</text>
+
+		<text name="NewChatMessageEmail_Title">Nova mensagem</text>
+		<text name="NewChatMessageEmail_SubTitle">Nova mensagem de chat</text>
+		<text name="NewChatMessageEmail_Subject">Mensagem do Chat</text>
+		<text name="Sender">Enviado</text>
+
+		<text name="SubscriptionExpire_Title">Expiração de assinatura</text>
+		<text name="SubscriptionExpire_SubTitle">Expiração de assinatura</text>
+		<text name="SubscriptionExpire_Email_Body">Expiração de assinatura {0}</text>
+		<text name="SubscriptionExpire_Email_Subject">Expiração de assinatura</text>
+		<text name="Group">TODOS</text>
+		<text name="GroupEmail"></text>
+
+		<text name="YouDontHaveAnyFriend">Nenhum amigo</text>
+		<text name="BlockedUsers">Usuario bloqueado</text>
+		<text name="YouDontHaveAnyBlockedFriend">Nenhum usuário bloqueado</text>
+		<text name="FilterOrAddUser">Localizar Usuário</text>
+		<text name="ChatUserSearch_Hint">Hint</text>
+		<text name="UserBlocked">Usuário Bloqueado</text>
+		<text name="UserUnblocked">Usuário Desbloqueado</text>
+		<text name="YouAlreadySentAFriendshipRequestToThisUser">Você já enviou um pedido de amizade para este usuário</text>
+		<text name="ThereIsNoTenantDefinedWithName">Não tem um Tenant com esse nome {0}</text>
+		<text name="TypeAMessageHere">Mensagem</text>
+		<text name="Send">Enviar</text>
+		<text name="BlockUser">Bloquear</text>
+		<text name="UnblockUser">Desbloquear</text>
+		<text name="AddFriend">Adicionar</text>
+		<text name="LoginSistem">Logar com usuário de sistema</text>
+		<text name="WebSiteLogsHeaderInfo">WebSite Logs</text>
+		<text name="TestSendMensage">Mensagem de Testes</text>
+		<text name="WelcomeToTheApplication">Bem vindo ao sistema</text>
+	</texts>
+</localizationDictionary>

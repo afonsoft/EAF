@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Eaf.OpenTelemetry": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:54789;http://localhost:54790",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
