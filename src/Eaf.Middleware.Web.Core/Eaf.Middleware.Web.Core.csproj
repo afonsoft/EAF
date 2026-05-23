@@ -54,8 +54,8 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
 		<PackageReference Include="Owl.reCAPTCHA" Version="9.0.0" />
-		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.16.0" />
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.16.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.18.0" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.18.0" />
 		<PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
 		<PackageReference Include="Hangfire.InMemory" Version="1.0.0" />

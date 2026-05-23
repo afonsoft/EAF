@@ -20,7 +20,7 @@
 		<EmbeddedResource Include="AzureActiveDirectory\Localization\Source\*.xml" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
 		<PackageReference Include="Microsoft.Graph" Version="[4.54.0,5.0.0)" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.74.1" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -30,6 +30,7 @@
 	<ItemGroup>
 		<PackageReference Include="Abp" Version="10.4.0" />
 		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.18.0" />
 		<EmbeddedResource Update="AzureActiveDirectory\Localization\Source\EafAzureActiveDirectory-pt-BR.xml">
 		  <CustomToolNamespace>Eaf.Middleware.AzureActiveDirectory.Localization.Source</CustomToolNamespace>
 		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
