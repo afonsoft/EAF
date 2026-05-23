@@ -94,9 +94,12 @@ The EAF framework has several custom integrations that require special attention
 
 ### Environment Requirements
 
-- **Node.js**: ^18.13.0 || ^20.9.0 || ^22.0.0 (Angular 21 supports Node 18, 20, and 22)
+- **Node.js**: ^20.11.1 || ^22.0.0 (Angular 21 requires Node.js v20.11.1 or later)
 - **npm**: ^9.0.0 || ^10.0.0
 - **Angular CLI**: ^21.0.0
+- **TypeScript**: ^5.7.0
+
+**Critical Note**: Angular 21 continues the stricter Node.js requirements from Angular 20. Using Node.js 18 or versions below 20.11.1 will cause build failures.
 
 ### Current State Assessment
 
@@ -131,12 +134,17 @@ npm install @angular/animations@^21.0.0 \
   @angular-devkit/core@^21.0.0
 ```
 
-### 1.2 Update Angular CLI and DevKit
+### 1.2 Update Angular CLI and DevKit - CRITICAL CHANGES
+
+**MAJOR BREAKING CHANGES in Angular 21:**
+
+**1. Vitest is Now Default (Karma Deprecated)**
+Angular 21 has officially swapped Karma for Vitest as the default test runner.
 
 ```bash
 # Update Angular CLI and build tools
 npm install @angular/cli@^21.0.0 \
-  @angular-devkit/build-angular@^21.0.0 \
+  @angular/build@^21.0.0 \
   @angular/compiler-cli@^21.0.0 \
   @angular-eslint/builder@^21.0.0 \
   @angular-eslint/eslint-plugin@^21.0.0 \
@@ -144,6 +152,47 @@ npm install @angular/cli@^21.0.0 \
   @angular-eslint/schematics@^21.0.0 \
   @angular-eslint/template-parser@^21.0.0
 ```
+
+**What breaks:**
+- If you have a custom `karma.conf.js` or rely on specific Karma plugins/reporters, your test suite is now legacy code
+- The CLI will nag you to migrate
+
+**Migration Options:**
+- **New Projects**: You get Vitest out of the box (faster, cleaner, uses Vite)
+- **Existing Projects**: You aren't forced to switch immediately, but migration is recommended
+- **Auto-migration**: Run the schematic to attempt automatic conversion:
+  ```bash
+  ng generate @angular/core:karma-to-vitest
+  ```
+  This is remarkably good at converting standard configs, but custom Webpack hacks in your test setup will need manual rewriting for Vite.
+
+**2. HttpClient is Now Default**
+HttpClient is now injected by default in the root injector.
+
+**What breaks:**
+- Tests that mock HttpClient by expecting it not to be there might fail
+- If you rely on HttpClientModule for complex interceptor ordering in a mixed NgModule/Standalone app, you might see subtle behavior changes
+
+**The Fix:**
+Remove explicit `provideHttpClient()` calls unless you are passing configuration options (like `withInterceptors` or `withFetch`). Check your interceptor execution order.
+
+```typescript
+// Before
+provideHttpClient(withInterceptors([myInterceptor]))
+
+// After (if no config needed)
+// Remove the call entirely - HttpClient is now provided by default
+```
+
+**3. zone.js is Gone for New Apps**
+New apps generated with `ng new` will exclude zone.js by default.
+
+**What breaks:**
+- Nothing for existing apps (yet). Your `polyfills.ts` will keep importing Zone
+- If you copy-paste code from a new v21 tutorial into your existing v20 app, it might assume Zoneless behavior (using ChangeDetectorRef less often, relying on Signals)
+- Mixing the two paradigms without understanding them can cause "changed after checked" errors or views that don't update
+
+**Recommendation for EAF Template**: Keep zone.js for now. Zoneless migration should be a separate, planned refactoring effort.
 
 ### 1.3 Update TypeScript
 

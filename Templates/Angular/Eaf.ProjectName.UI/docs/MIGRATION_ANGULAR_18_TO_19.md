@@ -109,9 +109,12 @@ The EAF framework has several custom integrations that require special attention
 
 ### Environment Requirements
 
-- **Node.js**: ^18.13.0 || ^20.9.0 || ^22.0.0 (Angular 19 supports Node 18, 20, and 22)
+- **Node.js**: ^18.19.1 || ^20.11.1 || ^22.0.0 (Angular 19 is stricter about versions than previous releases)
 - **npm**: ^9.0.0 || ^10.0.0
 - **Angular CLI**: ^19.0.0
+- **TypeScript**: ^5.4.0 (Angular 19 won't work with older versions)
+
+**Critical Note**: Angular 19 is pickier about versions than previous releases. Using Node.js 18.10 or older may cause esbuild errors.
 
 ### Current State Assessment
 
@@ -246,7 +249,54 @@ import { Table, Column, Row } from 'primeng/table';
 
 ## Step 2: Standalone Components Migration
 
-### 2.1 Migration Strategy
+### 2.1 Critical Breaking Change: Standalone Default
+
+**IMPORTANT**: Angular 19 changed the default value for `standalone` from `false` to `true`. This is a **breaking change** that affects every NgModule-based component.
+
+**Error you will encounter:**
+```
+Component AppComponent is standalone, and cannot be declared in an NgModule
+```
+
+**Solution Options:**
+
+**Option A: Keep NgModule-based (Recommended for EAF Template)**
+Add `standalone: false` explicitly to all components that use NgModules:
+
+```typescript
+// Before (Angular 18 - default was false)
+@Component({
+  selector: 'app-example',
+  templateUrl: './example.component.html'
+})
+export class ExampleComponent {}
+
+// After (Angular 19 - explicitly set for NgModule use)
+@Component({
+  standalone: false,  // Add this line
+  selector: 'app-example',
+  templateUrl: './example.component.html'
+})
+export class ExampleComponent {}
+```
+
+**Bulk fix script for smaller projects:**
+```bash
+# Add standalone: false to all components that use NgModules
+find src -name "*.component.ts" -exec grep -L "standalone:" {} \; | \
+  xargs grep -l "@Component" | \
+  xargs sed -i '' 's/@Component({/@Component({\n standalone: false,/g'
+```
+
+**Option B: Migrate to Standalone (Long-term approach)**
+Migrate components to standalone pattern, but this is complex for EAF template due to:
+- AppComponentBase inheritance
+- Custom EAF module integration
+- jQuery integration patterns
+
+**Recommendation for EAF Template**: Use Option A (add `standalone: false`) to maintain compatibility with existing EAF framework patterns. Standalone migration should be done as a separate, planned refactoring effort.
+
+### 2.2 Migration Strategy
 
 For the EAF template with 59+ components, a gradual migration approach is recommended:
 

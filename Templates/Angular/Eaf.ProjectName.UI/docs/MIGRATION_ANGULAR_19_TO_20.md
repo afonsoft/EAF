@@ -94,9 +94,12 @@ The EAF framework has several custom integrations that require special attention
 
 ### Environment Requirements
 
-- **Node.js**: ^18.13.0 || ^20.9.0 || ^22.0.0 (Angular 20 supports Node 18, 20, and 22)
+- **Node.js**: ^20.11.1 (Angular 20 requires Node.js v20.11.1 or later - stricter than Angular 19)
 - **npm**: ^9.0.0 || ^10.0.0
 - **Angular CLI**: ^20.0.0
+- **TypeScript**: ^5.6.0
+
+**Critical Note**: Angular 20 is stricter about Node.js versions. Using Node.js 18 or versions below 20.11.1 will cause build failures.
 
 ### Current State Assessment
 
@@ -131,12 +134,14 @@ npm install @angular/animations@^20.0.0 \
   @angular-devkit/core@^20.0.0
 ```
 
-### 1.2 Update Angular CLI and DevKit
+### 1.2 Update Angular CLI and DevKit - CRITICAL CHANGE
+
+**MAJOR BREAKING CHANGE**: Angular 20 changes the default build package from `@angular-devkit/build-angular` to the new `@angular/build`. This new package no longer includes the Karma plugin used by legacy test setups.
 
 ```bash
 # Update Angular CLI and build tools
 npm install @angular/cli@^20.0.0 \
-  @angular-devkit/build-angular@^20.0.0 \
+  @angular/build@^20.0.0 \
   @angular/compiler-cli@^20.0.0 \
   @angular-eslint/builder@^20.0.0 \
   @angular-eslint/eslint-plugin@^20.0.0 \
@@ -144,6 +149,21 @@ npm install @angular/cli@^20.0.0 \
   @angular-eslint/schematics@^20.0.0 \
   @angular-eslint/template-parser@^20.0.0
 ```
+
+**Karma Removal Impact:**
+- The web ecosystem has moved to faster test runners like Vitest and Jest
+- Karma had become a bottleneck and is no longer included by default
+- Angular's experimental test runner, now powered by Vitest, is the future
+
+**Temporary Fix for Karma (if needed):**
+If you need to keep using Karma temporarily, you can force the CLI to fall back to the old compiler:
+
+```bash
+# Reinstall old builder with Karma support (temporary fix)
+npm install @angular-devkit/build-angular@^19.0.0
+```
+
+**Note**: This is a compatibility bridge - start planning your migration to Jest or Vitest soon.
 
 ### 1.3 Update TypeScript
 
