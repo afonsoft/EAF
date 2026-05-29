@@ -3,15 +3,10 @@
 ## Diagrama de Arquivos
 
 ```
-AGENTS.md                 ← SSoT (≤500 linhas) — router de contexto
+AGENTS.md                 ← SSoT (≤500 linhas) — lido por Devin e Windsurf
 CLAUDE.md                 ← Delta para Claude Code (@import AGENTS.md)
-DEVIN.md                  ← Delta para Devin
-GEMINI.md                 ← Delta para Gemini CLI
-.aiignore                 ← Ignore JetBrains AI
 .claudeignore             ← Ignore Claude Code
-.cursorignore             ← Ignore Cursor
 .devinignore              ← Ignore Devin
-.geminiignore             ← Ignore Gemini CLI
 .windsurfignore           ← Ignore Windsurf
 .agents/
 ├── CONTEXT.md            ← Estratégias de carregamento de contexto
@@ -20,7 +15,6 @@ GEMINI.md                 ← Delta para Gemini CLI
 ├── TOOLS.md              ← Ferramentas, CI/CD, MCP
 ├── WORKFLOWS.md          ← Workflows de automação
 ├── README.md             ← Este arquivo
-├── .aiignore             ← Ignore base para AI
 └── skills/               ← Skills on-demand (SKILL.md format)
     ├── eaf-api/
     ├── eaf-modules/
@@ -70,14 +64,14 @@ O agente lê o `name` e `description` do frontmatter YAML para decidir se ativa 
 
 ## Compatibilidade por Plataforma
 
-| Feature | Claude | Devin | Gemini | Cursor | Windsurf | JetBrains |
-|---------|--------|-------|--------|--------|----------|-----------|
-| AGENTS.md | Sim | Sim | Sim | Sim | Sim | Sim |
-| Platform file | CLAUDE.md | DEVIN.md | GEMINI.md | — | — | — |
-| Skills (.agents/skills/) | Sim | Sim | Sim | Sim | Sim | Sim |
-| Rules (rules/) | Sim | Sim | Sim | Sim | Sim | Sim |
-| Ignore file | .claudeignore | .devinignore | .geminiignore | .cursorignore | .windsurfignore | .aiignore |
-| Memory | .agents/MEMORY.md | Knowledge | — | — | — | — |
+| Feature | Claude Code | Devin | Windsurf |
+|---------|-------------|-------|----------|
+| AGENTS.md (SSoT) | Sim | Sim | Sim |
+| Platform file | CLAUDE.md | AGENTS.md | AGENTS.md |
+| Skills (.agents/skills/) | Sim | Sim | Sim |
+| Rules (rules/) | Sim | Sim | Sim |
+| Ignore file | .claudeignore | .devinignore | .windsurfignore |
+| Memory | .agents/MEMORY.md | Knowledge | — |
 
 ## Referências
 

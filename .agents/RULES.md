@@ -10,7 +10,7 @@
 | H4 | APIs públicas devem ter documentação XML | CI: `GenerateDocumentationFile=true` |
 | H5 | Nunca commitar secrets (`.env`, tokens, connection strings) | `.gitignore` + review |
 | H6 | Não modificar `.github/workflows/` sem revisão humana | CODEOWNERS |
-| H7 | Não editar arquivos gerados (`service-proxies.ts`, `*.Designer.cs`) | `.aiignore` |
+| H7 | Não editar arquivos gerados (`service-proxies.ts`, `*.Designer.cs`) | `.claudeignore`, `.devinignore` |
 | H8 | Não push direto em `main` ou `develop` | Branch protection rules |
 | H9 | Não usar `--no-verify` ou `--force` sem aprovação | Git hooks |
 | H10 | Não reduzir número de testes existentes | CI: test count check |
