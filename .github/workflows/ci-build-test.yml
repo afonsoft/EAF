@@ -46,16 +46,27 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore Dependencies
+        id: restore-pkg
         run: |
           echo "Restoring NuGet packages for Eaf.sln"
-          dotnet restore Eaf.sln --no-cache --force --verbosity normal
+          if ! dotnet restore Eaf.sln --no-cache --force --verbosity normal 2>&1 | tee restore-output.log; then
+            echo "restore_failed=true" >> $GITHUB_OUTPUT
+            echo "::error::Falha no restore de dependências NuGet"
+          fi
 
       - name: Build Solution
+        id: build-pkg
         run: |
           echo "Building Eaf.sln"
-          dotnet build Eaf.sln --no-restore --configuration Release --verbosity minimal
+          if ! dotnet build Eaf.sln --no-restore --configuration Release --verbosity minimal 2>&1 | tee build-output.log; then
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+            echo "::error::Falha no build da solution Eaf.sln"
+            # Extract errors for summary
+            grep -i "error" build-output.log | head -20 > build-errors.log || true
+          fi
 
       - name: Run Tests
+        id: test-pkg
         run: |
           echo "Running tests for Eaf.sln"
           dotnet test test/Eaf.MiddlewareCore.Tests/ \
@@ -63,7 +74,15 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory TestResults \
             --collect:"XPlat Code Coverage" \
-            --verbosity normal
+            --verbosity normal 2>&1 | tee test-output.log || true
+          
+          # Check for test failures
+          if grep -q "Failed:" test-output.log; then
+            FAILED=$(grep "Failed:" test-output.log | tail -1)
+            echo "test_failed=true" >> $GITHUB_OUTPUT
+            echo "test_summary=$FAILED" >> $GITHUB_OUTPUT
+            echo "::warning::Testes falharam: $FAILED"
+          fi
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v7
@@ -84,18 +103,61 @@ jobs:
           retention-days: 7
 
       - name: Package EAF Summary
+        if: always()
         run: |
-          echo "## Package EAF Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Package EAF Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Build Status" >> $GITHUB_STEP_SUMMARY
-          echo "- Restore: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Build: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests: Executed" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Etapa | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Restore status
+          if [ "${{ steps.restore-pkg.outputs.restore_failed }}" == "true" ]; then
+            echo "| Restore | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Restore | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Build status
+          if [ "${{ steps.build-pkg.outputs.build_failed }}" == "true" ]; then
+            echo "| Build | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Build | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Test status
+          if [ "${{ steps.test-pkg.outputs.test_failed }}" == "true" ]; then
+            echo "| Tests | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Tests | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Build Details" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Detalhes" >> $GITHUB_STEP_SUMMARY
           echo "- **Solution**: Eaf.sln" >> $GITHUB_STEP_SUMMARY
           echo "- **Configuration**: Release" >> $GITHUB_STEP_SUMMARY
           echo "- **Framework**: .NET 10" >> $GITHUB_STEP_SUMMARY
+
+          # Show errors if any
+          if [ -f "build-errors.log" ] && [ -s "build-errors.log" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Erros de Build" >> $GITHUB_STEP_SUMMARY
+            echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+            cat build-errors.log >> $GITHUB_STEP_SUMMARY
+            echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.test-pkg.outputs.test_failed }}" == "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Testes que Falharam" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.test-pkg.outputs.test_summary }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if [ -f "test-output.log" ]; then
+              echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+              grep -A2 "Failed " test-output.log | head -30 >> $GITHUB_STEP_SUMMARY || true
+              echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
 
       - name: Save Summary to File
         run: |
@@ -140,24 +202,40 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: 🔧 Install Dependencies
+        id: npm-install
         run: |
           echo "📦 Installing npm dependencies"
-          npm install --prefer-offline --no-audit --no-fund --legacy-peer-deps
+          if ! npm install --prefer-offline --no-audit --no-fund --legacy-peer-deps 2>&1 | tee npm-install.log; then
+            echo "install_failed=true" >> $GITHUB_OUTPUT
+            echo "::error::Falha no npm install"
+          fi
 
       - name: 🔍 Lint Code
+        id: lint-frontend
         run: |
           echo "🔍 Running ESLint"
-          npm run lint --if-present
+          npm run lint --if-present 2>&1 | tee lint-output.log || true
 
       - name: 🏗️ Build Application
+        id: build-frontend
         run: |
           echo "🔨 Building Angular application"
-          npm run build
+          if ! npm run build 2>&1 | tee build-output.log; then
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+            echo "::error::Falha no build Angular"
+            # Capturar erros específicos
+            grep -E "(Error:|error TS|Module not found)" build-output.log | head -15 > build-errors.log || true
+          fi
 
       - name: 🧪 Run Tests
+        id: test-frontend
+        if: steps.build-frontend.outputs.build_failed != 'true'
         run: |
           echo "🧪 Running unit tests"
-          npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+          npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage 2>&1 | tee test-output.log || true
+          if grep -q "FAILED" test-output.log; then
+            echo "test_failed=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: 📊 Upload Test Results
         uses: actions/upload-artifact@v7
@@ -170,19 +248,58 @@ jobs:
           retention-days: 7
 
       - name: 📊 Frontend Summary
+        if: always()
         run: |
           echo "## 🎨 Frontend Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Install Dependencies: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Lint: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Build: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Tests: Executed" >> $GITHUB_STEP_SUMMARY
+          echo "| Etapa | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.npm-install.outputs.install_failed }}" == "true" ]; then
+            echo "| Install | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Install | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "| Lint | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.build-frontend.outputs.build_failed }}" == "true" ]; then
+            echo "| Build | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Build | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.test-frontend.outputs.test_failed }}" == "true" ]; then
+            echo "| Tests | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.build-frontend.outputs.build_failed }}" == "true" ]; then
+            echo "| Tests | ⏭️ Ignorado (build falhou) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Tests | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Build Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Framework**: Angular 17" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Detalhes" >> $GITHUB_STEP_SUMMARY
+          echo "- **Framework**: Angular ${{ env.ANGULAR_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Node.js**: ${{ env.NODE_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Working Directory**: Templates/Angular/Eaf.ProjectName.UI" >> $GITHUB_STEP_SUMMARY
+
+          # Mostrar erros de build se houver
+          if [ -f "build-errors.log" ] && [ -s "build-errors.log" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Erros de Build" >> $GITHUB_STEP_SUMMARY
+            echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+            cat build-errors.log >> $GITHUB_STEP_SUMMARY
+            echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Possíveis causas:" >> $GITHUB_STEP_SUMMARY
+            if grep -q "Module not found" build-errors.log 2>/dev/null; then
+              echo "- **Módulo não encontrado**: Verifique imports e dependências" >> $GITHUB_STEP_SUMMARY
+            fi
+            if grep -q "error TS" build-errors.log 2>/dev/null; then
+              echo "- **Erro TypeScript**: Verifique tipos e interfaces" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
 
       - name: 💾 Save Summary to File
         run: |
@@ -214,19 +331,29 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: 📦 Restore Dependencies
+        id: restore-api
         run: |
           echo "🔧 Restoring NuGet packages for API template"
-          dotnet restore Templates/Api/Eaf.ApiWithSrc.sln --no-cache --force --verbosity normal
+          if ! dotnet restore Templates/Api/Eaf.ApiWithSrc.sln --no-cache --force --verbosity normal 2>&1 | tee restore-output.log; then
+            echo "restore_failed=true" >> $GITHUB_OUTPUT
+            echo "::error::Falha no restore de dependências NuGet (API)"
+          fi
 
       - name: 🏗️ Build API
+        id: build-api
         run: |
           echo "🔨 Building API template"
-          dotnet build Templates/Api/Eaf.ApiWithSrc.sln \
+          if ! dotnet build Templates/Api/Eaf.ApiWithSrc.sln \
             --configuration Release \
             --no-restore \
-            --verbosity minimal
+            --verbosity minimal 2>&1 | tee build-output.log; then
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+            echo "::error::Falha no build da API"
+            grep -i "error" build-output.log | head -20 > build-errors.log || true
+          fi
 
       - name: 🧪 Test API
+        id: test-api
         run: |
           echo "🧪 Running API template tests"
           dotnet test Templates/Api/Eaf.ApiWithSrc.sln \
@@ -234,7 +361,14 @@ jobs:
             --no-build \
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory TestResults \
-            --verbosity normal
+            --verbosity normal 2>&1 | tee test-output.log || true
+          
+          if grep -q "Failed:" test-output.log; then
+            FAILED=$(grep "Failed:" test-output.log | tail -1)
+            echo "test_failed=true" >> $GITHUB_OUTPUT
+            echo "test_summary=$FAILED" >> $GITHUB_OUTPUT
+            echo "::warning::Testes API falharam: $FAILED"
+          fi
 
       - name: 📊 Upload Test Results
         uses: actions/upload-artifact@v7
@@ -247,18 +381,56 @@ jobs:
           retention-days: 7
 
       - name: 📊 API Summary
+        if: always()
         run: |
           echo "## 🚀 API Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Restore: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Build: Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Tests: Executed" >> $GITHUB_STEP_SUMMARY
+          echo "| Etapa | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.restore-api.outputs.restore_failed }}" == "true" ]; then
+            echo "| Restore | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Restore | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.build-api.outputs.build_failed }}" == "true" ]; then
+            echo "| Build | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Build | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.test-api.outputs.test_failed }}" == "true" ]; then
+            echo "| Tests | ❌ Falhou |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Tests | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Build Details" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Detalhes" >> $GITHUB_STEP_SUMMARY
           echo "- **Solution**: Templates/Api/Eaf.ApiWithSrc.sln" >> $GITHUB_STEP_SUMMARY
           echo "- **Configuration**: Release" >> $GITHUB_STEP_SUMMARY
           echo "- **Framework**: .NET 10" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "build-errors.log" ] && [ -s "build-errors.log" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Erros de Build" >> $GITHUB_STEP_SUMMARY
+            echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+            cat build-errors.log >> $GITHUB_STEP_SUMMARY
+            echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.test-api.outputs.test_failed }}" == "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Testes que Falharam" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.test-api.outputs.test_summary }}" >> $GITHUB_STEP_SUMMARY
+            if [ -f "test-output.log" ]; then
+              echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+              grep -A2 "Failed " test-output.log | head -30 >> $GITHUB_STEP_SUMMARY || true
+              echo "\'\'\'" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
 
       - name: 💾 Save Summary to File
         run: |

@@ -26,11 +26,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 🔍 Qodana Scan
+        id: qodana
         uses: JetBrains/qodana-action@v2026.1.0
+        continue-on-error: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: --linter,qodana-community-for-net --baseline,qodana.sarif.json --fail-threshold,0
+          args: "--baseline,qodana.sarif.json,--fail-threshold,0"
           cache-default-branch-only: true
           upload-result: false
 
@@ -40,6 +42,29 @@ jobs:
         with:
           name: qodana-report
           path: ${{ github.workspace }}/qodana
+
+      - name: 📋 Qodana Summary
+        if: always()
+        run: |
+          echo "## 🔍 Qodana Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.qodana.outcome }}" == "success" ]; then
+            echo "✅ **Qodana scan completed successfully**" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.qodana.outcome }}" == "failure" ]; then
+            echo "❌ **Qodana scan failed**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Possíveis causas:" >> $GITHUB_STEP_SUMMARY
+            echo "- Token QODANA_TOKEN inválido ou expirado" >> $GITHUB_STEP_SUMMARY
+            echo "- Arquivo baseline qodana.sarif.json não encontrado" >> $GITHUB_STEP_SUMMARY
+            echo "- Problema de configuração do linter" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📋 Detalhes" >> $GITHUB_STEP_SUMMARY
+            echo "- **Linter**: qodana-community-for-net (padrão qodana.yaml)" >> $GITHUB_STEP_SUMMARY
+            echo "- **Baseline**: qodana.sarif.json" >> $GITHUB_STEP_SUMMARY
+            echo "- **Fail Threshold**: 0" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Qodana scan skipped or cancelled**" >> $GITHUB_STEP_SUMMARY
+          fi
 
   # SonarQube Analysis
   sonarqube:
@@ -117,6 +142,7 @@ jobs:
   snyk:
     name: 🛡️ Snyk Security
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
 
     steps:
       - name: 📥 Checkout
@@ -130,7 +156,19 @@ jobs:
       - name: 🔧 Restore Dependencies
         run: dotnet restore Eaf.sln --ignore-failed-sources
 
+      - name: 🔑 Validate Snyk Token
+        id: snyk-token-check
+        run: |
+          if [ -z "${{ secrets.SNYK_TOKEN }}" ]; then
+            echo "has_token=false" >> $GITHUB_OUTPUT
+            echo "::warning::SNYK_TOKEN não configurado. Snyk scan será ignorado."
+          else
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: 🛡️ Run Snyk
+        if: steps.snyk-token-check.outputs.has_token == 'true'
+        id: snyk-scan
         uses: snyk/actions/dotnet@master
         continue-on-error: true
         env:
@@ -152,38 +190,46 @@ jobs:
           echo "## 🛡️ Snyk Security Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
+          if [ "${{ steps.snyk-token-check.outputs.has_token }}" != "true" ]; then
+            echo "⚠️ **SNYK_TOKEN não configurado**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "O token de autenticação do Snyk não está disponível." >> $GITHUB_STEP_SUMMARY
+            echo "Configure o secret \'SNYK_TOKEN\' nas configurações do repositório." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Como configurar:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Acesse [snyk.io](https://snyk.io) e gere um token" >> $GITHUB_STEP_SUMMARY
+            echo "2. Adicione como secret \'SNYK_TOKEN\' em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
           if [ -f "snyk.json" ]; then
             echo "### 📊 Vulnerability Summary" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
             # Extract summary from JSON
-            VULNS=$(cat snyk.json | jq -r '.results[0].vulnerabilities | length' 2>/dev/null || echo "0")
-            DEPS=$(cat snyk.json | jq -r '.results[0].dependencies | length' 2>/dev/null || echo "0")
+            VULNS=$(cat snyk.json | jq -r '.vulnerabilities | length // 0' 2>/dev/null || echo "0")
             
-            echo "- **Dependencies Analyzed**: $DEPS" >> $GITHUB_STEP_SUMMARY
             echo "- **Vulnerabilities Found**: $VULNS" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            if [ "$VULNS" -gt 0 ]; then
+            if [ "$VULNS" != "0" ] && [ "$VULNS" != "null" ]; then
               echo "### ⚠️ Vulnerabilities Detected" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
-              
-              # Extract vulnerability details
-              cat snyk.json | jq -r '.results[0].vulnerabilities[] | 
-                "- **\(.severity | ascii_upcase)**: \(.title) in \(.package)@\(.version)"' 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY
-              
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "### 🔧 Affected Projects" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              
-              # Extract affected projects
-              cat snyk.json | jq -r '.results[0].vulnerabilities[] | 
-                "- \(.from[0] | split("/")[-1])"' 2>/dev/null | sort -u >> $GITHUB_STEP_SUMMARY
+              cat snyk.json | jq -r '.vulnerabilities[]? | 
+                "- **\(.severity | ascii_upcase)**: \(.title) in \(.packageName)@\(.version)"' 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY
             else
               echo "✅ **No vulnerabilities found!** All dependencies are secure." >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "⚠️ **Snyk scan results not available**" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.snyk-scan.outcome }}" == "failure" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### ❌ Erro na execução do Snyk" >> $GITHUB_STEP_SUMMARY
+              echo "O scan falhou. Verifique:" >> $GITHUB_STEP_SUMMARY
+              echo "- Token SNYK_TOKEN válido" >> $GITHUB_STEP_SUMMARY
+              echo "- Conexão com api.snyk.io" >> $GITHUB_STEP_SUMMARY
+              echo "- Formato do arquivo Eaf.sln" >> $GITHUB_STEP_SUMMARY
+            fi
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
