@@ -51,7 +51,7 @@
 		<PackageReference Include="Abp.AspNetCore.PerRequestRedisCache" Version="10.4.0" />
 		<PackageReference Include="Abp" Version="10.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
 		<PackageReference Include="Owl.reCAPTCHA" Version="9.0.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.18.0" />
