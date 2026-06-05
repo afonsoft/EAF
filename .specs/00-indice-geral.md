@@ -4,6 +4,12 @@
 > SOLID/Clean Architecture está no final (80-99) pois pode alterar a estrutura do projeto.
 > **Para instruções de orquestração multi-agent, veja [`prompt.md`](prompt.md)**.
 
+## Fase 0 — Pré-requisitos
+
+| # | Arquivo | Complexidade | Descrição | Status |
+|---|---------|-------------|-----------|--------|
+| 15 | `15-consolidar-dependency-updates.md` | BAIXA | Consolidar 5 PRs Dependabot: EFCore, Sqlite, TestHost, EPPlus | ✅ CONCLUÍDA |
+
 ## Fase 1 — Performance dos Módulos `src/` (Crítica)
 
 | # | Arquivo | Complexidade | Descrição |
