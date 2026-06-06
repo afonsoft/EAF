@@ -34,14 +34,10 @@ namespace Eaf.KeyVault
         /// Inicializa uma nova instância do KeyVaultSecretManager com as opções fornecidas.
         /// </summary>
         /// <param name="options">Opções de configuração do Key Vault.</param>
-        public KeyVaultSecretManager(EafKeyVaultOptions options)
+        /// <param name="loggerFactory">Factory de logger (opcional, injetado via DI).</param>
+        public KeyVaultSecretManager(EafKeyVaultOptions options, ILoggerFactory loggerFactory = null)
         {
-            Logger = NullLogger.Instance;
-
-            if (IocManager.Instance.IsRegistered<ILoggerFactory>())
-            {
-                Logger = IocManager.Instance.Resolve<ILoggerFactory>().Create(typeof(KeyVaultSecretManager));
-            }
+            Logger = loggerFactory?.Create(typeof(KeyVaultSecretManager)) ?? NullLogger.Instance;
 
             if (options != null)
                 this.options = options.Value;

@@ -29,29 +29,6 @@ namespace Eaf.Middleware.Worker
             EventBus = NullEventBus.Instance;
             ObjectMapper = NullObjectMapper.Instance;
             LocalizationSourceName = DefaultLocalizationSourceName;
-            SetDependencies();
-        }
-
-        private void SetDependencies()
-        {
-            if (IocManager.IsRegistered<ILoggerFactory>())
-            {
-                Logger = IocManager.Resolve<ILoggerFactory>().Create(typeof(EafWorkerBase));
-            }
-
-            if (IocManager.IsRegistered<IEventBus>())
-            {
-                EventBus = IocManager.Resolve<IEventBus>();
-            }
-            if (IocManager.IsRegistered<ILocalizationManager>())
-            {
-                LocalizationManager = IocManager.Resolve<ILocalizationManager>();
-            }
-
-            if (IocManager.IsRegistered<IObjectMapper>())
-            {
-                ObjectMapper = IocManager.Resolve<IObjectMapper>();
-            }
         }
 
         /// <summary>
