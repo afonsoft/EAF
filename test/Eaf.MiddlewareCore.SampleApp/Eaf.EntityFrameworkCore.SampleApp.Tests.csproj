@@ -22,7 +22,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="4.1.0" />
+		<PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="5.0.0" />
 	</ItemGroup>
 
 
