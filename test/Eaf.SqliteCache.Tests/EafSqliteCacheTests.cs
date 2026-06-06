@@ -153,9 +153,11 @@ namespace Eaf.SqliteCache.Tests
 
             var expiredResult = cache.TryGetValue("expiring-key", out var expiredValue);
 
-            // Assert
+            // Assert — item deve existir imediatamente, mas expirar após sliding
             immediateResult.ShouldBeTrue();
             immediateValue.ShouldBe("expiring-value");
+            expiredResult.ShouldBeFalse();
+            expiredValue.ShouldBeNull();
         }
 
         [Fact]
@@ -243,10 +245,11 @@ namespace Eaf.SqliteCache.Tests
             var permanentResult = cache.TryGetValue("permanent-key", out var permanentValue);
             var expiringResult = cache.TryGetValue("expiring-key", out var expiringValue);
 
-            // Assert
+            // Assert — item permanente deve existir, item expirado (50ms sliding) deve ter sido removido
             permanentResult.ShouldBeTrue();
             permanentValue.ShouldBe("permanent-value");
-            expiringResult.ShouldBeTrue();
+            expiringResult.ShouldBeFalse();
+            expiringValue.ShouldBeNull();
         }
 
         [Theory]
