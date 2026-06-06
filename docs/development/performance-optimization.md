@@ -41,5 +41,33 @@ This document provides guidelines for optimizing the performance of applications
 
 By following these guidelines, you can optimize the performance of your EAF applications and provide a better user experience.
 
+## 6. Melhorias Implementadas (v2.0)
 
+As seguintes otimizações de performance foram implementadas no EAF (PR #61):
+
+### Backend
+- **Remoção do BinaryFormatter** (Specs 01-02): Substituído por `ExtendedXmlSerializer` + `System.Text.Json` fallback nos módulos de cache
+- **Correção de Fire-and-Forget** (Spec 03): Chamadas async aguardadas corretamente no cache
+- **Batch Delete** (Spec 04): Operações de exclusão em lote no Audit Log Worker
+- **IHttpClientFactory** (Spec 05): Eliminação de `new HttpClient()` nos auth providers
+- **Response Compression** (Spec 12): Brotli + Gzip no template API
+- **AsNoTracking** (Spec 13): Queries read-only otimizadas no EF Core
+- **Task.CompletedTask** (Spec 14): Eliminação de alocações desnecessárias
+
+### Multi-Database (Specs 06-08)
+- Suporte a PostgreSQL e MySQL além de SQL Server
+- Provider switch via configuração `Database:Provider`
+
+### Angular (Specs 09-11)
+- `takeUntilDestroyed()` para cleanup de subscriptions
+- Lazy loading com budgets de bundle
+- `ChangeDetectionStrategy.OnPush` em 9 componentes stateless
+
+### SOLID Refactoring (Specs 80-86)
+- Remoção do Service Locator anti-pattern
+- Factory Pattern para KeyVault providers
+- Interface Segregation no Worker
+- SRP extraction no MiddlewareWebCoreModule
+
+Para detalhes completos, consulte o [Changelog v2.0](./CHANGELOG-v2.md).
 

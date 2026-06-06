@@ -19,6 +19,10 @@ Para facilitar a consulta, a documentação está organizada nas seguintes seç�
 *   **[API](./api/README.md)**: Documentação da API do sistema, cobrindo Controllers, Application Services, Domain Services, Repositórios e Entidades.
 *   **[Implantação](./deployment/README.md)**: Guias sobre configuração de ambiente, migrações de banco de dados e considerações para produção.
 
+## Changelog
+
+*   **[Changelog v2.0](./development/CHANGELOG-v2.md)**: Melhorias de performance backend, suporte multi-database, otimizações Angular e refatoração SOLID (21 especificações implementadas — PR #61).
+
 ## Contribuindo
 
 Se você deseja contribuir para a documentação, por favor, siga as diretrizes de contribuição do projeto (se houver) e submeta suas alterações através de Pull Requests.
@@ -31,4 +35,4 @@ Se você deseja contribuir para a documentação, por favor, siga as diretrizes 
 
 ---
 
-*Esta documentação está em constante desenvolvimento. Última atualização: 02/05/2026.*
+*Esta documentação está em constante desenvolvimento. Última atualização: 06/06/2026.*
