@@ -35,7 +35,8 @@ namespace Eaf.KeyVault
         /// </summary>
         /// <param name="options">Opções de configuração do Key Vault.</param>
         /// <param name="loggerFactory">Factory de logger (opcional, injetado via DI).</param>
-        public KeyVaultSecretManager(EafKeyVaultOptions options, ILoggerFactory loggerFactory = null)
+        /// <param name="managerFactory">Factory para criar o manager (opcional, injetado via DI).</param>
+        public KeyVaultSecretManager(EafKeyVaultOptions options, ILoggerFactory loggerFactory = null, IKeyVaultManagerFactory managerFactory = null)
         {
             Logger = loggerFactory?.Create(typeof(KeyVaultSecretManager)) ?? NullLogger.Instance;
 
@@ -44,12 +45,8 @@ namespace Eaf.KeyVault
 
             try
             {
-                if (this.options.Provider == EnumKeyVault.Azure)
-                    manager = new AzureKeyVaultManager(this.options, Logger);
-                else if (this.options.Provider == EnumKeyVault.OCI)
-                    manager = new OCIKeyVaultManager(this.options, Logger);
-                else
-                    manager = new NullKeyVaultManager(this.options, Logger);
+                var factory = managerFactory ?? new KeyVaultManagerFactory(Logger);
+                manager = factory.Create(this.options);
             }
             catch (Exception ex)
             {
