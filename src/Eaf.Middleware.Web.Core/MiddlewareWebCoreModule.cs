@@ -211,46 +211,11 @@ namespace Eaf.Middleware.Web
                 Configuration.BackgroundJobs.UseHangfire();
             }
 
-            //Configuration for all caches
-            Configuration.Caching.ConfigureAll(cache =>
-            {
-                cache.DefaultSlidingExpireTime = TimeSpan.FromMinutes(10);
-            });
+            //Cache configuration (Redis, SQL Server)
+            CacheConfigurer.Configure(Configuration, _appConfiguration, IocManager);
 
-            if ((_appConfiguration["RedisCache:IsRedisEnabled"] != null && bool.Parse(_appConfiguration["RedisCache:IsRedisEnabled"]))
-                || _appConfiguration["RedisCache:IsEnabled"] != null && bool.Parse(_appConfiguration["RedisCache:IsEnabled"]))
-            {
-                Configuration.IocManager.RegisterIfNot(typeof(AbpRedisCacheOptions));
-
-                //See app.config for Redis configuration and connection string
-                Configuration.Caching.UseRedis(options =>
-                {
-                    options.ConnectionString = _appConfiguration["RedisCache:ConnectionString"];
-                    options.DatabaseId = _appConfiguration.GetValue<int>("RedisCache:DatabaseId");
-                });
-
-                IocManager.Register<IAbpPerRequestRedisCache, AbpPerRequestRedisCache>();
-                IocManager.Register<IAbpPerRequestRedisCacheManager, AbpPerRequestRedisCacheManager>();
-            }
-
-            if ((_appConfiguration["SqlServer:IsSqlEnabled"] != null && bool.Parse(_appConfiguration["SqlServer:IsSqlEnabled"]))
-                || _appConfiguration["SqlServerCache:IsEnabled"] != null && bool.Parse(_appConfiguration["SqlServerCache:IsEnabled"]))
-            {
-                //See app.config for SqlServer configuration and connection string
-                Configuration.Caching.UseSqlServer(options =>
-                {
-                    options.ConnectionString = _appConfiguration["SqlServerCache:ConnectionString"] ?? Configuration.DefaultNameOrConnectionString;
-                    options.SchemaName = _appConfiguration["SqlServerCache:SchemaName"] ?? null;
-                    options.TableName = _appConfiguration["SqlServerCache:TableName"] ?? "EafCache";
-                });
-            }
-
-            //Auditing
-            Configuration.Auditing.IsEnabledForAnonymousUsers = false;
-            Configuration.Auditing.IsEnabled = true;
-            Configuration.EntityHistory.IsEnabled = true;
-            Configuration.EntityHistory.IsEnabledForAnonymousUsers = true;
-            Configuration.EntityHistory.AddAllAuditedEntities();
+            //Auditing and Entity History
+            AuditConfigurer.Configure(Configuration);
 
             //https://aspnetboilerplate.com/Pages/Documents/Timing
             Clock.Provider = ClockProviders.Utc;
@@ -273,14 +238,7 @@ namespace Eaf.Middleware.Web
 
         private void ConfigureExternalAuthProviders()
         {
-            var externalAuthConfiguration = IocManager.Resolve<ExternalAuthConfiguration>();
-            if (externalAuthConfiguration != null)
-            {
-                externalAuthConfiguration.ExternalLoginInfoProviders.Add(IocManager.Resolve<TenantBasedOpenIdConnectExternalLoginInfoProvider>());
-                externalAuthConfiguration.ExternalLoginInfoProviders.Add(IocManager.Resolve<TenantBasedGoogleExternalLoginInfoProvider>());
-                externalAuthConfiguration.ExternalLoginInfoProviders.Add(IocManager.Resolve<TenantBasedMicrosoftExternalLoginInfoProvider>());
-                externalAuthConfiguration.ExternalLoginInfoProviders.Add(IocManager.Resolve<TenantBasedAuthZeroExternalLoginInfoProvider>());
-            }
+            ExternalAuthConfigurer.Configure(IocManager);
         }
 
         private void SetAppFolders()
