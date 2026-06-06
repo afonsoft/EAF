@@ -1,6 +1,6 @@
 # Enterprise Application Foundation (EAF)
 
-[![GitHub](https://img.shields.io/github/license/afonsoft/eaf)](LICENSE) [![GitHub version](https://badge.fury.io/gh/afonsoft%2Feaf.svg)](https://badge.fury.io/gh/afonsoft%2Feaf) [![Commits History](https://img.shields.io/badge/Commits-History-critical)](https://github.com/afonsoft/EAF/commits/main/)
+[![GitHub](https://img.shields.io/github/license/afonsoft/eaf)](LICENSE) [![GitHub version](https://badge.fury.io/gh/afonsoft%2Feaf.svg)](https://badge.fury.io/gh/afonsoft%2Feaf) [![Commits History](https://img.shields.io/badge/Commits-History-critical)](https://github.com/afonsoft/EAF/commits/main/) [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=alert_status)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) [![DeepWiki](https://img.shields.io/badge/DeepWiki-afonsoft%2FEAF-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNCAxOWguMDEiLz48cGF0aCBkPSJNMjAgMTEuMmMuNy40IDEuMSAxIDEuMSAxLjggMCAuNS0uMyAxLjEtLjcgMS41bC0zLjEgMy4xYy0uNS41LTEgLjctMS42LjdsLS44LS4xLTEuNC0uNS0xLjgtMS4xIi8+PHBhdGggZD0iTTQuMyAxNS4zYy0uNC0uNy0uNS0xLjUtLjMtMi4yLjItLjguNy0xLjQgMS4zLTEuOGwxLjgtMS4yYy43LS40IDEuNS0uNiAyLjItLjQuOC4yIDEuNS43IDEuOSAxLjMiLz48cGF0aCBkPSJNOCA1YzAtLjUuMi0xIC42LTEuNEM5IDMuMiA5LjUgMyAxMCAzaDRjLjUgMCAxIC4yIDEuNC42LjQuNC42LjkuNiAxLjR2M2MwIC41LS4yIDEtLjYgMS40LS40LjQtLjkuNi0xLjQuNmgtNGMtLjUgMC0xLS4yLTEuNC0uNkM4LjIgOSA4IDguNSA4IDgiLz48L3N2Zz4=)](https://deepwiki.com/afonsoft/EAF)
 
 **[English](README.md)** | Português
 
@@ -223,7 +223,7 @@ O EAF segue os princípios do Domain-Driven Design (DDD) e implementa padrões c
 
 A documentação técnica detalhada do sistema EAF, cobrindo arquitetura, módulos, guias de desenvolvimento e mais, pode ser encontrada em nosso portal de documentação.
 
-[Acesse a Documentação Completa](./docs/README.md)
+[Acesse a Documentação Completa](./docs/README.md) | [DeepWiki - Docs com IA](https://deepwiki.com/afonsoft/EAF)
 
 ---
 
@@ -590,21 +590,21 @@ public void Dado_ParametroValido_Quando_ChamarMetodo_Entao_DeveRetornarSucesso()
 
 ## Qualidade e Métricas
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/project/overview?id=afonsoft_EAF)
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main)
 
 | Code Smell | Bugs | Tests | Lang | Quality |
 |------------|------|-------|------|---------|
-| [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=code_smells)](https://sonarcloud.io/dashboard?id=EAF) | [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=bugs)](https://sonarcloud.io/dashboard?id=EAF) | ![AppVeyor tests](https://img.shields.io/appveyor/tests/afonsoft/eaf) | ![GitHub top language](https://img.shields.io/github/languages/top/afonsoft/eaf) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=alert_status)](https://sonarcloud.io/dashboard?id=EAF) |
+| [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=code_smells)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=bugs)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | ![AppVeyor tests](https://img.shields.io/appveyor/tests/afonsoft/eaf) | ![GitHub top language](https://img.shields.io/github/languages/top/afonsoft/eaf) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=alert_status)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) |
 
 ### Estatísticas
 
 | Lines of Code | Duplicated Lines | Coverage | Maintainability |
 |---------------|------------------|----------|-----------------|
-| [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=ncloc)](https://sonarcloud.io/dashboard?id=EAF) | [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=EAF) | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=coverage)](https://sonarcloud.io/dashboard?id=EAF) | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=EAF) |
+| [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=ncloc)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=duplicated_lines_density)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=coverage)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) |
 
 | Reliability | Security | Technical Debt | Vulnerabilities |
 |-------------|----------|----------------|-----------------|
-| [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=EAF) | [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=security_rating)](https://sonarcloud.io/dashboard?id=EAF) | [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=sqale_index)](https://sonarcloud.io/dashboard?id=EAF) | [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=EAF) |
+| [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=security_rating)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_index)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) |
 
 ### Downloads
 
