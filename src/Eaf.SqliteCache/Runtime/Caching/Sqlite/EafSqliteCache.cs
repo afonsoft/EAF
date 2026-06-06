@@ -73,7 +73,7 @@ namespace Abp.Runtime.Caching.Sqlite
         {
             Commands.Use(Operation.Insert, cmd =>
             {
-                CreateForSet(cmd, FixKey(key), ObjectToByteArray(value));
+                CreateForSet(cmd, FixKey(key), ObjectToByteArray(value), slidingExpireTime, absoluteExpireTime);
                 cmd.ExecuteNonQuery();
             });
         }

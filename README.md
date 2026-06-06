@@ -4,14 +4,15 @@
 
 English | **[Português](README_pt.md)**
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-24.1%25-yellow)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-15.5%25-red)
-![Method Coverage](https://img.shields.io/badge/Method%20Coverage-54.5%25-yellow)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-19%25-yellow)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-13.1%25-red)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-41.7%25-yellow)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-1492-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-1491-brightgreen)
-![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-122%20Total-blue)
-![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-121%20Success-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-1289-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-1289-brightgreen)
+![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
+![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
+![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-69%20Success-orange)
 
 ## Table of Contents
 
@@ -373,37 +374,45 @@ This example demonstrates several EAF features:
 
 ## Code Coverage
 
-### Test Status (Updated)
+### Test Status (June 2026)
 
-| Module | Line Coverage | Branch Coverage | New Tests | Status |
-|--------|--------------|-----------------|-----------|--------|
-| **Eaf.SqlServerCache** | 86.6% | 81.8% | +2 | Good coverage |
-| **Eaf.SqliteCache** | 75.5% | 34.9% | +4 | Good coverage |
-| **Eaf.OpenTelemetry** | 70.1% | 75.0% | +2 | Good coverage |
-| **Eaf.Middleware.Worker** | 24.6% | N/A | +4 | Needs +65.4% |
-| **Eaf.Middleware.Ldap** | 5.1% | N/A | +4 | Needs +84.9% |
-| **Eaf.Middleware.AzureActiveDirectory** | N/A | N/A | +4 | Tests added |
-| **Eaf.Middleware.Web.Core** | 0.63% | 0.16% | +10 | Needs +89.4% |
-| **Eaf.Middleware.Core** | 15.31% | 5.59% | +7 | Needs +74.7% |
-| **Eaf.Middleware.Application** | 4.45% | 1.35% | +15 | Needs +85.6% |
-| **Eaf.KeyVault** | 66.0% | 51.6% | +3 | Tests added |
-| **TOTAL** | **28.4%** | **21.3%** | **+47** | In progress |
+| Module | Tests | Line Coverage | Status |
+|--------|-------|--------------|--------|
+| **Eaf.Castle.Serilog** | 71 | 98.6% | ✅ Excellent |
+| **Eaf.SqlServerCache** | 95 | 88.3% | ✅ Excellent |
+| **Eaf.KeyVault.AspNetCore** | 10 | 88.8% | ✅ Excellent |
+| **Eaf.SqliteCache** | 126 | 82.7% | ✅ Good |
+| **Eaf.OpenTelemetry** | 49 | 75.4% | ✅ Good |
+| **Eaf.KeyVault** | 222 | 69.4% | ✅ Good |
+| **Eaf.Log4NetServiceBus** | 41 | 62.2% | ⚠️ Moderate |
+| **Eaf.Middleware.Worker** | 101 | 33.3% | ⚠️ Needs improvement |
+| **Eaf.Middleware.Application** | 410 | 23.6% | ⚠️ Needs improvement |
+| **Eaf.Middleware.AzureActiveDirectory** | 21 | 7.4% | ❌ Low |
+| **Eaf.Middleware.Ldap** | 21 | 6.0% | ❌ Low |
+| **Eaf.Middleware.Web.Core** | 122 | 4.9% | ❌ Low |
+| **Eaf.Middleware.Core** | — | 0.1% | ❌ Low |
+| **TOTAL** | **1289** | **19%** | In progress |
 
 ### Coverage Goal
 - **Target**: 90% code coverage
-- **Current**: 24.1% line, 15.5% branch, 54.5% method
-- **Test Status (May 2026)**: 1492 total, 1491 passing, 1 ignored, 0 failures (100% success)
-- **Next steps**: Implement tests for modules with low coverage
+- **Current**: 19% line, 13.1% branch, 41.7% method
+- **Backend Tests**: 1289 total, 1289 passing, 1 skipped, 0 failures (100% success rate)
+- **Angular Tests**: 222 total, 222 passing (100% success rate)
+- **API Template Tests**: 212 total, 69 passing, 142 failing (pre-existing EF Core context issue)
+- **Next steps**: Improve coverage for Middleware.Core, Middleware.Web.Core, Middleware.Ldap, and AzureActiveDirectory modules
 
 ### Implemented Improvements
-- **KeyVault**: 206+ BDD tests implemented (99.5% success, 66% coverage)
+- **KeyVault**: 222 BDD tests implemented (100% success, 69.4% coverage)
 - **XML Documentation**: Portuguese summaries added
 - **BDD Pattern**: Given/When/Then implemented
-- **Castle.Serilog**: 44 BDD tests implemented (100% success, 90% coverage)
-- **OpenTelemetry**: 45/45 tests passing (100% success)
-- **SqlServerCache**: 38/38 tests passing (100% success)
-- **Worker**: 63/63 tests passing (100% success)
-- **Test Expansion (April 2026)**: +65 new test files implemented
+- **Castle.Serilog**: 71 BDD tests implemented (100% success, 98.6% coverage)
+- **OpenTelemetry**: 49/49 tests passing (100% success, 75.4% coverage)
+- **SqlServerCache**: 95/95 tests passing (100% success, 88.3% coverage)
+- **SqliteCache**: 126/126 tests passing (100% success, 82.7% coverage)
+- **Worker**: 101/101 tests passing (100% success, 33.3% coverage)
+- **Middleware.Application**: 410/410 tests passing (100% success, 23.6% coverage)
+- **Middleware.Web.Core**: 122/122 tests passing (100% success)
+- **Test Expansion (June 2026)**: +12 new test files implemented (PR #63)
   - **Eaf.Middleware.Web.Core**: +10 tests (Swagger filters, TokenAuth, Impersonation models)
   - **Eaf.MiddlewareCore**: +30 tests (Entities, DTOs, Extensions, Cache items)
   - **Eaf.Middleware.Application**: +9 tests (constants, helpers, authorization)
@@ -417,8 +426,15 @@ This example demonstrates several EAF features:
   - **Eaf.OpenTelemetry**: +2 tests (module, extensions)
   - **Eaf.SqlServerCache**: +2 tests (helpers, extensions)
   - **Eaf.SqliteCache**: +4 tests (pool, commands, options)
+- **Bug Fix (June 2026)**: EafSqliteCache.Set expiration parameters forwarded correctly (PR #64)
 
 ### Technical Fixes Implemented
+
+#### SqliteCache - Expiration Parameters Fix (June 2026)
+- **Problem**: `EafSqliteCache.Set` ignores `slidingExpireTime` and `absoluteExpireTime` parameters
+- **Cause**: Parameters not forwarded to internal `CreateForSet` method
+- **Solution**: Forward both parameters to `CreateForSet(cmd, key, value, slidingExpireTime, absoluteExpireTime)`
+- **Result**: Cache expiration now works as expected; +14 expiration-specific tests added
 
 #### SqliteCache - Static Initialization Fix
 - **Problem**: IndexOutOfRangeException during DbCommandPool initialization
@@ -443,36 +459,61 @@ This example demonstrates several EAF features:
   - **AzureActiveDirectoryAuthenticationSource** - Azure AD authentication
 - **Next Modules**: Entity Framework, Web API, Authorization
 
-### Coverage by Assembly (Updated)
+### Coverage by Assembly (June 2026)
 
-| Assembly | Line Coverage | Branch Coverage | Method Coverage |
-|----------|--------------|-----------------|----------------|
-| **Eaf.KeyVault** | 66.0% (200/303) | 51.6% (33/64) | 70.2% (40/57) |
-| **Eaf.SqlServerCache** | 78.3% (123/157) | 81.8% (18/22) | 71.4% (15/21) |
-| **Eaf.OpenTelemetry** | 68.9% (164/238) | 75.0% (60/80) | 95.2% (20/21) |
-| **Eaf.Log4NetServiceBus** | 85.0% (97/114) | 62.5% (10/16) | 87.1% (27/31) |
-| **Eaf.SqliteCache** | 45.0% (175/389) | 34.9% (30/86) | 58.5% (24/41) |
-| **Eaf.Castle.Serilog** | 10.0% (29/289) | 3.6% (3/84) | 16.9% (10/59) |
-| **Eaf.KeyVault.AspNetCore** | 85.7% (18/21) | 100.0% (4/4) | 50.0% (1/2) |
-| **Eaf.Middleware.Web.Core** | 0.63% (1/159) | 0.16% (1/625) | 1.35% (1/74) |
-| **Eaf.Middleware.Core** | 15.31% (24/157) | 5.59% (5/90) | 16.9% (10/59) |
-| **Eaf.Middleware.Application** | 4.45% (7/157) | 1.35% (1/74) | 5.59% (5/90) |
+| Assembly | Line Coverage | Tests | Status |
+|----------|--------------|-------|--------|
+| **Eaf.Castle.Serilog** | 98.6% | 71 | ✅ |
+| **Eaf.SqlServerCache** | 88.3% | 95 | ✅ |
+| **Eaf.KeyVault.AspNetCore** | 88.8% | 10 | ✅ |
+| **Eaf.SqliteCache** | 82.7% | 126 | ✅ |
+| **Eaf.OpenTelemetry** | 75.4% | 49 | ✅ |
+| **Eaf.KeyVault** | 69.4% | 222 | ✅ |
+| **Eaf.Log4NetServiceBus** | 62.2% | 41 | ⚠️ |
+| **Eaf.Middleware.Worker** | 33.3% | 101 | ⚠️ |
+| **Eaf.Middleware.Application** | 23.6% | 410 | ⚠️ |
+| **Eaf.Middleware.AzureActiveDirectory** | 7.4% | 21 | ❌ |
+| **Eaf.Middleware.Ldap** | 6.0% | 21 | ❌ |
+| **Eaf.Middleware.Web.Core** | 4.9% | 122 | ❌ |
+| **Eaf.Middleware.Core** | 0.1% | — | ❌ |
 
 ### Test Project Status
 
 | Project | Status | Tests | Line Coverage | Notes |
 |---------|--------|--------|--------------|-------|
-| **Eaf.KeyVault.Tests** | Passing | 210 | 67.9% | Excellent coverage |
-| **Eaf.SqlServerCache.Tests** | Passing | 57 | 86.6% | Excellent coverage |
-| **Eaf.OpenTelemetry.Tests** | Passing | 10 | 68.9% | Good coverage |
-| **Eaf.KeyVault.AspNetCore.Tests** | Passing | 8 | 85.7% | Excellent coverage |
-| **Eaf.Log4NetServiceBus.Tests** | Passing | 12 | 85.0% | Good coverage |
-| **Eaf.SqliteCache.Tests** | Passing | 94 | 75.6% | Good coverage |
-| **Eaf.Castle.Serilog.Tests** | Passing | 44 | 10.0% | Resolved with BDD in Portuguese |
-| **Eaf.Middleware.Web.Core.Tests** | Passing | 78 | 0.63% | **EXPANDED**: +35 tests (Swagger, TokenAuth, Impersonation) |
-| **Eaf.Middleware.Application.Tests** | Passing | 58 | 4.45% | Basic coverage |
-| **Eaf.Middleware.Worker.Tests** | Passing | 70 | 25.97% | Moderate coverage |
-| **Eaf.MiddlewareCore.Tests** | Passing | 632 | 15.31% | **EXPANDED**: +30 tests (Entities, DTOs, Extensions) |
+| **Eaf.Middleware.Application.Tests** | ✅ Passing | 410 | 23.6% | Largest test suite |
+| **Eaf.KeyVault.Tests** | ✅ Passing | 222 | 69.4% | BDD pattern |
+| **Eaf.SqliteCache.Tests** | ✅ Passing | 126 | 82.7% | +14 expiration tests |
+| **Eaf.Middleware.Web.Core.Tests** | ✅ Passing | 122 | 4.9% | Swagger, TokenAuth, Impersonation |
+| **Eaf.Middleware.Worker.Tests** | ✅ Passing | 101 | 33.3% | Lifecycle, Background jobs |
+| **Eaf.SqlServerCache.Tests** | ✅ Passing | 95 | 88.3% | Excellent coverage |
+| **Eaf.Castle.Serilog.Tests** | ✅ Passing | 71 | 98.6% | BDD in Portuguese |
+| **Eaf.OpenTelemetry.Tests** | ✅ Passing | 49 | 75.4% | Good coverage |
+| **Eaf.Log4NetServiceBus.Tests** | ✅ Passing | 41 | 62.2% | Good coverage |
+| **Eaf.Middleware.AzureActiveDirectory.Tests** | ✅ Passing | 21 | 7.4% | Basic coverage |
+| **Eaf.Middleware.Ldap.Tests** | ✅ Passing | 21 | 6.0% | Basic coverage |
+| **Eaf.KeyVault.AspNetCore.Tests** | ✅ Passing | 10 | 88.8% | Excellent coverage |
+
+### Angular Template Tests
+
+| Metric | Value |
+|--------|-------|
+| **Total Tests** | 222 |
+| **Passing** | 222 (100%) |
+| **Statement Coverage** | 11.68% |
+| **Branch Coverage** | 2.56% |
+| **Function Coverage** | 9.01% |
+| **Line Coverage** | 11.16% |
+
+### API Template Tests
+
+| Metric | Value |
+|--------|-------|
+| **Total Tests** | 212 |
+| **Passing** | 69 |
+| **Failing** | 142 |
+| **Skipped** | 1 |
+| **Known Issue** | EF Core DbContext concurrent configuration (pre-existing) |
 
 **Legend:**
 - **Passing**: All tests pass successfully
