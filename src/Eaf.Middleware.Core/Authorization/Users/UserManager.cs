@@ -86,10 +86,11 @@ namespace Eaf.Middleware.Authorization.Users
         }
 
         /// <summary>
-        /// GetUser.
+        /// GetUser (síncrono).
         /// </summary>
         /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
         /// <returns>Resultado da operação.</returns>
+        [Obsolete("Use GetUserAsync instead. Sync-over-async causes thread pool starvation.")]
         public User GetUser(UserIdentifier userIdentifier)
         {
             return AsyncHelper.RunSync(() => GetUserAsync(userIdentifier));
@@ -125,10 +126,11 @@ namespace Eaf.Middleware.Authorization.Users
         }
 
         /// <summary>
-        /// GetUserOrNull.
+        /// GetUserOrNull (síncrono).
         /// </summary>
         /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
         /// <returns>Resultado da operação.</returns>
+        [Obsolete("Use GetUserOrNullAsync instead. Sync-over-async causes thread pool starvation.")]
         public User GetUserOrNull(UserIdentifier userIdentifier)
         {
             return AsyncHelper.RunSync(() => GetUserOrNullAsync(userIdentifier));

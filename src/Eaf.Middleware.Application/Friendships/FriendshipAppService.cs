@@ -126,7 +126,7 @@ namespace Eaf.Middleware.Friendships
             }
 
             var sourceFriendshipRequest = ObjectMapper.Map<FriendshipDto>(sourceFriendship);
-            sourceFriendshipRequest.IsOnline = _onlineClientManager.GetAllByUserIdAsync(probableFriend).GetAwaiter().GetResult().Any();
+            sourceFriendshipRequest.IsOnline = (await _onlineClientManager.GetAllByUserIdAsync(probableFriend)).Any();
 
             await _friendshipManager.AcceptFriendshipRequestAsync(userIdentifier, probableFriend);
             await _friendshipManager.AcceptFriendshipRequestAsync(probableFriend, userIdentifier);

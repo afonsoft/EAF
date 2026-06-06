@@ -82,7 +82,8 @@ namespace Eaf.KeyVault
         public Task SetValueAsync(string key, string value)
         {
             logger.Debug("NullKeyVaultManager : NotImplementedException");
-            return Task.Run(() => { SetValue(key, value); });
+            SetValue(key, value);
+            return Task.CompletedTask;
         }
     }
 }

@@ -7,6 +7,7 @@ using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Localization;
 using Eaf.Middleware.MultiTenancy;
 using Microsoft.AspNetCore.Identity;
+using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -107,6 +108,7 @@ namespace Eaf.Middleware
         /// </summary>
         /// <returns>Instância do usuário atual</returns>
         /// <exception cref="AbpException">Lançada quando não há usuário atual</exception>
+        [Obsolete("Use GetCurrentUserAsync instead. Sync-over-async causes thread pool starvation.")]
         protected virtual User GetCurrentUser()
         {
             return AsyncHelper.RunSync(GetCurrentUserAsync);
