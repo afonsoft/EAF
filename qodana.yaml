@@ -1,0 +1,15 @@
+version: "1.0"
+linter: jetbrains/qodana-cdnet:2024.3
+
+exclude:
+  - name: All
+    paths:
+      - Templates/Angular
+      - node_modules
+      - bin
+      - obj
+      - TestResults
+      - sonar
+      - .github
+
+failThreshold: 0

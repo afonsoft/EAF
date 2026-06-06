@@ -357,3 +357,7 @@ MigrationBackup/
 /resultTest/*.trx
 /nupkg/test
 /Templates/Angular/Eaf.ProjectName.UI/.vscode/chrome
+
+# Allow Angular eaf-ng2-module log service (overrides [Ll]og/ rule)
+!Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-ng2-module/src/log/
+!Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-ng2-module/src/log/log.service.ts

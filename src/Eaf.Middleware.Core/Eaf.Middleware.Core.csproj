@@ -17,7 +17,7 @@
 		<PackageReference Include="Abp.ZeroCore" Version="10.4.0" />
 		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
 		<PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
-		<PackageReference Include="AutoMapper" Version="16.1.1" />
+		<PackageReference Include="AutoMapper" Version="14.0.0" />
 		<PackageReference Include="Abp.MailKit" Version="10.4.0" />
 		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.4.0" />
 		<PackageReference Include="MimeKit" Version="4.16.0" />
@@ -39,7 +39,7 @@
 		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
