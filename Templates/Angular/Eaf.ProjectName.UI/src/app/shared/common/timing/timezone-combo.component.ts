@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { NameValueDto, TimingServiceProxy, SettingScopes } from '@shared/service-proxies/service-proxies';
 import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -9,6 +9,7 @@ import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@an
   template: ` <select class="form-control" [formControl]="selectedTimeZone">
     <option *ngFor="let timeZone of timeZones" [value]="timeZone.value">{{ timeZone.name }}</option>
   </select>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

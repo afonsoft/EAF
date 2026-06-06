@@ -1,4 +1,4 @@
-﻿import { Component, Injector, Input } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Injector, Input } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { ThemeSettingsDto, UiCustomizationSettingsServiceProxy } from '@shared/service-proxies/service-proxies';
@@ -8,6 +8,7 @@ import { ThemeSettingsDto, UiCustomizationSettingsServiceProxy } from '@shared/s
   templateUrl: './theme3-theme-ui-settings.component.html',
   animations: [appModuleAnimation()],
   selector: 'theme3-theme-ui-settings',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Theme3ThemeUiSettingsComponent extends AppComponentBase {
   @Input() settings: ThemeSettingsDto;
