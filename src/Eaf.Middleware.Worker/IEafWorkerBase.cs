@@ -9,33 +9,28 @@ using Microsoft.Extensions.Hosting;
 namespace Eaf
 {
     /// <summary>
-    /// Representa a interface IEafWorkerBase.
+    /// Interface base para workers EAF com suporte a logging e infraestrutura ABP.
     /// </summary>
     public interface IEafWorkerBase : IHostedService, IDomainService, ISingletonDependency
     {
         /// <summary>
-        /// Obtém ou define IocManager.
+        /// Obtém ou define o logger.
         /// </summary>
-        public IIocManager IocManager { get; set; }
+        ILogger Logger { get; set; }
 
         /// <summary>
-        /// Gets the event bus.
+        /// Obtém ou define o event bus.
         /// </summary>
-        public IEventBus EventBus { get; set; }
+        IEventBus EventBus { get; set; }
 
         /// <summary>
-        /// Reference to the localization manager.
+        /// Define o localization manager.
         /// </summary>
-        public ILocalizationManager LocalizationManager { set; }
+        ILocalizationManager LocalizationManager { set; }
 
         /// <summary>
-        /// Reference to the logger to write logs.
+        /// Obtém ou define o object mapper.
         /// </summary>
-        public ILogger Logger { get; set; }
-
-        /// <summary>
-        /// Reference to the object to object mapper.
-        /// </summary>
-        public IObjectMapper ObjectMapper { get; set; }
+        IObjectMapper ObjectMapper { get; set; }
     }
 }

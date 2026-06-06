@@ -1,11 +1,12 @@
 ﻿import { PermissionCheckerService } from '@eaf/auth/permission-checker.service';
-import { Component, Injector, OnInit, AfterViewInit, ViewEncapsulation, ElementRef, ViewChild, Input, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, AfterViewInit, ViewEncapsulation, ElementRef, ViewChild, Input, Inject, DestroyRef, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { AppMenu } from './app-menu';
 import { AppNavigationService } from './app-navigation.service';
 import * as objectPath from 'object-path';
 import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MenuHorizontalDirective } from '@metronic/app/core/directives/menu-horizontal.directive';
 import { MenuHorizontalOffcanvasDirective } from '@metronic/app/core/directives/menu-horizontal-offcanvas.directive';
 import { DOCUMENT } from '@angular/common';
@@ -15,8 +16,10 @@ import { DOCUMENT } from '@angular/common';
   templateUrl: './top-bar-menu.component.html',
   selector: 'top-bar-menu',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TopBarMenuComponent extends AppComponentBase implements OnInit, AfterViewInit {
+  private destroyRef = inject(DestroyRef);
   @Input() isTabMenuUsed?: boolean;
 
   menu: AppMenu = null;
@@ -42,7 +45,7 @@ export class TopBarMenuComponent extends AppComponentBase implements OnInit, Aft
     this.menu = this._appNavigationService.getMenu();
     this.currentRouteUrl = this.router.url;
 
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(event => {
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       this.currentRouteUrl = this.router.url;
       this.ui.removeSelectItemClass(document);
       eaf.event.trigger('app.router.navigationEnd');

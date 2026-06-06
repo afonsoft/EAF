@@ -6,9 +6,8 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -21,6 +20,15 @@ namespace Eaf.Runtime.Caching.SqlServer
     public class EafSqlServerCache : CacheBase
     {
         private readonly IDistributedCache _cache;
+
+        /// <summary>
+        /// Serializer XML estático para evitar alocação por chamada.
+        /// </summary>
+        private static readonly Lazy<IExtendedXmlSerializer> _xmlSerializer = new(() =>
+            new ConfigurationContainer()
+                .UseAutoFormatting()
+                .UseOptimizedNamespaces()
+                .Create());
 
         /// <summary>
         /// EafSqlServerCache.
@@ -167,7 +175,14 @@ namespace Eaf.Runtime.Caching.SqlServer
         public override void Set(string key, object value, TimeSpan? slidingExpireTime = null, DateTimeOffset? absoluteExpireTime = null)
         {
             var encodedCurrent = ObjectToByteArray(value);
-            _cache.SetAsync(FixKey(key), CompressBytesAsync(encodedCurrent).GetAwaiter().GetResult(), new DistributedCacheEntryOptions { AbsoluteExpiration = absoluteExpireTime ?? DefaultAbsoluteExpireTime, SlidingExpiration = slidingExpireTime ?? DefaultSlidingExpireTime }).GetAwaiter();
+            var compressedData = CompressBytesAsync(encodedCurrent).GetAwaiter().GetResult();
+            // NOTA: CacheBase do ABP não define SetAsync, portanto sync-over-async é necessário aqui.
+            _cache.SetAsync(FixKey(key), compressedData,
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpiration = absoluteExpireTime ?? DefaultAbsoluteExpireTime,
+                    SlidingExpiration = slidingExpireTime ?? DefaultSlidingExpireTime
+                }).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -189,6 +204,11 @@ namespace Eaf.Runtime.Caching.SqlServer
 
         #region ObjectToByteArray and ByteArrayToObject
 
+        /// <summary>
+        /// Serializa um objeto para array de bytes usando XML ou JSON como fallback.
+        /// </summary>
+        /// <param name="objData">Objeto a serializar.</param>
+        /// <returns>Array de bytes representando o objeto serializado.</returns>
         private static byte[] ObjectToByteArray(object objData)
         {
             if (objData == null)
@@ -198,28 +218,26 @@ namespace Eaf.Runtime.Caching.SqlServer
 
             try
             {
-                var serializer = new ConfigurationContainer().UseAutoFormatting()
-                    .UseOptimizedNamespaces()
-                    .Create();
-
-                using (var contentStream = new MemoryStream())
+                using var contentStream = new MemoryStream();
+                using (var writer = XmlWriter.Create(contentStream))
                 {
-                    using (var writer = XmlWriter.Create(contentStream))
-                    {
-                        serializer.Serialize(writer, objData);
-                        writer.Flush();
-                    }
-
-                    contentStream.Seek(0, SeekOrigin.Begin);
-                    return Encoding.ASCII.GetBytes(new StreamReader(contentStream).ReadToEnd());
+                    _xmlSerializer.Value.Serialize(writer, objData);
+                    writer.Flush();
                 }
+                contentStream.Seek(0, SeekOrigin.Begin);
+                return Encoding.ASCII.GetBytes(new StreamReader(contentStream).ReadToEnd());
             }
             catch
             {
-                return SerializeToStream(objData);
+                return JsonSerializer.SerializeToUtf8Bytes(objData);
             }
         }
 
+        /// <summary>
+        /// Desserializa um array de bytes para objeto usando XML ou JSON como fallback.
+        /// </summary>
+        /// <param name="byteArray">Array de bytes a desserializar.</param>
+        /// <returns>Objeto desserializado.</returns>
         private static object ByteArrayToObject(byte[] byteArray)
         {
             if (byteArray == null || !byteArray.Any())
@@ -229,44 +247,15 @@ namespace Eaf.Runtime.Caching.SqlServer
 
             try
             {
-                var serializer = new ConfigurationContainer().UseAutoFormatting()
-                    .UseOptimizedNamespaces()
-                    .Create();
-
-                using (var contentStream = new MemoryStream(byteArray))
-                {
-                    using (var reader = XmlReader.Create(contentStream))
-                    {
-                        return serializer.Deserialize(reader);
-                    }
-                }
+                using var contentStream = new MemoryStream(byteArray);
+                using var reader = XmlReader.Create(contentStream);
+                return _xmlSerializer.Value.Deserialize(reader);
             }
             catch
             {
-                return DeserializeFromStream(byteArray);
+                return JsonSerializer.Deserialize<object>(byteArray);
             }
         }
-
-#pragma warning disable SYSLIB0011
-
-        private static byte[] SerializeToStream(object objectType)
-        {
-            var stream = new MemoryStream();
-            IFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(stream, objectType);
-            return stream.ToArray();
-        }
-
-        private static object DeserializeFromStream(byte[] objectByte)
-        {
-            var stream = new MemoryStream(objectByte);
-            IFormatter formatter = new BinaryFormatter();
-            stream.Seek(0, SeekOrigin.Begin);
-            var objectType = formatter.Deserialize(stream);
-            return objectType;
-        }
-
-#pragma warning disable SYSLIB0011
 
         #endregion ObjectToByteArray and ByteArrayToObject
     }

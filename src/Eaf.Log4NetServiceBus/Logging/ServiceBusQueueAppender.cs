@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Eaf.Log4NetServiceBus.Logging
 {
@@ -67,38 +66,53 @@ namespace Eaf.Log4NetServiceBus.Logging
                         PurgeDateUTC = DateTime.UtcNow.AddDays(RetentionTime),
                         RetentionTime = RetentionTime,
                         ApplicationName = ApplicationName,
-                        Level = getParams(0, paramsFull),
-                        ServerName = getParams(1, paramsFull),
-                        Event = getParams(2, paramsFull),
-                        Message = getParams(3, paramsFull),
-                        JsonData = getParams(4, paramsFull)
+                        Level = GetParams(0, paramsFull),
+                        ServerName = GetParams(1, paramsFull),
+                        Event = GetParams(2, paramsFull),
+                        Message = GetParams(3, paramsFull),
+                        JsonData = GetParams(4, paramsFull)
                     };
 
                     messages.Add(new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(log))));
                 }
 
-                queueClient.SendAsync(messages);
+                queueClient.SendAsync(messages).GetAwaiter().GetResult();
             }
-            catch (Exception)
+            catch (ServiceBusException ex)
             {
-                //bypass
+                System.Diagnostics.Debug.WriteLine($"ServiceBusQueueAppender: Service Bus error: {ex.Message}");
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
+            {
+                System.Diagnostics.Debug.WriteLine($"ServiceBusQueueAppender: Unexpected error: {ex.Message}");
             }
         }
 
-        protected override async void OnClose()
+        /// <inheritdoc/>
+        protected override void OnClose()
         {
-            if (!_serviceBusConnection.IsClosedOrClosing)
-                await _serviceBusConnection.CloseAsync();
+            try
+            {
+                if (_serviceBusConnection != null && !_serviceBusConnection.IsClosedOrClosing)
+                {
+                    _serviceBusConnection.CloseAsync().GetAwaiter().GetResult();
+                }
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
+            {
+                System.Diagnostics.Debug.WriteLine($"ServiceBusQueueAppender: Error on close: {ex.Message}");
+            }
 
             base.OnClose();
         }
 
+        /// <inheritdoc/>
         protected override void SendBuffer(LoggingEvent[] events)
         {
-            Task.Run(() => AppendBuffer(events));
+            AppendBuffer(events);
         }
 
-        private string getParams(int index, string message)
+        private string GetParams(int index, string message)
         {
             try
             {

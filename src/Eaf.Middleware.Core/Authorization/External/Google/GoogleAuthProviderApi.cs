@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Abp.Dependency;
 
 namespace Eaf.Middleware.Core.Authentication.External.Google
 {
@@ -14,15 +15,18 @@ namespace Eaf.Middleware.Core.Authentication.External.Google
     public class GoogleAuthProviderApi : ExternalAuthProviderApiBase
     {
         public const string Name = "Google";
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// GoogleAuthProviderApi.
         /// </summary>
         /// <param name="logger">Parâmetro logger.</param>
+        /// <param name="httpClientFactory">Fábrica de HttpClient para evitar socket exhaustion.</param>
         /// <returns>Resultado da operação.</returns>
-        public GoogleAuthProviderApi(ILogger logger)
+        public GoogleAuthProviderApi(ILogger logger, IHttpClientFactory httpClientFactory)
         {
             Logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -37,7 +41,7 @@ namespace Eaf.Middleware.Core.Authentication.External.Google
                 throw new AbpException("Authentication:Google:UserInfoEndpoint configuration is required.");
 
             ExternalAuthUserInfo externalAuthUserInfo;
-            using (HttpClient client = new HttpClient())
+            using var client = _httpClientFactory.CreateClient("ExternalAuth");
             {
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
                 client.DefaultRequestHeaders.Accept.ParseAdd("application/json");

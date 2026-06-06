@@ -9,6 +9,8 @@ import {
   Inject,
   HostBinding,
   ChangeDetectionStrategy,
+  DestroyRef,
+  inject,
 } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { AppMenu } from './app-menu';
@@ -16,6 +18,7 @@ import { AppNavigationService } from './app-navigation.service';
 import { DOCUMENT } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service';
 
 @Component({
@@ -26,6 +29,7 @@ import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SideBarMenuComponent extends AppComponentBase implements OnInit, AfterViewInit {
+  private destroyRef = inject(DestroyRef);
   menu: AppMenu = null;
 
   currentRouteUrl = '';
@@ -48,7 +52,7 @@ export class SideBarMenuComponent extends AppComponentBase implements OnInit, Af
     this.menu = this._appNavigationService.getMenu();
     this.currentRouteUrl = this.router.url.split(/[?#]/)[0];
 
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(event => {
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       this.currentRouteUrl = this.router.url.split(/[?#]/)[0];
       this.ui.removeSelectItemClass(document);
       eaf.event.trigger('app.router.navigationEnd');

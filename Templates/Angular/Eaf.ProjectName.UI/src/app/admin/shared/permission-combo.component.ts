@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { FlatPermissionWithLevelDto, PermissionServiceProxy } from '@shared/service-proxies/service-proxies';
 import * as _ from 'lodash';
@@ -11,6 +11,7 @@ import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@an
     <option value="">{{ 'SearchWithThreeDot' | localize }}</option>
     <option *ngFor="let permission of permissions" [value]="permission.name">{{ permission.displayName }}</option>
   </select>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

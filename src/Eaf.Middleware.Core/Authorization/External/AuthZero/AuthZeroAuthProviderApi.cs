@@ -18,15 +18,18 @@ namespace Eaf.Middleware.Core.Authentication.External.AuthZero
     public class AuthZeroAuthProviderApi : ExternalAuthProviderApiBase
     {
         public const string Name = "AuthZero";
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// AuthZeroAuthProviderApi.
         /// </summary>
         /// <param name="logger">Parâmetro logger.</param>
+        /// <param name="httpClientFactory">Fábrica de HttpClient para evitar socket exhaustion.</param>
         /// <returns>Resultado da operação.</returns>
-        public AuthZeroAuthProviderApi(ILogger logger)
+        public AuthZeroAuthProviderApi(ILogger logger, IHttpClientFactory httpClientFactory)
         {
             Logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -47,7 +50,7 @@ namespace Eaf.Middleware.Core.Authentication.External.AuthZero
             domain = domain.RemovePostFix("/");
 
             ExternalAuthUserInfo externalAuthUserInfo;
-            using (HttpClient client = new HttpClient())
+            using var client = _httpClientFactory.CreateClient("ExternalAuth");
             {
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
                 client.DefaultRequestHeaders.Accept.ParseAdd("application/json");

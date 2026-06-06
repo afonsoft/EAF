@@ -37,6 +37,7 @@ namespace Eaf.ProjectName.Airplanes
         public async Task<PagedResultDto<AirplaneDto>> GetAll(GetAirplanesInput input)
         {
             var query = _airplaneManager.Airplanes
+                .AsNoTracking()
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
                     e => e.Number.Contains(input.Filter) || e.Model.Contains(input.Filter));
 
@@ -88,7 +89,7 @@ namespace Eaf.ProjectName.Airplanes
 
         public async Task<FileDto> GetAirplanesToExcel()
         {
-            var items = await _airplaneManager.Airplanes.ToListAsync();
+            var items = await _airplaneManager.Airplanes.AsNoTracking().ToListAsync();
             return _airplanesExcelExporter.ExportToFile(ObjectMapper.Map<List<AirplaneDto>>(items));
         }
 

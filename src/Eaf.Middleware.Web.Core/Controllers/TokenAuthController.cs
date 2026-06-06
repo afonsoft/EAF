@@ -47,6 +47,7 @@ using System.Threading.Tasks;
 using Abp.Extensions;
 using Abp;
 using Abp.Runtime.Session;
+using Abp.Runtime;
 using Eaf.Security;
 
 namespace Eaf.Middleware.Web.Controllers
@@ -75,6 +76,7 @@ namespace Eaf.Middleware.Web.Controllers
         private readonly IBinaryObjectManager _binaryObjectManager;
         private readonly IWebhookPublisher _webhookPublisher;
         private readonly INotificationSubscriptionManager _notificationSubscriptionManager;
+        private readonly IPrincipalAccessor _principalAccessor;
 
         /// <summary>
         /// TokenAuthController.
@@ -101,7 +103,8 @@ namespace Eaf.Middleware.Web.Controllers
             INotificationPublisher notificationPublisher,
             IBinaryObjectManager binaryObjectManager,
             INotificationSubscriptionManager notificationSubscriptionManager,
-            IWebhookPublisher webhookPublisher
+            IWebhookPublisher webhookPublisher,
+            IPrincipalAccessor principalAccessor
         )
         {
             _logInManager = logInManager;
@@ -125,6 +128,7 @@ namespace Eaf.Middleware.Web.Controllers
             _binaryObjectManager = binaryObjectManager;
             _webhookPublisher = webhookPublisher;
             _notificationSubscriptionManager = notificationSubscriptionManager;
+            _principalAccessor = principalAccessor;
             RecaptchaValidator = NullRecaptchaValidator.Instance;
         }
 
@@ -517,7 +521,7 @@ namespace Eaf.Middleware.Web.Controllers
 
             try
             {
-                var claims = IocManager.Instance.Resolve<IPrincipalAccessor>()?.Principal;
+                var claims = _principalAccessor?.Principal;
                 if (claims != null)
                 {
                     var tokenValidityKeyInClaims = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";

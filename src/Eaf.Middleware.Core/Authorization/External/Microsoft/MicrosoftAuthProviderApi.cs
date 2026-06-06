@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Abp.Dependency;
 
 namespace Eaf.Middleware.Core.Authentication.External.Microsoft
 {
@@ -14,15 +15,18 @@ namespace Eaf.Middleware.Core.Authentication.External.Microsoft
     public class MicrosoftAuthProviderApi : ExternalAuthProviderApiBase
     {
         public const string Name = "Microsoft";
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// MicrosoftAuthProviderApi.
         /// </summary>
         /// <param name="logger">Parâmetro logger.</param>
+        /// <param name="httpClientFactory">Fábrica de HttpClient para evitar socket exhaustion.</param>
         /// <returns>Resultado da operação.</returns>
-        public MicrosoftAuthProviderApi(ILogger logger)
+        public MicrosoftAuthProviderApi(ILogger logger, IHttpClientFactory httpClientFactory)
         {
             Logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -33,7 +37,7 @@ namespace Eaf.Middleware.Core.Authentication.External.Microsoft
         public override async Task<ExternalAuthUserInfo> GetUserInfo(string accessCode)
         {
             ExternalAuthUserInfo externalAuthUserInfo;
-            using (HttpClient client = new HttpClient())
+            using var client = _httpClientFactory.CreateClient("ExternalAuth");
             {
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
                 client.DefaultRequestHeaders.Accept.ParseAdd("application/json");

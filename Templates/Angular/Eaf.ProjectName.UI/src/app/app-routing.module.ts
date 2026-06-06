@@ -29,7 +29,6 @@ import { NotificationsComponent } from './shared/layout/notifications/notificati
           {
             path: 'admin',
             loadChildren: () => import('app/admin/admin.module').then(m => m.AdminModule), //Lazy load admin module
-            data: { preload: true },
             canLoad: [AppRouteGuard],
           },
           {
