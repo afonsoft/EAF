@@ -35,8 +35,7 @@ namespace Eaf.KeyVault
         /// </summary>
         /// <param name="options">Opções de configuração do Key Vault.</param>
         /// <param name="loggerFactory">Factory de logger (opcional, injetado via DI).</param>
-        /// <param name="managerFactory">Factory para criar o manager (opcional, injetado via DI).</param>
-        public KeyVaultSecretManager(EafKeyVaultOptions options, ILoggerFactory loggerFactory = null, IKeyVaultManagerFactory managerFactory = null)
+        public KeyVaultSecretManager(EafKeyVaultOptions options, ILoggerFactory loggerFactory = null)
         {
             Logger = loggerFactory?.Create(typeof(KeyVaultSecretManager)) ?? NullLogger.Instance;
 
@@ -45,7 +44,7 @@ namespace Eaf.KeyVault
 
             try
             {
-                var factory = managerFactory ?? new KeyVaultManagerFactory(Logger);
+                var factory = new KeyVaultManagerFactory(Logger);
                 manager = factory.Create(this.options);
             }
             catch (Exception ex)

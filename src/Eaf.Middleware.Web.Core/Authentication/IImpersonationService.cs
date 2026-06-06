@@ -13,14 +13,14 @@ namespace Eaf.Middleware.Web.Authentication
         /// </summary>
         /// <param name="input">Dados do usuário a impersonar.</param>
         /// <returns>Resultado com token impersonado.</returns>
-        Task<ImpersonatedAuthenticateResultModel> ImpersonateUserAsync(ImpersonateInput input);
+        Task<ImpersonatedAuthenticateResultModel> ImpersonateUserAsync(ImpersonateModel input);
 
         /// <summary>
         /// Inicia impersonação de um tenant específico.
         /// </summary>
-        /// <param name="input">Dados do tenant a impersonar.</param>
+        /// <param name="tenantId">ID do tenant a impersonar.</param>
         /// <returns>Resultado com token impersonado.</returns>
-        Task<ImpersonatedAuthenticateResultModel> ImpersonateTenantAsync(ImpersonateTenantInput input);
+        Task<ImpersonatedAuthenticateResultModel> ImpersonateTenantAsync(int tenantId);
 
         /// <summary>
         /// Volta à identidade original após impersonação.

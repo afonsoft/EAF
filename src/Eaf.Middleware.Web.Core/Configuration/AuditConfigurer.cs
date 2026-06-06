@@ -1,4 +1,5 @@
 using Abp.Configuration.Startup;
+using Eaf.Middleware.Auditing;
 
 namespace Eaf.Middleware.Web.Configuration
 {

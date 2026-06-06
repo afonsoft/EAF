@@ -1,4 +1,3 @@
-using Abp.Dependency;
 using Castle.Core.Logging;
 
 namespace Eaf.KeyVault
@@ -7,7 +6,7 @@ namespace Eaf.KeyVault
     /// Implementação da factory de KeyVaultManager.
     /// Responsável por criar a instância correta baseada no provider configurado.
     /// </summary>
-    public class KeyVaultManagerFactory : IKeyVaultManagerFactory, ITransientDependency
+    internal class KeyVaultManagerFactory : IKeyVaultManagerFactory
     {
         private readonly ILogger _logger;
 
