@@ -27,11 +27,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
@@ -142,6 +144,34 @@ namespace Eaf.ProjectName.Web.Startup
                 options.SupportNonNullableReferenceTypes();
             }).AddSwaggerGenNewtonsoftSupport();
 
+            // Response Compression (Brotli + Gzip)
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+                {
+                    "application/json",
+                    "application/javascript",
+                    "text/css",
+                    "text/html",
+                    "text/json",
+                    "text/plain",
+                    "text/xml"
+                });
+            });
+
+            services.Configure<BrotliCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
+
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
+
             //Configure Eaf and Dependency Injection
             services.AddAbpWithoutCreatingServiceProvider<WebHostModule>(options =>
             {
@@ -159,6 +189,7 @@ namespace Eaf.ProjectName.Web.Startup
                 options.UseAbpRequestLocalization = false;
             });
 
+            app.UseResponseCompression();
             app.UseEafHealthChecks();
             app.UseMiddleware<ContentSecurityPolicyMiddleware>();
             app.UseDeveloperExceptionPage();
