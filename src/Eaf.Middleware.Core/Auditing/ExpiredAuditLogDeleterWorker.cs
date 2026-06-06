@@ -131,16 +131,18 @@ namespace Eaf.Middleware.Web.Auditing
 
             if (expiredEntryCount > MaxDeletionCount)
             {
-                var deleteStartId = _auditLogRepository.GetAll().OrderBy(l => l.Id).Skip(MaxDeletionCount).Select(x => x.Id).First();
-                var deleteItens = _auditLogRepository.GetAll().Where(l => l.Id < deleteStartId);
-                foreach (var del in deleteItens)
-                    AsyncHelper.RunSync(() => _auditLogRepository.DeleteAsync(del));
+                var idsToDelete = _auditLogRepository.GetAll()
+                    .Where(l => l.ExecutionTime < expireDate)
+                    .OrderBy(l => l.Id)
+                    .Take(MaxDeletionCount)
+                    .Select(l => l.Id)
+                    .ToList();
+
+                _auditLogRepository.Delete(l => idsToDelete.Contains(l.Id));
             }
             else
             {
-                var deleteItens = _auditLogRepository.GetAll().Where(l => l.ExecutionTime < expireDate);
-                foreach (var del in deleteItens)
-                    AsyncHelper.RunSync(() => _auditLogRepository.DeleteAsync(del));
+                _auditLogRepository.Delete(l => l.ExecutionTime < expireDate);
             }
         }
     }
