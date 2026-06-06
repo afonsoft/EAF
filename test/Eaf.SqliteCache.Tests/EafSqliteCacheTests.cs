@@ -153,9 +153,11 @@ namespace Eaf.SqliteCache.Tests
 
             var expiredResult = cache.TryGetValue("expiring-key", out var expiredValue);
 
-            // Assert
+            // Assert — item deve existir imediatamente, mas expirar após sliding
             immediateResult.ShouldBeTrue();
             immediateValue.ShouldBe("expiring-value");
+            expiredResult.ShouldBeFalse();
+            expiredValue.ShouldBeNull();
         }
 
         [Fact]
