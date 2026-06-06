@@ -386,7 +386,7 @@ namespace Eaf.SqlServerCache.Tests
         }
 
         [Fact]
-        public void Dado_ValorComplexo_Quando_ChamarSet_Entao_DeveLancarNotSupportedException()
+        public void Dado_ValorComplexo_Quando_ChamarSet_Entao_DeveSerializarViaJsonFallback()
         {
             // Dado
             var key = "complex-key";
@@ -397,8 +397,8 @@ namespace Eaf.SqlServerCache.Tests
                 Items = new[] { "item1", "item2" }
             };
 
-            // Quando & Então
-            Should.Throw<NotSupportedException>(() => _cache.Set(key, complexValue));
+            // Quando & Então (JSON fallback permite serialização de tipos complexos)
+            Should.NotThrow(() => _cache.Set(key, complexValue));
         }
 
         [Fact]
