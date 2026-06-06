@@ -19,7 +19,11 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         {
             var builder = new DbContextOptionsBuilder<ProjectNameDbContext>();
             var configuration = GetConfigurationRoot();
-            ProjectNameDbContextConfigurer.Configure(builder, configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName));
+            var databaseProvider = configuration["Database:Provider"] ?? "SqlServer";
+            ProjectNameDbContextConfigurer.Configure(
+                builder,
+                configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName),
+                databaseProvider);
 
             return new ProjectNameDbContext(builder.Options);
         }
