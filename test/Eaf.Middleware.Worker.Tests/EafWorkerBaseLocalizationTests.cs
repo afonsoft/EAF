@@ -157,15 +157,17 @@ namespace Eaf.Middleware.Worker.Tests
         }
 
         [Fact]
-        public void Dado_WorkerConcreto_Quando_ExecuteAsync_Entao_DeveSerChamavel()
+        public async Task Dado_WorkerConcreto_Quando_ExecuteAsync_Entao_DeveSerChamavel()
         {
             // Dado
             var worker = new TestWorker();
-            var cts = new CancellationTokenSource();
+            using var cts = new CancellationTokenSource();
 
-            // Quando & Então
-            Should.NotThrow(async () => await worker.StartAsync(cts.Token));
-            cts.Cancel();
+            // Quando
+            await worker.StartAsync(cts.Token);
+
+            // Então — lifecycle completo: Start + Stop
+            await worker.StopAsync(CancellationToken.None);
         }
 
         #endregion

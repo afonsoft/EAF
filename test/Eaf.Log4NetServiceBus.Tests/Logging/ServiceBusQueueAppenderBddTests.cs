@@ -104,9 +104,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             var appender = new ServiceBusQueueAppender();
             var sendBufferMethod = typeof(ServiceBusQueueAppender)
                 .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull("SendBuffer deve existir como método protegido");
 
             // Quando & Então — não deve lançar exceção (exit early)
-            Should.NotThrow(() => sendBufferMethod?.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
+            Should.NotThrow(() => sendBufferMethod.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
         }
 
         [Fact]
@@ -122,9 +123,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             };
             var sendBufferMethod = typeof(ServiceBusQueueAppender)
                 .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull("SendBuffer deve existir como método protegido");
 
             // Quando & Então
-            Should.NotThrow(() => sendBufferMethod?.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
+            Should.NotThrow(() => sendBufferMethod.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
         }
 
         [Fact]
@@ -140,9 +142,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             };
             var sendBufferMethod = typeof(ServiceBusQueueAppender)
                 .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull("SendBuffer deve existir como método protegido");
 
             // Quando & Então
-            Should.NotThrow(() => sendBufferMethod?.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
+            Should.NotThrow(() => sendBufferMethod.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
         }
 
         [Fact]
@@ -158,9 +161,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             };
             var sendBufferMethod = typeof(ServiceBusQueueAppender)
                 .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull("SendBuffer deve existir como método protegido");
 
             // Quando & Então
-            Should.NotThrow(() => sendBufferMethod?.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
+            Should.NotThrow(() => sendBufferMethod.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
         }
 
         #endregion
