@@ -9,7 +9,7 @@ using Eaf.Middleware.Storage;
 using Eaf.ProjectName.Airplanes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore.SqlServer.Diagnostics.Internal;
 using System;
 
 namespace Eaf.ProjectName.EntityFrameworkCore
@@ -51,7 +51,10 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.ConfigureWarnings(w => w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS));
+            if (Database.IsSqlServer())
+            {
+                optionsBuilder.ConfigureWarnings(w => w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS));
+            }
             optionsBuilder.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
             base.OnConfiguring(optionsBuilder);
         }
@@ -93,10 +96,20 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                 b.HasIndex(e => new { e.FriendTenantId, e.FriendUserId });
             });
 
-            modelBuilder.Entity<Abp.Auditing.AuditLog>(b =>
+            if (Database.IsSqlServer())
             {
-                b.Property(e => e.Parameters).HasColumnType("nvarchar(max)");
-            });
+                modelBuilder.Entity<Abp.Auditing.AuditLog>(b =>
+                {
+                    b.Property(e => e.Parameters).HasColumnType("nvarchar(max)");
+                });
+            }
+            else if (Database.IsNpgsql())
+            {
+                modelBuilder.Entity<Abp.Auditing.AuditLog>(b =>
+                {
+                    b.Property(e => e.Parameters).HasColumnType("text");
+                });
+            }
         }
     }
 }
