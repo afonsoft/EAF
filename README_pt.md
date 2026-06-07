@@ -12,7 +12,7 @@
 ![Passing Tests](https://img.shields.io/badge/Passing%20Tests-1289-brightgreen)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
-![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-69%20Success-orange)
+![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
 
 ## Índice
 
@@ -153,7 +153,7 @@ O EAF segue os princípios do Domain-Driven Design (DDD) e implementa padrões c
 |------------|--------|--------|
 | **ASP.NET Core** | 10.0 | Suportado |
 | **Entity Framework Core** | 10.0 | Suportado |
-| **Angular** | 18 | Suportado |
+| **Angular** | 19 | Suportado |
 | **.NET** | 10.0 | Suportado |
 
 ### Componentes Principais
@@ -201,7 +201,7 @@ O EAF segue os princípios do Domain-Driven Design (DDD) e implementa padrões c
 - **NSubstitute**: Mocking framework
 
 ### Frontend (Template)
-- **Angular 18**: Framework SPA
+- **Angular 19**: Framework SPA
 - **Node.js 20.20.0**: Runtime JavaScript
 - **TypeScript 5.2**: Linguagem principal
 - **Bootstrap 5**: Framework CSS
@@ -398,7 +398,7 @@ Este exemplo demonstra vários recursos do EAF:
 - **Atual**: 19% linha, 13.1% branch, 41.7% método
 - **Testes Backend**: 1289 total, 1289 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
-- **Testes API Template**: 212 total, 69 passando, 142 falhando (problema pré-existente de EF Core)
+- **Testes API Template**: 212 total, 211 passando, 1 ignorado (problema de EF Core corrigido)
 - **Próximos passos**: Melhorar cobertura dos módulos Middleware.Core, Middleware.Web.Core, Middleware.Ldap e AzureActiveDirectory
 
 ### Melhorias Implementadas
@@ -510,10 +510,10 @@ Este exemplo demonstra vários recursos do EAF:
 | Métrica | Valor |
 |---------|-------|
 | **Total de Testes** | 212 |
-| **Passando** | 69 |
-| **Falhando** | 142 |
+| **Passando** | 211 |
+| **Falhando** | 0 |
 | **Ignorados** | 1 |
-| **Problema Conhecido** | Configuração concorrente de EF Core DbContext (pré-existente) |
+| **Correção Aplicada** | `OnConfiguring` agora verifica provider via `optionsBuilder.Options.Extensions` ao invés de `Database.IsSqlServer()` |
 
 **Legenda:**
 - **Passando**: Todos os testes passam com sucesso

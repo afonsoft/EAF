@@ -37,6 +37,8 @@ namespace Eaf.ProjectName.Tests
 
         public override void PreInitialize()
         {
+            ProjectNameDbContext.SkipMigrate = true;
+
             Configuration.UnitOfWork.Timeout = TimeSpan.FromMinutes(30);
             Configuration.UnitOfWork.IsTransactional = false;
 

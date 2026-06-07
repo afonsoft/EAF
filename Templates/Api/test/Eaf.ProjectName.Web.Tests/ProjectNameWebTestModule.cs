@@ -48,6 +48,8 @@ namespace Eaf.ProjectName.Web.Tests
 
         public override void PreInitialize()
         {
+            ProjectNameDbContext.SkipMigrate = true;
+
             IocManager.RegisterIfNot<TokenAuthConfiguration>();
             Configuration.UnitOfWork.IsTransactional = false; //EF Core InMemory DB does not support transactions.
 
