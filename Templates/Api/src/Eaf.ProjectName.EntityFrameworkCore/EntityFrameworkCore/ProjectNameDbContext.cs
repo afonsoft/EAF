@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.SqlServer.Diagnostics.Internal;
 using System;
+using System.Linq;
 
 namespace Eaf.ProjectName.EntityFrameworkCore
 {
@@ -51,7 +52,10 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (Database.IsSqlServer())
+            var isSqlServer = optionsBuilder.Options.Extensions
+                .Any(e => e.GetType().FullName?.Contains("SqlServer") == true);
+
+            if (isSqlServer)
             {
                 optionsBuilder.ConfigureWarnings(w => w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS));
             }
