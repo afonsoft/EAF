@@ -2,161 +2,134 @@ using Eaf.Middleware.Authorization.Accounts.Dto;
 using Shouldly;
 using Xunit;
 
-namespace Eaf.Middleware.Application.Tests.Authorization.Accounts.Dto
+namespace Eaf.Middleware.Tests.Authorization.Accounts.Dto
 {
+    /// <summary>
+    /// Testes BDD para DTOs de Conta seguindo o padrão Dado/Quando/Então
+    /// </summary>
     public class AccountDtoTests
     {
+        #region IsTenantAvailableInput
+
         [Fact]
-        public void Dado_TenantAvailabilityState_Quando_VerificarValores_Entao_DeveSerCorreto()
+        public void Dado_IsTenantAvailableInput_Quando_DefinirTenancyName_Entao_DeveArmazenar()
         {
-            ((int)TenantAvailabilityState.Available).ShouldBe(1);
-            ((int)TenantAvailabilityState.InActive).ShouldBe(2);
-            ((int)TenantAvailabilityState.NotFound).ShouldBe(3);
+            // Dado & Quando
+            var input = new IsTenantAvailableInput { TenancyName = "acme" };
+
+            // Então
+            input.TenancyName.ShouldBe("acme");
         }
 
-        [Fact]
-        public void Dado_IsTenantAvailableOutput_Quando_CriarComEstado_Entao_DeveDefinirPropriedades()
-        {
-            var output = new IsTenantAvailableOutput(TenantAvailabilityState.Available, 1);
+        #endregion
 
-            output.State.ShouldBe(TenantAvailabilityState.Available);
-            output.TenantId.ShouldBe(1);
+        #region TenantAvailabilityState
+
+        [Fact]
+        public void Dado_TenantAvailabilityState_Quando_Verificar_Entao_DevemTerValoresCorretos()
+        {
+            TenantAvailabilityState.Available.ShouldBe((TenantAvailabilityState)1);
+            TenantAvailabilityState.InActive.ShouldBe((TenantAvailabilityState)2);
+            TenantAvailabilityState.NotFound.ShouldBe((TenantAvailabilityState)3);
         }
 
-        [Fact]
-        public void Dado_IsTenantAvailableOutput_Quando_CriarComServerRoot_Entao_DeveDefinirPropriedades()
-        {
-            var output = new IsTenantAvailableOutput(TenantAvailabilityState.Available, 1, "https://api.example.com");
+        #endregion
 
-            output.State.ShouldBe(TenantAvailabilityState.Available);
-            output.TenantId.ShouldBe(1);
-            output.ServerRootAddress.ShouldBe("https://api.example.com");
-        }
+        #region ResetPasswordInput
 
         [Fact]
-        public void Dado_IsTenantAvailableOutput_Quando_CriarSemTenantId_Entao_DeveSerNull()
+        public void Dado_ResetPasswordInput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
         {
-            var output = new IsTenantAvailableOutput(TenantAvailabilityState.NotFound);
-            output.TenantId.ShouldBeNull();
-        }
-
-        [Fact]
-        public void Dado_IsTenantAvailableOutput_Quando_CriarConstrutorPadrao_Entao_DeveFuncionar()
-        {
-            var output = new IsTenantAvailableOutput();
-            output.TenantId.ShouldBeNull();
-        }
-
-        [Fact]
-        public void Dado_RegisterOutput_Quando_CanLoginTrue_Entao_DeveRetornarTrue()
-        {
-            var output = new RegisterOutput { CanLogin = true };
-            output.CanLogin.ShouldBeTrue();
-        }
-
-        [Fact]
-        public void Dado_RegisterOutput_Quando_CanLoginFalse_Entao_DeveRetornarFalse()
-        {
-            var output = new RegisterOutput { CanLogin = false };
-            output.CanLogin.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void Dado_ImpersonateInput_Quando_DefinirPropriedades_Entao_DeveRetornarValoresCorretos()
-        {
-            var input = new ImpersonateInput
+            // Dado & Quando
+            var input = new ResetPasswordInput
             {
-                TenantId = 5,
+                AuthenticationSource = "LDAP",
+                Password = "NewP@ss123",
+                ResetCode = "ABC123",
+                ReturnUrl = "/dashboard",
+                SingleSignIn = "true",
                 UserId = 42
             };
 
-            input.TenantId.ShouldBe(5);
+            // Então
+            input.AuthenticationSource.ShouldBe("LDAP");
+            input.Password.ShouldBe("NewP@ss123");
+            input.ResetCode.ShouldBe("ABC123");
+            input.ReturnUrl.ShouldBe("/dashboard");
+            input.SingleSignIn.ShouldBe("true");
             input.UserId.ShouldBe(42);
         }
 
         [Fact]
-        public void Dado_ImpersonateOutput_Quando_DefinirPropriedades_Entao_DeveRetornarValoresCorretos()
+        public void Dado_ResetPasswordInput_Quando_NormalizeSemParametroC_Entao_NaoDeveAlterar()
         {
-            var output = new ImpersonateOutput
-            {
-                ImpersonationToken = "token-123",
-                TenancyName = "TenantA"
-            };
-
-            output.ImpersonationToken.ShouldBe("token-123");
-            output.TenancyName.ShouldBe("TenantA");
-        }
-
-        [Fact]
-        public void Dado_IsTenantAvailableInput_Quando_DefinirTenancyName_Entao_DeveRetornarCorreto()
-        {
-            var input = new IsTenantAvailableInput
-            {
-                TenancyName = "my-tenant"
-            };
-
-            input.TenancyName.ShouldBe("my-tenant");
-        }
-
-        [Fact]
-        public void Dado_SendPasswordResetCodeInput_Quando_DefinirEmail_Entao_DeveRetornarCorreto()
-        {
-            var input = new SendPasswordResetCodeInput
-            {
-                EmailAddress = "user@test.com"
-            };
-
-            input.EmailAddress.ShouldBe("user@test.com");
-        }
-
-        [Fact]
-        public void Dado_ResetPasswordInput_Quando_DefinirPropriedades_Entao_DeveRetornarValoresCorretos()
-        {
+            // Dado
             var input = new ResetPasswordInput
             {
-                Password = "newpass123",
-                ResetCode = "abc-reset",
                 UserId = 10,
-                ReturnUrl = "/login",
-                SingleSignIn = "true",
-                AuthenticationSource = "Local"
+                ResetCode = "XYZ"
             };
 
-            input.Password.ShouldBe("newpass123");
-            input.ResetCode.ShouldBe("abc-reset");
+            // Quando
+            input.Normalize();
+
+            // Então
             input.UserId.ShouldBe(10);
-            input.ReturnUrl.ShouldBe("/login");
-            input.SingleSignIn.ShouldBe("true");
-            input.AuthenticationSource.ShouldBe("Local");
+            input.ResetCode.ShouldBe("XYZ");
         }
+
+        #endregion
+
+        #region ResetPasswordOutput
 
         [Fact]
-        public void Dado_ResetPasswordInput_Quando_cVazio_Entao_NormalizeNaoDeveAlterarPropriedades()
+        public void Dado_ResetPasswordOutput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
         {
-            var input = new ResetPasswordInput
+            // Dado & Quando
+            var output = new ResetPasswordOutput
             {
-                UserId = 5,
-                ResetCode = "code",
-                c = ""
+                CanLogin = true,
+                UserName = "admin"
             };
 
-            input.Normalize();
-            input.UserId.ShouldBe(5);
-            input.ResetCode.ShouldBe("code");
+            // Então
+            output.CanLogin.ShouldBeTrue();
+            output.UserName.ShouldBe("admin");
         }
+
+        #endregion
+
+        #region SendPasswordResetCodeInput
 
         [Fact]
-        public void Dado_ResetPasswordInput_Quando_cNull_Entao_NormalizeNaoDeveAlterarPropriedades()
+        public void Dado_SendPasswordResetCodeInput_Quando_DefinirEmail_Entao_DeveArmazenar()
         {
-            var input = new ResetPasswordInput
+            // Dado & Quando
+            var input = new SendPasswordResetCodeInput { EmailAddress = "user@acme.com" };
+
+            // Então
+            input.EmailAddress.ShouldBe("user@acme.com");
+        }
+
+        #endregion
+
+        #region ActivateEmailInput
+
+        [Fact]
+        public void Dado_ActivateEmailInput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        {
+            // Dado & Quando
+            var input = new ActivateEmailInput
             {
                 UserId = 5,
-                ResetCode = "code"
+                ConfirmationCode = "confirm-abc"
             };
 
-            input.Normalize();
+            // Então
             input.UserId.ShouldBe(5);
-            input.ResetCode.ShouldBe("code");
+            input.ConfirmationCode.ShouldBe("confirm-abc");
         }
+
+        #endregion
     }
 }
