@@ -3,6 +3,7 @@ using Abp.RealTime;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Friendships;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -26,7 +27,9 @@ namespace Eaf.Middleware.Tests.Chat
         public async Task Dado_NullChatCommunicator_Quando_SendMessageToClient_Entao_DeveCompletarSemExcecao()
         {
             var clients = new List<IOnlineClient>();
-            var message = new ChatMessage();
+            var user = new UserIdentifier(1, 100);
+            var target = new UserIdentifier(1, 200);
+            var message = new ChatMessage(user, target, ChatSide.Sender, "Olá", ChatMessageReadState.Unread, Guid.NewGuid(), ChatMessageReadState.Unread);
             await _communicator.SendMessageToClient(clients, message);
         }
 
@@ -34,7 +37,9 @@ namespace Eaf.Middleware.Tests.Chat
         public async Task Dado_NullChatCommunicator_Quando_SendFriendshipRequestToClient_Entao_DeveCompletarSemExcecao()
         {
             var clients = new List<IOnlineClient>();
-            var friend = new Friendship(1, 100, 2, 200, "user2", "tenant2", FriendshipState.Accepted);
+            var user = new UserIdentifier(1, 100);
+            var probableFriend = new UserIdentifier(2, 200);
+            var friend = new Friendship(user, probableFriend, "tenant2", "user2", null, FriendshipState.Accepted);
             await _communicator.SendFriendshipRequestToClient(clients, friend, true, false);
         }
 
