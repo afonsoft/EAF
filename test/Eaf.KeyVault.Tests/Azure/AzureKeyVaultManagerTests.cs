@@ -3,6 +3,7 @@ using Eaf.KeyVault;
 using NSubstitute;
 using Shouldly;
 using System;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
@@ -42,7 +43,9 @@ namespace Eaf.KeyVault.Tests.Azure
         public void Constructor_WithValidCertificateCredentials_ShouldCreateInstance()
         {
             // Arrange
-            var certificate = new X509Certificate2(Array.Empty<byte>());
+            using var rsa = RSA.Create(2048);
+            var req = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddMinutes(5));
             _options.Azure.Certificate = certificate;
             _options.Azure.ClientSecret = null;
 

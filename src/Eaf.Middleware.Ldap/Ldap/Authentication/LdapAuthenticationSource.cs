@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Ldap.Authentication
@@ -125,28 +126,11 @@ namespace Eaf.Middleware.Ldap.Authentication
                     using (var searcherDisplayname = new PrincipalSearcher(searchMaskDisplayname))
                     using (var searcherUsername = new PrincipalSearcher(searchMaskUsername))
                     using (var searcherEmail = new PrincipalSearcher(searchMaskEmail))
-                    using (var taskDisplayname = Task.Run(() =>
-                    {
-                        if (searcherDisplayname.GetUnderlyingSearcher() is DirectorySearcher search)
-                            search.SizeLimit = 10;
-
-                        return searcherDisplayname.FindAll();
-                    }))
-                    using (var taskUsername = Task.Run(() =>
-                    {
-                        if (searcherUsername.GetUnderlyingSearcher() is DirectorySearcher search)
-                            search.SizeLimit = 10;
-
-                        return searcherUsername.FindAll();
-                    }))
-
-                    using (var taskEmail = Task.Run(() =>
-                    {
-                        if (searcherEmail.GetUnderlyingSearcher() is DirectorySearcher search)
-                            search.SizeLimit = 10;
-
-                        return searcherUsername.FindAll();
-                    }))
+#pragma warning disable CA1416 // Already guarded by OperatingSystem.IsWindows()
+                    using (var taskDisplayname = Task.Run(() => SearchWithLimit(searcherDisplayname, 10)))
+                    using (var taskUsername = Task.Run(() => SearchWithLimit(searcherUsername, 10)))
+                    using (var taskEmail = Task.Run(() => SearchWithLimit(searcherEmail, 10)))
+#pragma warning restore CA1416
                     {
                         foreach (Principal result in (await taskDisplayname).Union(await taskUsername).Union(await taskEmail))
                         {
@@ -615,5 +599,18 @@ namespace Eaf.Middleware.Ldap.Authentication
         }
 
         #endregion Windows
+
+        /// <summary>
+        /// Executes a <see cref="PrincipalSearcher"/> with a size limit on its underlying <see cref="DirectorySearcher"/>.
+        /// Extracted to isolate the Windows-only API call from the caller.
+        /// </summary>
+        [SupportedOSPlatform("windows")]
+        private static PrincipalSearchResult<Principal> SearchWithLimit(PrincipalSearcher searcher, int sizeLimit)
+        {
+            if (searcher.GetUnderlyingSearcher() is DirectorySearcher ds)
+                ds.SizeLimit = sizeLimit;
+
+            return searcher.FindAll();
+        }
     }
 }

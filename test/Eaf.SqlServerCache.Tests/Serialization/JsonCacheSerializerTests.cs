@@ -26,7 +26,7 @@ namespace Eaf.SqlServerCache.Tests.Serialization
         public void Dado_ObjetoNulo_Quando_Serializar_Entao_DeveRetornarNull()
         {
             // Dado
-            object obj = null;
+            object obj = null!;
 
             // Quando
             var result = _serializer.Serialize(obj);
@@ -84,7 +84,7 @@ namespace Eaf.SqlServerCache.Tests.Serialization
         public void Dado_ObjetoComPropriedadeNula_Quando_Serializar_Entao_DeveIgnorarNulos()
         {
             // Dado
-            var value = new { Nome = "Teste", Descricao = (string)null };
+            var value = new { Nome = "Teste", Descricao = (string)null! };
 
             // Quando
             var result = _serializer.Serialize(value);
@@ -174,7 +174,7 @@ namespace Eaf.SqlServerCache.Tests.Serialization
         public void Dado_BytesNulos_Quando_Desserializar_Entao_DeveRetornarNull()
         {
             // Dado
-            byte[] data = null;
+            byte[] data = null!;
 
             // Quando
             var result = _serializer.Deserialize(data);

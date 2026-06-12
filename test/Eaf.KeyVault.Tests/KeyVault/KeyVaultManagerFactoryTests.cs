@@ -107,7 +107,7 @@ namespace Eaf.KeyVault.Tests.KeyVault
         public void Dado_OptionsNulo_Quando_Create_Entao_DeveRetornarNullKeyVaultManager()
         {
             // Dado
-            EafKeyVaultOptions options = null;
+            EafKeyVaultOptions options = null!;
 
             // Quando
             var result = _factory.Create(options);

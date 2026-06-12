@@ -9,7 +9,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
 {
     public class HangFireConfigurerTests
     {
-        private static IConfiguration BuildConfiguration(Dictionary<string, string> settings)
+        private static IConfiguration BuildConfiguration(Dictionary<string, string?> settings)
         {
             return new ConfigurationBuilder()
                 .AddInMemoryCollection(settings)
@@ -21,7 +21,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderSqlServer_Quando_ResolverStorage_Entao_DeveRetornarSqlServer()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "SqlServer" }
             });
@@ -34,7 +34,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderMSSQL_Quando_ResolverStorage_Entao_DeveRetornarSqlServer()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "MSSQL" }
             });
@@ -47,7 +47,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderSqlServerCaseInsensitive_Quando_ResolverStorage_Entao_DeveRetornarSqlServer()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "sqlserver" }
             });
@@ -60,7 +60,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderNaoDefinido_Quando_ResolverStorage_Entao_DeveRetornarSqlServerPadrao()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>());
+            var config = BuildConfiguration(new Dictionary<string, string?>());
 
             var result = HangFireConfigurer.ResolveStorageType(config);
 
@@ -74,7 +74,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderPostgreSQL_E_RedisHabilitado_Quando_ResolverStorage_Entao_DeveRetornarRedis()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "PostgreSQL" },
                 { "RedisCache:IsEnabled", "true" },
@@ -89,7 +89,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderMySQL_E_RedisHabilitado_Quando_ResolverStorage_Entao_DeveRetornarRedis()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "MySQL" },
                 { "RedisCache:IsEnabled", "true" }
@@ -103,7 +103,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderPostgres_E_IsRedisEnabled_Quando_ResolverStorage_Entao_DeveRetornarRedis()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "Postgres" },
                 { "RedisCache:IsRedisEnabled", "true" }
@@ -121,7 +121,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderPostgreSQL_E_RediDesabilitado_Quando_ResolverStorage_Entao_DeveRetornarInMemory()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "PostgreSQL" },
                 { "RedisCache:IsEnabled", "false" }
@@ -135,7 +135,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderMySQL_E_SemRedis_Quando_ResolverStorage_Entao_DeveRetornarInMemory()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "MySQL" }
             });
@@ -148,7 +148,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ForceInMemory_E_SqlServer_Quando_ResolverStorage_Entao_DeveRetornarInMemory()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "SqlServer" },
                 { "Hangfire:IsInMemoryDatabase", "true" }
@@ -162,7 +162,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ForceInMemory_E_RedisHabilitado_Quando_ResolverStorage_Entao_DeveRetornarInMemory()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "PostgreSQL" },
                 { "Hangfire:IsInMemoryDatabase", "true" },
@@ -181,7 +181,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_SqlServer_E_RedisHabilitado_Quando_ResolverStorage_Entao_DeveRetornarSqlServer()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "SqlServer" },
                 { "RedisCache:IsEnabled", "true" }
@@ -195,7 +195,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_MSSQL_E_RedisHabilitado_Quando_ResolverStorage_Entao_DeveRetornarSqlServer()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "MSSQL" },
                 { "RedisCache:IsEnabled", "true" }
@@ -209,7 +209,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_IsInMemoryDatabaseFalse_E_SqlServer_Quando_ResolverStorage_Entao_DeveRetornarSqlServer()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "SqlServer" },
                 { "Hangfire:IsInMemoryDatabase", "false" }
@@ -223,7 +223,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderOracle_E_SemRedis_Quando_ResolverStorage_Entao_DeveRetornarInMemory()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "Oracle" }
             });
@@ -236,7 +236,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_ProviderOracle_E_RedisHabilitado_Quando_ResolverStorage_Entao_DeveRetornarRedis()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "Oracle" },
                 { "RedisCache:IsEnabled", "true" }
@@ -250,7 +250,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Configuration
         [Fact]
         public void Dado_RedisConfigInvalido_Quando_ResolverStorage_Entao_DeveRetornarInMemorySemException()
         {
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var config = BuildConfiguration(new Dictionary<string, string?>
             {
                 { "Database:Provider", "PostgreSQL" },
                 { "RedisCache:IsEnabled", "yes" }

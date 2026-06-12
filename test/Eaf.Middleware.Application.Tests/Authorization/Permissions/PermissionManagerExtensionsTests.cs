@@ -52,7 +52,7 @@ namespace Eaf.Middleware.Tests.Authorization.Permissions
             var permission2 = new Permission("Permission2", new LocalizableString("Permission 2", "Eaf"));
 
             _permissionManager.GetPermissionOrNull("Permission1").Returns(permission1);
-            _permissionManager.GetPermissionOrNull("InvalidPermission").Returns((Permission)null);
+            _permissionManager.GetPermissionOrNull("InvalidPermission").Returns((Permission)null!);
             _permissionManager.GetPermissionOrNull("Permission2").Returns(permission2);
 
             // Act & Assert
@@ -63,7 +63,7 @@ namespace Eaf.Middleware.Tests.Authorization.Permissions
 
             exception.Message.ShouldContain("1 undefined permission");
             exception.ValidationErrors.Count.ShouldBe(1);
-            exception.ValidationErrors.First().ErrorMessage.ShouldContain("InvalidPermission");
+            exception.ValidationErrors.First().ErrorMessage!.ShouldContain("InvalidPermission");
         }
 
         [Fact]
@@ -72,9 +72,9 @@ namespace Eaf.Middleware.Tests.Authorization.Permissions
             // Arrange
             var permissionNames = new[] { "InvalidPermission1", "InvalidPermission2", "InvalidPermission3" };
 
-            _permissionManager.GetPermissionOrNull("InvalidPermission1").Returns((Permission)null);
-            _permissionManager.GetPermissionOrNull("InvalidPermission2").Returns((Permission)null);
-            _permissionManager.GetPermissionOrNull("InvalidPermission3").Returns((Permission)null);
+            _permissionManager.GetPermissionOrNull("InvalidPermission1").Returns((Permission)null!);
+            _permissionManager.GetPermissionOrNull("InvalidPermission2").Returns((Permission)null!);
+            _permissionManager.GetPermissionOrNull("InvalidPermission3").Returns((Permission)null!);
 
             // Act & Assert
             var exception = Should.Throw<AbpValidationException>(() =>
@@ -123,7 +123,7 @@ namespace Eaf.Middleware.Tests.Authorization.Permissions
             // Arrange
             var permissionNames = new[] { "InvalidPermission" };
 
-            _permissionManager.GetPermissionOrNull("InvalidPermission").Returns((Permission)null);
+            _permissionManager.GetPermissionOrNull("InvalidPermission").Returns((Permission)null!);
 
             // Act & Assert
             var exception = Should.Throw<AbpValidationException>(() =>
@@ -139,7 +139,7 @@ namespace Eaf.Middleware.Tests.Authorization.Permissions
         public void GetPermissionsFromNamesByValidating_NullPermissionNames_ThrowsNullReferenceException()
         {
             // Arrange
-            IEnumerable<string> permissionNames = null;
+            IEnumerable<string> permissionNames = null!;
 
             // Act & Assert
             Should.Throw<NullReferenceException>(() =>

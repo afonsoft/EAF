@@ -11,6 +11,8 @@
 		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;OpenTelemetry;Caching;Eaf;Boilerplate</PackageTags>
 		<Description>Enterprise Application Foundation - OpenTelemetry implementation</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<!-- Suppress NU5104: OpenTelemetry beta packages have no stable release yet -->
+		<NoWarn>$(NoWarn);NU5104</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

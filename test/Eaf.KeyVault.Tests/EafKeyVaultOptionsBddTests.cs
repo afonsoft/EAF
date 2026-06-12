@@ -2,6 +2,7 @@ using Eaf.KeyVault;
 using Shouldly;
 using System;
 using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
@@ -158,7 +159,9 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var options = new EafKeyVaultOptions();
-            var certificate = new X509Certificate2();
+            using var rsa = RSA.Create(2048);
+            var req = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddMinutes(5));
 
             // Quando
             options.Azure.Certificate = certificate;
@@ -175,7 +178,9 @@ namespace Eaf.KeyVault.Tests
             var applicationId = "app-id-123";
             var tenantId = "tenant-id-456";
             var clientSecret = "secret-789";
-            var certificate = new X509Certificate2();
+            using var rsa = RSA.Create(2048);
+            var req = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            var certificate = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddMinutes(5));
 
             // Quando
             options.Azure.ApplicationId = applicationId;
