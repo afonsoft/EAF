@@ -1,0 +1,73 @@
+using Abp;
+using Abp.RealTime;
+using Eaf.Middleware.Chat;
+using Eaf.Middleware.Friendships;
+using Shouldly;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Eaf.Middleware.Tests.Chat
+{
+    /// <summary>
+    /// Testes BDD para NullChatCommunicator seguindo o padrão Dado/Quando/Então
+    /// </summary>
+    public class NullChatCommunicatorBddTests
+    {
+        private readonly NullChatCommunicator _communicator = new();
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendMessageToAll_Entao_DeveCompletarSemExcecao()
+        {
+            await _communicator.SendMessageToAll("test message");
+        }
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendMessageToClient_Entao_DeveCompletarSemExcecao()
+        {
+            var clients = new List<IOnlineClient>();
+            var message = new ChatMessage();
+            await _communicator.SendMessageToClient(clients, message);
+        }
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendFriendshipRequestToClient_Entao_DeveCompletarSemExcecao()
+        {
+            var clients = new List<IOnlineClient>();
+            var friend = new Friendship(1, 100, 2, 200, "user2", "tenant2", FriendshipState.Accepted);
+            await _communicator.SendFriendshipRequestToClient(clients, friend, true, false);
+        }
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendUserConnectionChangeToClients_Entao_DeveCompletarSemExcecao()
+        {
+            var clients = new List<IOnlineClient>();
+            var user = new UserIdentifier(1, 100);
+            await _communicator.SendUserConnectionChangeToClients(clients, user, true);
+        }
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendUserStateChangeToClients_Entao_DeveCompletarSemExcecao()
+        {
+            var clients = new List<IOnlineClient>();
+            var user = new UserIdentifier(1, 100);
+            await _communicator.SendUserStateChangeToClients(clients, user, FriendshipState.Accepted);
+        }
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendReadStateChangeToClients_Entao_DeveCompletarSemExcecao()
+        {
+            var clients = new List<IOnlineClient>();
+            var user = new UserIdentifier(1, 100);
+            await _communicator.SendReadStateChangeToClients(clients, user);
+        }
+
+        [Fact]
+        public async Task Dado_NullChatCommunicator_Quando_SendAllUnreadMessagesOfUserReadToClients_Entao_DeveCompletarSemExcecao()
+        {
+            var clients = new List<IOnlineClient>();
+            var user = new UserIdentifier(1, 100);
+            await _communicator.SendAllUnreadMessagesOfUserReadToClients(clients, user);
+        }
+    }
+}

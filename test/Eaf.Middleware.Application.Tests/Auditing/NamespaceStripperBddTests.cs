@@ -56,5 +56,46 @@ namespace Eaf.Middleware.Tests.Auditing
             // Então
             result.ShouldBeNull();
         }
+
+        [Fact]
+        public void Dado_NomeGenericoComNamespace_Quando_StripNameSpace_Entao_DeveRetornarTipoGenericoSimples()
+        {
+            // Dado
+            var genericName = "System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]";
+
+            // Quando
+            var result = _stripper.StripNameSpace(genericName);
+
+            // Então
+            result.ShouldContain("List");
+            result.ShouldContain("<");
+            result.ShouldContain(">");
+        }
+
+        [Fact]
+        public void Dado_NomeSemPontos_Quando_StripNameSpace_Entao_DeveRetornarMesmo()
+        {
+            // Dado
+            var name = "SimpleClass";
+
+            // Quando
+            var result = _stripper.StripNameSpace(name);
+
+            // Então
+            result.ShouldBe("SimpleClass");
+        }
+
+        [Fact]
+        public void Dado_NomeComUmPonto_Quando_StripNameSpace_Entao_DeveRetornarUltimaParte()
+        {
+            // Dado
+            var name = "Namespace.ClassName";
+
+            // Quando
+            var result = _stripper.StripNameSpace(name);
+
+            // Então
+            result.ShouldBe("ClassName");
+        }
     }
 }
