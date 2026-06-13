@@ -16,9 +16,9 @@ namespace Eaf.Middleware.Tests.Net.MimeTypes
         }
 
         [Fact]
-        public void Dado_ApplicationXml_Quando_Verificar_Entao_DeveSerApplicationXml()
+        public void Dado_ApplicationXmlDtd_Quando_Verificar_Entao_DeveSerApplicationXmlDtd()
         {
-            MimeTypeNames.ApplicationXml.ShouldBe("application/xml");
+            MimeTypeNames.ApplicationXmlDtd.ShouldBe("application/xml-dtd");
         }
 
         [Fact]

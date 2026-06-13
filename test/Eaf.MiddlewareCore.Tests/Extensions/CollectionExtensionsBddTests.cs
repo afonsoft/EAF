@@ -18,7 +18,7 @@ namespace Eaf.Middleware.Tests.Extensions
             var list = new List<int> { 1, 2, 3, 4, 5, 6 };
 
             // Quando
-            list.RemoveAll(x => x % 2 == 0);
+            CollectionExtensions.CollectionExtensions.RemoveAll(list, x => x % 2 == 0);
 
             // Então
             list.Count.ShouldBe(3);
@@ -34,7 +34,7 @@ namespace Eaf.Middleware.Tests.Extensions
             var list = new List<string>();
 
             // Quando
-            list.RemoveAll(x => x == "test");
+            CollectionExtensions.CollectionExtensions.RemoveAll(list, x => x == "test");
 
             // Então
             list.Count.ShouldBe(0);
@@ -47,7 +47,7 @@ namespace Eaf.Middleware.Tests.Extensions
             ICollection<int> collection = new HashSet<int> { 1, 2, 3, 4, 5 };
 
             // Quando
-            collection.RemoveAll(x => x > 3);
+            CollectionExtensions.CollectionExtensions.RemoveAll(collection, x => x > 3);
 
             // Então
             collection.Count.ShouldBe(3);
@@ -63,7 +63,7 @@ namespace Eaf.Middleware.Tests.Extensions
             var list = new List<int> { 10, 20, 30 };
 
             // Quando
-            list.RemoveAll(x => true);
+            CollectionExtensions.CollectionExtensions.RemoveAll(list, x => true);
 
             // Então
             list.ShouldBeEmpty();
@@ -76,7 +76,7 @@ namespace Eaf.Middleware.Tests.Extensions
             var list = new List<string> { "a", "b", "c" };
 
             // Quando
-            list.RemoveAll(x => false);
+            CollectionExtensions.CollectionExtensions.RemoveAll(list, x => false);
 
             // Então
             list.Count.ShouldBe(3);

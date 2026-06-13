@@ -189,13 +189,13 @@ namespace Eaf.Middleware.Tests.Chat.Dto
 
         #endregion
 
-        #region MarkMessagesAsReadInput
+        #region MarkAllUnreadMessagesOfUserAsReadInput
 
         [Fact]
-        public void Dado_MarkMessagesAsReadInput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_MarkAllUnreadMessagesOfUserAsReadInput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
         {
             // Dado & Quando
-            var input = new MarkMessagesAsReadInput
+            var input = new MarkAllUnreadMessagesOfUserAsReadInput
             {
                 TenantId = 2,
                 UserId = 55
