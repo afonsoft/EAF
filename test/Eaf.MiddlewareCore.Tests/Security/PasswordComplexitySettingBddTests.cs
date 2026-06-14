@@ -4,80 +4,124 @@ using Xunit;
 
 namespace Eaf.Middleware.Tests.Security
 {
-    /// <summary>
-    /// Testes BDD para PasswordComplexitySetting seguindo o padrão Dado/Quando/Então
-    /// </summary>
     public class PasswordComplexitySettingBddTests
     {
         [Fact]
-        public void Dado_DoisSettingsIguais_Quando_Comparar_Entao_DeveRetornarTrue()
+        public void Dado_DoisSettingsIguais_Quando_Equals_Entao_DeveRetornarTrue()
         {
-            // Dado
-            var setting1 = new PasswordComplexitySetting
+            var a = new PasswordComplexitySetting
             {
                 RequireDigit = true,
                 RequireLowercase = true,
                 RequireUppercase = true,
-                RequireNonAlphanumeric = true,
+                RequireNonAlphanumeric = false,
                 RequiredLength = 8
             };
-            var setting2 = new PasswordComplexitySetting
+
+            var b = new PasswordComplexitySetting
             {
                 RequireDigit = true,
                 RequireLowercase = true,
                 RequireUppercase = true,
-                RequireNonAlphanumeric = true,
+                RequireNonAlphanumeric = false,
                 RequiredLength = 8
             };
 
-            // Quando & Então
-            setting1.Equals(setting2).ShouldBeTrue();
+            a.Equals(b).ShouldBeTrue();
         }
 
         [Fact]
-        public void Dado_DoisSettingsDiferentes_Quando_Comparar_Entao_DeveRetornarFalse()
+        public void Dado_SettingsDiferentes_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            // Dado
-            var setting1 = new PasswordComplexitySetting { RequireDigit = true, RequiredLength = 8 };
-            var setting2 = new PasswordComplexitySetting { RequireDigit = false, RequiredLength = 8 };
+            var a = new PasswordComplexitySetting
+            {
+                RequireDigit = true,
+                RequireLowercase = true,
+                RequireUppercase = true,
+                RequireNonAlphanumeric = false,
+                RequiredLength = 8
+            };
 
-            // Quando & Então
-            setting1.Equals(setting2).ShouldBeFalse();
+            var b = new PasswordComplexitySetting
+            {
+                RequireDigit = false,
+                RequireLowercase = true,
+                RequireUppercase = true,
+                RequireNonAlphanumeric = false,
+                RequiredLength = 8
+            };
+
+            a.Equals(b).ShouldBeFalse();
         }
 
         [Fact]
-        public void Dado_SettingComparadoComNull_Quando_Comparar_Entao_DeveRetornarFalse()
+        public void Dado_SettingNull_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            // Dado
-            var setting = new PasswordComplexitySetting { RequiredLength = 6 };
+            var a = new PasswordComplexitySetting
+            {
+                RequireDigit = true,
+                RequiredLength = 6
+            };
 
-            // Quando & Então
-            setting.Equals(null).ShouldBeFalse();
+            a.Equals(null).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(true, true, true, true, 12)]
+        [InlineData(false, false, false, false, 4)]
+        public void Dado_PasswordComplexitySetting_Quando_DefinirPropriedades_Entao_DevePersistir(
+            bool digit, bool lower, bool upper, bool nonAlpha, int length)
+        {
+            var setting = new PasswordComplexitySetting
+            {
+                RequireDigit = digit,
+                RequireLowercase = lower,
+                RequireUppercase = upper,
+                RequireNonAlphanumeric = nonAlpha,
+                RequiredLength = length
+            };
+
+            setting.RequireDigit.ShouldBe(digit);
+            setting.RequireLowercase.ShouldBe(lower);
+            setting.RequireUppercase.ShouldBe(upper);
+            setting.RequireNonAlphanumeric.ShouldBe(nonAlpha);
+            setting.RequiredLength.ShouldBe(length);
         }
 
         [Fact]
-        public void Dado_SettingComRequiredLengthDiferente_Quando_Comparar_Entao_DeveRetornarFalse()
+        public void Dado_RequiredLengthDiferente_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            // Dado
-            var setting1 = new PasswordComplexitySetting { RequiredLength = 6 };
-            var setting2 = new PasswordComplexitySetting { RequiredLength = 10 };
+            var a = new PasswordComplexitySetting { RequiredLength = 8 };
+            var b = new PasswordComplexitySetting { RequiredLength = 12 };
 
-            // Quando & Então
-            setting1.Equals(setting2).ShouldBeFalse();
+            a.Equals(b).ShouldBeFalse();
         }
 
         [Fact]
-        public void Dado_NovoSetting_Quando_Criar_Entao_DeveTerValoresPadrao()
+        public void Dado_RequireLowercaseDiferente_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            // Dado & Quando
-            var setting = new PasswordComplexitySetting();
+            var a = new PasswordComplexitySetting { RequireLowercase = true };
+            var b = new PasswordComplexitySetting { RequireLowercase = false };
 
-            // Então
-            setting.RequireDigit.ShouldBeFalse();
-            setting.RequireLowercase.ShouldBeFalse();
-            setting.RequireUppercase.ShouldBeFalse();
-            setting.RequireNonAlphanumeric.ShouldBeFalse();
-            setting.RequiredLength.ShouldBe(0);
+            a.Equals(b).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_RequireUppercaseDiferente_Quando_Equals_Entao_DeveRetornarFalse()
+        {
+            var a = new PasswordComplexitySetting { RequireUppercase = true };
+            var b = new PasswordComplexitySetting { RequireUppercase = false };
+
+            a.Equals(b).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_RequireNonAlphanumericDiferente_Quando_Equals_Entao_DeveRetornarFalse()
+        {
+            var a = new PasswordComplexitySetting { RequireNonAlphanumeric = true };
+            var b = new PasswordComplexitySetting { RequireNonAlphanumeric = false };
+
+            a.Equals(b).ShouldBeFalse();
         }
     }
 }
