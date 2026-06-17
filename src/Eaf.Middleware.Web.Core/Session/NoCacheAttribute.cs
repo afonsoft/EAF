@@ -3,6 +3,9 @@ using System;
 
 namespace Eaf.Middleware.Web.Session
 {
+    /// <summary>
+    /// Representa a classe NoCacheAttribute.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class NoCacheAttribute : ActionFilterAttribute
     {

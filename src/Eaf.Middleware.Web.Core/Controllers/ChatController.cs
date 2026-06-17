@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Web.Controllers
 {
+    /// <summary>
+    /// Controller responsável por endpoints de Chat.
+    /// </summary>
     [AbpAllowAnonymous]
     public class ChatController : ChatControllerBase
     {

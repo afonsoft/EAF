@@ -52,6 +52,9 @@ using Eaf.Security;
 
 namespace Eaf.Middleware.Web.Controllers
 {
+    /// <summary>
+    /// Controller responsável por endpoints de TokenAuth.
+    /// </summary>
     [AbpAllowAnonymous]
     [Route("api/[controller]/[action]")]
     public class TokenAuthController : MiddlewareControllerBase, IApplicationService

@@ -47,6 +47,9 @@ namespace Eaf.Middleware.Web
         typeof(AbpRedisCacheModule),
         typeof(EafSqlServerCacheModule)
     )]
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareWebCore.
+    /// </summary>
     public class MiddlewareWebCoreModule : AbpModule
     {
         private readonly IConfigurationRoot _appConfiguration;
