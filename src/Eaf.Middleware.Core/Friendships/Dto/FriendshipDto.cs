@@ -3,6 +3,9 @@ using System;
 
 namespace Eaf.Middleware.Friendships.Dto
 {
+    /// <summary>
+    /// DTO (Data Transfer Object) para Friendship.
+    /// </summary>
     [AutoMap(typeof(Friendship))]
     public class FriendshipDto
     {

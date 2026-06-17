@@ -2,6 +2,9 @@ using System;
 
 namespace Eaf.Middleware.Authorization.Impersonation
 {
+    /// <summary>
+    /// Item de cache para armazenamento de Impersonation.
+    /// </summary>
     [Serializable]
     public class ImpersonationCacheItem
     {

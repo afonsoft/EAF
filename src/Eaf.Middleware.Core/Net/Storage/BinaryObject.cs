@@ -7,6 +7,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eaf.Middleware.Storage
 {
+    /// <summary>
+    /// Representa a classe BinaryObject.
+    /// </summary>
     [Table("EafBinaryObjects")]
     public class BinaryObject : CreationAuditedEntity<Guid>, IMayHaveTenant
     {
