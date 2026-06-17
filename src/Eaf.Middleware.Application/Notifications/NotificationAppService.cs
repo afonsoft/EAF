@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Notifications
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Notification.
+    /// </summary>
     [AbpAuthorize]
     public class NotificationAppService : MiddlewareAppServiceBase, INotificationAppService
     {

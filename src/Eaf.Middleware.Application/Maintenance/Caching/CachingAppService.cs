@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Maintenance.Caching
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Caching.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Maintenance)]
     public class CachingAppService : MiddlewareAppServiceBase, ICachingAppService
     {

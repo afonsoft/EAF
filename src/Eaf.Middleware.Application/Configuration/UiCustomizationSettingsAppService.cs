@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Configuration
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de UiCustomizationSettings.
+    /// </summary>
     [AbpAuthorize]
     public class UiCustomizationSettingsAppService : MiddlewareAppServiceBase, IUiCustomizationSettingsAppService
     {

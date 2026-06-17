@@ -6,6 +6,9 @@ using Eaf.Middleware.MultiTenancy.Dto;
 
 namespace Eaf.Middleware.MultiTenancy
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de TenantAddress.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Tenants)]
     public class TenantAddressAppService : AsyncCrudAppService<TenantAddress, TenantAddressDto>
     {

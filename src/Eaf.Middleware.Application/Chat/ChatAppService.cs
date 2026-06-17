@@ -18,6 +18,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Chat
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Chat.
+    /// </summary>
     [AbpAuthorize]
     public class ChatAppService : MiddlewareAppServiceBase, IChatAppService
     {

@@ -17,6 +17,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eaf.Middleware.Authorization.Roles
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Role.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Roles)]
     public class RoleAppService : MiddlewareAppServiceBase, IRoleAppService
     {

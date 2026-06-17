@@ -2,6 +2,9 @@ using System;
 
 namespace Eaf.Middleware.Authorization.TwoFactor
 {
+    /// <summary>
+    /// Item de cache para armazenamento de TwoFactorCode.
+    /// </summary>
     [Serializable]
     public class TwoFactorCodeCacheItem
     {

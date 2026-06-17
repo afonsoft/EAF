@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Authorization.Users
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de UserLogin.
+    /// </summary>
     [AbpAuthorize]
     public class UserLoginAppService : MiddlewareAppServiceBase, IUserLoginAppService
     {

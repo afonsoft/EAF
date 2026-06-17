@@ -14,6 +14,9 @@ using System.Linq;
 
 namespace Eaf.Middleware.Logging
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de WebLog.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Maintenance)]
     public class WebLogAppService : MiddlewareAppServiceBase, IWebLogAppService
     {

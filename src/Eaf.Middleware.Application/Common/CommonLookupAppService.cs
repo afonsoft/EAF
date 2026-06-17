@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Common
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de CommonLookup.
+    /// </summary>
     [AbpAuthorize]
     public class CommonLookupAppService : MiddlewareAppServiceBase, ICommonLookupAppService
     {

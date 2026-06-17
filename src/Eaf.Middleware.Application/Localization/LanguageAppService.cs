@@ -18,6 +18,9 @@ using Abp.Linq.Extensions;
 
 namespace Eaf.Middleware.Localization
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Language.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Languages)]
     public class LanguageAppService : MiddlewareAppServiceBase, ILanguageAppService
     {

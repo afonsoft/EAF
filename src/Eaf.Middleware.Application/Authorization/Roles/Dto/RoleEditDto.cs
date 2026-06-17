@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Eaf.Middleware.Authorization.Roles.Dto
 {
+    /// <summary>
+    /// DTO (Data Transfer Object) para RoleEdit.
+    /// </summary>
     [AutoMap(typeof(Role))]
     public class RoleEditDto
     {

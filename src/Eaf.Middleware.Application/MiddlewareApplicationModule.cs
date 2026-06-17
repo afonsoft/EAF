@@ -16,6 +16,9 @@ namespace Eaf.Middleware
     [DependsOn(
         typeof(MiddlewareCoreModule)
         )]
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareApplication.
+    /// </summary>
     public class MiddlewareApplicationModule : AbpModule
     {
         /// <summary>

@@ -20,6 +20,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Auditing
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de AuditLog.
+    /// </summary>
     [DisableAuditing]
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_AuditLogs)]
     public class AuditLogAppService : MiddlewareAppServiceBase, IAuditLogAppService

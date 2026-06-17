@@ -19,6 +19,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Chat
 {
+    /// <summary>
+    /// Gerenciador responsável pela lógica de ChatMessage.
+    /// </summary>
     [AbpAuthorize]
     public class ChatMessageManager : DomainService, IChatMessageManager
     {
