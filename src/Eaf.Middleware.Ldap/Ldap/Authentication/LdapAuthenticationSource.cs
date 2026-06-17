@@ -25,6 +25,9 @@ namespace Eaf.Middleware.Ldap.Authentication
     /// </summary>
     /// <typeparam name="TTenant">Tenant type</typeparam>
     /// <typeparam name="TUser">User type</typeparam>
+    /// <summary>
+    /// Fonte de autenticação LdapAuthenticationSource.
+    /// </summary>
     public abstract class LdapAuthenticationSource<TTenant, TUser> : DefaultExternalAuthenticationSource<TTenant, TUser>, ITransientDependency
         where TTenant : AbpTenant<TUser>
         where TUser : AbpUserBase, new()

@@ -29,6 +29,9 @@ namespace Eaf.Middleware.Worker
         typeof(AbpZeroCommonModule),
         typeof(AbpAutoMapperModule),
         typeof(AbpMailKitModule))]
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareWorker.
+    /// </summary>
     public class MiddlewareWorkerModule : AbpModule
     {
         private readonly IConfigurationRoot _appConfiguration;

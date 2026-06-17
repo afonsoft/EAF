@@ -4,6 +4,9 @@ using System;
 
 namespace Eaf.KeyVault.AspNetCore
 {
+    /// <summary>
+    /// Módulo ABP que configura e inicializa EafKeyVaultAspNetCore.
+    /// </summary>
     [DependsOn(typeof(EafKeyVaultModule))]
     public class EafKeyVaultAspNetCoreModule : AbpModule
     {
