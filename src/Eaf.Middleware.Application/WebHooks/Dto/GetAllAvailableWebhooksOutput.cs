@@ -3,6 +3,9 @@ using Abp.Webhooks;
 
 namespace Eaf.Middleware.WebHooks.Dto
 {
+    /// <summary>
+    /// Representa a classe GetAllAvailableWebhooksOutput.
+    /// </summary>
     [AutoMap(typeof(WebhookDefinition))]
     public class GetAllAvailableWebhooksOutput
     {

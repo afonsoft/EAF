@@ -373,7 +373,7 @@ namespace Eaf.KeyVault.Tests
         public void Constructor_WithNullOptionsValue_ShouldCreateDefaultOptions()
         {
             // Arrange
-            EafKeyVaultOptions nullOptions = null;
+            EafKeyVaultOptions nullOptions = null!;
 
             // Act
             var manager = new KeyVaultSecretManager((EafKeyVaultOptions?)nullOptions);

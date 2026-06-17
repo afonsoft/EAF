@@ -40,6 +40,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
             // Arrange
             var model = new AuthenticateModel();
             var property = model.GetType().GetProperty("UserNameOrEmailAddress");
+            property.ShouldNotBeNull();
 
             // Act
             var attributes = property.GetCustomAttributes(typeof(RequiredAttribute), false);
@@ -54,6 +55,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
             // Arrange
             var model = new AuthenticateModel();
             var property = model.GetType().GetProperty("UserNameOrEmailAddress");
+            property.ShouldNotBeNull();
 
             // Act
             var attributes = property.GetCustomAttributes(typeof(MaxLengthAttribute), false);
@@ -68,6 +70,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
             // Arrange
             var model = new AuthenticateModel();
             var property = model.GetType().GetProperty("Password");
+            property.ShouldNotBeNull();
 
             // Act
             var attributes = property.GetCustomAttributes(typeof(RequiredAttribute), false);
@@ -82,6 +85,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
             // Arrange
             var model = new AuthenticateModel();
             var property = model.GetType().GetProperty("Password");
+            property.ShouldNotBeNull();
 
             // Act
             var attributes = property.GetCustomAttributes(typeof(MaxLengthAttribute), false);
@@ -96,6 +100,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
             // Arrange
             var model = new AuthenticateModel();
             var property = model.GetType().GetProperty("Password");
+            property.ShouldNotBeNull();
 
             // Act
             var attributes = property.GetCustomAttributes(typeof(Abp.Auditing.DisableAuditingAttribute), false);
@@ -110,6 +115,7 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
             // Arrange
             var model = new AuthenticateModel();
             var property = model.GetType().GetProperty("CaptchaResponse");
+            property.ShouldNotBeNull();
 
             // Act
             var attributes = property.GetCustomAttributes(typeof(Abp.Auditing.DisableAuditingAttribute), false);

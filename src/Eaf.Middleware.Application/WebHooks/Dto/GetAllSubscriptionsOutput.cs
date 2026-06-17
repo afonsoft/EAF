@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Eaf.Middleware.WebHooks.Dto
 {
+    /// <summary>
+    /// Representa a classe GetAllSubscriptionsOutput.
+    /// </summary>
     [AutoMap(typeof(WebhookSubscription))]
     public class GetAllSubscriptionsOutput : EntityDto<Guid>
     {

@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Friendships
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Friendship.
+    /// </summary>
     [AbpAuthorize]
     public class FriendshipAppService : MiddlewareAppServiceBase, IFriendshipAppService
     {

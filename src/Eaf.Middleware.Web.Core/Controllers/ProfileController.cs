@@ -4,6 +4,9 @@ using Eaf.Middleware.Storage;
 
 namespace Eaf.Middleware.Web.Controllers
 {
+    /// <summary>
+    /// Controller responsável por endpoints de Profile.
+    /// </summary>
     [AbpAuthorize]
     public class ProfileController : ProfileControllerBase
     {

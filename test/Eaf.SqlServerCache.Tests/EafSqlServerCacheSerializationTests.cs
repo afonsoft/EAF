@@ -107,7 +107,7 @@ namespace Eaf.SqlServerCache.Tests
         {
             // Dado
             var key = "list-key";
-            var value = new List<object> { "item1", 2, true, null };
+            var value = new List<object> { "item1", 2, true, null! };
 
             // Quando & Então
             Should.NotThrow(() => _cache.Set(key, value));
@@ -206,7 +206,7 @@ namespace Eaf.SqlServerCache.Tests
         {
             // Dado
             _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]>(null));
+                .Returns(Task.FromResult<byte[]?>(null));
 
             // Quando
             var result = _cache.TryGetValue("missing-key", out var value);
@@ -221,7 +221,7 @@ namespace Eaf.SqlServerCache.Tests
         {
             // Dado
             _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult(Array.Empty<byte>()));
+                .Returns(Task.FromResult<byte[]?>(Array.Empty<byte>()));
 
             // Quando
             var result = _cache.TryGetValue("empty-key", out var value);
@@ -236,7 +236,7 @@ namespace Eaf.SqlServerCache.Tests
         {
             // Dado
             _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromException<byte[]>(new TimeoutException("Connection timeout")));
+                .Returns(Task.FromException<byte[]?>(new TimeoutException("Connection timeout")));
 
             // Quando
             var result = _cache.TryGetValue("timeout-key", out var value);

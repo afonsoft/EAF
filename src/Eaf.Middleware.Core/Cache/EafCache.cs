@@ -6,6 +6,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eaf.Middleware.Core.Cache
 {
+    /// <summary>
+    /// Representa a classe EafCache.
+    /// </summary>
     [Table("EafCache")]
     [MultiTenancySide(MultiTenancySides.Host)]
     public class EafCache : IEntity<string>

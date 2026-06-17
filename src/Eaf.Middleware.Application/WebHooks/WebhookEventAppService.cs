@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.WebHooks
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de WebhookEvent.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration)]
     public class WebhookEventAppService : MiddlewareAppServiceBase, IWebhookEventAppService
     {

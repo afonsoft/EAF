@@ -35,6 +35,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Authorization.Users
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de User.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Users)]
     public class UserAppService : MiddlewareAppServiceBase, IUserAppService
     {

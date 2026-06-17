@@ -22,6 +22,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Configuration.Host
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de HostSettings.
+    /// </summary>
     [AbpAllowAnonymous]
     public class HostSettingsAppService : SettingsAppServiceBase, IHostSettingsAppService
     {

@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.WebHooks
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de WebhookSendAttempt.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration)]
     public class WebhookSendAttemptAppService : MiddlewareAppServiceBase
     {

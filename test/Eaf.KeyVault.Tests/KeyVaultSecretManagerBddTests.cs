@@ -62,7 +62,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_OpcoesNulas_Quando_CriarKeyVaultSecretManager_Entao_DeveUsarOpcoesDefault()
         {
             // Dado
-            EafKeyVaultOptions options = null;
+            EafKeyVaultOptions options = null!;
 
             // Quando
             var manager = new KeyVaultSecretManager(options);
@@ -190,7 +190,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new KeyVaultSecretManager(_options);
-            string chave = null;
+            string chave = null!;
 
             // Quando
             var resultado = manager.GetValue(chave);
@@ -204,7 +204,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new KeyVaultSecretManager(_options);
-            string chave = null;
+            string chave = null!;
 
             // Quando
             var resultado = await manager.GetValueAsync(chave);
@@ -248,7 +248,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new KeyVaultSecretManager(_options);
-            string chave = null;
+            string chave = null!;
             string valor = "valor-teste";
 
             // Quando & Então
@@ -260,7 +260,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new KeyVaultSecretManager(_options);
-            string chave = null;
+            string chave = null!;
             string valor = "valor-teste";
 
             // Quando & Então
@@ -273,7 +273,7 @@ namespace Eaf.KeyVault.Tests
             // Dado
             var manager = new KeyVaultSecretManager(_options);
             string chave = "chave-teste";
-            string valor = null;
+            string valor = null!;
 
             // Quando & Então
             Should.NotThrow(() => manager.SetValue(chave, valor));
@@ -285,7 +285,7 @@ namespace Eaf.KeyVault.Tests
             // Dado
             var manager = new KeyVaultSecretManager(_options);
             string chave = "chave-teste";
-            string valor = null;
+            string valor = null!;
 
             // Quando & Então
             await Should.NotThrowAsync(async () => await manager.SetValueAsync(chave, valor));

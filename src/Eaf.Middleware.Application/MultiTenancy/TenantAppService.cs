@@ -20,6 +20,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.MultiTenancy
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Tenant.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Tenants)]
     public class TenantAppService : MiddlewareAppServiceBase, ITenantAppService
     {

@@ -24,6 +24,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Authorization.Users.Profile
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Profile.
+    /// </summary>
     [AbpAuthorize]
     public class ProfileAppService : MiddlewareAppServiceBase, IProfileAppService
     {

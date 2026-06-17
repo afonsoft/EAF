@@ -4,6 +4,9 @@ using System;
 
 namespace Eaf.Middleware.Friendships.Cache
 {
+    /// <summary>
+    /// Item de cache para armazenamento de Friend.
+    /// </summary>
     [AutoMapTo(typeof(FriendshipDto))]
     [AutoMapFrom(typeof(Friendship))]
     public class FriendCacheItem

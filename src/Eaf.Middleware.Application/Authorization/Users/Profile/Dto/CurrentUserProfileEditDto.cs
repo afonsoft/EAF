@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Eaf.Middleware.Authorization.Users.Profile.Dto
 {
+    /// <summary>
+    /// DTO (Data Transfer Object) para CurrentUserProfileEdit.
+    /// </summary>
     [AutoMap(typeof(User))]
     public class CurrentUserProfileEditDto
     {

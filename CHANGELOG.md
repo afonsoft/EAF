@@ -9,49 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Added
 
-*   docs: Documentação XML `/// <summary>` adicionada a todas as classes e métodos públicos (476 arquivos)
+*   test: Implementação massiva de testes BDD em português (Dado/Quando/Então)
+    - 2384 testes totais (era 1289), 100% passando
+    - Cobertura de DTOs, Models, Entities, Domain Logic
+    - Testes para Authorization, Chat, Friendships, MultiTenancy, Editions, Notifications
+    - Testes para Configuration, Sessions, WebHooks, External Auth Providers
+    - Testes para Security, Profile, Localization, Timing, UI Customization
+*   docs: Documentação XML `/// <summary>` adicionada a 48 tipos públicos sem documentação
 *   feat: add repo summary to .openhands/microagents/repo.md
-*   Readme (openhands)
 
 ### Fixed
 
-*   fix(CA2254): Corrigir interpolação de strings em mensagens de log (AzureActiveDirectory, LDAP)
-*   fix(NU1504): Remover PackageReference duplicados em projetos de teste
-*   fix(CS0169): Remover campo não utilizado em KeyVaultSecretManagerBddTests
-*   fix(CS1587): Remover comentários XML posicionados incorretamente (99 arquivos)
-*   fix(CS1572/CS1573): Corrigir nomes de parâmetros em documentação XML
+*   fix: Resolver todos os 70 build warnings da solução (70 → 0)
+    - fix(NU5118): Corrigir README duplicado em nupkg
+    - fix(CA1416): Adicionar guards `[SupportedOSPlatform]` para LDAP
+    - fix(CS8600/CS8602/CS8604): Corrigir nullable reference warnings
+    - fix(CA2254): Corrigir interpolação de strings em mensagens de log
+    - fix(NU1504): Remover PackageReference duplicados
+    - fix(CS0169): Remover campos não utilizados
+    - fix(CS1587): Corrigir comentários XML posicionados incorretamente
+    - fix(CS1572/CS1573): Corrigir nomes de parâmetros em documentação XML
+*   fix: Habilitar Eaf.MiddlewareCore.Tests em build Release (não era compilado)
 *   fix(test): Corrigir teste PathNavigatesAboveRoot para compatibilidade Linux
-*   **Test Coverage Framework**: Implementação completa de testes BDD em português com xUnit.Net v2
-*   **Coverage Reports**: Sistema de relatórios com dotnet-reportgenerator-globaltool
-*   **Test Metrics**: Seção completa de métricas no README
-*   **Compiler Warnings**: Correção de warnings em projetos de teste
-*   **xUnit Warnings**: Correção de xUnit1012 (null parameters) e xUnit1048 (async void)
-*   **Code Smells**: Remoção de package references desnecessários (System.*)
-*   **Nullable Types**: Ajuste de assinaturas para aceitar parâmetros null
-*   **CS8600 Warnings**: Correção de conversões null literais
-*   **Statistics**: 1492 tests (1491 passing, 100% success rate), 24.1% line coverage, 54.5% method coverage
 *   Fix issue #478: Build All and Test workflow failing due to Coverlet error
 *   Fix issue #475: Corrigir testes unitários com falhas e atualizar README
 *   Fix: Resolve Coverlet path errors in CI workflow
 *   Fix: Address some SqliteCache test failures
-*   Fix: Output PATH environment variable
-*   Fix: Build solution in both Release and Debug configurations
-*   Fix: Scale profile picture proportionally when smaller than container
 
 ### Changed
 
+*   docs: Atualizar README badges com métricas atuais (Line 36.6%, Tests 2384, 0 Warnings)
 *   refactor: Atualizar xunit.runner.visualstudio para 3.1.4 em todos os projetos de teste
 *   refactor: Padronizar PackageReference em Directory.Build.props
-*   docs: Atualizar README com métricas de cobertura atualizadas (Maio 2026)
 *   Update ABP to Version="10.2.0"
-*   Refatorar install.sh para melhor verificação, tratamento de erros e feedback
-*   Feat: Optimize CI pipelines and automate PR creation
-*   Feat: Adicionar testes unitários para StringExtensions e corrigir lógica
-*   docs: Add comprehensive XML documentation to public methods
-*   docs: Update README with XML documentation progress
-*   feat: Add comprehensive SerilogLoggerFactory tests with BDD pattern
-*   README: Atualizar métricas com correção do SqliteCache
-*   Adicionar documentação XML em português para interfaces e classes principais
 *   Update and rename ci.yml to coverage-reports.yml
 
 ### Removed
@@ -60,51 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ## [10.0.0] - 2025-02-14
 
-### ⚡ BREAKING CHANGES
-
-
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/).
-
-## [Unreleased]
-
-### Added
-
-*   feat: add repo summary to .openhands/microagents/repo.md
-*   Readme (openhands)
-
-### Fixed
-n*   **Compiler Warnings**: Correção de 62 warnings em projetos de teste
-*   **xUnit Warnings**: Correção de xUnit1012 (null parameters) e xUnit1048 (async void)
-*   **Code Smells**: Remoção de package references desnecessários (System.*)
-*   **Nullable Types**: Ajuste de assinaturas para aceitar parâmetros null
-*   **CS8600 Warnings**: Correção de conversões null literais
-*   **Statistics**: 63 tests passing (100% success rate), 28.3% line coverage
-
-*   Fix issue #478: Build All and Test workflow failing due to Coverlet error
-*   Fix issue #475: Corrigir testes unitários com falhas e atualizar README
-*   Fix: Resolve Coverlet path errors in CI workflow
-*   Fix: Address some SqliteCache test failures
-*   Fix: Output PATH environment variable
-*   Fix: Build solution in both Release and Debug configurations
-*   Fix: Scale profile picture proportionally when smaller than container
-
-### Changed
-
-*   Update ABP to Version="10.2.0"
-*   Refatorar install.sh para melhor verificação, tratamento de erros e feedback
-*   Feat: Optimize CI pipelines and automate PR creation
-*   Feat: Adicionar testes unitários para StringExtensions e corrigir lógica
-*   docs: Add comprehensive XML documentation to public methods
-*   docs: Update README with XML documentation progress
-*   feat: Add comprehensive SerilogLoggerFactory tests with BDD pattern
-*   📊 README: Atualizar métricas com correção do SqliteCache
-*   📝 Adicionar documentação XML em português para interfaces e classes principais
-*   Update and rename ci.yml to coverage-reports.yml
+### BREAKING CHANGES
 
 
 # [9.0.2](https://github.com/afonsoft/EAF/releases/tag/9.0.2)

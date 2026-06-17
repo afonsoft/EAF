@@ -43,7 +43,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_OpcoesNulas_Quando_CriarNullKeyVaultManager_Entao_DeveAceitarOpcoesNulas()
         {
             // Dado
-            EafKeyVaultOptions options = null;
+            EafKeyVaultOptions options = null!;
             var logger = Substitute.For<ILogger>();
 
             // Quando & Então
@@ -55,7 +55,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var options = new EafKeyVaultOptions();
-            ILogger logger = null;
+            ILogger logger = null!;
 
             // Quando & Então
             Should.NotThrow(() => new NullKeyVaultManager(options, logger));
@@ -164,7 +164,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new NullKeyVaultManager(_options, _mockLogger);
-            string chave = null;
+            string chave = null!;
 
             // Quando
             var resultado = manager.GetValue(chave);
@@ -178,7 +178,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new NullKeyVaultManager(_options, _mockLogger);
-            string chave = null;
+            string chave = null!;
 
             // Quando
             var resultado = await manager.GetValueAsync(chave);
@@ -250,7 +250,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new NullKeyVaultManager(_options, _mockLogger);
-            string chave = null;
+            string chave = null!;
             string valor = "valor-teste";
 
             // Quando & Então
@@ -262,7 +262,7 @@ namespace Eaf.KeyVault.Tests
         {
             // Dado
             var manager = new NullKeyVaultManager(_options, _mockLogger);
-            string chave = null;
+            string chave = null!;
             string valor = "valor-teste";
 
             // Quando & Então
@@ -275,7 +275,7 @@ namespace Eaf.KeyVault.Tests
             // Dado
             var manager = new NullKeyVaultManager(_options, _mockLogger);
             string chave = "chave-teste";
-            string valor = null;
+            string valor = null!;
 
             // Quando & Então
             Should.NotThrow(() => manager.SetValue(chave, valor));
@@ -287,7 +287,7 @@ namespace Eaf.KeyVault.Tests
             // Dado
             var manager = new NullKeyVaultManager(_options, _mockLogger);
             string chave = "chave-teste";
-            string valor = null;
+            string valor = null!;
 
             // Quando & Então
             await Should.NotThrowAsync(async () => await manager.SetValueAsync(chave, valor));

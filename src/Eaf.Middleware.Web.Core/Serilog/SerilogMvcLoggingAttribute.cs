@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace Eaf.Middleware.Web.Serilog
 {
+    /// <summary>
+    /// Representa a classe SerilogMvcLoggingAttribute.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class SerilogMvcLoggingAttribute : ActionFilterAttribute
     {

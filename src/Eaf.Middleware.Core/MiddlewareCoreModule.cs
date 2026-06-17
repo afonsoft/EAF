@@ -37,6 +37,9 @@ namespace Eaf.Middleware
         typeof(EafMiddlewareLdapModule),
         typeof(AbpAutoMapperModule),
         typeof(AbpMailKitModule))]
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareCore.
+    /// </summary>
     public class MiddlewareCoreModule : AbpModule
     {
         /// <summary>

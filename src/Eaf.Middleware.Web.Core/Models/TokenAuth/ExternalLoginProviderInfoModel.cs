@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Eaf.Middleware.Web.Models.TokenAuth
 {
+    /// <summary>
+    /// Representa a classe ExternalLoginProviderInfoModel.
+    /// </summary>
     [AutoMapFrom(typeof(ExternalLoginProviderInfo))]
     public class ExternalLoginProviderInfoModel
     {

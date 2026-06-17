@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.WebHooks
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de WebhookSubscription.
+    /// </summary>
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration)]
     public class WebhookSubscriptionAppService : MiddlewareAppServiceBase, IWebhookSubscriptionAppService
     {

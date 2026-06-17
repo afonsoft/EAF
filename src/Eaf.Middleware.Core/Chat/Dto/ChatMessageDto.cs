@@ -4,6 +4,9 @@ using System;
 
 namespace Eaf.Middleware.Chat.Dto
 {
+    /// <summary>
+    /// DTO (Data Transfer Object) para ChatMessage.
+    /// </summary>
     [AutoMap(typeof(ChatMessage))]
     public class ChatMessageDto : EntityDto
     {

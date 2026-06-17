@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Configuration
 {
+    /// <summary>
+    /// Serviço de aplicação para gerenciamento de Google.
+    /// </summary>
     [AbpAllowAnonymous]
     public class GoogleAppService : MiddlewareAppServiceBase, IGoogleAppService
     {

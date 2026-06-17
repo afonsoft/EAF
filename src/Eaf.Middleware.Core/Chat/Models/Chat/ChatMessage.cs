@@ -9,6 +9,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Eaf.Middleware.Chat
 
 {
+    /// <summary>
+    /// Representa a classe ChatMessage.
+    /// </summary>
     [Table("EafChatMessages")]
     public class ChatMessage : Entity<long>, IHasCreationTime, IMayHaveTenant
     {

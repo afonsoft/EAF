@@ -5,6 +5,9 @@ using Abp.Reflection.Extensions;
 
 namespace Eaf.KeyVault
 {
+    /// <summary>
+    /// Módulo ABP que configura e inicializa EafKeyVault.
+    /// </summary>
     [DependsOn(typeof(AbpKernelModule))]
     public class EafKeyVaultModule : AbpModule
     {

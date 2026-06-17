@@ -18,6 +18,9 @@ namespace Eaf.Middleware.Friendships
         Blocked = 2
     }
 
+    /// <summary>
+    /// Representa a classe Friendship.
+    /// </summary>
     [Table("EafFriendships")]
     public class Friendship : Entity<long>, IHasCreationTime, IMayHaveTenant
     {

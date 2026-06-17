@@ -24,6 +24,9 @@ namespace Eaf.Middleware.AzureActiveDirectory.Authentication
     /// </summary>
     /// <typeparam name="TTenant">Tenant type</typeparam>
     /// <typeparam name="TUser">User type</typeparam>
+    /// <summary>
+    /// Fonte de autenticação AzureActiveDirectoryAuthenticationSource.
+    /// </summary>
     public abstract class AzureActiveDirectoryAuthenticationSource<TTenant, TUser> : DefaultExternalAuthenticationSource<TTenant, TUser>, ITransientDependency
         where TTenant : AbpTenant<TUser>
         where TUser : AbpUserBase, new()

@@ -1,78 +1,178 @@
 using Eaf.Middleware.Authorization.Roles.Dto;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
-namespace Eaf.Middleware.Application.Tests.Authorization.Roles.Dto
+namespace Eaf.Middleware.Tests.Authorization.Roles.Dto
 {
+    /// <summary>
+    /// Testes BDD para DTOs de Role seguindo o padrão Dado/Quando/Então
+    /// </summary>
     public class RoleDtoTests
     {
+        #region RoleListDto
+
         [Fact]
-        public void Dado_RoleListDto_Quando_SemLastModificationTime_Entao_LastModificationDateDeveRetornarCreationTime()
+        public void Dado_RoleListDto_Quando_DefinirPropriedades_Entao_DeveArmazenar()
         {
-            var creationTime = new DateTime(2024, 1, 15, 10, 0, 0);
+            // Dado & Quando
+            var dto = new RoleListDto
+            {
+                DisplayName = "Administrador",
+                IsDefault = false,
+                IsStatic = true,
+                Name = "Admin"
+            };
+
+            // Então
+            dto.DisplayName.ShouldBe("Administrador");
+            dto.IsDefault.ShouldBeFalse();
+            dto.IsStatic.ShouldBeTrue();
+            dto.Name.ShouldBe("Admin");
+        }
+
+        [Fact]
+        public void Dado_RoleListDto_Quando_LastModificationTimeNull_Entao_DeveRetornarCreationTime()
+        {
+            // Dado
+            var creationTime = new DateTime(2026, 1, 1);
             var dto = new RoleListDto
             {
                 CreationTime = creationTime,
                 LastModificationTime = null
             };
 
+            // Quando & Então
             dto.LastModificationDate.ShouldBe(creationTime);
         }
 
         [Fact]
-        public void Dado_RoleListDto_Quando_ComLastModificationTime_Entao_LastModificationDateDeveRetornarLastModificationTime()
+        public void Dado_RoleListDto_Quando_LastModificationTimePreenchido_Entao_DeveRetornarLastModificationTime()
         {
-            var creationTime = new DateTime(2024, 1, 15, 10, 0, 0);
-            var modificationTime = new DateTime(2024, 2, 20, 14, 30, 0);
+            // Dado
+            var modTime = new DateTime(2026, 6, 15);
             var dto = new RoleListDto
             {
-                CreationTime = creationTime,
-                LastModificationTime = modificationTime
+                CreationTime = new DateTime(2026, 1, 1),
+                LastModificationTime = modTime
             };
 
-            dto.LastModificationDate.ShouldBe(modificationTime);
+            // Quando & Então
+            dto.LastModificationDate.ShouldBe(modTime);
         }
 
-        [Fact]
-        public void Dado_RoleListDto_Quando_DefinirPropriedades_Entao_DeveRetornarValoresCorretos()
-        {
-            var dto = new RoleListDto
-            {
-                Id = 1,
-                Name = "Admin",
-                DisplayName = "Administrator",
-                IsStatic = true,
-                IsDefault = false
-            };
+        #endregion
 
-            dto.Id.ShouldBe(1);
-            dto.Name.ShouldBe("Admin");
-            dto.DisplayName.ShouldBe("Administrator");
-            dto.IsStatic.ShouldBeTrue();
-            dto.IsDefault.ShouldBeFalse();
-        }
+        #region RoleEditDto
 
         [Fact]
-        public void Dado_RoleEditDto_Quando_DefinirPropriedades_Entao_DeveRetornarValoresCorretos()
+        public void Dado_RoleEditDto_Quando_DefinirPropriedades_Entao_DeveArmazenar()
         {
+            // Dado & Quando
             var dto = new RoleEditDto
             {
-                Id = 5,
-                DisplayName = "Manager",
+                Id = 1,
+                DisplayName = "Gerente",
                 IsDefault = true
             };
 
-            dto.Id.ShouldBe(5);
-            dto.DisplayName.ShouldBe("Manager");
+            // Então
+            dto.Id.ShouldBe(1);
+            dto.DisplayName.ShouldBe("Gerente");
             dto.IsDefault.ShouldBeTrue();
         }
 
         [Fact]
-        public void Dado_RoleEditDto_Quando_IdNull_Entao_DevePermitir()
+        public void Dado_RoleEditDto_Quando_IdNull_Entao_DeveAceitar()
         {
-            var dto = new RoleEditDto { DisplayName = "NewRole" };
+            // Dado & Quando
+            var dto = new RoleEditDto { DisplayName = "Novo" };
+
+            // Então
             dto.Id.ShouldBeNull();
         }
+
+        #endregion
+
+        #region GetRolesInput
+
+        [Fact]
+        public void Dado_GetRolesInput_Quando_Criar_Entao_FilterDeveSerVazio()
+        {
+            // Dado & Quando
+            var input = new GetRolesInput();
+
+            // Então
+            input.Filter.ShouldBe("");
+        }
+
+        [Fact]
+        public void Dado_GetRolesInput_Quando_NormalizeSemSorting_Entao_DeveDefinirComoName()
+        {
+            // Dado
+            var input = new GetRolesInput();
+
+            // Quando
+            input.Normalize();
+
+            // Então
+            input.Sorting.ShouldBe("Name");
+        }
+
+        [Fact]
+        public void Dado_GetRolesInput_Quando_NormalizeComSorting_Entao_NaoDeveAlterar()
+        {
+            // Dado
+            var input = new GetRolesInput { Sorting = "DisplayName" };
+
+            // Quando
+            input.Normalize();
+
+            // Então
+            input.Sorting.ShouldBe("DisplayName");
+        }
+
+        #endregion
+
+        #region CreateOrUpdateRoleInput
+
+        [Fact]
+        public void Dado_CreateOrUpdateRoleInput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        {
+            // Dado & Quando
+            var input = new CreateOrUpdateRoleInput
+            {
+                Role = new RoleEditDto { DisplayName = "Editor" },
+                GrantedPermissionNames = new List<string> { "Pages", "Pages.Dashboard" }
+            };
+
+            // Então
+            input.Role.DisplayName.ShouldBe("Editor");
+            input.GrantedPermissionNames.Count.ShouldBe(2);
+        }
+
+        #endregion
+
+        #region GetRoleForEditOutput
+
+        [Fact]
+        public void Dado_GetRoleForEditOutput_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        {
+            // Dado & Quando
+            var output = new GetRoleForEditOutput
+            {
+                Role = new RoleEditDto { Id = 1, DisplayName = "Admin" },
+                GrantedPermissionNames = new List<string> { "Pages" },
+                Permissions = new List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>()
+            };
+
+            // Então
+            output.Role.DisplayName.ShouldBe("Admin");
+            output.GrantedPermissionNames.Count.ShouldBe(1);
+            output.Permissions.ShouldNotBeNull();
+        }
+
+        #endregion
     }
 }
