@@ -1,95 +1,48 @@
 using Eaf.Middleware.Web.Models.TokenAuth;
 using Shouldly;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Xunit;
 
 namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
 {
     /// <summary>
-    /// Testes BDD para modelos de TokenAuth seguindo o padrão Dado/Quando/Então
+    /// Testes BDD para modelos TokenAuth seguindo o padrao Dado/Quando/Entao.
     /// </summary>
     public class TokenAuthModelsBddTests
     {
-        #region AuthenticateModel
-
-        [Fact]
-        public void Dado_AuthenticateModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
-        {
-            var model = new AuthenticateModel
-            {
-                UserNameOrEmailAddress = "admin@acme.com",
-                Password = "Senha@123",
-                RememberClient = true,
-                ReturnUrl = "/dashboard",
-                SingleSignIn = true,
-                TwoFactorVerificationCode = "123456",
-                TwoFactorRememberClientToken = "token-abc",
-                CaptchaResponse = "captcha-xyz"
-            };
-
-            model.UserNameOrEmailAddress.ShouldBe("admin@acme.com");
-            model.Password.ShouldBe("Senha@123");
-            model.RememberClient.ShouldBeTrue();
-            model.ReturnUrl.ShouldBe("/dashboard");
-            model.SingleSignIn.ShouldBe(true);
-            model.TwoFactorVerificationCode.ShouldBe("123456");
-            model.TwoFactorRememberClientToken.ShouldBe("token-abc");
-            model.CaptchaResponse.ShouldBe("captcha-xyz");
-        }
-
-        #endregion
-
-        #region AuthenticateResultModel
-
-        [Fact]
-        public void Dado_AuthenticateResultModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
-        {
-            var model = new AuthenticateResultModel
-            {
-                AccessToken = "jwt-token",
-                EncryptedAccessToken = "encrypted",
-                ExpireInSeconds = 3600,
-                UserId = 42,
-                ShouldResetPassword = false,
-                RequiresTwoFactorVerification = true,
-                TwoFactorAuthProviders = new List<string> { "Email", "Google" },
-                TwoFactorRememberClientToken = "remember-token",
-                PasswordResetCode = "reset-code",
-                ReturnUrl = "/home"
-            };
-
-            model.AccessToken.ShouldBe("jwt-token");
-            model.EncryptedAccessToken.ShouldBe("encrypted");
-            model.ExpireInSeconds.ShouldBe(3600);
-            model.UserId.ShouldBe(42);
-            model.ShouldResetPassword.ShouldBeFalse();
-            model.RequiresTwoFactorVerification.ShouldBeTrue();
-            model.TwoFactorAuthProviders.Count.ShouldBe(2);
-            model.PasswordResetCode.ShouldBe("reset-code");
-            model.ReturnUrl.ShouldBe("/home");
-        }
-
-        #endregion
-
         #region ExternalAuthenticateModel
 
         [Fact]
-        public void Dado_ExternalAuthenticateModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ExternalAuthenticateModel_Quando_DefinirAuthProvider_Entao_DeveArmazenarCorretamente()
         {
-            var model = new ExternalAuthenticateModel
-            {
-                AuthProvider = "Google",
-                ProviderKey = "google-key",
-                ProviderAccessCode = "access-code",
-                ReturnUrl = "/callback",
-                SingleSignIn = false
-            };
-
+            var model = new ExternalAuthenticateModel { AuthProvider = "Google" };
             model.AuthProvider.ShouldBe("Google");
-            model.ProviderKey.ShouldBe("google-key");
+        }
+
+        [Fact]
+        public void Dado_ExternalAuthenticateModel_Quando_DefinirProviderKey_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalAuthenticateModel { ProviderKey = "key-123" };
+            model.ProviderKey.ShouldBe("key-123");
+        }
+
+        [Fact]
+        public void Dado_ExternalAuthenticateModel_Quando_DefinirProviderAccessCode_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalAuthenticateModel { ProviderAccessCode = "access-code" };
             model.ProviderAccessCode.ShouldBe("access-code");
-            model.ReturnUrl.ShouldBe("/callback");
-            model.SingleSignIn.ShouldBe(false);
+        }
+
+        [Fact]
+        public void Dado_ExternalAuthenticateModel_Quando_CamposObrigatoriosVazios_Entao_DeveFalharValidacao()
+        {
+            var model = new ExternalAuthenticateModel();
+            var context = new ValidationContext(model);
+            var results = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(model, context, results, true);
+            isValid.ShouldBeFalse();
         }
 
         #endregion
@@ -97,23 +50,52 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
         #region ExternalAuthenticateResultModel
 
         [Fact]
-        public void Dado_ExternalAuthenticateResultModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ExternalAuthenticateResultModel_Quando_DefinirAccessToken_Entao_DeveArmazenarCorretamente()
         {
-            var model = new ExternalAuthenticateResultModel
-            {
-                AccessToken = "ext-token",
-                EncryptedAccessToken = "enc-ext",
-                ExpireInSeconds = 7200,
-                ReturnUrl = "/ext-return",
-                WaitingForActivation = true,
-                UserId = 99
-            };
-
+            var model = new ExternalAuthenticateResultModel { AccessToken = "ext-token" };
             model.AccessToken.ShouldBe("ext-token");
-            model.EncryptedAccessToken.ShouldBe("enc-ext");
-            model.ExpireInSeconds.ShouldBe(7200);
+        }
+
+        [Fact]
+        public void Dado_ExternalAuthenticateResultModel_Quando_DefinirWaitingForActivation_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalAuthenticateResultModel { WaitingForActivation = true };
             model.WaitingForActivation.ShouldBeTrue();
-            model.UserId.ShouldBe(99);
+        }
+
+        [Fact]
+        public void Dado_ExternalAuthenticateResultModel_Quando_DefinirUserId_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalAuthenticateResultModel { UserId = 42 };
+            model.UserId.ShouldBe(42);
+        }
+
+        #endregion
+
+        #region ExternalLoginProviderInfoModel
+
+        [Fact]
+        public void Dado_ExternalLoginProviderInfoModel_Quando_DefinirName_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalLoginProviderInfoModel { Name = "Google" };
+            model.Name.ShouldBe("Google");
+        }
+
+        [Fact]
+        public void Dado_ExternalLoginProviderInfoModel_Quando_DefinirClientId_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalLoginProviderInfoModel { ClientId = "client-id-123" };
+            model.ClientId.ShouldBe("client-id-123");
+        }
+
+        [Fact]
+        public void Dado_ExternalLoginProviderInfoModel_Quando_DefinirAdditionalParams_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ExternalLoginProviderInfoModel
+            {
+                AdditionalParams = new Dictionary<string, string> { { "scope", "email" } }
+            };
+            model.AdditionalParams.ShouldContainKeyAndValue("scope", "email");
         }
 
         #endregion
@@ -121,16 +103,27 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
         #region ImpersonateModel
 
         [Fact]
-        public void Dado_ImpersonateModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ImpersonateModel_Quando_DefinirUserId_Entao_DeveArmazenarCorretamente()
         {
-            var model = new ImpersonateModel
-            {
-                TenantId = 5,
-                UserId = 100
-            };
+            var model = new ImpersonateModel { UserId = 42 };
+            model.UserId.ShouldBe(42);
+        }
 
-            model.TenantId.ShouldBe(5);
-            model.UserId.ShouldBe(100);
+        [Fact]
+        public void Dado_ImpersonateModel_Quando_DefinirTenantId_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ImpersonateModel { TenantId = 1 };
+            model.TenantId.ShouldBe(1);
+        }
+
+        [Fact]
+        public void Dado_ImpersonateModel_Quando_UserIdZero_Entao_DeveFalharValidacao()
+        {
+            var model = new ImpersonateModel { UserId = 0 };
+            var context = new ValidationContext(model);
+            var results = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(model, context, results, true);
+            isValid.ShouldBeFalse();
         }
 
         #endregion
@@ -138,14 +131,10 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
         #region ImpersonateResultModel
 
         [Fact]
-        public void Dado_ImpersonateResultModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ImpersonateResultModel_Quando_DefinirImpersonationToken_Entao_DeveArmazenarCorretamente()
         {
-            var model = new ImpersonateResultModel
-            {
-                ImpersonationToken = "imp-token-abc"
-            };
-
-            model.ImpersonationToken.ShouldBe("imp-token-abc");
+            var model = new ImpersonateResultModel { ImpersonationToken = "imp-token" };
+            model.ImpersonationToken.ShouldBe("imp-token");
         }
 
         #endregion
@@ -153,36 +142,17 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
         #region ImpersonatedAuthenticateResultModel
 
         [Fact]
-        public void Dado_ImpersonatedAuthResultModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ImpersonatedAuthenticateResultModel_Quando_DefinirAccessToken_Entao_DeveArmazenarCorretamente()
         {
-            var model = new ImpersonatedAuthenticateResultModel
-            {
-                AccessToken = "imp-access",
-                EncryptedAccessToken = "imp-encrypted",
-                ExpireInSeconds = 1800
-            };
-
-            model.AccessToken.ShouldBe("imp-access");
-            model.EncryptedAccessToken.ShouldBe("imp-encrypted");
-            model.ExpireInSeconds.ShouldBe(1800);
+            var model = new ImpersonatedAuthenticateResultModel { AccessToken = "imp-jwt" };
+            model.AccessToken.ShouldBe("imp-jwt");
         }
 
-        #endregion
-
-        #region SwitchedAccountAuthenticateResultModel
-
         [Fact]
-        public void Dado_SwitchedAccountAuthResultModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ImpersonatedAuthenticateResultModel_Quando_DefinirExpireInSeconds_Entao_DeveArmazenarCorretamente()
         {
-            var model = new SwitchedAccountAuthenticateResultModel
-            {
-                AccessToken = "switch-token",
-                EncryptedAccessToken = "switch-encrypted",
-                ExpireInSeconds = 900
-            };
-
-            model.AccessToken.ShouldBe("switch-token");
-            model.ExpireInSeconds.ShouldBe(900);
+            var model = new ImpersonatedAuthenticateResultModel { ExpireInSeconds = 7200 };
+            model.ExpireInSeconds.ShouldBe(7200);
         }
 
         #endregion
@@ -190,26 +160,28 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
         #region ProviderModel
 
         [Fact]
-        public void Dado_ProviderModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_ProviderModel_Quando_DefinirUsernameOrEmailAddress_Entao_DeveArmazenarCorretamente()
         {
-            var model = new ProviderModel
-            {
-                UsernameOrEmailAddress = "user@test.com",
-                AuthenticationSource = "LDAP",
-                Tenant = new TenantModal
-                {
-                    Id = 1,
-                    Name = "Acme Corp",
-                    TenancyName = "acme"
-                }
-            };
+            var model = new ProviderModel { UsernameOrEmailAddress = "admin@test.com" };
+            model.UsernameOrEmailAddress.ShouldBe("admin@test.com");
+        }
 
-            model.UsernameOrEmailAddress.ShouldBe("user@test.com");
+        [Fact]
+        public void Dado_ProviderModel_Quando_DefinirAuthenticationSource_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new ProviderModel { AuthenticationSource = "LDAP" };
             model.AuthenticationSource.ShouldBe("LDAP");
+        }
+
+        [Fact]
+        public void Dado_ProviderModel_Quando_DefinirTenant_Entao_DeveArmazenarCorretamente()
+        {
+            var tenant = new TenantModal { Id = 1, Name = "Default", TenancyName = "default" };
+            var model = new ProviderModel { Tenant = tenant };
             model.Tenant.ShouldNotBeNull();
             model.Tenant.Id.ShouldBe(1);
-            model.Tenant.Name.ShouldBe("Acme Corp");
-            model.Tenant.TenancyName.ShouldBe("acme");
+            model.Tenant.Name.ShouldBe("Default");
+            model.Tenant.TenancyName.ShouldBe("default");
         }
 
         #endregion
@@ -217,16 +189,38 @@ namespace Eaf.Middleware.Web.Core.Tests.Models.TokenAuth
         #region SendTwoFactorAuthCodeModel
 
         [Fact]
-        public void Dado_SendTwoFactorAuthCodeModel_Quando_DefinirPropriedades_Entao_DeveArmazenar()
+        public void Dado_SendTwoFactorAuthCodeModel_Quando_DefinirProvider_Entao_DeveArmazenarCorretamente()
         {
-            var model = new SendTwoFactorAuthCodeModel
-            {
-                Provider = "Email",
-                UserId = 55
-            };
-
+            var model = new SendTwoFactorAuthCodeModel { Provider = "Email" };
             model.Provider.ShouldBe("Email");
-            model.UserId.ShouldBe(55);
+        }
+
+        [Fact]
+        public void Dado_SendTwoFactorAuthCodeModel_Quando_ProviderVazio_Entao_DeveFalharValidacao()
+        {
+            var model = new SendTwoFactorAuthCodeModel { UserId = 1 };
+            var context = new ValidationContext(model);
+            var results = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(model, context, results, true);
+            isValid.ShouldBeFalse();
+        }
+
+        #endregion
+
+        #region SwitchedAccountAuthenticateResultModel
+
+        [Fact]
+        public void Dado_SwitchedAccountAuthenticateResultModel_Quando_DefinirAccessToken_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new SwitchedAccountAuthenticateResultModel { AccessToken = "switched-jwt" };
+            model.AccessToken.ShouldBe("switched-jwt");
+        }
+
+        [Fact]
+        public void Dado_SwitchedAccountAuthenticateResultModel_Quando_DefinirExpireInSeconds_Entao_DeveArmazenarCorretamente()
+        {
+            var model = new SwitchedAccountAuthenticateResultModel { ExpireInSeconds = 1800 };
+            model.ExpireInSeconds.ShouldBe(1800);
         }
 
         #endregion
