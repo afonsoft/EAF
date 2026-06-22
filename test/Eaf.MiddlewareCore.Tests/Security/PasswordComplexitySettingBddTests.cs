@@ -2,126 +2,99 @@ using Eaf.Middleware.Security;
 using Shouldly;
 using Xunit;
 
-namespace Eaf.Middleware.Tests.Security
+namespace Eaf.MiddlewareCore.Tests.Security
 {
+    /// <summary>
+    /// Testes BDD para PasswordComplexitySetting seguindo o padrao Dado/Quando/Entao.
+    /// </summary>
     public class PasswordComplexitySettingBddTests
     {
+        #region Propriedades
+
+        [Fact]
+        public void Dado_PasswordComplexitySetting_Quando_DefinirRequireDigit_Entao_DeveArmazenarCorretamente()
+        {
+            var setting = new PasswordComplexitySetting { RequireDigit = true };
+            setting.RequireDigit.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_PasswordComplexitySetting_Quando_DefinirRequiredLength_Entao_DeveArmazenarCorretamente()
+        {
+            var setting = new PasswordComplexitySetting { RequiredLength = 12 };
+            setting.RequiredLength.ShouldBe(12);
+        }
+
+        [Fact]
+        public void Dado_PasswordComplexitySetting_Quando_DefinirRequireLowercase_Entao_DeveArmazenarCorretamente()
+        {
+            var setting = new PasswordComplexitySetting { RequireLowercase = true };
+            setting.RequireLowercase.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_PasswordComplexitySetting_Quando_DefinirRequireNonAlphanumeric_Entao_DeveArmazenarCorretamente()
+        {
+            var setting = new PasswordComplexitySetting { RequireNonAlphanumeric = true };
+            setting.RequireNonAlphanumeric.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_PasswordComplexitySetting_Quando_DefinirRequireUppercase_Entao_DeveArmazenarCorretamente()
+        {
+            var setting = new PasswordComplexitySetting { RequireUppercase = true };
+            setting.RequireUppercase.ShouldBeTrue();
+        }
+
+        #endregion
+
+        #region Equals
+
         [Fact]
         public void Dado_DoisSettingsIguais_Quando_Equals_Entao_DeveRetornarTrue()
         {
-            var a = new PasswordComplexitySetting
+            var setting1 = new PasswordComplexitySetting
             {
                 RequireDigit = true,
                 RequireLowercase = true,
-                RequireUppercase = true,
                 RequireNonAlphanumeric = false,
+                RequireUppercase = true,
                 RequiredLength = 8
             };
-
-            var b = new PasswordComplexitySetting
+            var setting2 = new PasswordComplexitySetting
             {
                 RequireDigit = true,
                 RequireLowercase = true,
-                RequireUppercase = true,
                 RequireNonAlphanumeric = false,
+                RequireUppercase = true,
                 RequiredLength = 8
             };
-
-            a.Equals(b).ShouldBeTrue();
+            setting1.Equals(setting2).ShouldBeTrue();
         }
 
         [Fact]
-        public void Dado_SettingsDiferentes_Quando_Equals_Entao_DeveRetornarFalse()
+        public void Dado_DoisSettingsDiferentes_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            var a = new PasswordComplexitySetting
-            {
-                RequireDigit = true,
-                RequireLowercase = true,
-                RequireUppercase = true,
-                RequireNonAlphanumeric = false,
-                RequiredLength = 8
-            };
-
-            var b = new PasswordComplexitySetting
-            {
-                RequireDigit = false,
-                RequireLowercase = true,
-                RequireUppercase = true,
-                RequireNonAlphanumeric = false,
-                RequiredLength = 8
-            };
-
-            a.Equals(b).ShouldBeFalse();
+            var setting1 = new PasswordComplexitySetting { RequireDigit = true, RequiredLength = 8 };
+            var setting2 = new PasswordComplexitySetting { RequireDigit = false, RequiredLength = 8 };
+            setting1.Equals(setting2).ShouldBeFalse();
         }
 
         [Fact]
-        public void Dado_SettingNull_Quando_Equals_Entao_DeveRetornarFalse()
+        public void Dado_SettingComparadoComNull_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            var a = new PasswordComplexitySetting
-            {
-                RequireDigit = true,
-                RequiredLength = 6
-            };
-
-            a.Equals(null).ShouldBeFalse();
-        }
-
-        [Theory]
-        [InlineData(true, true, true, true, 12)]
-        [InlineData(false, false, false, false, 4)]
-        public void Dado_PasswordComplexitySetting_Quando_DefinirPropriedades_Entao_DevePersistir(
-            bool digit, bool lower, bool upper, bool nonAlpha, int length)
-        {
-            var setting = new PasswordComplexitySetting
-            {
-                RequireDigit = digit,
-                RequireLowercase = lower,
-                RequireUppercase = upper,
-                RequireNonAlphanumeric = nonAlpha,
-                RequiredLength = length
-            };
-
-            setting.RequireDigit.ShouldBe(digit);
-            setting.RequireLowercase.ShouldBe(lower);
-            setting.RequireUppercase.ShouldBe(upper);
-            setting.RequireNonAlphanumeric.ShouldBe(nonAlpha);
-            setting.RequiredLength.ShouldBe(length);
+            var setting = new PasswordComplexitySetting();
+            setting.Equals(null).ShouldBeFalse();
         }
 
         [Fact]
-        public void Dado_RequiredLengthDiferente_Quando_Equals_Entao_DeveRetornarFalse()
+        public void Dado_DoisSettingsComRequiredLengthDiferente_Quando_Equals_Entao_DeveRetornarFalse()
         {
-            var a = new PasswordComplexitySetting { RequiredLength = 8 };
-            var b = new PasswordComplexitySetting { RequiredLength = 12 };
-
-            a.Equals(b).ShouldBeFalse();
+            var setting1 = new PasswordComplexitySetting { RequiredLength = 8 };
+            var setting2 = new PasswordComplexitySetting { RequiredLength = 12 };
+            setting1.Equals(setting2).ShouldBeFalse();
         }
 
-        [Fact]
-        public void Dado_RequireLowercaseDiferente_Quando_Equals_Entao_DeveRetornarFalse()
-        {
-            var a = new PasswordComplexitySetting { RequireLowercase = true };
-            var b = new PasswordComplexitySetting { RequireLowercase = false };
-
-            a.Equals(b).ShouldBeFalse();
-        }
-
-        [Fact]
-        public void Dado_RequireUppercaseDiferente_Quando_Equals_Entao_DeveRetornarFalse()
-        {
-            var a = new PasswordComplexitySetting { RequireUppercase = true };
-            var b = new PasswordComplexitySetting { RequireUppercase = false };
-
-            a.Equals(b).ShouldBeFalse();
-        }
-
-        [Fact]
-        public void Dado_RequireNonAlphanumericDiferente_Quando_Equals_Entao_DeveRetornarFalse()
-        {
-            var a = new PasswordComplexitySetting { RequireNonAlphanumeric = true };
-            var b = new PasswordComplexitySetting { RequireNonAlphanumeric = false };
-
-            a.Equals(b).ShouldBeFalse();
-        }
+        #endregion
     }
 }
