@@ -1,3 +1,4 @@
+using Abp.Application.Services.Dto;
 using Abp.Auditing;
 using Abp.Configuration.Startup;
 using Abp.Domain.Repositories;
@@ -7,6 +8,7 @@ using Eaf.Middleware.Auditing.Exporting;
 using Eaf.Middleware.Authorization.Users;
 using NSubstitute;
 using Shouldly;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Eaf.Middleware.Application.Tests.Auditing
@@ -74,6 +76,44 @@ namespace Eaf.Middleware.Application.Tests.Auditing
 
             // Então
             sut.ShouldNotBeNull();
+        }
+
+        #endregion
+
+        #region GetEntityHistoryObjectTypes
+
+        [Fact]
+        public void Dado_ConfiguracoesCustomizadasPreenchidas_Quando_GetEntityHistoryObjectTypes_Entao_DeveRetornarListaNameValue()
+        {
+            // Dado
+            var config = new Dictionary<string, object>
+            {
+                { "TipoA", "ValorA" },
+                { "TipoB", 42 }
+            };
+            _eafStartupConfiguration.GetCustomConfig().Returns(config);
+
+            // Quando
+            var result = _sut.GetEntityHistoryObjectTypes();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(2);
+            result.ShouldContain(x => x.Name == "TipoA" && x.Value == "ValorA");
+            result.ShouldContain(x => x.Name == "TipoB" && x.Value == "42");
+        }
+
+        [Fact]
+        public void Dado_ConfiguracoesCustomizadasVazias_Quando_GetEntityHistoryObjectTypes_Entao_DeveRetornarListaVazia()
+        {
+            // Dado
+            _eafStartupConfiguration.GetCustomConfig().Returns(new Dictionary<string, object>());
+
+            // Quando
+            var result = _sut.GetEntityHistoryObjectTypes();
+
+            // Então
+            result.ShouldBeEmpty();
         }
 
         #endregion
