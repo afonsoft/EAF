@@ -1,8 +1,12 @@
+#nullable disable
+
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,7 +44,7 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             ElementType = typeof(T);
         }
 
-        public AsyncQueryable(IQueryProvider provider, Expression expression)
+        public AsyncQueryable(IAsyncQueryProvider provider, Expression expression)
         {
             Provider = provider;
             Expression = expression;
@@ -73,7 +77,7 @@ namespace Eaf.Middleware.Application.Tests.Helpers
     /// Provedor de query que reescreve constantes <see cref="AsyncQueryable{T}"/> para a fonte
     /// real, permitindo executar expressões LINQ sobre coleções em memória.
     /// </summary>
-    internal class AsyncQueryProvider<T> : IQueryProvider
+    internal class AsyncQueryProvider<T> : IAsyncQueryProvider
     {
         private readonly IQueryable<T> _source;
 
@@ -84,17 +88,20 @@ namespace Eaf.Middleware.Application.Tests.Helpers
 
         public IQueryable CreateQuery(Expression expression)
         {
-            throw new NotSupportedException();
+            if (expression == null)
+                throw new ArgumentNullException(nameof(expression));
+
+            var elementType = expression.Type.GetGenericArguments().FirstOrDefault();
+            if (elementType == null)
+                throw new NotSupportedException();
+
+            var queryType = typeof(AsyncQueryable<>).MakeGenericType(elementType);
+            return (IQueryable)Activator.CreateInstance(queryType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new object[] { this, expression }, null);
         }
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
         {
-            if (typeof(TElement) != typeof(T))
-            {
-                throw new NotSupportedException($"AsyncQueryable only supports queries of type {typeof(T).Name}.");
-            }
-
-            return new AsyncQueryable<TElement>(new AsyncQueryProvider<TElement>((IQueryable<TElement>)_source), expression);
+            return new AsyncQueryable<TElement>(this, expression);
         }
 
         public object Execute(Expression expression)
@@ -105,6 +112,40 @@ namespace Eaf.Middleware.Application.Tests.Helpers
         public TResult Execute<TResult>(Expression expression)
         {
             return _source.Provider.Execute<TResult>(Rewrite(expression));
+        }
+
+        public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken = default)
+        {
+            var result = Execute(Rewrite(expression));
+
+            if (typeof(TResult).IsGenericType && typeof(TResult).GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                var valueType = typeof(TResult).GetGenericArguments()[0];
+
+                if (valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    var list = (IList)Activator.CreateInstance(valueType);
+                    foreach (var item in (IEnumerable)result)
+                    {
+                        list.Add(item);
+                    }
+
+                    return (TResult)TaskFromResult(valueType, list);
+                }
+
+                var converted = Convert.ChangeType(result, valueType);
+                return (TResult)TaskFromResult(valueType, converted);
+            }
+
+            return (TResult)result;
+        }
+
+        private static object TaskFromResult(Type valueType, object value)
+        {
+            return typeof(Task)
+                .GetMethod("FromResult")!
+                .MakeGenericMethod(valueType)
+                .Invoke(null, new[] { value });
         }
 
         private Expression Rewrite(Expression expression)
