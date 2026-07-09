@@ -138,5 +138,77 @@ namespace Eaf.Middleware.Tests.Application.Chat
             // Quando/Então
             Should.Throw<Abp.UI.UserFriendlyException>(() => sut.Delete(sharedMessageId));
         }
+
+        [Fact]
+        public void Dado_MensagensRecentes_Quando_Delete_Entao_DeveRemoverMensagens()
+        {
+            // Dado
+            var sharedMessageId = Guid.NewGuid();
+            var message = CriarMensagem(1, 10, 20, sharedMessageId);
+            message.CreationTime = DateTime.Now;
+
+            var repository = Substitute.For<IRepository<ChatMessage, long>>();
+            var messages = new List<ChatMessage> { message }.AsAsyncQueryable();
+            repository.GetAll().Returns(messages);
+            repository.Delete(Arg.Any<Expression<Func<ChatMessage, bool>>>());
+
+            var sut = CriarChatMessageManager(repository, null);
+
+            // Quando
+            sut.Delete(sharedMessageId);
+
+            // Então
+            repository.Received(1).Delete(Arg.Any<Expression<Func<ChatMessage, bool>>>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuariosAtivos_Quando_SendMessageToGroupAsync_Entao_DeveSalvarMensagensParaSenderEReceivers()
+        {
+            // Dado
+            var sender = new UserIdentifier(null, 10);
+            var receiverGroup = new UserIdentifier(null, 20);
+
+            var user = new User { Id = 20, UserName = "receiver", IsActive = true };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.Users.Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var repository = Substitute.For<IRepository<ChatMessage, long>>();
+            repository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
+
+            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+            onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>())
+                .Returns(Task.FromResult<IReadOnlyList<IOnlineClient>>(new List<IOnlineClient>()));
+
+            var chatCommunicator = Substitute.For<IChatCommunicator>();
+            chatCommunicator.SendMessageToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<ChatMessage>())
+                .Returns(Task.CompletedTask);
+
+            var chatFeatureChecker = Substitute.For<IChatFeatureChecker>();
+            chatFeatureChecker.CheckChatFeatures(Arg.Any<int?>(), Arg.Any<int?>());
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+
+            var sut = new ChatMessageManager(
+                Substitute.For<IFriendshipManager>(),
+                chatCommunicator,
+                onlineClientManager,
+                userManager,
+                Substitute.For<ITenantCache>(),
+                Substitute.For<IUserFriendsCache>(),
+                Substitute.For<IUserEmailer>(),
+                repository,
+                chatFeatureChecker,
+                unitOfWorkManager);
+
+            // Quando
+            await sut.SendMessageToGroupAsync(sender, receiverGroup, "Hello group");
+
+            // Então
+            repository.Received(2).InsertAndGetId(Arg.Any<ChatMessage>());
+            await chatCommunicator.Received(1).SendMessageToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<ChatMessage>());
+        }
     }
 }

@@ -1,6 +1,8 @@
+using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Authorization.Roles;
 using Abp.Authorization.Users;
+using Abp.Configuration;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Localization;
@@ -43,6 +45,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
     {
         private readonly UserAppService _sut;
         private readonly ICacheManager _cacheManager;
+        private readonly RoleManager _roleManager;
 
         public UserAppServiceBddTests()
         {
@@ -52,7 +55,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
                 Substitute.For<IRepository<RolePermissionSetting, long>>()
             );
 
-            var roleManager = Substitute.For<RoleManager>(
+            _roleManager = Substitute.For<RoleManager>(
                 roleStore,
                 new List<IRoleValidator<Role>>(),
                 Substitute.For<ILookupNormalizer>(),
@@ -71,7 +74,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             _cacheManager.GetCache(Arg.Any<string>()).Returns(Substitute.For<ICache>());
 
             _sut = new UserAppService(
-                roleManager,
+                _roleManager,
                 Substitute.For<IUserEmailer>(),
                 Substitute.For<IUserListExcelExporter>(),
                 Substitute.For<INotificationSubscriptionManager>(),
@@ -290,5 +293,90 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
         }
 
         #endregion
+
+        #region GetUserForEdit
+
+        [Fact]
+        public async Task Dado_NovoUsuario_Quando_GetUserForEdit_Entao_DeveRetornarUsuarioPadraoERolesPadroesMarcados()
+        {
+            // Dado
+            var roles = new List<Role>
+            {
+                new Role(null, "admin", "Admin") { Id = 1, IsDefault = true },
+                new Role(null, "user", "User") { Id = 2, IsDefault = false }
+            }.AsAsyncQueryable();
+            _roleManager.Roles.Returns(roles);
+
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueAsync(Arg.Any<string>()).Returns("False");
+            _sut.SettingManager = settingManager;
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<UserEditDto>(Arg.Any<User>()).Returns(new UserEditDto());
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = await _sut.GetUserForEdit(new NullableIdDto<long>());
+
+            // Então
+            result.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
+            result.User.IsActive.ShouldBeTrue();
+            result.Roles.ShouldNotBeEmpty();
+            result.Roles.ShouldContain(r => r.RoleName == "admin" && r.IsAssigned);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_GetUserForEdit_Entao_DeveRetornarUsuarioMapeadoERolesAtribuidos()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+            userManager.IsInRoleAsync(user, Arg.Any<string>()).Returns(true);
+
+            var roles = new List<Role>
+            {
+                new Role(null, "admin", "Admin") { Id = 1, IsDefault = true }
+            }.AsAsyncQueryable();
+            _roleManager.Roles.Returns(roles);
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<UserEditDto>(Arg.Any<User>()).Returns(new UserEditDto { UserName = "admin" });
+            _sut.ObjectMapper = objectMapper;
+            _sut.UserManager = userManager;
+
+            // Quando
+            var result = await _sut.GetUserForEdit(new NullableIdDto<long> { Id = 1 });
+
+            // Então
+            result.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
+            result.User.UserName.ShouldBe("admin");
+            result.Roles.ShouldContain(r => r.RoleName == "admin" && r.IsAssigned);
+        }
+
+        #endregion
+
+        #region GetActiveDirectoryUsers
+
+        [Fact]
+        public async Task Dado_FonteAzureDesabilitada_Quando_GetActiveDirectoryUsers_Entao_DeveRetornarListaVazia()
+        {
+            // Dado
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<UserListDto>>(Arg.Any<object>()).Returns(new List<UserListDto>());
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = await _sut.GetActiveDirectoryUsers("john");
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(0);
+        }
+
+        #endregion
+
     }
 }

@@ -235,5 +235,116 @@ namespace Eaf.Middleware.Application.Tests.Localization
         }
 
         #endregion
+
+        #region CreateOrUpdateLanguage
+
+        [Fact]
+        public async Task Dado_NovoIdioma_Quando_CreateOrUpdateLanguage_Entao_DeveAdicionarIdioma()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            _applicationLanguageManager.GetLanguagesAsync(null).Returns(new List<ApplicationLanguage>());
+
+            var input = new CreateOrUpdateLanguageInput
+            {
+                Language = new ApplicationLanguageEditDto
+                {
+                    Name = "fr",
+                    Icon = "fr",
+                    IsEnabled = true
+                }
+            };
+
+            // Quando
+            await _sut.CreateOrUpdateLanguage(input);
+
+            // Então
+            await _applicationLanguageManager.Received(1).AddAsync(Arg.Is<ApplicationLanguage>(l => l.Name == "fr"));
+        }
+
+        [Fact]
+        public async Task Dado_IdiomaExistente_Quando_CreateOrUpdateLanguage_Entao_DeveAtualizarIdioma()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var existingLanguage = new ApplicationLanguage(null, "pt-BR", "Português (Brasil)") { Id = 1 };
+            _applicationLanguageManager.GetLanguagesAsync(null).Returns(new List<ApplicationLanguage> { existingLanguage });
+            _languageRepository.GetAsync(1).Returns(existingLanguage);
+
+            var input = new CreateOrUpdateLanguageInput
+            {
+                Language = new ApplicationLanguageEditDto
+                {
+                    Id = 1,
+                    Name = "pt-BR",
+                    Icon = "br",
+                    IsEnabled = true
+                }
+            };
+
+            // Quando
+            await _sut.CreateOrUpdateLanguage(input);
+
+            // Então
+            await _applicationLanguageManager.Received(1).UpdateAsync(null, existingLanguage);
+        }
+
+        #endregion
+
+        #region GetLanguageTexts
+
+        [Fact]
+        public async Task Dado_TextosLocalizados_Quando_GetLanguageTexts_Entao_DeveRetornarListaPaginada()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafMiddleware");
+            source.GetAllStrings().Returns(new List<LocalizedString>
+            {
+                new LocalizedString("Hello", "Hello", CultureInfo.InvariantCulture)
+            });
+            localizationManager.GetSource("EafMiddleware").Returns(source);
+            _sut.LocalizationManager = localizationManager;
+
+            _applicationLanguageTextManager.GetStringOrNull(
+                Arg.Any<int?>(),
+                Arg.Any<string>(),
+                Arg.Any<CultureInfo>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>()).Returns("Olá");
+
+            var input = new GetLanguageTextsInput
+            {
+                BaseLanguageName = "pt-BR",
+                TargetLanguageName = "en-US",
+                SourceName = "EafMiddleware",
+                Sorting = "Key",
+                MaxResultCount = 10,
+                SkipCount = 0,
+                TargetValueFilter = "ALL"
+            };
+
+            // Quando
+            var result = await _sut.GetLanguageTexts(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].Key.ShouldBe("Hello");
+        }
+
+        #endregion
     }
 }
