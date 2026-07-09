@@ -24,6 +24,9 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Eaf.Middleware.Application.Tests.Helpers
 {
@@ -39,8 +42,15 @@ namespace Eaf.Middleware.Application.Tests.Helpers
 
         public static UserManager CreateUserManager(out IRepository<User, long> userRepository)
         {
-            var userStore = Substitute.For<UserStore>(new object[10]);
-            userRepository = Substitute.For<IRepository<User, long>>();
+            return CreateUserManager(out userRepository, out _);
+        }
+
+        public static UserManager CreateUserManager(out IRepository<User, long> userRepository, out UserStore userStore)
+        {
+            userStore = Substitute.For<UserStore>(new object[10]);
+            userStore.UpdateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns(IdentityResult.Success);
+
+            userRepository = Substitute.For<IRepository<User, long>, ISupportsExplicitLoading<User, long>>();
             var optionsAccessor = Options.Create(new IdentityOptions());
             var passwordHasher = Substitute.For<IPasswordHasher<User>>();
             var userValidators = Array.Empty<IUserValidator<User>>();
@@ -55,6 +65,12 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
             activeUnitOfWork.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
             unitOfWorkManager.Current.Returns(activeUnitOfWork);
+
+            var uowHandle = Substitute.For<IUnitOfWorkCompleteHandle>();
+            uowHandle.CompleteAsync().Returns(Task.CompletedTask);
+            unitOfWorkManager.Begin().Returns(uowHandle);
+            unitOfWorkManager.Begin(Arg.Any<UnitOfWorkOptions>()).Returns(uowHandle);
+            unitOfWorkManager.Begin(Arg.Any<TransactionScopeOption>()).Returns(uowHandle);
             var cacheManager = Substitute.For<ICacheManager>();
             var settingManager = Substitute.For<ISettingManager>();
             var localizationManager = Substitute.For<ILocalizationManager>();

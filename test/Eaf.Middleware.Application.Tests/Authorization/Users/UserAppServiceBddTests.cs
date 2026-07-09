@@ -378,5 +378,111 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
         #endregion
 
+        #region CreateOrUpdateUser
+
+        [Fact]
+        public async Task Dado_NovoUsuario_Quando_CreateOrUpdateUser_Entao_DeveCriarUsuarioLimparCacheENotificar()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            currentUow.SaveChangesAsync().Returns(Task.CompletedTask);
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var newUser = new User { Id = 0, UserName = "newuser", Name = "New", Surname = "User", EmailAddress = "new@example.com" };
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<User>(Arg.Any<object>()).Returns(newUser);
+            _sut.ObjectMapper = objectMapper;
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CreateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            var input = new CreateOrUpdateUserInput
+            {
+                User = new UserEditDto
+                {
+                    UserName = "newuser",
+                    Name = "New",
+                    Surname = "User",
+                    EmailAddress = "new@example.com",
+                    IsActive = true
+                },
+                AssignedRoleNames = new[] { "admin" },
+                SetRandomPassword = true,
+                SendActivationEmail = false
+            };
+
+            // Quando
+            await _sut.CreateOrUpdateUser(input);
+
+            // Então
+            await userManager.Received(1).CreateAsync(Arg.Any<User>());
+            await currentUow.Received(1).SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_CreateOrUpdateUser_Entao_DeveAtualizarUsuarioRolesCache()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var existingUser = new User { Id = 1, UserName = "admin", Name = "Admin", Surname = "User", EmailAddress = "admin@example.com" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(existingUser);
+            userManager.ChangePasswordAsync(existingUser, Arg.Any<string>()).Returns(IdentityResult.Success);
+            userManager.CheckDuplicateUsernameOrEmailAddressAsync(Arg.Any<long?>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(IdentityResult.Success);
+            userManager.SetRolesAsync(existingUser, Arg.Any<string[]>()).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            _sut.ObjectMapper = objectMapper;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            var input = new CreateOrUpdateUserInput
+            {
+                User = new UserEditDto
+                {
+                    Id = 1,
+                    UserName = "admin",
+                    Name = "Admin",
+                    Surname = "User",
+                    EmailAddress = "admin@example.com",
+                    IsActive = true,
+                    Password = ""
+                },
+                AssignedRoleNames = new[] { "admin" },
+                SetRandomPassword = false,
+                SendActivationEmail = false
+            };
+
+            // Quando
+            await _sut.CreateOrUpdateUser(input);
+
+            // Então
+            await userManager.Received(1).CheckDuplicateUsernameOrEmailAddressAsync(Arg.Any<long?>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+            await userManager.Received(1).SetRolesAsync(existingUser, Arg.Any<string[]>());
+        }
+
+        #endregion
     }
 }

@@ -210,5 +210,66 @@ namespace Eaf.Middleware.Tests.Application.Chat
             repository.Received(2).InsertAndGetId(Arg.Any<ChatMessage>());
             await chatCommunicator.Received(1).SendMessageToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<ChatMessage>());
         }
+
+        [Fact]
+        public async Task Dado_UsuariosAmigos_Quando_SendMessageAsync_Entao_DeveSalvarMensagensParaAmbos()
+        {
+            // Dado
+            var sender = new UserIdentifier(1, 10);
+            var receiver = new UserIdentifier(1, 20);
+            var senderUser = new User { Id = 10, UserName = "sender", TenantId = 1 };
+            var receiverUser = new User { Id = 20, UserName = "receiver", TenantId = 1 };
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserOrNullAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
+
+            var friendshipManager = Substitute.For<IFriendshipManager>();
+            friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
+
+            var tenantCache = Substitute.For<ITenantCache>();
+            tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+
+            var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
+            chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
+            chatMessageRepository.Count(Arg.Any<Expression<Func<ChatMessage, bool>>>()).Returns(1);
+
+            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+            onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
+
+            var chatCommunicator = Substitute.For<IChatCommunicator>();
+            chatCommunicator.SendMessageToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<ChatMessage>()).Returns(Task.CompletedTask);
+
+            var userEmailer = Substitute.For<IUserEmailer>();
+            userEmailer.TryToSendChatMessageMail(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<ChatMessage>()).Returns(Task.CompletedTask);
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+
+            var sut = new ChatMessageManager(
+                friendshipManager,
+                chatCommunicator,
+                onlineClientManager,
+                userManager,
+                tenantCache,
+                Substitute.For<IUserFriendsCache>(),
+                userEmailer,
+                chatMessageRepository,
+                Substitute.For<IChatFeatureChecker>(),
+                unitOfWorkManager);
+
+            // Quando
+            await sut.SendMessageAsync(sender, receiver, "Hello", "acme", "sender", null);
+
+            // Então
+            chatMessageRepository.Received(2).InsertAndGetId(Arg.Any<ChatMessage>());
+            await friendshipManager.Received(2).CreateFriendshipAsync(Arg.Any<Friendship>());
+            await userEmailer.Received(1).TryToSendChatMessageMail(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<ChatMessage>());
+        }
     }
 }
