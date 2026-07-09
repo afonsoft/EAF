@@ -13,6 +13,9 @@ using Abp.Webhooks;
 using Abp.Zero.Configuration;
 using Eaf.Middleware.Authorization.AzureActiveDirectory;
 using Eaf.Middleware.Authorization.Ldap;
+using Eaf.Middleware;
+using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Authorization.Permissions;
 using Eaf.Middleware.AzureActiveDirectory.Configuration;
 using Eaf.Middleware.Ldap.Configuration;
 using Eaf.Middleware.Authorization.Roles;
@@ -36,6 +39,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
     public class UserAppServiceBddTests
     {
         private readonly UserAppService _sut;
+        private readonly ICacheManager _cacheManager;
 
         public UserAppServiceBddTests()
         {
@@ -60,8 +64,8 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
                 Substitute.For<IRepository<OrganizationUnitRole, long>>()
             );
 
-            var cacheManager = Substitute.For<ICacheManager>();
-            cacheManager.GetCache(Arg.Any<string>()).Returns(Substitute.For<ICache>());
+            _cacheManager = Substitute.For<ICacheManager>();
+            _cacheManager.GetCache(Arg.Any<string>()).Returns(Substitute.For<ICache>());
 
             _sut = new UserAppService(
                 roleManager,
@@ -81,7 +85,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
                 ),
                 Substitute.For<INotificationPublisher>(),
                 Substitute.For<IWebhookPublisher>(),
-                cacheManager
+                _cacheManager
             );
         }
 
@@ -127,6 +131,105 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             var customService = Substitute.For<IAppUrlService>();
             _sut.AppUrlService = customService;
             _sut.AppUrlService.ShouldBe(customService);
+        }
+
+        #endregion
+
+        #region CloseSessionUser
+
+        [Fact]
+        public async Task Dado_UsuarioComTokens_Quando_CloseSessionUser_Entao_DeveRemoverTokensDoCache()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+            userManager.RemoveAllTokenValidityKeyAsync(user, default).Returns(new List<string> { "token1", "token2" });
+
+            var cache = Substitute.For<ICache>();
+            _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).Returns(cache);
+
+            _sut.UserManager = userManager;
+
+            // Quando
+            await _sut.CloseSessionUser(1);
+
+            // Então
+            cache.Received(1).Remove("token1");
+            cache.Received(1).Remove("token2");
+        }
+
+        #endregion
+
+        #region UnlockUser
+
+        [Fact]
+        public async Task Dado_UsuarioBloqueado_Quando_UnlockUser_Entao_DeveDesbloquearELimparCache()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin", LockoutEndDateUtc = DateTime.UtcNow.AddHours(1) };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _sut.UserManager = userManager;
+
+            // Quando
+            await _sut.UnlockUser(new Abp.Application.Services.Dto.EntityDto<long>(1));
+
+            // Então
+            user.LockoutEndDateUtc.ShouldBeNull();
+        }
+
+        #endregion
+
+        #region ResetUserSpecificPermissions
+
+        [Fact]
+        public async Task Dado_UsuarioComPermissoes_Quando_ResetUserSpecificPermissions_Entao_DeveResetarPermissoes()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+            userManager.ResetAllPermissionsAsync(user).Returns(Task.CompletedTask);
+
+            _sut.UserManager = userManager;
+
+            // Quando
+            await _sut.ResetUserSpecificPermissions(new Abp.Application.Services.Dto.EntityDto<long>(1));
+
+            // Então
+            await userManager.Received(1).ResetAllPermissionsAsync(user);
+        }
+
+        #endregion
+
+        #region UpdateUserPermissions
+
+        [Fact]
+        public async Task Dado_UsuarioEPermissoes_Quando_UpdateUserPermissions_Entao_DeveAtualizarPermissoes()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+            userManager.SetGrantedPermissionsAsync(user, Arg.Any<IEnumerable<Permission>>()).Returns(Task.CompletedTask);
+
+            var permissionManager = Substitute.For<IPermissionManager>();
+            permissionManager.GetPermissionOrNull(Arg.Any<string>()).Returns(new Permission("Pages.Test", displayName: null));
+
+            _sut.UserManager = userManager;
+            _sut.PermissionManager = permissionManager;
+
+            // Quando
+            await _sut.UpdateUserPermissions(new Eaf.Middleware.Authorization.Users.Dto.UpdateUserPermissionsInput
+            {
+                Id = 1,
+                GrantedPermissionNames = new List<string> { "Pages.Test" }
+            });
+
+            // Então
+            await userManager.Received(1).SetGrantedPermissionsAsync(user, Arg.Any<IEnumerable<Permission>>());
         }
 
         #endregion

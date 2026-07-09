@@ -3,12 +3,19 @@ using Abp.Auditing;
 using Abp.Configuration.Startup;
 using Abp.Domain.Repositories;
 using Abp.EntityHistory;
+using Abp.ObjectMapping;
+using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.Auditing;
+using Eaf.Middleware.Auditing.Dto;
 using Eaf.Middleware.Auditing.Exporting;
 using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.Dto;
 using NSubstitute;
 using Shouldly;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.Middleware.Application.Tests.Auditing
@@ -49,6 +56,34 @@ namespace Eaf.Middleware.Application.Tests.Auditing
                 _entityPropertyChangeRepository,
                 _eafStartupConfiguration
             );
+
+            SetupObjectMapper();
+            SetupNamespaceStripper();
+            SetupExcelExporter();
+        }
+
+        private void SetupObjectMapper()
+        {
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<AuditLogListDto>(Arg.Any<object>())
+                .Returns(x => new AuditLogListDto { ServiceName = ((AuditLog)x[0]).ServiceName });
+            objectMapper.Map<EntityChangeListDto>(Arg.Any<object>())
+                .Returns(x => new EntityChangeListDto());
+            _sut.ObjectMapper = objectMapper;
+        }
+
+        private void SetupNamespaceStripper()
+        {
+            _namespaceStripper.StripNameSpace(Arg.Any<string>())
+                .Returns(x => x.Arg<string>());
+        }
+
+        private void SetupExcelExporter()
+        {
+            _auditLogListExcelExporter.ExportToFile(Arg.Any<List<AuditLogListDto>>())
+                .Returns(x => new FileDto("auditLogs.xlsx", "xlsx"));
+            _auditLogListExcelExporter.ExportToFile(Arg.Any<List<EntityChangeListDto>>())
+                .Returns(x => new FileDto("entityChanges.xlsx", "xlsx"));
         }
 
         #region Construtor
@@ -114,6 +149,187 @@ namespace Eaf.Middleware.Application.Tests.Auditing
 
             // Então
             result.ShouldBeEmpty();
+        }
+
+        #endregion
+
+        #region AuditLogs
+
+        [Fact]
+        public async Task Dado_AuditLogsEUsuarios_Quando_GetAuditLogs_Entao_DeveRetornarResultadoPaginado()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var auditLog = new AuditLog
+            {
+                Id = 1,
+                UserId = 1,
+                ExecutionTime = new DateTime(2025, 6, 1),
+                ServiceName = "Eaf.Middleware.Test.TestService",
+                MethodName = "TestMethod",
+                BrowserInfo = "Chrome",
+                ExecutionDuration = 100
+            };
+
+            _auditLogRepository.GetAll().Returns(new List<AuditLog> { auditLog }.AsAsyncQueryable());
+            _userRepository.GetAll().Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var input = new GetAuditLogsInput
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MaxResultCount = 10,
+                SkipCount = 0,
+                Sorting = "AuditLog.ExecutionTime desc"
+            };
+
+            // Quando
+            var result = await _sut.GetAuditLogs(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].UserName.ShouldBe("admin");
+            result.Items[0].ServiceName.ShouldBe("Eaf.Middleware.Test.TestService");
+        }
+
+        [Fact]
+        public async Task Dado_AuditLogsDisponiveis_Quando_GetAuditLogsToExcel_Entao_DeveRetornarArquivo()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var auditLog = new AuditLog
+            {
+                Id = 1,
+                UserId = 1,
+                ExecutionTime = new DateTime(2025, 6, 1),
+                ServiceName = "Eaf.Middleware.Test.TestService",
+                MethodName = "TestMethod",
+                ExecutionDuration = 100
+            };
+
+            _auditLogRepository.GetAll().Returns(new List<AuditLog> { auditLog }.AsAsyncQueryable());
+            _userRepository.GetAll().Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var input = new GetAuditLogsInput
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31)
+            };
+
+            // Quando
+            var result = await _sut.GetAuditLogsToExcel(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.FileName.ShouldBe("auditLogs.xlsx");
+        }
+
+        #endregion
+
+        #region EntityChanges
+
+        [Fact]
+        public async Task Dado_EntityChangesEUsuarios_Quando_GetEntityChanges_Entao_DeveRetornarResultadoPaginado()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var entityChangeSet = new EntityChangeSet { Id = 1, UserId = 1 };
+            var entityChange = new EntityChange
+            {
+                Id = 1,
+                EntityChangeSetId = 1,
+                EntityTypeFullName = "Eaf.Middleware.Test.Entity",
+                ChangeTime = new DateTime(2025, 6, 1)
+            };
+
+            _entityChangeSetRepository.GetAll().Returns(new List<EntityChangeSet> { entityChangeSet }.AsAsyncQueryable());
+            _entityChangeRepository.GetAll().Returns(new List<EntityChange> { entityChange }.AsAsyncQueryable());
+            _userRepository.GetAll().Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var input = new GetEntityChangeInput
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MaxResultCount = 10,
+                SkipCount = 0,
+                Sorting = "EntityChange.ChangeTime desc"
+            };
+
+            // Quando
+            var result = await _sut.GetEntityChanges(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].UserName.ShouldBe("admin");
+        }
+
+        [Fact]
+        public async Task Dado_EntityPropertyChanges_Quando_GetEntityPropertyChanges_Entao_DeveRetornarListaMapeada()
+        {
+            // Dado
+            var entityPropertyChange = new EntityPropertyChange
+            {
+                Id = 1,
+                EntityChangeId = 10,
+                PropertyName = "Name",
+                OriginalValue = "Old",
+                NewValue = "New",
+                PropertyTypeFullName = "System.String"
+            };
+
+            _entityPropertyChangeRepository.GetAll().Returns(new List<EntityPropertyChange> { entityPropertyChange }.AsAsyncQueryable());
+
+            // Quando
+            var result = await _sut.GetEntityPropertyChanges(10);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(1);
+            result[0].PropertyName.ShouldBe("Name");
+            result[0].OriginalValue.ShouldBe("Old");
+            result[0].NewValue.ShouldBe("New");
+        }
+
+        [Fact]
+        public async Task Dado_TipoEEntidadeEspecificos_Quando_GetEntityTypeChanges_Entao_DeveRetornarResultadoPaginado()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var entityChangeSet = new EntityChangeSet { Id = 1, UserId = 1 };
+            var entityChange = new EntityChange
+            {
+                Id = 1,
+                EntityChangeSetId = 1,
+                EntityTypeFullName = "Eaf.Middleware.Test.Entity",
+                EntityId = "42",
+                ChangeTime = new DateTime(2025, 6, 1)
+            };
+
+            _entityChangeSetRepository.GetAll().Returns(new List<EntityChangeSet> { entityChangeSet }.AsAsyncQueryable());
+            _entityChangeRepository.GetAll().Returns(new List<EntityChange> { entityChange }.AsAsyncQueryable());
+            _userRepository.GetAll().Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var input = new GetEntityTypeChangeInput
+            {
+                EntityTypeFullName = "Eaf.Middleware.Test.Entity",
+                EntityId = "42",
+                MaxResultCount = 10,
+                SkipCount = 0,
+                Sorting = "EntityChange.ChangeTime desc"
+            };
+
+            // Quando
+            var result = await _sut.GetEntityTypeChanges(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].UserName.ShouldBe("admin");
         }
 
         #endregion
