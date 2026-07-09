@@ -11,9 +11,11 @@ using Shouldly;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Abp.Domain.Repositories;
+using Abp.Authorization.Users;
 
 namespace Eaf.Middleware.Tests.Application.Authorization.Users
 {
@@ -177,6 +179,76 @@ namespace Eaf.Middleware.Tests.Application.Authorization.Users
             // Então
             result.ShouldNotBeNull();
             result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_GetUserByLoginAsyncComTenant_Entao_DeveRetornarUsuario()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "user1", NormalizedUserName = "USER1" };
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>()).Returns(user);
+
+            // Quando
+            var result = await userManager.GetUserByLoginAsync("user1", 1);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioValido_Quando_UpdateWithValidateAsync_Entao_DeveRetornarSucesso()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin", EmailAddress = "admin@example.com" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CheckDuplicateUsernameOrEmailAddressAsync(
+                Arg.Any<long?>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()).Returns(IdentityResult.Success);
+
+            // Quando
+            var result = await userManager.UpdateWithValidateAsync(user);
+
+            // Então
+            result.Succeeded.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComTokens_Quando_RemoveAllTokenValidityKeyAsync_Entao_DeveRetornarTokensRemovidos()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            user.Tokens = new List<UserToken>
+            {
+                CreateToken(1, "TokenValidityKeyProvider", "token1"),
+                CreateToken(1, "TokenValidityKeyProvider", "token2"),
+                CreateToken(1, "OtherProvider", "token3")
+            };
+
+            static UserToken CreateToken(long userId, string loginProvider, string name)
+            {
+                var token = Substitute.For<UserToken>();
+                token.UserId.Returns(userId);
+                token.LoginProvider.Returns(loginProvider);
+                token.Name.Returns(name);
+                return token;
+            }
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userManager.When(x => x.RemoveAllTokenValidityKeyAsync(user, default)).CallBase();
+            userRepository.EnsureCollectionLoadedAsync(user, u => u.Tokens, Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+
+            // Quando
+            var result = await userManager.RemoveAllTokenValidityKeyAsync(user, default);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(2);
+            result.ShouldContain("token1");
+            result.ShouldContain("token2");
         }
     }
 }
