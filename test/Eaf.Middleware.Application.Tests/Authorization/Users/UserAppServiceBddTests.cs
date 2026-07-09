@@ -5,6 +5,7 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Localization;
 using Abp.Notifications;
+using Abp.ObjectMapping;
 using Abp.Organizations;
 using Abp.Runtime.Caching;
 using Abp.Runtime.Session;
@@ -16,6 +17,8 @@ using Eaf.Middleware.Authorization.Ldap;
 using Eaf.Middleware;
 using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.Authorization.Permissions;
+using Eaf.Middleware.Authorization.Permissions.Dto;
+using Eaf.Middleware.Authorization.Users.Dto;
 using Eaf.Middleware.AzureActiveDirectory.Configuration;
 using Eaf.Middleware.Ldap.Configuration;
 using Eaf.Middleware.Authorization.Roles;
@@ -119,6 +122,28 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             // Quando / Então
             await Should.ThrowAsync<UserFriendlyException>(() =>
                 _sut.DeleteUser(new Abp.Application.Services.Dto.EntityDto<long>(42)));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_DeleteUser_Entao_DeveDeletarELimparCache()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            _sut.AbpSession = abpSession;
+
+            var user = new User { Id = 2, UserName = "user2" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(2).Returns(user);
+            userManager.DeleteAsync(user).Returns(IdentityResult.Success);
+
+            _sut.UserManager = userManager;
+
+            // Quando
+            await _sut.DeleteUser(new Abp.Application.Services.Dto.EntityDto<long>(2));
+
+            // Então
+            await userManager.Received(1).DeleteAsync(user);
         }
 
         #endregion
@@ -230,6 +255,38 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
             // Então
             await userManager.Received(1).SetGrantedPermissionsAsync(user, Arg.Any<IEnumerable<Permission>>());
+        }
+
+        #endregion
+
+        #region GetUserPermissionsForEdit
+
+        [Fact]
+        public async Task Dado_UsuarioEPermissoes_Quando_GetUserPermissionsForEdit_Entao_DeveRetornarPermissoesMapeadas()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+            userManager.GetGrantedPermissionsAsync(user).Returns(new List<Permission>());
+
+            var permissionManager = Substitute.For<IPermissionManager>();
+            permissionManager.GetAllPermissions().Returns(new List<Permission> { new Permission("Pages.Test", displayName: null) });
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<FlatPermissionDto>>(Arg.Any<object>()).Returns(new List<FlatPermissionDto> { new FlatPermissionDto { Name = "Pages.Test" } });
+
+            _sut.UserManager = userManager;
+            _sut.PermissionManager = permissionManager;
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = await _sut.GetUserPermissionsForEdit(new Abp.Application.Services.Dto.EntityDto<long>(1));
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Permissions.Count.ShouldBe(1);
+            result.Permissions[0].Name.ShouldBe("Pages.Test");
         }
 
         #endregion
