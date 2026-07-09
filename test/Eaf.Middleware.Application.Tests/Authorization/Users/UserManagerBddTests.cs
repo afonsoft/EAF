@@ -1,3 +1,4 @@
+using Abp;
 using Abp.Authorization;
 using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
@@ -9,8 +10,10 @@ using NSubstitute;
 using Shouldly;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
+using Abp.Domain.Repositories;
 
 namespace Eaf.Middleware.Tests.Application.Authorization.Users
 {
@@ -97,6 +100,83 @@ namespace Eaf.Middleware.Tests.Application.Authorization.Users
 
             result.Succeeded.ShouldBeFalse();
             result.Errors.First().Code.ShouldBe("1");
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_GetUserByLoginAsync_Entao_DeveRetornarUsuario()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "user1", NormalizedUserName = "USER1" };
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>()).Returns(user);
+
+            // Quando
+            var result = await userManager.GetUserByLoginAsync("user1", null);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioNaoEncontrado_Quando_GetUserByLoginAsync_Entao_DeveRetornarNulo()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>()).Returns((User)null!);
+
+            // Quando
+            var result = await userManager.GetUserByLoginAsync("missing", null);
+
+            // Então
+            result.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_GetUserAsync_Entao_DeveRetornarUsuario()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "user1" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns((User?)user);
+            userManager.When(x => x.GetUserOrNullAsync(Arg.Any<UserIdentifier>())).CallBase();
+
+            // Quando
+            var result = await userManager.GetUserAsync(new UserIdentifier(null, 1));
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioNaoEncontrado_Quando_GetUserAsync_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns((User?)null);
+            userManager.When(x => x.GetUserOrNullAsync(Arg.Any<UserIdentifier>())).CallBase();
+
+            // Quando/Então
+            var exception = await Should.ThrowAsync<Exception>(() => userManager.GetUserAsync(new UserIdentifier(null, 1)));
+            exception.Message.ShouldContain("There is no user");
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_GetUserOrNullAsync_Entao_DeveRetornarUsuario()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "user1" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns((User?)user);
+            userManager.When(x => x.GetUserOrNullAsync(Arg.Any<UserIdentifier>())).CallBase();
+
+            // Quando
+            var result = await userManager.GetUserOrNullAsync(new UserIdentifier(null, 1));
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
         }
     }
 }

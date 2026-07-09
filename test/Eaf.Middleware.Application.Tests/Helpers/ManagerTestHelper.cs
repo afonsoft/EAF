@@ -34,8 +34,13 @@ namespace Eaf.Middleware.Application.Tests.Helpers
     {
         public static UserManager CreateUserManager()
         {
+            return CreateUserManager(out _);
+        }
+
+        public static UserManager CreateUserManager(out IRepository<User, long> userRepository)
+        {
             var userStore = Substitute.For<UserStore>(new object[10]);
-            var userRepository = Substitute.For<IRepository<User, long>>();
+            userRepository = Substitute.For<IRepository<User, long>>();
             var optionsAccessor = Options.Create(new IdentityOptions());
             var passwordHasher = Substitute.For<IPasswordHasher<User>>();
             var userValidators = Array.Empty<IUserValidator<User>>();
@@ -47,6 +52,9 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             var roleManager = CreateRoleManager();
             var permissionManager = Substitute.For<IPermissionManager>();
             var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
             var cacheManager = Substitute.For<ICacheManager>();
             var settingManager = Substitute.For<ISettingManager>();
             var localizationManager = Substitute.For<ILocalizationManager>();
