@@ -160,5 +160,37 @@ namespace Eaf.Middleware.Tests.Application.Friendships
             // Então
             result.ShouldBeNull();
         }
+
+        [Fact]
+        public async Task Dado_MesmoTenantEUsuariosDistintos_Quando_CreateFriendshipAsync_Entao_DeveInserirESalvar()
+        {
+            // Dado
+            var user = new UserIdentifier(1, 10);
+            var friend = new UserIdentifier(1, 20);
+            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
+
+            // Quando
+            await _sut.CreateFriendshipAsync(friendship);
+
+            // Então
+            _friendshipRepository.Received(1).Insert(friendship);
+            await _unitOfWork.Received(1).SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task Dado_AmizadeExistente_Quando_UpdateFriendshipAsync_Entao_DeveAtualizarESalvar()
+        {
+            // Dado
+            var user = new UserIdentifier(1, 10);
+            var friend = new UserIdentifier(1, 20);
+            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
+
+            // Quando
+            await _sut.UpdateFriendshipAsync(friendship);
+
+            // Então
+            _friendshipRepository.Received(1).Update(friendship);
+            await _unitOfWork.Received(1).SaveChangesAsync();
+        }
     }
 }

@@ -97,5 +97,21 @@ namespace Eaf.Middleware.Tests.Auditing
             // Então
             result.ShouldBe("ClassName");
         }
+
+        [Fact]
+        public void Dado_NomeGenericoComMultiplosArgumentos_Quando_StripNameSpace_Entao_DeveRetornarTiposGenericosSimples()
+        {
+            // Dado
+            var genericName = "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]";
+
+            // Quando
+            var result = _stripper.StripNameSpace(genericName);
+
+            // Então
+            result.ShouldContain("Dictionary");
+            result.ShouldContain("<");
+            result.ShouldContain(">");
+            result.ShouldContain(",");
+        }
     }
 }

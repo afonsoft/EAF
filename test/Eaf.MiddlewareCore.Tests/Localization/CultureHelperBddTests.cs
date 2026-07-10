@@ -53,6 +53,20 @@ namespace Eaf.MiddlewareCore.Tests.Localization
         }
 
         [Fact]
+        public void Dado_NomeCulturaVazio_Quando_GetCultureInfoByChecking_Entao_DeveRetornarInvariantCulture()
+        {
+            // Dado
+            var name = "";
+
+            // Quando
+            var result = CultureHelper.GetCultureInfoByChecking(name);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Name.ShouldBe(CultureInfo.InvariantCulture.Name);
+        }
+
+        [Fact]
         public void Dado_CulturaHelper_Quando_VerificarIsRtl_Entao_DeveRetornarBool()
         {
             // Dado / Quando
