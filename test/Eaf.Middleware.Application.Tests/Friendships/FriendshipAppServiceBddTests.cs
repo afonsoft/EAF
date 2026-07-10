@@ -9,6 +9,7 @@ using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Friendships;
 using Eaf.Middleware.Friendships.Dto;
+using Eaf.Middleware.MultiTenancy;
 using NSubstitute;
 using Shouldly;
 using System;
@@ -244,6 +245,107 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             result.FriendUserName.ShouldBe("user100");
             await _friendshipManager.Received(2).CreateFriendshipAsync(Arg.Any<Friendship>());
             await _friendshipManager.Received(2).AcceptFriendshipRequestAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>());
+        }
+
+        #endregion
+
+        #region CreateFriendshipRequestByUserName
+
+        [Fact]
+        public async Task Dado_UsuarioNoHost_Quando_CreateFriendshipRequestByUserName_Entao_DeveCriarAmizadePeloUserName()
+        {
+            // Dado
+            var userId = 42L;
+            var friendId = 100L;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            abpSession.UserId.Returns(userId);
+            abpSession.GetUserId().Returns(userId);
+            _sut.AbpSession = abpSession;
+
+            var currentUser = new User { Id = userId, UserName = "user42" };
+            var friendUser = new User { Id = friendId, UserName = "user100", TenantId = null };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync(userId.ToString()).Returns(currentUser);
+            userManager.FindByIdAsync(friendId.ToString()).Returns(friendUser);
+            userManager.FindByNameOrEmailAsync("user100").Returns(friendUser);
+            _sut.UserManager = userManager;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            _friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
+            _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<FriendshipDto>(Arg.Any<Friendship>()).Returns(new FriendshipDto { FriendUserId = friendId, FriendUserName = "user100" });
+            _sut.ObjectMapper = objectMapper;
+
+            var input = new CreateFriendshipRequestByUserNameInput { TenancyName = ".", UserName = "user100" };
+
+            // Quando
+            var result = await _sut.CreateFriendshipRequestByUserName(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.FriendUserId.ShouldBe(friendId);
+            await _friendshipManager.Received(2).CreateFriendshipAsync(Arg.Any<Friendship>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioEmTenant_Quando_CreateFriendshipRequestByUserName_Entao_DeveResolverTenantECriarAmizade()
+        {
+            // Dado
+            var userId = 42L;
+            var friendId = 100L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(tenantId);
+            abpSession.UserId.Returns(userId);
+            abpSession.GetUserId().Returns(userId);
+            _sut.AbpSession = abpSession;
+
+            var currentUser = new User { Id = userId, UserName = "user42", TenantId = tenantId };
+            var friendUser = new User { Id = friendId, UserName = "user100", TenantId = tenantId };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync(userId.ToString()).Returns(currentUser);
+            userManager.FindByIdAsync(friendId.ToString()).Returns(friendUser);
+            userManager.FindByNameOrEmailAsync("user100").Returns(friendUser);
+            _sut.UserManager = userManager;
+
+            var tenant = new Tenant("acme", "Acme") { Id = tenantId };
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.FindByTenancyNameAsync("acme").Returns(tenant);
+            _sut.TenantManager = tenantManager;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            _friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
+            _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
+            _tenantCache.Get(tenantId).Returns(new TenantCacheItem { TenancyName = "acme" });
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<FriendshipDto>(Arg.Any<Friendship>()).Returns(new FriendshipDto { FriendUserId = friendId, FriendUserName = "user100" });
+            _sut.ObjectMapper = objectMapper;
+
+            var input = new CreateFriendshipRequestByUserNameInput { TenancyName = "acme", UserName = "user100" };
+
+            // Quando
+            var result = await _sut.CreateFriendshipRequestByUserName(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.FriendUserId.ShouldBe(friendId);
+            await _friendshipManager.Received(2).CreateFriendshipAsync(Arg.Any<Friendship>());
         }
 
         #endregion

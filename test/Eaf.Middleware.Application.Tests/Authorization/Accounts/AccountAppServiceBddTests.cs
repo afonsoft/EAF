@@ -1,6 +1,8 @@
 using Abp;
 using Abp.ObjectMapping;
+using Abp.Runtime.Security;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.Authorization.Accounts;
 using Eaf.Middleware.Authorization.Accounts.Dto;
@@ -84,6 +86,23 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
 
             // Então
             result.ShouldBe(3);
+        }
+
+        [Fact]
+        public async Task Dado_ParametroCComTenantId_Quando_ResolveTenantId_Entao_DeveRetornarTenantIdDecriptado()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(3);
+            _sut.AbpSession = abpSession;
+
+            var encrypted = SimpleStringCipher.Instance.Encrypt("tenantId=5");
+
+            // Quando
+            var result = await _sut.ResolveTenantId(new ResolveTenantIdInput { c = encrypted });
+
+            // Então
+            result.ShouldBe(5);
         }
 
         #endregion
@@ -238,6 +257,22 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             await userManager.Received(1).UpdateAsync(user);
         }
 
+        [Fact]
+        public async Task Dado_CodigoInvalido_Quando_ActivateEmail_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var user = new User { Id = 1, EmailAddress = "test@example.com", EmailConfirmationCode = "123" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.ActivateEmail(new ActivateEmailInput { UserId = 1, ConfirmationCode = "999" }));
+        }
+
         #endregion
 
         #region ResetPassword
@@ -267,6 +302,22 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             result.UserName.ShouldBe("admin");
             user.PasswordResetCode.ShouldBeNull();
             user.IsEmailConfirmed.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_CodigoInvalido_Quando_ResetPassword_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin", PasswordResetCode = "456", IsActive = true };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.ResetPassword(new ResetPasswordInput { UserId = 1, ResetCode = "999", Password = "NewPass123!" }));
         }
 
         #endregion

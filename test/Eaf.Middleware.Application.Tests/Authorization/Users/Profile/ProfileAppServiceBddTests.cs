@@ -2,6 +2,7 @@ using Abp;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Domain.Uow;
+using Abp.Localization;
 using Abp.ObjectMapping;
 using Abp.Runtime.Caching;
 using Abp.Runtime.Session;
@@ -134,6 +135,29 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
 
             // Então
             await userManager.Received(1).ChangePasswordAsync(user, "oldPass", "newPass");
+        }
+
+        [Fact]
+        public async Task Dado_ErroDeIdentidade_Quando_ChangePassword_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(user);
+            userManager.ChangePasswordAsync(user, "oldPass", "newPass")
+                .Returns(IdentityResult.Failed(new IdentityError { Description = "Current password is incorrect" }));
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns((int?)null);
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(() =>
+                _sut.ChangePassword(new ChangePasswordInput { CurrentPassword = "oldPass", NewPassword = "newPass" }));
         }
 
         #endregion
@@ -537,6 +561,55 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
             // Então
             await _binaryObjectManager.Received(1).SaveAsync(Arg.Any<BinaryObject>());
             user.ProfilePictureId.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ImagemValidaComCropEFotoExistente_Quando_UpdateProfilePicture_Entao_DeveDeletarFotoAntigaESalvarNova()
+        {
+            // Dado
+            var fileToken = "token123";
+            var imageBytes = new byte[] { 66, 77, 58, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0, 0, 0, 0, 0, 4, 0, 0, 0, 196, 14, 0, 0, 196, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            _tempFileCacheManager.GetFile(fileToken).Returns(imageBytes);
+
+            var existingPictureId = Guid.NewGuid();
+            var user = new User { Id = 1, UserName = "admin", ProfilePictureId = existingPictureId };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _sut.UserManager = userManager;
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            activeUow.SaveChangesAsync().Returns(Task.CompletedTask);
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            _sut.AbpSession = abpSession;
+
+            _binaryObjectManager.DeleteAsync(existingPictureId).Returns(Task.CompletedTask);
+            _binaryObjectManager.SaveAsync(Arg.Any<BinaryObject>()).Returns(Task.CompletedTask);
+
+            var input = new UpdateProfilePictureInput
+            {
+                FileToken = fileToken,
+                X = 0,
+                Y = 0,
+                Width = 1,
+                Height = 1
+            };
+
+            // Quando
+            await _sut.UpdateProfilePicture(input);
+
+            // Então
+            await _binaryObjectManager.Received(1).DeleteAsync(existingPictureId);
+            await _binaryObjectManager.Received(1).SaveAsync(Arg.Any<BinaryObject>());
+            user.ProfilePictureId.ShouldNotBe(existingPictureId);
         }
 
         #endregion

@@ -26,14 +26,15 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             out IIocResolver iocResolver,
             out IUiThemeCustomizerFactory uiThemeCustomizerFactory,
             out IUiCustomizer uiCustomizer,
-            out IAbpSession abpSession)
+            out IAbpSession abpSession,
+            out SettingManager settingManager)
         {
             iocResolver = Substitute.For<IIocResolver>();
             uiThemeCustomizerFactory = Substitute.For<IUiThemeCustomizerFactory>();
             uiCustomizer = Substitute.For<IUiCustomizer>();
             abpSession = Substitute.For<IAbpSession>();
 
-            var settingManager = Substitute.For<SettingManager>(new object[]
+            settingManager = Substitute.For<SettingManager>(new object[]
             {
                 Substitute.For<ISettingDefinitionManager>(),
                 Substitute.For<ICacheManager>(),
@@ -55,7 +56,7 @@ namespace Eaf.Middleware.Application.Tests.Configuration
         public async Task Dado_ThemeCadastrado_Quando_GetUiManagementSettings_Entao_DeveRetornarListaDeTemas()
         {
             // Dado
-            var sut = CreateSut(out var iocResolver, out _, out var uiCustomizer, out _);
+            var sut = CreateSut(out var iocResolver, out _, out var uiCustomizer, out _, out _);
             iocResolver.ResolveAll<IUiCustomizer>().Returns(new[] { uiCustomizer });
             uiCustomizer.GetUiSettings().Returns(new UiCustomizationSettingsDto
             {
@@ -78,7 +79,7 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             var settings = new ThemeSettingsDto { Theme = "Default" };
             var userIdentifier = new UserIdentifier(1, 1);
 
-            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession);
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession, out var _);
             abpSession.UserId.Returns(1L);
             abpSession.TenantId.Returns(1);
             uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
@@ -97,7 +98,7 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             // Dado
             var settings = new ThemeSettingsDto { Theme = "Default" };
 
-            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession);
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession, out var _);
             abpSession.TenantId.Returns(1);
             uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
 
@@ -115,7 +116,7 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             // Dado
             var settings = new ThemeSettingsDto { Theme = "Default" };
 
-            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession);
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession, out var _);
             abpSession.TenantId.Returns((int?)null);
             uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
 

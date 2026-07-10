@@ -386,6 +386,78 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
         #endregion
 
+        #region GetLdapUsers
+
+        [Fact]
+        public async Task Dado_NomeVazio_Quando_GetLdapUsers_Entao_DeveRetornarListaVazia()
+        {
+            // Dado
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<UserListDto>>(Arg.Any<object>()).Returns(new List<UserListDto>());
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = await _sut.GetLdapUsers("");
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(0);
+        }
+
+        #endregion
+
+        #region CreateUsersByActiveDirectory
+
+        [Fact]
+        public async Task Dado_ListaDeUserNamesVazia_Quando_CreateUsersByActiveDirectory_Entao_DeveRetornarSemErro()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new string[] { },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            // Quando
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            // Então
+            _sut.AbpSession.TenantId.ShouldBeNull();
+        }
+
+        #endregion
+
+        #region CreateUsersByLdap
+
+        [Fact]
+        public async Task Dado_ListaDeUserNamesVazia_Quando_CreateUsersByLdap_Entao_DeveRetornarSemErro()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var input = new CreateLdapUserInput
+            {
+                UserNames = new string[] { },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            // Quando
+            await _sut.CreateUsersByLdap(input);
+
+            // Então
+            _sut.AbpSession.TenantId.ShouldBeNull();
+        }
+
+        #endregion
+
         #region CreateOrUpdateUser
 
         [Fact]
@@ -606,6 +678,55 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             await userManager.Received(1).SetRolesAsync(existingUser, Arg.Any<string[]>());
         }
 
+        [Fact]
+        public async Task Dado_UsuarioExistente_Quando_CreateOrUpdateUserComSenhaAleatoriaEEAtivacao_Entao_DeveAtualizarSenhaEEnviarEmail()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var existingUser = new User { Id = 1, UserName = "john", Name = "John", Surname = "User", EmailAddress = "john@example.com" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(existingUser);
+            userManager.CheckDuplicateUsernameOrEmailAddressAsync(Arg.Any<long?>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(IdentityResult.Success);
+            userManager.SetRolesAsync(existingUser, Arg.Any<string[]>()).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            _sut.ObjectMapper = objectMapper;
+
+            _roleManager.GetRoleByNameAsync("user").Returns(new Role(null, "user", "User") { Id = 1 });
+
+            var appUrlService = Substitute.For<IAppUrlService>();
+            appUrlService.CreateEmailActivationUrlFormat(Arg.Any<int?>()).Returns("https://localhost/activate");
+            _sut.AppUrlService = appUrlService;
+
+            var input = new CreateOrUpdateUserInput
+            {
+                User = new UserEditDto
+                {
+                    Id = 1,
+                    UserName = "john",
+                    Name = "John",
+                    Surname = "User",
+                    EmailAddress = "john@example.com",
+                    IsActive = true,
+                    Password = ""
+                },
+                AssignedRoleNames = new[] { "user" },
+                SetRandomPassword = true,
+                SendActivationEmail = true
+            };
+
+            // Quando
+            await _sut.CreateOrUpdateUser(input);
+
+            // Então
+            await userManager.Received(1).CheckDuplicateUsernameOrEmailAddressAsync(Arg.Any<long?>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+            await userManager.Received(1).SetRolesAsync(existingUser, Arg.Any<string[]>());
+        }
+
         #endregion
 
         #region GetUsers
@@ -664,6 +785,47 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             result.TotalCount.ShouldBe(2);
         }
 
+        [Fact]
+        public async Task Dado_FiltroPorNome_Quando_GetUsers_Entao_DeveRetornarApenasUsuariosFiltrados()
+        {
+            // Dado
+            var users = new List<User>
+            {
+                new User { Id = 1, UserName = "admin", Name = "Admin", Surname = "User", EmailAddress = "admin@example.com" },
+                new User { Id = 2, UserName = "user2", Name = "User", Surname = "Two", EmailAddress = "user2@example.com" }
+            };
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.Users.Returns(users.AsAsyncQueryable());
+            _sut.UserManager = userManager;
+
+            _userRoleRepository.GetAll().Returns(new List<Abp.Authorization.Users.UserRole>().AsAsyncQueryable());
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<UserListDto>>(Arg.Any<object>()).Returns(new List<UserListDto>
+            {
+                new UserListDto { Id = 1, UserName = "admin", Name = "Admin", Surname = "User", Roles = new List<UserListRoleDto>() }
+            });
+            objectMapper.Map<List<UserListRoleDto>>(Arg.Any<object>()).Returns(new List<UserListRoleDto>());
+            _sut.ObjectMapper = objectMapper;
+
+            var input = new GetUsersInput
+            {
+                Sorting = "Name",
+                MaxResultCount = 10,
+                SkipCount = 0,
+                Filter = "admin"
+            };
+
+            // Quando
+            var result = await _sut.GetUsers(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Items.Count.ShouldBe(1);
+            result.TotalCount.ShouldBe(1);
+        }
+
         #endregion
 
         #region GetUsersToExcel
@@ -704,6 +866,42 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             result.ShouldNotBeNull();
             result.ShouldBe(expectedFile);
             _usersCache.Received(1).Get("ALL", Arg.Any<Func<string, object>>());
+        }
+
+        [Fact]
+        public async Task Dado_CacheAtingido_Quando_GetUsersToExcel_Entao_DeveUsarCacheSemConsultarRepositorio()
+        {
+            // Dado
+            var users = new List<User>
+            {
+                new User { Id = 1, UserName = "admin", Name = "Admin", Surname = "User", EmailAddress = "admin@example.com" }
+            };
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            _sut.UserManager = userManager;
+
+            _userRoleRepository.GetAll().Returns(new List<Abp.Authorization.Users.UserRole>().AsAsyncQueryable());
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<UserListDto>>(Arg.Any<object>()).Returns(new List<UserListDto>
+            {
+                new UserListDto { Id = 1, UserName = "admin", Name = "Admin", Surname = "User", Roles = new List<UserListRoleDto>() }
+            });
+            objectMapper.Map<List<UserListRoleDto>>(Arg.Any<object>()).Returns(new List<UserListRoleDto>());
+            _sut.ObjectMapper = objectMapper;
+
+            var expectedFile = new FileDto("users.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            _userListExcelExporter.ExportToFile(Arg.Any<List<UserListDto>>()).Returns(expectedFile);
+
+            _usersCache.Get("ALL", Arg.Any<Func<string, List<User>>>()).Returns(users);
+
+            // Quando
+            var result = await _sut.GetUsersToExcel();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.ShouldBe(expectedFile);
+            var _ = userManager.DidNotReceive().Users;
         }
 
         #endregion
