@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `devin/1783714742-priority26-coverage-audit`
-Baseline coverage (P25): Line 66.4%, Branch 49.7%, Method 85.0%.
-Current coverage (after P26): Line 68.0%, Branch 52.1%, Method 86.4%.
+Last session branch: `devin/1783717794-priority27-coverage-audit`
+Baseline coverage (P26): Line 68.0%, Branch 52.1%, Method 86.4%.
+Current coverage (after P27): Line 75.6%, Branch 54.0%, Method 90.8%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -14,21 +14,30 @@ Current coverage (after P26): Line 68.0%, Branch 52.1%, Method 86.4%.
 - `BinaryObject` constructor signature is `(int? tenantId, byte[] bytes, string fileType, string fileName)`; the `Id` is generated, so tests that need a specific `Id` must set `binaryObject.Id = fileId` after construction.
 - `IApplicationBuilder.UseHealthChecks(...)` is an extension method that resolves `IEnumerable<IHealthCheckService>` from `ApplicationServices`; do not mock `UseHealthChecks` directly on a substitute `IApplicationBuilder` — it will leak `Arg.Any` specs and fail.
 - `ActionDescriptor.Id` is read-only and derived from `RouteValues`; use `ActionDescriptor.RouteValues` with `Dictionary<string, string?>` and assert `IDiagnosticContext.Set` with `Arg.Any<string>()` for the id.
+- `EafServiceCollectionExtensions.AddEaf` bootstraps a full ABP/Castle pipeline; always use `options.IocManager = new IocManager()` in tests to avoid duplicate component registration in the static `IocManager.Instance`.
+- `EafHangfireApplicationBuilderExtensions.UseEafHangfire` requires `IHostApplicationLifetime`, `Hangfire.Dashboard.RouteCollection` and `JobStorage` to be registered in the service provider.
+- `IApplicationBuilder.Map` is an extension method, not a mockable interface member; assert `IApplicationBuilder.New()` and `IApplicationBuilder.Use(...)` when verifying Hangfire/Map middleware setup.
 
 ## Coverage command
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P27)
-- `Eaf.Middleware.Web.UiCustomization.Metronic.*` (0%)
-- `Eaf.Middleware.Web.WebHooks.EafWebhookDefinitionProvider` (0%)
-- `Eaf.Notifications.EmailRealTimeNotifier` (0%)
-- `Eaf.WebHooks.EafWebHookReceiver` (0%)
-- `Eaf.Middleware.Worker.MiddlewareWorkerModule` (16.4%)
-- `Eaf.Middleware.Worker.EafServiceCollectionExtensions` (0%)
+## Notable classes with remaining low coverage (target for P28)
+- `Eaf.Middleware.Web.Controllers.TokenAuthController` (0%)
+- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (45.5%)
+- `Eaf.Middleware.Web.WebContentDirectoryFinder` (0%)
+- `Eaf.Middleware.Web.Configuration.CacheConfigurer` (41.1%)
+- `Eaf.Middleware.Web.Swagger.SwaggerExtensions` (33.3%)
+- `Eaf.Middleware.Configuration.EafHostBuilderExtensions` (40.7%)
+- `Eaf.Middleware.Web.Configuration.EafHostBuilderExtensions` (0%)
+- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (18.6%)
+- `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (19%)
+- `Eaf.Hangfire.EafDisplayNameExtensions` (0%)
+- `Eaf.Hangfire.EafHangfireConfigurationExtensions` (0%)
+- `Eaf.Middleware.Core.Authentication.External.*` providers (0%)
+- `Eaf.Middleware.Identity.LogInManager`, `SecurityStampValidator`, `SignInManager` (0%)
+- `Eaf.AspNetCore.SignalR.Chat.ChatHub` (0%)
+- `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
+- `Microsoft.AspNetCore.Builder.EafHealthCheckApplicationBuilderExtensions` (0%)
 - `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (38.5%)
-- `Eaf.Middleware.MiddlewareCoreModule` (0%)
-- `Eaf.Middleware.MiddlewareApplicationModule` (0%)
-- `Eaf.AspNetCore.Hangfire.Configuration.EafHangfireApplicationBuilderExtensions` (0%)
-- `Eaf.Configuration.EafWebHostBuilderExtensions` (0%)
-- `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (0%)
+- `Eaf.KeyVault.*` modules (0-19%)
