@@ -429,6 +429,39 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
         #region GetCurrentUserProfileForEdit / UpdateCurrentUserProfile with Timezone
 
         [Fact]
+        public async Task Dado_UsuarioLogadoSemSuporteATimezone_Quando_GetCurrentUserProfileForEdit_Entao_DeveRetornarTimezoneVazio()
+        {
+            var user = new User { Id = 1, UserName = "admin", Name = "Admin", Surname = "User" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(user);
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns((int?)null);
+
+            var originalProvider = Abp.Timing.Clock.Provider;
+            var clockProvider = Substitute.For<IClockProvider>();
+            clockProvider.SupportsMultipleTimezone.Returns(false);
+            Abp.Timing.Clock.Provider = clockProvider;
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.ObjectMapper = CreateObjectMapper();
+
+            try
+            {
+                var result = await _sut.GetCurrentUserProfileForEdit();
+
+                result.ShouldNotBeNull();
+                result.Timezone.ShouldBeNullOrEmpty();
+            }
+            finally
+            {
+                Abp.Timing.Clock.Provider = originalProvider;
+            }
+        }
+
+        [Fact]
         public async Task Dado_UsuarioLogadoComTimezone_Quando_GetCurrentUserProfileForEdit_Entao_DeveRetornarTimezone()
         {
             // Dado

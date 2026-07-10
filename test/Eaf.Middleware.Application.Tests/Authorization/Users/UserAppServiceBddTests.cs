@@ -18,6 +18,7 @@ using Eaf.Middleware.Authorization.AzureActiveDirectory;
 using Eaf.Middleware.Authorization.Ldap;
 using Eaf.Middleware;
 using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.Authorization.Permissions;
 using Eaf.Middleware.Dto;
 using Eaf.Middleware.Authorization.Permissions.Dto;
@@ -50,6 +51,11 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
         private readonly IRepository<Abp.Authorization.Users.UserRole, long> _userRoleRepository;
         private readonly IUserListExcelExporter _userListExcelExporter;
         private readonly ICache _usersCache;
+        private readonly IPasswordValidator<User> _passwordValidator;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly AppLdapAuthenticationSource _appLdapAuthenticationSource;
+        private readonly AppAzureActiveDirectoryAuthenticationSource _appAzureActiveDirectoryAuthenticationSource;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
         public UserAppServiceBddTests()
         {
@@ -81,26 +87,41 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             _userRoleRepository = Substitute.For<IRepository<Abp.Authorization.Users.UserRole, long>>();
             _userListExcelExporter = Substitute.For<IUserListExcelExporter>();
 
+            _passwordValidator = Substitute.For<IPasswordValidator<User>>();
+            _passwordValidator.ValidateAsync(Arg.Any<UserManager>(), Arg.Any<User>(), Arg.Any<string>()).Returns(IdentityResult.Success);
+
+            _passwordHasher = Substitute.For<IPasswordHasher<User>>();
+            _passwordHasher.HashPassword(Arg.Any<User>(), Arg.Any<string>()).Returns("hashed");
+
+            _appAzureActiveDirectoryAuthenticationSource = Substitute.For<AppAzureActiveDirectoryAuthenticationSource>(
+                Substitute.For<IAzureActiveDirectorySettings>(),
+                Substitute.For<IEafMiddlewareAzureActiveDirectoryModuleConfig>()
+            );
+
+            _appLdapAuthenticationSource = Substitute.For<AppLdapAuthenticationSource>(
+                Substitute.For<ILdapSettings>(),
+                Substitute.For<IEafMiddlewareLdapModuleConfig>()
+            );
+
+            _unitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
+
             _sut = new UserAppService(
                 _roleManager,
                 Substitute.For<IUserEmailer>(),
                 _userListExcelExporter,
                 Substitute.For<INotificationSubscriptionManager>(),
                 _userRoleRepository,
-                new List<IPasswordValidator<User>>(),
-                Substitute.For<IPasswordHasher<User>>(),
-                Substitute.For<AppAzureActiveDirectoryAuthenticationSource>(
-                    Substitute.For<IAzureActiveDirectorySettings>(),
-                    Substitute.For<IEafMiddlewareAzureActiveDirectoryModuleConfig>()
-                ),
-                Substitute.For<AppLdapAuthenticationSource>(
-                    Substitute.For<ILdapSettings>(),
-                    Substitute.For<IEafMiddlewareLdapModuleConfig>()
-                ),
+                new List<IPasswordValidator<User>> { _passwordValidator },
+                _passwordHasher,
+                _appAzureActiveDirectoryAuthenticationSource,
+                _appLdapAuthenticationSource,
                 Substitute.For<INotificationPublisher>(),
                 Substitute.For<IWebhookPublisher>(),
                 _cacheManager
-            );
+            )
+            {
+                UnitOfWorkManager = _unitOfWorkManager
+            };
         }
 
         #region Construtor
@@ -193,6 +214,16 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             // Então
             cache.Received(1).Remove("token1");
             cache.Received(1).Remove("token2");
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioInexistente_Quando_CloseSessionUser_Entao_DeveLancarArgumentNullException()
+        {
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(99).Returns((User)null);
+            _sut.UserManager = userManager;
+
+            await Should.ThrowAsync<ArgumentNullException>(() => _sut.CloseSessionUser(99));
         }
 
         #endregion
@@ -456,9 +487,39 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             _sut.AbpSession.TenantId.ShouldBeNull();
         }
 
+        [Fact]
+        public async Task Dado_UserNamesLdapValidos_Quando_CreateUsersByLdap_Entao_DeveCriarUsuariosDoLdap()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var user = new User { Id = 1, UserName = "john", Name = "John", Surname = "User", EmailAddress = "john@example.com" };
+            _appLdapAuthenticationSource.CreateUserAsync("john", Arg.Any<Tenant>()).Returns(user);
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CreateAsync(user).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            var input = new CreateLdapUserInput
+            {
+                UserNames = new[] { "john" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByLdap(input);
+
+            await _appLdapAuthenticationSource.Received(1).CreateUserAsync("john", Arg.Any<Tenant>());
+            await userManager.Received(1).CreateAsync(user);
+        }
+
         #endregion
 
         #region CreateOrUpdateUser
+
 
         [Fact]
         public async Task Dado_NovoUsuario_Quando_CreateOrUpdateUser_Entao_DeveCriarUsuarioLimparCacheENotificar()
@@ -725,6 +786,46 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             // Então
             await userManager.Received(1).CheckDuplicateUsernameOrEmailAddressAsync(Arg.Any<long?>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
             await userManager.Received(1).SetRolesAsync(existingUser, Arg.Any<string[]>());
+        }
+
+        [Fact]
+        public async Task Dado_NovoUsuarioComSenhaValida_Quando_CreateOrUpdateUser_Entao_DeveValidarSenhaEHashSenha()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var newUser = new User { Id = 0, UserName = "newuser", Name = "New", Surname = "User", EmailAddress = "new@example.com" };
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<User>(Arg.Any<object>()).Returns(newUser);
+            _sut.ObjectMapper = objectMapper;
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CreateAsync(newUser).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            var input = new CreateOrUpdateUserInput
+            {
+                User = new UserEditDto
+                {
+                    UserName = "newuser",
+                    Name = "New",
+                    Surname = "User",
+                    EmailAddress = "new@example.com",
+                    IsActive = true,
+                    Password = "Password123!"
+                },
+                AssignedRoleNames = new[] { "admin" },
+                SetRandomPassword = false,
+                SendActivationEmail = false
+            };
+
+            await _sut.CreateOrUpdateUser(input);
+
+            await _passwordValidator.Received(1).ValidateAsync(userManager, newUser, "Password123!");
+            _passwordHasher.Received(1).HashPassword(newUser, "Password123!");
         }
 
         #endregion

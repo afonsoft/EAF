@@ -79,5 +79,14 @@ namespace Eaf.Middleware.Tests.Application.Chat
 
             Should.Throw<UserFriendlyException>(() => _sut.CheckChatFeatures(1, null));
         }
+
+        [Fact]
+        public void Dado_HostParaTenantComTenantToHostHabilitado_Quando_CheckChatFeatures_Entao_NaoDeveLancarExcecao()
+        {
+            _featureChecker.IsEnabled(1, AppFeatures.TenantToHostChatFeature).Returns(true);
+            _featureChecker.IsEnabled(1, AppFeatures.ChatFeature).Returns(true);
+
+            _sut.CheckChatFeatures(null, 1);
+        }
     }
 }

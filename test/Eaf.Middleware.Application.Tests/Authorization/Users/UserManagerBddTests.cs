@@ -217,6 +217,22 @@ namespace Eaf.Middleware.Tests.Application.Authorization.Users
         }
 
         [Fact]
+        public async Task Dado_EmailDuplicadoMesmoAuthSource_Quando_CheckDuplicateUsernameOrEmailAddressAsync_Entao_DeveRetornarFalhaCodigo2()
+        {
+            var userManager = ManagerTestHelper.CreateUserManager();
+            var existing = new User { Id = 2, UserName = "other", EmailAddress = "user1@example.com", AuthenticationSource = "LDAP" };
+
+            userManager.FindByNameAsync("user1").Returns(Task.FromResult<User?>(null));
+            userManager.FindByEmailAsync("user1@example.com").Returns(Task.FromResult<User?>(existing));
+            userManager.When(x => x.CheckDuplicateUsernameOrEmailAddressAsync(Arg.Any<long?>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())).CallBase();
+
+            var result = await userManager.CheckDuplicateUsernameOrEmailAddressAsync(1, "user1", "user1@example.com", "LDAP");
+
+            result.Succeeded.ShouldBeFalse();
+            result.Errors.First().Code.ShouldBe("2");
+        }
+
+        [Fact]
         public async Task Dado_UsuarioComTokens_Quando_RemoveAllTokenValidityKeyAsync_Entao_DeveRetornarTokensRemovidos()
         {
             // Dado

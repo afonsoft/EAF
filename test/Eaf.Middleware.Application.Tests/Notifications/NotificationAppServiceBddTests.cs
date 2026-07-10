@@ -198,6 +198,34 @@ namespace Eaf.Middleware.Application.Tests.Notifications
         #region UpdateNotificationSettings
 
         [Fact]
+        public async Task Dado_ReceberNotificacoesDesabilitado_Quando_UpdateNotificationSettings_Entao_DeveAtualizarSettingParaFalse()
+        {
+            var userIdentifier = new UserIdentifier(1, 42);
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var settingManager = Substitute.For<Abp.Configuration.ISettingManager>();
+            _sut.SettingManager = settingManager;
+
+            var input = new UpdateNotificationSettingsInput
+            {
+                ReceiveNotifications = false,
+                Notifications = new List<NotificationSubscriptionDto>()
+            };
+
+            await _sut.UpdateNotificationSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForUserAsync(
+                Arg.Any<UserIdentifier>(),
+                NotificationSettingNames.ReceiveNotifications,
+                "False");
+            await _notificationSubscriptionManager.DidNotReceive().SubscribeAsync(Arg.Any<UserIdentifier>(), Arg.Any<string>());
+            await _notificationSubscriptionManager.DidNotReceive().UnsubscribeAsync(Arg.Any<UserIdentifier>(), Arg.Any<string>());
+        }
+
+        [Fact]
         public async Task Dado_SettingsComSubscricoes_Quando_UpdateNotificationSettings_Entao_DeveAtualizarSubscricoes()
         {
             // Dado

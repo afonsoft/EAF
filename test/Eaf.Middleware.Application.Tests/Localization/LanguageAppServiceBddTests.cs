@@ -346,6 +346,52 @@ namespace Eaf.Middleware.Application.Tests.Localization
         }
 
         [Fact]
+        public async Task Dado_BaseLanguageNaoInformado_Quando_GetLanguageTexts_Entao_DeveUsarIdiomaPadraoComoBase()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafMiddleware");
+            source.GetAllStrings().Returns(new List<LocalizedString>
+            {
+                new LocalizedString("Hello", "Hello", CultureInfo.InvariantCulture)
+            });
+            localizationManager.GetSource("EafMiddleware").Returns(source);
+            _sut.LocalizationManager = localizationManager;
+
+            _applicationLanguageManager.GetDefaultLanguageOrNullAsync(null).Returns((ApplicationLanguage)null);
+            _applicationLanguageManager.GetLanguagesAsync(null).Returns(new List<ApplicationLanguage>
+            {
+                new ApplicationLanguage(null, "en", "English")
+            });
+
+            _applicationLanguageTextManager.GetStringOrNull(
+                Arg.Any<int?>(),
+                Arg.Any<string>(),
+                Arg.Any<CultureInfo>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>()).Returns("Olá");
+
+            var input = new GetLanguageTextsInput
+            {
+                BaseLanguageName = null,
+                TargetLanguageName = "pt-BR",
+                SourceName = "EafMiddleware",
+                MaxResultCount = 10,
+                SkipCount = 0,
+                TargetValueFilter = "ALL"
+            };
+
+            var result = await _sut.GetLanguageTexts(input);
+
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+        }
+
+        [Fact]
         public async Task Dado_TextosVaziosEComFiltro_Quando_GetLanguageTexts_Entao_DeveRetornarTextosFiltrados()
         {
             // Dado

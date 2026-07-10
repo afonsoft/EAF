@@ -83,6 +83,29 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
         #region GetTenants
 
         [Fact]
+        public async Task Dado_TenantsCadastradosComFiltro_Quando_GetTenants_Entao_DeveRetornarResultadoFiltrado()
+        {
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            var tenants = new List<Tenant>
+            {
+                new Tenant("tenant1", "Tenant One") { Id = 1, IsActive = true },
+                new Tenant("tenant2", "Tenant Two") { Id = 2, IsActive = true }
+            };
+            tenantManager.Tenants.Returns(tenants.AsAsyncQueryable());
+
+            _sut.TenantManager = tenantManager;
+            _sut.ObjectMapper = CreateObjectMapper();
+
+            var input = new GetTenantsInput { Filter = "One", MaxResultCount = 10, SkipCount = 0, Sorting = "TenancyName" };
+
+            var result = await _sut.GetTenants(input);
+
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+            result.Items.Count.ShouldBe(1);
+        }
+
+        [Fact]
         public async Task Dado_TenantsCadastrados_Quando_GetTenants_Entao_DeveRetornarResultadoPaginado()
         {
             // Dado
@@ -268,6 +291,24 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
 
             // Então
             user.AccessFailedCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public async Task Dado_TenantSemAdmin_Quando_UnlockTenantAdmin_Entao_NaoDeveLancarExcecao()
+        {
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByNameAsync("admin").Returns((User)null);
+
+            var unitOfWork = Substitute.For<IUnitOfWork>();
+            unitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(unitOfWork);
+
+            _sut.UserManager = userManager;
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            await _sut.UnlockTenantAdmin(new EntityDto(1));
         }
 
         #endregion
