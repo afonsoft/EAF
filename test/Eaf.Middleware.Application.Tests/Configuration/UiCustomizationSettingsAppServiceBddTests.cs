@@ -1,9 +1,6 @@
+using Abp;
 using Abp.Configuration;
-using Abp.Configuration.Startup;
 using Abp.Dependency;
-using Abp.Domain.Uow;
-using Abp.MultiTenancy;
-using Abp.Runtime.Caching;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Configuration.Dto;
@@ -11,7 +8,6 @@ using Eaf.Middleware.UiCustomization;
 using Eaf.Middleware.UiCustomization.Dto;
 using NSubstitute;
 using Shouldly;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -22,152 +18,100 @@ namespace Eaf.Middleware.Application.Tests.Configuration
     /// </summary>
     public class UiCustomizationSettingsAppServiceBddTests
     {
-        private readonly SettingManager _settingManager;
-        private readonly IIocResolver _iocResolver;
-        private readonly IUiThemeCustomizerFactory _uiThemeCustomizerFactory;
-        private readonly UiCustomizationSettingsAppService _sut;
-
-        public UiCustomizationSettingsAppServiceBddTests()
+        private static UiCustomizationSettingsAppService CreateSut(
+            out IIocResolver iocResolver,
+            out IUiThemeCustomizerFactory uiThemeCustomizerFactory,
+            out IUiCustomizer uiCustomizer,
+            out IAbpSession abpSession,
+            SettingManager? settingManager = null)
         {
-            _settingManager = Substitute.For<SettingManager>(
-                Substitute.For<ISettingDefinitionManager>(),
-                Substitute.For<ICacheManager>(),
-                Substitute.For<IMultiTenancyConfig>(),
-                Substitute.For<ITenantStore>(),
-                Substitute.For<ISettingEncryptionService>(),
-                Substitute.For<IUnitOfWorkManager>()
-            );
-            _iocResolver = Substitute.For<IIocResolver>();
-            _uiThemeCustomizerFactory = Substitute.For<IUiThemeCustomizerFactory>();
+            iocResolver = Substitute.For<IIocResolver>();
+            uiThemeCustomizerFactory = Substitute.For<IUiThemeCustomizerFactory>();
+            uiCustomizer = Substitute.For<IUiCustomizer>();
+            abpSession = Substitute.For<IAbpSession>();
 
-            _sut = new UiCustomizationSettingsAppService(
-                _settingManager,
-                _iocResolver,
-                _uiThemeCustomizerFactory
-            );
-        }
-
-        #region Construtor
-
-        [Fact]
-        public void Dado_Dependencias_Quando_CriarInstancia_Entao_DeveSerValido()
-        {
-            _sut.ShouldNotBeNull();
-        }
-
-        #endregion
-
-        #region GetUiManagementSettings
-
-        [Fact]
-        public async Task Dado_NenhumCustomizer_Quando_GetUiManagementSettings_Entao_DeveRetornarListaVazia()
-        {
-            // Dado
-            _iocResolver.ResolveAll<IUiCustomizer>().Returns(new IUiCustomizer[0]);
-
-            // Quando
-            var result = await _sut.GetUiManagementSettings();
-
-            // Então
-            result.ShouldNotBeNull();
-            result.Count.ShouldBe(0);
-        }
-
-        [Fact]
-        public async Task Dado_CustomizersExistentes_Quando_GetUiManagementSettings_Entao_DeveRetornarSettings()
-        {
-            // Dado
-            var customizer = Substitute.For<IUiCustomizer>();
-            var uiSettings = new UiCustomizationSettingsDto
+            var sut = new UiCustomizationSettingsAppService(settingManager!, iocResolver, uiThemeCustomizerFactory)
             {
-                BaseSettings = new ThemeSettingsDto { Theme = "default" }
+                AbpSession = abpSession
             };
-            customizer.GetUiSettings().Returns(uiSettings);
 
-            _iocResolver.ResolveAll<IUiCustomizer>().Returns(new[] { customizer });
+            return sut;
+        }
+
+        [Fact]
+        public async Task Dado_ThemeCadastrado_Quando_GetUiManagementSettings_Entao_DeveRetornarListaDeTemas()
+        {
+            // Dado
+            var sut = CreateSut(out var iocResolver, out _, out var uiCustomizer, out _);
+            iocResolver.ResolveAll<IUiCustomizer>().Returns(new[] { uiCustomizer });
+            uiCustomizer.GetUiSettings().Returns(new UiCustomizationSettingsDto
+            {
+                BaseSettings = new ThemeSettingsDto { Theme = "Default" }
+            });
 
             // Quando
-            var result = await _sut.GetUiManagementSettings();
+            var result = await sut.GetUiManagementSettings();
 
             // Então
             result.ShouldNotBeNull();
             result.Count.ShouldBe(1);
+            result[0].Theme.ShouldBe("Default");
         }
 
-        #endregion
-
-        #region UpdateDefaultUiManagementSettings - Tenant
-
         [Fact]
-        public async Task Dado_TenantLogado_Quando_UpdateDefaultUiManagementSettings_Entao_DeveAtualizarParaTenant()
+        public async Task Dado_UsuarioLogado_Quando_UpdateUiManagementSettings_Entao_DeveAtualizarConfiguracaoDoUsuario()
         {
             // Dado
-            var abpSession = Substitute.For<IAbpSession>();
+            var settings = new ThemeSettingsDto { Theme = "Default" };
+            var userIdentifier = new UserIdentifier(1, 1);
+
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession);
+            abpSession.UserId.Returns(1L);
             abpSession.TenantId.Returns(1);
-            _sut.AbpSession = abpSession;
-
-            var customizer = Substitute.For<IUiCustomizer>();
-            _uiThemeCustomizerFactory.GetUiCustomizer("default").Returns(customizer);
-
-            var settings = new ThemeSettingsDto { Theme = "default" };
+            uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
 
             // Quando
-            await _sut.UpdateDefaultUiManagementSettings(settings);
+            await sut.UpdateUiManagementSettings(settings);
 
             // Então
-            await customizer.Received(1).UpdateTenantUiManagementSettingsAsync(1, settings);
+            uiThemeCustomizerFactory.Received(1).GetUiCustomizer("Default");
+            await uiCustomizer.Received(1).UpdateUserUiManagementSettingsAsync(userIdentifier, settings);
         }
 
-        #endregion
-
-        #region UpdateDefaultUiManagementSettings - Host
-
         [Fact]
-        public async Task Dado_HostLogado_Quando_UpdateDefaultUiManagementSettings_Entao_DeveAtualizarParaAplicacao()
+        public async Task Dado_TenantExistente_Quando_UpdateDefaultUiManagementSettings_Entao_DeveAtualizarConfiguracaoDoTenant()
         {
             // Dado
-            var abpSession = Substitute.For<IAbpSession>();
+            var settings = new ThemeSettingsDto { Theme = "Default" };
+
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession);
+            abpSession.TenantId.Returns(1);
+            uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
+
+            // Quando
+            await sut.UpdateDefaultUiManagementSettings(settings);
+
+            // Então
+            uiThemeCustomizerFactory.Received(1).GetUiCustomizer("Default");
+            await uiCustomizer.Received(1).UpdateTenantUiManagementSettingsAsync(1, settings);
+        }
+
+        [Fact]
+        public async Task Dado_HostSemTenant_Quando_UpdateDefaultUiManagementSettings_Entao_DeveAtualizarConfiguracaoAplicacao()
+        {
+            // Dado
+            var settings = new ThemeSettingsDto { Theme = "Default" };
+
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession);
             abpSession.TenantId.Returns((int?)null);
-            _sut.AbpSession = abpSession;
-
-            var customizer = Substitute.For<IUiCustomizer>();
-            _uiThemeCustomizerFactory.GetUiCustomizer("default").Returns(customizer);
-
-            var settings = new ThemeSettingsDto { Theme = "default" };
+            uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
 
             // Quando
-            await _sut.UpdateDefaultUiManagementSettings(settings);
+            await sut.UpdateDefaultUiManagementSettings(settings);
 
             // Então
-            await customizer.Received(1).UpdateApplicationUiManagementSettingsAsync(settings);
+            uiThemeCustomizerFactory.Received(1).GetUiCustomizer("Default");
+            await uiCustomizer.Received(1).UpdateApplicationUiManagementSettingsAsync(settings);
         }
-
-        #endregion
-
-        #region UpdateUiManagementSettings
-
-        [Fact]
-        public async Task Dado_UsuarioLogado_Quando_UpdateUiManagementSettings_Entao_DeveAtualizarParaUsuario()
-        {
-            // Dado
-            var userIdentifier = new Abp.UserIdentifier(1, 42);
-            var abpSession = Substitute.For<IAbpSession>();
-            abpSession.TenantId.Returns(1);
-            abpSession.UserId.Returns(42L);
-            _sut.AbpSession = abpSession;
-
-            var customizer = Substitute.For<IUiCustomizer>();
-            _uiThemeCustomizerFactory.GetUiCustomizer("dark").Returns(customizer);
-
-            var settings = new ThemeSettingsDto { Theme = "dark" };
-
-            // Quando
-            await _sut.UpdateUiManagementSettings(settings);
-
-            // Então
-            await customizer.Received(1).UpdateUserUiManagementSettingsAsync(Arg.Any<Abp.UserIdentifier>(), settings);
-        }
-
-        #endregion
     }
 }
