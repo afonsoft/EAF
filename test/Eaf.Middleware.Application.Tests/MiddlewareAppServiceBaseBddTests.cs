@@ -1,9 +1,11 @@
 using Abp;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.MultiTenancy;
+using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using Shouldly;
 using System.Threading.Tasks;
@@ -22,6 +24,7 @@ namespace Eaf.Middleware.Application.Tests
             public User PublicGetCurrentUser() => GetCurrentUser();
             public Task<Tenant> PublicGetCurrentTenantAsync() => GetCurrentTenantAsync();
             public Tenant PublicGetCurrentTenant() => GetCurrentTenant();
+            public void PublicCheckErrors(IdentityResult result) => CheckErrors(result);
         }
 
         private static TestMiddlewareAppService CreateSut()
@@ -104,6 +107,35 @@ namespace Eaf.Middleware.Application.Tests
 
             // Quando / Então
             Should.Throw<AbpException>(() => sut.PublicGetCurrentUser());
+        }
+
+        [Fact]
+        public async Task Dado_TenantExistente_Quando_GetCurrentTenantSync_Entao_DeveRetornarTenantAtual()
+        {
+            // Dado
+            var currentTenant = new Tenant("tenant1", "Tenant One") { Id = 1 };
+            var sut = CreateSut();
+            sut.TenantManager.GetByIdAsync(1).Returns(currentTenant);
+
+            // Quando
+            var result = await sut.PublicGetCurrentTenantAsync();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public void Dado_ResultadoDeIdentidadeInvalido_Quando_CheckErrors_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var sut = CreateSut();
+            sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            var identityResult = IdentityResult.Failed(new IdentityError { Description = "Invalid login attempt" });
+
+            // Quando / Então
+            Should.Throw<UserFriendlyException>(() => sut.PublicCheckErrors(identityResult));
         }
 
     }
