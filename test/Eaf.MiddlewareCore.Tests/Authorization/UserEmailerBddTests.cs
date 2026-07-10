@@ -371,5 +371,143 @@ namespace Eaf.Middleware.Tests.Authorization
                 m.Subject == "SubscriptionExpire_Email_Subject" &&
                 m.To[0].Address == "admin@example.com"));
         }
+
+        [Fact]
+        public async Task Dado_TenantSemAdmin_Quando_TryToSendSubscriptionExpireEmail_Entao_NaoDeveEnviarEmail()
+        {
+            // Dado
+            var emailTemplateProvider = Substitute.For<IEmailTemplateProvider>();
+            var emailSender = Substitute.For<IEmailSender>();
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var currentUowProvider = Substitute.For<ICurrentUnitOfWorkProvider>();
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            var settingManager = Substitute.For<ISettingManager>();
+
+            var sut = new UserEmailer(
+                emailTemplateProvider,
+                emailSender,
+                tenantRepository,
+                currentUowProvider,
+                unitOfWorkManager,
+                userRepository,
+                settingManager);
+
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+
+            unitOfWorkManager.Begin().Returns(Substitute.For<IUnitOfWorkCompleteHandle>());
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
+
+            userRepository.FirstOrDefaultAsync(Arg.Any<System.Linq.Expressions.Expression<Func<User, bool>>>())
+                .Returns(Task.FromResult<User>(null!));
+
+            emailSender.SendAsync(Arg.Any<MailMessage>()).Returns(Task.CompletedTask);
+
+            // Quando
+            await sut.TryToSendSubscriptionExpireEmail(1, DateTime.UtcNow);
+
+            // Então
+            await emailSender.DidNotReceive().SendAsync(Arg.Any<MailMessage>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComPlainPassword_Quando_SendEmailActivationLinkAsync_Entao_DeveIncluirSenhaNoEmail()
+        {
+            // Dado
+            var emailTemplateProvider = Substitute.For<IEmailTemplateProvider>();
+            var emailSender = Substitute.For<IEmailSender>();
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var currentUowProvider = Substitute.For<ICurrentUnitOfWorkProvider>();
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            var settingManager = Substitute.For<ISettingManager>();
+
+            var sut = new UserEmailer(
+                emailTemplateProvider,
+                emailSender,
+                tenantRepository,
+                currentUowProvider,
+                unitOfWorkManager,
+                userRepository,
+                settingManager);
+
+            var currentUnitOfWork = Substitute.For<IUnitOfWork>();
+            currentUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            currentUowProvider.Current.Returns(currentUnitOfWork);
+
+            emailTemplateProvider.GetDefaultTemplate(Arg.Any<int?>())
+                .Returns("<html>{EMAIL_TITLE}-{EMAIL_SUB_TITLE}-{EMAIL_BODY}</html>");
+
+            emailSender.SendAsync(Arg.Any<MailMessage>()).Returns(Task.CompletedTask);
+
+            var user = new User
+            {
+                EmailConfirmationCode = "code",
+                TenantId = 1,
+                Name = "Nome",
+                Surname = "Sobrenome",
+                UserName = "usuario",
+                EmailAddress = "usuario@example.com"
+            };
+
+            // Quando
+            await sut.SendEmailActivationLinkAsync(user, "http://link", "plain-password");
+
+            // Então
+            await emailSender.Received(1).SendAsync(Arg.Is<MailMessage>(m =>
+                m.Subject == "EmailActivation_Subject" &&
+                m.Body.Contains("plain-password")));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComAuthenticationSource_Quando_SendPasswordResetLinkAsync_Entao_DeveCriptografarLink()
+        {
+            // Dado
+            var emailTemplateProvider = Substitute.For<IEmailTemplateProvider>();
+            var emailSender = Substitute.For<IEmailSender>();
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var currentUowProvider = Substitute.For<ICurrentUnitOfWorkProvider>();
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            var settingManager = Substitute.For<ISettingManager>();
+
+            var sut = new UserEmailer(
+                emailTemplateProvider,
+                emailSender,
+                tenantRepository,
+                currentUowProvider,
+                unitOfWorkManager,
+                userRepository,
+                settingManager);
+
+            var currentUnitOfWork = Substitute.For<IUnitOfWork>();
+            currentUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            currentUowProvider.Current.Returns(currentUnitOfWork);
+
+            emailTemplateProvider.GetDefaultTemplate(Arg.Any<int?>())
+                .Returns("<html>{EMAIL_TITLE}-{EMAIL_SUB_TITLE}-{EMAIL_BODY}</html>");
+
+            emailSender.SendAsync(Arg.Any<MailMessage>()).Returns(Task.CompletedTask);
+
+            var user = new User
+            {
+                PasswordResetCode = "reset",
+                TenantId = 1,
+                Name = "Nome",
+                Surname = "Sobrenome",
+                UserName = "usuario",
+                EmailAddress = "usuario@example.com",
+                AuthenticationSource = "Google"
+            };
+
+            // Quando
+            await sut.SendPasswordResetLinkAsync(user, "http://link?resetCode={resetCode}&userId={userId}&tenantId={tenantId}&authenticationSource={authenticationSource}");
+
+            // Então
+            await emailSender.Received(1).SendAsync(Arg.Is<MailMessage>(m =>
+                m.Subject == "PasswordResetEmail_Subject" &&
+                m.Body.Contains("c=")));
+        }
     }
 }

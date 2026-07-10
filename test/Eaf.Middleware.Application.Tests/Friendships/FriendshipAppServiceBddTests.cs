@@ -247,6 +247,54 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             await _friendshipManager.Received(2).AcceptFriendshipRequestAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>());
         }
 
+        [Fact]
+        public async Task Dado_NovaSolicitacaoComClientesOnline_Quando_CreateFriendshipRequest_Entao_DeveNotificarClientes()
+        {
+            // Dado
+            var userId = 42L;
+            var friendId = 100L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(tenantId);
+            abpSession.UserId.Returns(userId);
+            _sut.AbpSession = abpSession;
+
+            var currentUser = new User { Id = userId, UserName = "user42", TenantId = tenantId };
+            var friendUser = new User { Id = friendId, UserName = "user100", TenantId = tenantId };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync(userId.ToString()).Returns(currentUser);
+            userManager.FindByIdAsync(friendId.ToString()).Returns(friendUser);
+            _sut.UserManager = userManager;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            _friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
+            _tenantCache.Get(tenantId).Returns(new TenantCacheItem { TenancyName = "acme" });
+
+            var onlineClient = Substitute.For<IOnlineClient>();
+            _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient> { onlineClient });
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<FriendshipDto>(Arg.Any<Friendship>()).Returns(new FriendshipDto { FriendUserId = friendId, FriendUserName = "user100", IsOnline = true });
+            _sut.ObjectMapper = objectMapper;
+
+            var input = new CreateFriendshipRequestInput { TenantId = tenantId, UserId = friendId };
+
+            // Quando
+            var result = await _sut.CreateFriendshipRequest(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.IsOnline.ShouldBeTrue();
+            await _chatCommunicator.Received(2).SendFriendshipRequestToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<Friendship>(), Arg.Any<bool>(), Arg.Any<bool>());
+            await _chatCommunicator.Received(2).SendUserStateChangeToClients(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<UserIdentifier>(), Arg.Any<FriendshipState>());
+        }
+
         #endregion
 
         #region CreateFriendshipRequestByUserName

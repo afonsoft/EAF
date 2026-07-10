@@ -110,19 +110,13 @@ namespace Eaf.Middleware.Application.Tests
         }
 
         [Fact]
-        public async Task Dado_TenantExistente_Quando_GetCurrentTenantSync_Entao_DeveRetornarTenantAtual()
+        public void Dado_TenantExistente_Quando_GetCurrentTenantSync_Entao_DeveLancarNotImplementedException()
         {
             // Dado
-            var currentTenant = new Tenant("tenant1", "Tenant One") { Id = 1 };
             var sut = CreateSut();
-            sut.TenantManager.GetByIdAsync(1).Returns(currentTenant);
 
-            // Quando
-            var result = await sut.PublicGetCurrentTenantAsync();
-
-            // Então
-            result.ShouldNotBeNull();
-            result.Id.ShouldBe(1);
+            // Quando / Então
+            Should.Throw<NotImplementedException>(() => sut.PublicGetCurrentTenant());
         }
 
         [Fact]

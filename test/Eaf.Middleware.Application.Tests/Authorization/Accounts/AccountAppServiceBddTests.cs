@@ -105,6 +105,23 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             result.ShouldBe(5);
         }
 
+        [Fact]
+        public async Task Dado_ParametroCSemTenantId_Quando_ResolveTenantId_Entao_DeveRetornarNulo()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(3);
+            _sut.AbpSession = abpSession;
+
+            var encrypted = SimpleStringCipher.Instance.Encrypt("other=value");
+
+            // Quando
+            var result = await _sut.ResolveTenantId(new ResolveTenantIdInput { c = encrypted });
+
+            // Então
+            result.ShouldBeNull();
+        }
+
         #endregion
 
         #region BackToImpersonator
@@ -233,6 +250,21 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             result.TenancyName.ShouldBe("tenant1");
         }
 
+        [Fact]
+        public async Task Dado_TenantInexistente_Quando_Impersonate_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.FindByIdAsync(1).Returns((Tenant)null!);
+
+            _sut.TenantManager = tenantManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.Impersonate(new ImpersonateInput { UserId = 10, TenantId = 1 }));
+        }
+
         #endregion
 
         #region ActivateEmail
@@ -271,6 +303,21 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             // Quando / Então
             await Should.ThrowAsync<UserFriendlyException>(async () =>
                 await _sut.ActivateEmail(new ActivateEmailInput { UserId = 1, ConfirmationCode = "999" }));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioNaoEncontrado_Quando_ActivateEmail_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns((User?)null);
+
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.ActivateEmail(new ActivateEmailInput { UserId = 1, ConfirmationCode = "123" }));
         }
 
         #endregion
@@ -320,6 +367,45 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
                 await _sut.ResetPassword(new ResetPasswordInput { UserId = 1, ResetCode = "999", Password = "NewPass123!" }));
         }
 
+        [Fact]
+        public async Task Dado_UsuarioNaoEncontrado_Quando_ResetPassword_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns((User?)null);
+
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.ResetPassword(new ResetPasswordInput { UserId = 1, ResetCode = "456", Password = "NewPass123!" }));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioInativo_Quando_ResetPassword_Entao_DeveRetornarCanLoginFalse()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin", PasswordResetCode = "456", IsActive = false };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+            userManager.InitializeOptionsAsync(Arg.Any<int?>()).Returns(Task.CompletedTask);
+            userManager.ChangePasswordAsync(user, Arg.Any<string>()).Returns(IdentityResult.Success);
+            userManager.UpdateAsync(user).Returns(IdentityResult.Success);
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+
+            // Quando
+            var result = await _sut.ResetPassword(new ResetPasswordInput { UserId = 1, ResetCode = "456", Password = "NewPass123!" });
+
+            // Então
+            result.ShouldNotBeNull();
+            result.CanLogin.ShouldBeFalse();
+        }
+
         #endregion
 
         #region SendEmailActivationLink
@@ -349,6 +435,46 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             await _userEmailer.Received(1).SendEmailActivationLinkAsync(user, "https://example.com/activate");
         }
 
+        [Fact]
+        public async Task Dado_EmailInvalido_Quando_SendEmailActivationLink_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByEmailAsync("missing@example.com").Returns((User?)null);
+
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.SendEmailActivationLink(new SendEmailActivationLinkInput { EmailAddress = "missing@example.com" }));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComTenant_Quando_SendEmailActivationLink_Entao_DeveChamarUserEmailer()
+        {
+            // Dado
+            var user = new User { Id = 1, EmailAddress = "test@example.com", TenantId = 1 };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByEmailAsync("test@example.com").Returns(user);
+
+            var appUrlService = Substitute.For<IAppUrlService>();
+            appUrlService.CreateEmailActivationUrlFormat(Arg.Any<int?>()).Returns("https://example.com/activate?userId={userId}&tenantId={tenantId}&confirmationCode={confirmationCode}");
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.AppUrlService = appUrlService;
+
+            // Quando
+            await _sut.SendEmailActivationLink(new SendEmailActivationLinkInput { EmailAddress = "test@example.com" });
+
+            // Então
+            await _userEmailer.Received(1).SendEmailActivationLinkAsync(user, Arg.Is<string>(s => s.Contains("tenantId=")));
+        }
+
         #endregion
 
         #region SendPasswordResetCode
@@ -376,6 +502,46 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
 
             // Então
             await _userEmailer.Received(1).SendPasswordResetLinkAsync(user, "https://example.com/reset");
+        }
+
+        [Fact]
+        public async Task Dado_EmailInvalido_Quando_SendPasswordResetCode_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByEmailAsync("missing@example.com").Returns((User?)null);
+
+            _sut.UserManager = userManager;
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.SendPasswordResetCode(new SendPasswordResetCodeInput { EmailAddress = "missing@example.com" }));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComAuthenticationSource_Quando_SendPasswordResetCode_Entao_DeveChamarUserEmailer()
+        {
+            // Dado
+            var user = new User { Id = 1, EmailAddress = "test@example.com", TenantId = 1, AuthenticationSource = "Google" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByEmailAsync("test@example.com").Returns(user);
+
+            var appUrlService = Substitute.For<IAppUrlService>();
+            appUrlService.CreatePasswordResetUrlFormat(Arg.Any<int?>()).Returns("https://example.com/reset?userId={userId}&resetCode={resetCode}&tenantId={tenantId}&authenticationSource={authenticationSource}");
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.AppUrlService = appUrlService;
+
+            // Quando
+            await _sut.SendPasswordResetCode(new SendPasswordResetCodeInput { EmailAddress = "test@example.com" });
+
+            // Então
+            await _userEmailer.Received(1).SendPasswordResetLinkAsync(user, Arg.Is<string>(s => s.Contains("authenticationSource")));
         }
 
         #endregion
