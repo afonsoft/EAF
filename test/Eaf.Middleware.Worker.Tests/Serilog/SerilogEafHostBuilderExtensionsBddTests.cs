@@ -1,4 +1,4 @@
-using Eaf.Middleware.Web.Serilog;
+using Eaf.Middleware.Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog.Events;
@@ -6,16 +6,18 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 
-namespace Eaf.Middleware.Tests.WebCore.Serilog
+namespace Eaf.Middleware.Worker.Tests.Serilog
 {
     public class SerilogEafHostBuilderExtensionsBddTests
     {
         [Fact]
         public void Dado_HostBuilder_Quando_UsarEafSerilogComNivel_Entao_DeveRetornarMesmoBuilder()
         {
-            var tempDirectory = CriarTempDirectory();
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
             var originalDirectory = Directory.GetCurrentDirectory();
 
             try
@@ -31,14 +33,15 @@ namespace Eaf.Middleware.Tests.WebCore.Serilog
             finally
             {
                 Directory.SetCurrentDirectory(originalDirectory);
-                LimparTempDirectory(tempDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
             }
         }
 
         [Fact]
         public void Dado_HostBuilderComConfigElastic_Quando_UsarEafSerilog_Entao_DeveRetornarMesmoBuilder()
         {
-            var tempDirectory = CriarTempDirectory();
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
             var originalDirectory = Directory.GetCurrentDirectory();
 
             try
@@ -58,14 +61,15 @@ namespace Eaf.Middleware.Tests.WebCore.Serilog
             finally
             {
                 Directory.SetCurrentDirectory(originalDirectory);
-                LimparTempDirectory(tempDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
             }
         }
 
         [Fact]
         public void Dado_HostBuilderComConfigSeq_Quando_UsarEafSerilog_Entao_DeveRetornarMesmoBuilder()
         {
-            var tempDirectory = CriarTempDirectory();
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
             var originalDirectory = Directory.GetCurrentDirectory();
 
             try
@@ -85,20 +89,8 @@ namespace Eaf.Middleware.Tests.WebCore.Serilog
             finally
             {
                 Directory.SetCurrentDirectory(originalDirectory);
-                LimparTempDirectory(tempDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
             }
-        }
-
-        private static string CriarTempDirectory()
-        {
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
-        }
-
-        private static void LimparTempDirectory(string tempDirectory)
-        {
-            try { Directory.Delete(tempDirectory, true); } catch { }
         }
     }
 }
