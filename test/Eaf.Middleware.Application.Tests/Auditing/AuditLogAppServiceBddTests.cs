@@ -226,6 +226,51 @@ namespace Eaf.Middleware.Application.Tests.Auditing
             result.FileName.ShouldBe("auditLogs.xlsx");
         }
 
+        [Fact]
+        public async Task Dado_AuditLogsComFiltros_Quando_GetAuditLogs_Entao_DeveRetornarResultadoFiltrado()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var auditLog = new AuditLog
+            {
+                Id = 1,
+                UserId = 1,
+                ExecutionTime = new DateTime(2025, 6, 1),
+                ServiceName = "Eaf.Middleware.Test.TestService",
+                MethodName = "TestMethod",
+                BrowserInfo = "Chrome",
+                ExecutionDuration = 100,
+                Exception = "Error"
+            };
+
+            _auditLogRepository.GetAll().Returns(new List<AuditLog> { auditLog }.AsAsyncQueryable());
+            _userRepository.GetAll().Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var input = new GetAuditLogsInput
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                UserName = "admin",
+                ServiceName = "Test",
+                MethodName = "Test",
+                BrowserInfo = "Chrome",
+                MinExecutionDuration = 50,
+                MaxExecutionDuration = 200,
+                HasException = true,
+                MaxResultCount = 10,
+                SkipCount = 0,
+                Sorting = "AuditLog.ExecutionTime desc"
+            };
+
+            // Quando
+            var result = await _sut.GetAuditLogs(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(1);
+            result.Items.Count.ShouldBe(1);
+        }
+
         #endregion
 
         #region EntityChanges
@@ -330,6 +375,38 @@ namespace Eaf.Middleware.Application.Tests.Auditing
             result.TotalCount.ShouldBe(1);
             result.Items.Count.ShouldBe(1);
             result.Items[0].UserName.ShouldBe("admin");
+        }
+
+        [Fact]
+        public async Task Dado_EntityChangesEUsuarios_Quando_GetEntityChangesToExcel_Entao_DeveRetornarArquivo()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var entityChangeSet = new EntityChangeSet { Id = 1, UserId = 1 };
+            var entityChange = new EntityChange
+            {
+                Id = 1,
+                EntityChangeSetId = 1,
+                EntityTypeFullName = "Eaf.Middleware.Test.Entity",
+                ChangeTime = new DateTime(2025, 6, 1)
+            };
+
+            _entityChangeSetRepository.GetAll().Returns(new List<EntityChangeSet> { entityChangeSet }.AsAsyncQueryable());
+            _entityChangeRepository.GetAll().Returns(new List<EntityChange> { entityChange }.AsAsyncQueryable());
+            _userRepository.GetAll().Returns(new List<User> { user }.AsAsyncQueryable());
+
+            var input = new GetEntityChangeInput
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31)
+            };
+
+            // Quando
+            var result = await _sut.GetEntityChangesToExcel(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.FileName.ShouldBe("entityChanges.xlsx");
         }
 
         #endregion

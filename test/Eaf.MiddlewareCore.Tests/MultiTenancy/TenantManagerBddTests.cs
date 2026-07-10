@@ -44,5 +44,27 @@ namespace Eaf.MiddlewareCore.Tests.MultiTenancy
             // Então
             tenantId.ShouldBeGreaterThan(0);
         }
+
+        [Fact]
+        public async Task Dado_CriacaoComEmailAtivacao_Quando_CreateWithAdminUserAsync_Entao_DeveEnviarEmailAtivacao()
+        {
+            // Dado
+            var tenantManager = CoreManagerTestHelper.CreateTenantManager(
+                out _, out _, out _, out _, out _);
+
+            // Quando
+            var tenantId = await tenantManager.CreateWithAdminUserAsync(
+                "tenant2",
+                "Tenant Two",
+                null,
+                "admin@tenant2.com",
+                isActive: true,
+                shouldChangePasswordOnNextLogin: false,
+                sendActivationEmail: true,
+                emailActivationLink: "https://localhost/activate");
+
+            // Então
+            tenantId.ShouldBeGreaterThan(0);
+        }
     }
 }

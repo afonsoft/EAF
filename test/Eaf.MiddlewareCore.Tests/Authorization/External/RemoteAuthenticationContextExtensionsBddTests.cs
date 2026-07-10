@@ -1,7 +1,10 @@
 using Eaf.Middleware.Core.Authentication.External;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Shouldly;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.Authorization.External
@@ -11,6 +14,25 @@ namespace Eaf.Middleware.Tests.Authorization.External
     /// </summary>
     public class RemoteAuthenticationContextExtensionsBddTests
     {
+        private class TestAuthenticationHandler : IAuthenticationHandler
+        {
+            public Task<AuthenticateResult> AuthenticateAsync() => Task.FromResult(AuthenticateResult.NoResult());
+            public Task ChallengeAsync(AuthenticationProperties properties) => Task.CompletedTask;
+            public Task ForbidAsync(AuthenticationProperties properties) => Task.CompletedTask;
+            public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context) => Task.CompletedTask;
+        }
+
+        private class TestRemoteAuthenticationContext : RemoteAuthenticationContext<RemoteAuthenticationOptions>
+        {
+            public TestRemoteAuthenticationContext(
+                HttpContext context,
+                AuthenticationScheme scheme,
+                RemoteAuthenticationOptions options,
+                AuthenticationProperties properties)
+                : base(context, scheme, options, properties)
+            {
+            }
+        }
         #region AddMappedClaims - ClaimsPrincipal
 
         [Fact]
@@ -95,6 +117,70 @@ namespace Eaf.Middleware.Tests.Authorization.External
             // Entao
             principal.HasClaim("email", "a@b.com").ShouldBeTrue();
             principal.HasClaim("name", "John").ShouldBeTrue();
+        }
+
+        #endregion
+
+        #region AddMappedClaims - RemoteAuthenticationContext
+
+        [Fact]
+        public void Dado_ContextoComClaimExistente_Quando_AddMappedClaims_Entao_DeveAdicionarNovaIdentidade()
+        {
+            // Dado
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim("email_key", "user@example.com")
+            }, "test");
+
+            var context = new TestRemoteAuthenticationContext(
+                new DefaultHttpContext(),
+                new AuthenticationScheme("test", "Test", typeof(TestAuthenticationHandler)),
+                new RemoteAuthenticationOptions(),
+                new AuthenticationProperties())
+            {
+                Principal = new ClaimsPrincipal(identity)
+            };
+
+            var mappings = new List<JsonClaimMap>
+            {
+                new JsonClaimMap { Key = "email_key", Claim = "email" }
+            };
+
+            // Quando
+            context.AddMappedClaims(mappings);
+
+            // Entao
+            context.Principal.HasClaim("email", "user@example.com").ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_ContextoComMappingInexistente_Quando_AddMappedClaims_Entao_NaoDeveAdicionarClaim()
+        {
+            // Dado
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim("name", "John")
+            }, "test");
+
+            var context = new TestRemoteAuthenticationContext(
+                new DefaultHttpContext(),
+                new AuthenticationScheme("test", "Test", typeof(TestAuthenticationHandler)),
+                new RemoteAuthenticationOptions(),
+                new AuthenticationProperties())
+            {
+                Principal = new ClaimsPrincipal(identity)
+            };
+
+            var mappings = new List<JsonClaimMap>
+            {
+                new JsonClaimMap { Key = "nonexistent_key", Claim = "mapped_claim" }
+            };
+
+            // Quando
+            context.AddMappedClaims(mappings);
+
+            // Entao
+            context.Principal.HasClaim(c => c.Type == "mapped_claim").ShouldBeFalse();
         }
 
         #endregion

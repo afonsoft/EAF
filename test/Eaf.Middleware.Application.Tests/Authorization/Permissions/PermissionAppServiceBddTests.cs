@@ -97,6 +97,33 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Permissions
             result.Items.Count.ShouldBe(2);
         }
 
+        [Fact]
+        public void Dado_PermissoesComFilhos_Quando_GetAllPermissions_Entao_DeveRetornarNiveisAgrupados()
+        {
+            // Dado
+            var parent = new Permission("Pages", displayName: null);
+            var child = parent.CreateChildPermission("Pages.Admin", displayName: null);
+            var grandchild = child.CreateChildPermission("Pages.Admin.Users", displayName: null);
+
+            var permissionManager = Substitute.For<IPermissionManager>();
+            permissionManager.GetAllPermissions().Returns(new List<Permission> { parent, child, grandchild });
+            _sut.PermissionManager = permissionManager;
+
+            var objectMapper = Substitute.For<Abp.ObjectMapping.IObjectMapper>();
+            objectMapper.Map<FlatPermissionWithLevelDto>(Arg.Any<Permission>())
+                .Returns(ci => new FlatPermissionWithLevelDto { Name = ((Permission)ci.Arg<object>()).Name, ParentName = ((Permission)ci.Arg<object>()).Parent?.Name });
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = _sut.GetAllPermissions();
+
+            // Então
+            result.Items.Count.ShouldBe(3);
+            result.Items[0].Level.ShouldBe(0);
+            result.Items[1].Level.ShouldBe(1);
+            result.Items[2].Level.ShouldBe(2);
+        }
+
         #endregion
     }
 }

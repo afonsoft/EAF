@@ -491,6 +491,56 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
 
         #endregion
 
+        #region UpdateProfilePicture
+
+        [Fact]
+        public async Task Dado_ImagemValida_Quando_UpdateProfilePicture_Entao_DeveSalvarNovaFoto()
+        {
+            // Dado
+            var fileToken = "token123";
+            var imageBytes = new byte[] { 66, 77, 58, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, 40, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0, 0, 0, 0, 0, 4, 0, 0, 0, 196, 14, 0, 0, 196, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            _tempFileCacheManager.GetFile(fileToken).Returns(imageBytes);
+
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _sut.UserManager = userManager;
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            activeUow.SaveChangesAsync().Returns(Task.CompletedTask);
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            _sut.AbpSession = abpSession;
+
+            _binaryObjectManager.SaveAsync(Arg.Any<BinaryObject>()).Returns(Task.CompletedTask);
+
+            var input = new UpdateProfilePictureInput
+            {
+                FileToken = fileToken,
+                X = 0,
+                Y = 0,
+                Width = 0,
+                Height = 0
+            };
+
+            // Quando
+            await _sut.UpdateProfilePicture(input);
+
+            // Então
+            await _binaryObjectManager.Received(1).SaveAsync(Arg.Any<BinaryObject>());
+            user.ProfilePictureId.ShouldNotBeNull();
+        }
+
+        #endregion
+
         private IObjectMapper CreateObjectMapper()
         {
             var objectMapper = Substitute.For<IObjectMapper>();
