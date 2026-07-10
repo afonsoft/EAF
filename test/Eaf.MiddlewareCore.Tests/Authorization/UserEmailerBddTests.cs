@@ -412,6 +412,101 @@ namespace Eaf.Middleware.Tests.Authorization
         }
 
         [Fact]
+        public async Task Dado_ErroAoEnviarChatEmail_Quando_TryToSendChatMessageMail_Entao_DeveCapturarExcecaoSemLancar()
+        {
+            var emailTemplateProvider = Substitute.For<IEmailTemplateProvider>();
+            var emailSender = Substitute.For<IEmailSender>();
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var currentUowProvider = Substitute.For<ICurrentUnitOfWorkProvider>();
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            var settingManager = Substitute.For<ISettingManager>();
+
+            var sut = new UserEmailer(
+                emailTemplateProvider,
+                emailSender,
+                tenantRepository,
+                currentUowProvider,
+                unitOfWorkManager,
+                userRepository,
+                settingManager);
+
+            emailTemplateProvider.GetDefaultTemplate(Arg.Any<int?>())
+                .Returns("<html>{EMAIL_TITLE}-{EMAIL_SUB_TITLE}-{EMAIL_BODY}</html>");
+            emailSender.SendAsync(Arg.Any<MailMessage>()).Returns(Task.FromException(new Exception("SMTP error")));
+
+            var user = new User
+            {
+                TenantId = 1,
+                EmailAddress = "usuario@example.com"
+            };
+
+            var chatMessage = new ChatMessage(
+                new UserIdentifier(1, 1),
+                new UserIdentifier(1, 2),
+                ChatSide.Sender,
+                "Ola",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            await sut.TryToSendChatMessageMail(user, "remetente", "tenant1", chatMessage);
+
+            await emailSender.Received(1).SendAsync(Arg.Any<MailMessage>());
+        }
+
+        [Fact]
+        public async Task Dado_ErroAoEnviarSubscriptionExpireEmail_Quando_TryToSendSubscriptionExpireEmail_Entao_DeveCapturarExcecaoSemLancar()
+        {
+            var emailTemplateProvider = Substitute.For<IEmailTemplateProvider>();
+            var emailSender = Substitute.For<IEmailSender>();
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var currentUowProvider = Substitute.For<ICurrentUnitOfWorkProvider>();
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            var settingManager = Substitute.For<ISettingManager>();
+
+            var sut = new UserEmailer(
+                emailTemplateProvider,
+                emailSender,
+                tenantRepository,
+                currentUowProvider,
+                unitOfWorkManager,
+                userRepository,
+                settingManager);
+
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+
+            unitOfWorkManager.Begin().Returns(Substitute.For<IUnitOfWorkCompleteHandle>());
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
+
+            var tenantAdmin = new User
+            {
+                TenantId = 1,
+                Id = 1,
+                UserName = Abp.Authorization.Users.AbpUserBase.AdminUserName,
+                EmailAddress = "admin@example.com"
+            };
+            userRepository.FirstOrDefaultAsync(Arg.Any<System.Linq.Expressions.Expression<Func<User, bool>>>())
+                .Returns(Task.FromResult(tenantAdmin));
+
+            settingManager.GetSettingValueForUserAsync(
+                LocalizationSettingNames.DefaultLanguage,
+                tenantAdmin.TenantId,
+                tenantAdmin.Id)
+                .Returns(Task.FromResult("pt-BR"));
+
+            emailTemplateProvider.GetDefaultTemplate(Arg.Any<int?>())
+                .Returns("<html>{EMAIL_TITLE}-{EMAIL_SUB_TITLE}-{EMAIL_BODY}</html>");
+            emailSender.SendAsync(Arg.Any<MailMessage>()).Returns(Task.FromException(new Exception("SMTP error")));
+
+            await sut.TryToSendSubscriptionExpireEmail(1, DateTime.UtcNow);
+
+            await emailSender.Received(1).SendAsync(Arg.Any<MailMessage>());
+        }
+
+        [Fact]
         public async Task Dado_UsuarioComPlainPassword_Quando_SendEmailActivationLinkAsync_Entao_DeveIncluirSenhaNoEmail()
         {
             // Dado

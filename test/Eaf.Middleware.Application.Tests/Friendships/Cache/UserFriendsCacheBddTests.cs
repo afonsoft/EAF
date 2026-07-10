@@ -196,6 +196,44 @@ namespace Eaf.Middleware.Application.Tests.Friendships.Cache
         }
 
         [Fact]
+        public void Dado_UsuarioForaDoCacheComErroAoBuscarAmigo_Quando_GetCacheItem_Entao_DeveRetornarAmigoSemPreencherDetalhes()
+        {
+            var userIdentifier = new UserIdentifier(1, 1);
+            var user = new User
+            {
+                Id = 1,
+                UserName = "user1",
+                Name = "User",
+                Surname = "One",
+                EmailAddress = "user1@example.com"
+            };
+
+            var friendship = new Friendship(
+                new UserIdentifier(1, 1),
+                new UserIdentifier(2, 2),
+                "tenant2",
+                "friend2",
+                null,
+                FriendshipState.Accepted
+            );
+
+            _friendshipRepository.GetAll().Returns(new List<Friendship> { friendship }.AsQueryable());
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage>().AsQueryable());
+            _tenantCache.GetOrNull(1).Returns(new TenantCacheItem { Id = 1, TenancyName = "Default" });
+            _userStore.FindById("1", Arg.Any<CancellationToken>()).Returns(user);
+            _userStore.When(x => x.FindById("2", Arg.Any<CancellationToken>())).Do(_ => throw new Exception("user not found"));
+
+            var result = _sut.GetCacheItem(userIdentifier);
+
+            result.ShouldNotBeNull();
+            result.Friends.Count.ShouldBe(1);
+            result.Friends[0].FriendUserId.ShouldBe(2);
+            result.Friends[0].Name.ShouldBeNull();
+            result.Friends[0].Surname.ShouldBeNull();
+            result.Friends[0].Email.ShouldBeNull();
+        }
+
+        [Fact]
         public void Dado_UsuarioEmCache_Quando_GetCacheItem_Entao_DeveRetornarUsuarioSemChamarRepositorio()
         {
             // Dado
