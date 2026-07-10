@@ -1,3 +1,4 @@
+using Abp;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Application.Tests.Helpers;
@@ -77,5 +78,33 @@ namespace Eaf.Middleware.Application.Tests
             result.ShouldNotBeNull();
             result.Id.ShouldBe(1);
         }
+
+        [Fact]
+        public void Dado_UsuarioExistente_Quando_GetCurrentUser_Entao_DeveRetornarUsuarioAtual()
+        {
+            // Dado
+            var currentUser = new User { Id = 1, UserName = "admin" };
+            var sut = CreateSut();
+            sut.UserManager.FindByIdAsync("1").Returns(currentUser);
+
+            // Quando
+            var result = sut.PublicGetCurrentUser();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public void Dado_UsuarioNaoEncontrado_Quando_GetCurrentUser_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var sut = CreateSut();
+            sut.UserManager.FindByIdAsync("1").Returns((User?)null);
+
+            // Quando / Então
+            Should.Throw<AbpException>(() => sut.PublicGetCurrentUser());
+        }
+
     }
 }

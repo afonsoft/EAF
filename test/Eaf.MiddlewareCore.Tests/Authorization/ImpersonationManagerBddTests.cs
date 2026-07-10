@@ -135,5 +135,36 @@ namespace Eaf.Middleware.Tests.Authorization
             // Quando / Então
             Should.Throw<UserFriendlyException>(() => sut.GetImpersonatedUserAndIdentity("invalid-token").GetAwaiter().GetResult());
         }
+
+        [Fact]
+        public async Task Dado_HostImpersonandoTenant_Quando_GetImpersonationToken_Entao_DeveRetornarToken()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            abpSession.UserId.Returns(1L);
+
+            var sut = CoreManagerTestHelper.CreateImpersonationManager(abpSession);
+
+            // Quando
+            var token = await sut.GetImpersonationToken(2, 1);
+
+            // Então
+            token.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void Dado_SemImpersonacao_Quando_GetBackToImpersonatorToken_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            abpSession.UserId.Returns(1L);
+
+            var sut = CoreManagerTestHelper.CreateImpersonationManager(abpSession);
+
+            // Quando / Então
+            Should.Throw<UserFriendlyException>(() => sut.GetBackToImpersonatorToken().GetAwaiter().GetResult());
+        }
     }
 }

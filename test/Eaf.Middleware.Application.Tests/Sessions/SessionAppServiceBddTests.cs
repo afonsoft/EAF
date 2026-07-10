@@ -14,6 +14,8 @@ using Abp.Runtime.Session;
 using Abp.Zero.Configuration;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.Sessions;
 using Eaf.Middleware.Sessions.Dto;
 using Eaf.Middleware.UiCustomization;
@@ -237,11 +239,84 @@ namespace Eaf.Middleware.Application.Tests.Sessions
 
         #endregion
 
+        #region GetCurrentLoginInformationsTenant
+
+        [Fact]
+        public async Task Dado_UsuarioEmTenant_Quando_GetCurrentLoginInformations_Entao_DeveRetornarTenantEUsuario()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin" };
+            var userManager = CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(user);
+
+            var tenant = new Tenant("tenant1", "Tenant One") { Id = 1 };
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.Tenants.Returns(new List<Tenant> { tenant }.AsAsyncQueryable());
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns(1);
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.TenantManager = tenantManager;
+            _sut.ObjectMapper = CreateObjectMapper();
+            SetupUiThemeCustomizer();
+
+            // Quando
+            var result = await _sut.GetCurrentLoginInformations();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Tenant.ShouldNotBeNull();
+            result.Tenant.Id.ShouldBe(1);
+            result.User.ShouldNotBeNull();
+        }
+
+        #endregion
+
+        #region UpdateUserSignInTokenTenant
+
+        [Fact]
+        public async Task Dado_UsuarioLogadoEmTenant_Quando_UpdateUserSignInToken_Entao_DeveRetornarTenantIdCodificado()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "admin", TenantId = 1 };
+            var userManager = CreateUserManager();
+            userManager.GetUserOrNullAsync(Arg.Any<UserIdentifier>()).Returns(user);
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns(1);
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+
+            // Quando
+            var result = await _sut.UpdateUserSignInToken();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.SignInToken.ShouldNotBeNull();
+            result.EncodedUserId.ShouldNotBeNull();
+            result.EncodedTenantId.ShouldNotBeEmpty();
+        }
+
+        #endregion
+
         private IObjectMapper CreateObjectMapper()
         {
             var objectMapper = Substitute.For<IObjectMapper>();
-            objectMapper.Map<UserLoginInfoDto>(Arg.Any<object>()).Returns(new UserLoginInfoDto());
-            objectMapper.Map<TenantLoginInfoDto>(Arg.Any<object>()).Returns(new TenantLoginInfoDto());
+            objectMapper.Map<UserLoginInfoDto>(Arg.Any<object>()).Returns(ci =>
+            {
+                var user = (User)ci.Arg<object>();
+                return new UserLoginInfoDto { Id = user.Id, UserName = user.UserName };
+            });
+            objectMapper.Map<TenantLoginInfoDto>(Arg.Any<object>()).Returns(ci =>
+            {
+                var tenant = (Tenant)ci.Arg<object>();
+                return new TenantLoginInfoDto { Id = tenant.Id, Name = tenant.TenancyName };
+            });
             return objectMapper;
         }
 

@@ -1,6 +1,9 @@
 using Abp;
 using Abp.Application.Services.Dto;
+using Abp.Configuration;
+using Abp.Localization;
 using Abp.Notifications;
+using Abp.ObjectMapping;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Notifications;
 using Eaf.Middleware.Notifications.Dto;
@@ -8,6 +11,7 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -224,6 +228,57 @@ namespace Eaf.Middleware.Application.Tests.Notifications
                 .SubscribeAsync(Arg.Any<UserIdentifier>(), "Notification1");
             await _notificationSubscriptionManager.Received(1)
                 .UnsubscribeAsync(Arg.Any<UserIdentifier>(), "Notification2");
+        }
+
+        #endregion
+
+        #region GetNotificationSettings
+
+        [Fact]
+        public async Task Dado_NotificacoesDisponiveis_Quando_GetNotificationSettings_Entao_DeveRetornarConfiguracoesComAssinaturas()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueAsync(NotificationSettingNames.ReceiveNotifications).Returns("true");
+            _sut.SettingManager = settingManager;
+
+            var definitions = new List<NotificationDefinition>
+            {
+                new NotificationDefinition("Test", null, new FixedLocalizableString("Test"), null, null, null)
+            };
+            _notificationDefinitionManager.GetAllAvailableAsync(Arg.Any<UserIdentifier>())
+                .Returns(definitions);
+
+            var subscriptions = new List<NotificationSubscription>
+            {
+                new NotificationSubscription { NotificationName = "Test" }
+            };
+            _notificationSubscriptionManager.GetSubscribedNotificationsAsync(Arg.Any<UserIdentifier>())
+                .Returns(subscriptions);
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<NotificationSubscriptionWithDisplayNameDto>>(Arg.Any<object>())
+                .Returns(ci =>
+                {
+                    var source = (IEnumerable<NotificationDefinition>)ci.Arg<object>();
+                    return source.Select(d => new NotificationSubscriptionWithDisplayNameDto { Name = d.Name, DisplayName = d.DisplayName?.ToString() ?? d.Name }).ToList();
+                });
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = await _sut.GetNotificationSettings();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.ReceiveNotifications.ShouldBeTrue();
+            result.Notifications.Count.ShouldBe(1);
+            result.Notifications[0].Name.ShouldBe("Test");
+            result.Notifications[0].IsSubscribed.ShouldBeTrue();
         }
 
         #endregion

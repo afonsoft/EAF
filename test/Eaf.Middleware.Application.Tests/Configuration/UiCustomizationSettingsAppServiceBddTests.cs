@@ -1,6 +1,10 @@
 using Abp;
 using Abp.Configuration;
+using Abp.Configuration.Startup;
 using Abp.Dependency;
+using Abp.Domain.Uow;
+using Abp.MultiTenancy;
+using Abp.Runtime.Caching;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Configuration.Dto;
@@ -22,15 +26,24 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             out IIocResolver iocResolver,
             out IUiThemeCustomizerFactory uiThemeCustomizerFactory,
             out IUiCustomizer uiCustomizer,
-            out IAbpSession abpSession,
-            SettingManager? settingManager = null)
+            out IAbpSession abpSession)
         {
             iocResolver = Substitute.For<IIocResolver>();
             uiThemeCustomizerFactory = Substitute.For<IUiThemeCustomizerFactory>();
             uiCustomizer = Substitute.For<IUiCustomizer>();
             abpSession = Substitute.For<IAbpSession>();
 
-            var sut = new UiCustomizationSettingsAppService(settingManager!, iocResolver, uiThemeCustomizerFactory)
+            var settingManager = Substitute.For<SettingManager>(new object[]
+            {
+                Substitute.For<ISettingDefinitionManager>(),
+                Substitute.For<ICacheManager>(),
+                Substitute.For<IMultiTenancyConfig>(),
+                Substitute.For<ITenantStore>(),
+                Substitute.For<ISettingEncryptionService>(),
+                Substitute.For<IUnitOfWorkManager>()
+            });
+
+            var sut = new UiCustomizationSettingsAppService(settingManager, iocResolver, uiThemeCustomizerFactory)
             {
                 AbpSession = abpSession
             };
@@ -113,5 +126,6 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             uiThemeCustomizerFactory.Received(1).GetUiCustomizer("Default");
             await uiCustomizer.Received(1).UpdateApplicationUiManagementSettingsAsync(settings);
         }
+
     }
 }

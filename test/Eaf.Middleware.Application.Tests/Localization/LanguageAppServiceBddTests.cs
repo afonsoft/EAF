@@ -345,6 +345,59 @@ namespace Eaf.Middleware.Application.Tests.Localization
             result.Items[0].Key.ShouldBe("Hello");
         }
 
+        [Fact]
+        public async Task Dado_TextosVaziosEComFiltro_Quando_GetLanguageTexts_Entao_DeveRetornarTextosFiltrados()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafMiddleware");
+            source.GetAllStrings().Returns(new List<LocalizedString>
+            {
+                new LocalizedString("Hello", "Hello", CultureInfo.InvariantCulture),
+                new LocalizedString("World", "World", CultureInfo.InvariantCulture)
+            });
+            localizationManager.GetSource("EafMiddleware").Returns(source);
+            _sut.LocalizationManager = localizationManager;
+
+            _applicationLanguageTextManager.GetStringOrNull(
+                Arg.Any<int?>(),
+                Arg.Any<string>(),
+                Arg.Any<CultureInfo>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>()).Returns(ci =>
+            {
+                var culture = ci.ArgAt<CultureInfo>(2);
+                var name = ci.ArgAt<string>(3);
+                return culture.Name == "en-US" ? null : name;
+            });
+
+            var input = new GetLanguageTextsInput
+            {
+                BaseLanguageName = "pt-BR",
+                TargetLanguageName = "en-US",
+                SourceName = "EafMiddleware",
+                MaxResultCount = 10,
+                SkipCount = 0,
+                TargetValueFilter = "EMPTY",
+                FilterText = "Hello"
+            };
+
+            // Quando
+            var result = await _sut.GetLanguageTexts(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].Key.ShouldBe("Hello");
+            result.Items[0].BaseValue.ShouldBe("Hello");
+            result.Items[0].TargetValue.ShouldBeNull();
+        }
+
         #endregion
     }
 }
