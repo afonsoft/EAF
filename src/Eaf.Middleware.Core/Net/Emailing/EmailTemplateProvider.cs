@@ -35,7 +35,7 @@ namespace Eaf.Middleware.Net.Emailing
 
             return _defaultTemplates.GetOrAdd(tenancyKey, key =>
             {
-                using (var stream = typeof(EmailTemplateProvider).GetAssembly().GetManifestResourceStream("Eaf.Middleware.Net.Emailing.EmailTemplates.default.html"))
+                using (var stream = typeof(EmailTemplateProvider).GetAssembly().GetManifestResourceStream($"{typeof(EmailTemplateProvider).GetAssembly().GetName().Name}.Net.Emailing.EmailTemplates.default.html"))
                 {
                     var bytes = stream.GetAllBytes();
                     var template = Encoding.UTF8.GetString(bytes);

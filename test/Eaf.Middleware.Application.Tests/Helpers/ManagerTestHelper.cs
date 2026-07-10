@@ -79,13 +79,46 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             var organizationUnitSettings = Substitute.For<IOrganizationUnitSettings>();
             var userLoginRepository = Substitute.For<IRepository<UserLogin, long>>();
 
-            return Substitute.For<UserManager>(new object[]
+            var userManager = Substitute.For<UserManager>(new object[]
             {
                 userStore, userRepository, optionsAccessor, passwordHasher, userValidators, passwordValidators,
                 keyNormalizer, errors, services, logger, roleManager, permissionManager, unitOfWorkManager,
                 cacheManager, settingManager, localizationManager, organizationUnitRepository,
                 userOrganizationUnitRepository, organizationUnitSettings, userLoginRepository
             });
+
+            userManager.GetUserIdAsync(Arg.Any<User>()).Returns(t => ((User)t[0]).Id.ToString());
+            userManager.GetUserNameAsync(Arg.Any<User>()).Returns(t => ((User)t[0]).UserName);
+            userManager.GetEmailAsync(Arg.Any<User>()).Returns(t => ((User)t[0]).EmailAddress);
+            userManager.GetPhoneNumberAsync(Arg.Any<User>()).Returns(t => ((User)t[0]).PhoneNumber);
+            userManager.IsEmailConfirmedAsync(Arg.Any<User>()).Returns(true);
+            userManager.IsPhoneNumberConfirmedAsync(Arg.Any<User>()).Returns(true);
+            userManager.GetTwoFactorEnabledAsync(Arg.Any<User>()).Returns(false);
+            userManager.GetRolesAsync(Arg.Any<User>()).Returns(new List<string>());
+            userManager.CheckPasswordAsync(Arg.Any<User>(), Arg.Any<string>()).Returns(true);
+            userManager.IsLockedOutAsync(Arg.Any<User>()).Returns(false);
+            userManager.ResetAccessFailedCountAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            userManager.InitializeOptionsAsync(Arg.Any<int?>()).Returns(Task.CompletedTask);
+            userManager.UpdateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+
+            return userManager;
+        }
+
+        public static IUnitOfWorkManager CreateUnitOfWorkManager()
+        {
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            activeUnitOfWork.SaveChangesAsync().Returns(Task.CompletedTask);
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
+
+            var uowHandle = Substitute.For<IUnitOfWorkCompleteHandle>();
+            uowHandle.CompleteAsync().Returns(Task.CompletedTask);
+            unitOfWorkManager.Begin().Returns(uowHandle);
+            unitOfWorkManager.Begin(Arg.Any<UnitOfWorkOptions>()).Returns(uowHandle);
+            unitOfWorkManager.Begin(Arg.Any<TransactionScopeOption>()).Returns(uowHandle);
+
+            return unitOfWorkManager;
         }
 
         public static RoleManager CreateRoleManager()
