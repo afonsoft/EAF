@@ -129,7 +129,7 @@ namespace Eaf.Middleware.Friendships.Cache
             {
                 if (user.Friends.ContainsFriend(friend))
                 {
-                    user.Friends.Remove(friend);
+                    user.Friends.RemoveAll(f => f.FriendTenantId == friend.FriendTenantId && f.FriendUserId == friend.FriendUserId);
                     UpdateUserOnCache(userIdentifier, user);
                 }
             }

@@ -4,27 +4,69 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.MiddlewareCore.Tests.Authorization.External
 {
     /// <summary>
-    /// Testes BDD para ExternalAuthManager seguindo o padrao Dado/Quando/Entao.
+    /// Testes BDD para ExternalAuthManager exercitando caminhos reais de provedores externos.
     /// </summary>
     public class ExternalAuthManagerBddTests
     {
-        private readonly IIocResolver _iocResolver;
-        private readonly IExternalAuthConfiguration _externalAuthConfiguration;
-        private readonly ExternalAuthManager _sut;
+        private const string ProviderName = "EAFProvider";
 
-        public ExternalAuthManagerBddTests()
+        private ExternalAuthManager CreateSut(IExternalAuthProviderApi providerApi = null)
         {
-            _iocResolver = Substitute.For<IIocResolver>();
-            _externalAuthConfiguration = Substitute.For<IExternalAuthConfiguration>();
-            _externalAuthConfiguration.ExternalLoginInfoProviders
-                .Returns(new List<IExternalLoginInfoProvider>());
-            _sut = new ExternalAuthManager(_iocResolver, _externalAuthConfiguration);
+            var iocResolver = Substitute.For<IIocResolver>();
+            var externalAuthConfiguration = Substitute.For<IExternalAuthConfiguration>();
+
+            var providerType = typeof(FakeExternalAuthProviderApi);
+            var providerInfo = new ExternalLoginProviderInfo(ProviderName, "client", "secret", "1", providerType);
+
+            var provider = Substitute.For<IExternalLoginInfoProvider>();
+            provider.Name.Returns(ProviderName);
+            provider.GetExternalLoginInfo().Returns(providerInfo);
+
+            externalAuthConfiguration.ExternalLoginInfoProviders
+                .Returns(new List<IExternalLoginInfoProvider> { provider });
+
+            if (providerApi != null)
+            {
+                iocResolver.Resolve(providerType).Returns(providerApi);
+            }
+            else
+            {
+                iocResolver.Resolve(providerType).Returns(new FakeExternalAuthProviderApi());
+            }
+
+            return new ExternalAuthManager(iocResolver, externalAuthConfiguration);
         }
+
+        private IExternalAuthProviderApi CreateProviderApi()
+        {
+            var api = Substitute.For<IExternalAuthProviderApi>();
+            api.GetUserInfo("access-code").Returns(new ExternalAuthUserInfo
+            {
+                Provider = ProviderName,
+                ProviderKey = "provider-key",
+                AccessCode = "access-code"
+            });
+            api.IsValidUser("provider-key", "access-code").Returns(true);
+            return api;
+        }
+
+        #region Instanciacao
+
+        [Fact]
+        public void Dado_Dependencias_Quando_CriarInstancia_Entao_DeveInicializarCorretamente()
+        {
+            var sut = CreateSut();
+            sut.ShouldNotBeNull();
+            sut.ShouldBeAssignableTo<IExternalAuthManager>();
+        }
+
+        #endregion
 
         #region CreateProviderApi
 
@@ -32,24 +74,76 @@ namespace Eaf.MiddlewareCore.Tests.Authorization.External
         public void Dado_ProviderDesconhecido_Quando_CreateProviderApi_Entao_DeveLancarArgumentNullException()
         {
             // Dado
-            _externalAuthConfiguration.ExternalLoginInfoProviders
-                .Returns(new List<IExternalLoginInfoProvider>());
+            var externalAuthConfiguration = Substitute.For<IExternalAuthConfiguration>();
+            externalAuthConfiguration.ExternalLoginInfoProviders.Returns(new List<IExternalLoginInfoProvider>());
+            var sut = new ExternalAuthManager(Substitute.For<IIocResolver>(), externalAuthConfiguration);
 
             // Quando/Entao
-            Should.Throw<ArgumentNullException>(() => _sut.CreateProviderApi("UnknownProvider"));
+            Should.Throw<ArgumentNullException>(() => sut.CreateProviderApi("UnknownProvider"));
         }
-
-        #endregion
-
-        #region Instanciacao
 
         [Fact]
-        public void Dado_Dependencias_Quando_CriarInstancia_Entao_DeveInicializarCorretamente()
+        public void Dado_ProviderConfigurado_Quando_CreateProviderApi_Entao_DeveRetornarApiInicializada()
         {
-            _sut.ShouldNotBeNull();
-            _sut.ShouldBeAssignableTo<IExternalAuthManager>();
+            // Dado
+            var sut = CreateSut();
+
+            // Quando
+            using var api = sut.CreateProviderApi(ProviderName);
+
+            // Então
+            api.ShouldNotBeNull();
+            api.Object.ShouldNotBeNull();
         }
 
         #endregion
+
+        #region GetUserInfo
+
+        [Fact]
+        public async Task Dado_ProviderConfigurado_Quando_GetUserInfo_Entao_DeveRetornarUsuarioExterno()
+        {
+            // Dado
+            var providerApi = CreateProviderApi();
+            var sut = CreateSut(providerApi);
+
+            // Quando
+            var result = await sut.GetUserInfo(ProviderName, "access-code");
+
+            // Então
+            result.ShouldNotBeNull();
+            result.ProviderKey.ShouldBe("provider-key");
+        }
+
+        #endregion
+
+        #region IsValidUser
+
+        [Fact]
+        public async Task Dado_UsuarioValidoNoProvider_Quando_IsValidUser_Entao_DeveRetornarVerdadeiro()
+        {
+            // Dado
+            var providerApi = CreateProviderApi();
+            var sut = CreateSut(providerApi);
+
+            // Quando
+            var result = await sut.IsValidUser(ProviderName, "provider-key", "access-code");
+
+            // Então
+            result.ShouldBeTrue();
+        }
+
+        #endregion
+
+        private class FakeExternalAuthProviderApi : IExternalAuthProviderApi
+        {
+            public ExternalLoginProviderInfo ProviderInfo { get; set; }
+
+            public Task<ExternalAuthUserInfo> GetUserInfo(string accessCode) => Task.FromResult(new ExternalAuthUserInfo());
+
+            public void Initialize(ExternalLoginProviderInfo providerInfo) => ProviderInfo = providerInfo;
+
+            public Task<bool> IsValidUser(string userId, string accessCode) => Task.FromResult(false);
+        }
     }
 }
