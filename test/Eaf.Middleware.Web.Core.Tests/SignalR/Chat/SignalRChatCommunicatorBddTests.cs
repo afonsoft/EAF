@@ -19,147 +19,169 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
 {
     public class SignalRChatCommunicatorBddTests
     {
-        private class FakeHubClients : IHubClients
-        {
-            private readonly ISingleClientProxy _client;
-            public FakeHubClients(ISingleClientProxy client) => _client = client;
+        private readonly IHubContext<ChatHub> _chatHub;
+        private readonly IClientProxy _clientProxy;
+        private readonly IObjectMapper _objectMapper;
+        private readonly IOnlineClientManager<ChatChannel> _onlineClientManager;
 
-            public IClientProxy All => _client;
-            public IClientProxy AllExcept(IReadOnlyList<string> excludedConnectionIds) => _client;
-            IClientProxy IHubClients<IClientProxy>.Client(string connectionId) => _client;
-            public ISingleClientProxy Client(string connectionId) => _client;
-            public IClientProxy Clients(IReadOnlyList<string> connectionIds) => _client;
-            public IClientProxy Group(string groupName) => _client;
-            public IClientProxy GroupExcept(string groupName, IReadOnlyList<string> excludedConnectionIds) => _client;
-            public IClientProxy Groups(IReadOnlyList<string> groupNames) => _client;
-            public IClientProxy User(string userId) => _client;
-            public IClientProxy Users(IReadOnlyList<string> userIds) => _client;
+        public SignalRChatCommunicatorBddTests()
+        {
+            _chatHub = Substitute.For<IHubContext<ChatHub>>();
+            _clientProxy = Substitute.For<IClientProxy>();
+            _objectMapper = Substitute.For<IObjectMapper>();
+            _onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+
+            _chatHub.Clients.Returns(new FakeHubClients(_clientProxy));
         }
 
-        private static SignalRChatCommunicator CriarSUT(
-            IObjectMapper? objectMapper = null,
-            IOnlineClientManager<ChatChannel>? onlineClientManager = null,
-            IHubContext<ChatHub>? chatHub = null)
+        [Fact]
+        public async Task Dado_UsuarioOnline_Quando_SendReadStateChangeToClients_Entao_DeveChamarSendAsync()
         {
-            objectMapper ??= Substitute.For<IObjectMapper>();
-            onlineClientManager ??= Substitute.For<IOnlineClientManager<ChatChannel>>();
-            chatHub ??= Substitute.For<IHubContext<ChatHub>>();
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-1", 1);
 
-            var clientProxy = Substitute.For<ISingleClientProxy>();
-            var hubClients = new FakeHubClients(clientProxy);
-            chatHub.Clients.Returns(hubClients);
+            await communicator.SendReadStateChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1));
 
-            return new SignalRChatCommunicator(objectMapper, onlineClientManager, chatHub);
+            await _clientProxy.Received(1).SendCoreAsync("getReadStateChange", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
         }
 
-        private static IOnlineClient CriarCliente(string connectionId = "conn-123")
+        [Fact]
+        public async Task Dado_UsuarioOffline_Quando_SendReadStateChangeToClients_Entao_NaoDeveChamarSendAsync()
+        {
+            var nullProxy = new NullClientProxy();
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            _chatHub.Clients.Returns(new FakeHubClients(nullProxy));
+            var onlineClient = CriarOnlineClient("conn-2", 2);
+
+            await communicator.SendReadStateChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1));
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getReadStateChange", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_Mensagem_Quando_SendMessageToAll_Entao_DeveChamarSendAsyncParaCadaCliente()
+        {
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-3", 1);
+            _onlineClientManager.GetAllClientsAsync().Returns(new List<IOnlineClient> { onlineClient });
+            _objectMapper.Map<ChatMessageDto>(Arg.Any<ChatMessage>()).Returns(new ChatMessageDto());
+
+            await communicator.SendMessageToAll("hello");
+
+            await _clientProxy.Received(1).SendCoreAsync("getMessage", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_PedidoAmizade_Quando_SendFriendshipRequestToClient_Entao_DeveMapearEEnviar()
+        {
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-4", 1);
+            var friendship = CriarFriendship();
+            _objectMapper.Map<FriendshipDto>(friendship).Returns(new FriendshipDto());
+
+            await communicator.SendFriendshipRequestToClient(new List<IOnlineClient> { onlineClient }, friendship, true, false);
+
+            await _clientProxy.Received(1).SendCoreAsync("getFriendshipRequest", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_MensagemChat_Quando_SendMessageToClient_Entao_DeveMapearEEnviar()
+        {
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-5", 1);
+            var message = CriarChatMessage();
+            _objectMapper.Map<ChatMessageDto>(message).Returns(new ChatMessageDto());
+
+            await communicator.SendMessageToClient(new List<IOnlineClient> { onlineClient }, message);
+
+            await _clientProxy.Received(1).SendCoreAsync("getChatMessage", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_Usuario_Quando_SendUserConnectionChangeToClients_Entao_DeveChamarSendAsync()
+        {
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-6", 1);
+
+            await communicator.SendUserConnectionChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1), true);
+
+            await _clientProxy.Received(1).SendCoreAsync("getUserConnectNotification", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_Usuario_Quando_SendUserStateChangeToClients_Entao_DeveChamarSendAsync()
+        {
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-7", 1);
+
+            await communicator.SendUserStateChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1), FriendshipState.Accepted);
+
+            await _clientProxy.Received(1).SendCoreAsync("getUserStateChange", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComMensagensNaoLidas_Quando_SendAllUnreadMessagesOfUserReadToClients_Entao_DeveChamarSendAsync()
+        {
+            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
+            var onlineClient = CriarOnlineClient("conn-8", 1);
+
+            await communicator.SendAllUnreadMessagesOfUserReadToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1));
+
+            await _clientProxy.Received(1).SendCoreAsync("getallUnreadMessagesOfUserRead", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        private static IOnlineClient CriarOnlineClient(string connectionId, long userId)
         {
             var client = Substitute.For<IOnlineClient>();
             client.ConnectionId.Returns(connectionId);
+            client.UserId.Returns(userId);
             return client;
         }
 
-        [Fact]
-        public void Dado_Dependencias_Quando_Criar_Entao_DeveInicializarCorretamente()
+        private static Friendship CriarFriendship()
         {
-            var objectMapper = Substitute.For<IObjectMapper>();
-            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
-            var chatHub = Substitute.For<IHubContext<ChatHub>>();
-
-            var sut = new SignalRChatCommunicator(objectMapper, onlineClientManager, chatHub);
-            sut.ShouldNotBeNull();
+            return (Friendship)Activator.CreateInstance(typeof(Friendship), true)!;
         }
 
-        [Fact]
-        public async Task Dado_ClientesConectados_Quando_SendMessageToAll_Entao_DeveEnviarMensagemParaCadaCliente()
+        private static ChatMessage CriarChatMessage()
         {
-            // Dado
-            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
-            var client = CriarCliente();
-            onlineClientManager.GetAllClientsAsync().Returns(new List<IOnlineClient> { client });
-
-            var sut = CriarSUT(onlineClientManager: onlineClientManager);
-
-            // Quando
-            await sut.SendMessageToAll("hello");
-
-            // Então
-            await onlineClientManager.Received(1).GetAllClientsAsync();
+            return (ChatMessage)Activator.CreateInstance(typeof(ChatMessage), true)!;
         }
 
-        [Fact]
-        public async Task Dado_Mensagem_Quando_SendMessageToClient_Entao_DeveMapearEEnviar()
+        private class NullClientProxy : IClientProxy
         {
-            // Dado
-            var objectMapper = Substitute.For<IObjectMapper>();
-            objectMapper.Map<ChatMessageDto>(Arg.Any<object>()).Returns(new ChatMessageDto { Id = 1 });
-
-            var chatHub = Substitute.For<IHubContext<ChatHub>>();
-            var clientProxy = Substitute.For<ISingleClientProxy>();
-            var hubClients = new FakeHubClients(clientProxy);
-            chatHub.Clients.Returns(hubClients);
-
-            var sut = new SignalRChatCommunicator(objectMapper, Substitute.For<IOnlineClientManager<ChatChannel>>(), chatHub);
-            var client = CriarCliente();
-            var message = new ChatMessage(
-                new UserIdentifier(null, 1),
-                new UserIdentifier(null, 2),
-                ChatSide.Sender,
-                "Hello",
-                ChatMessageReadState.Read,
-                Guid.NewGuid(),
-                ChatMessageReadState.Read);
-
-            // Quando
-            await sut.SendMessageToClient(new List<IOnlineClient> { client }, message);
-
-            // Então
-            objectMapper.Received(1).Map<ChatMessageDto>(message);
-            await clientProxy.Received(1).SendCoreAsync("getChatMessage", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+            public Task SendCoreAsync(string method, object?[] args, CancellationToken cancellationToken = default)
+            {
+                return Task.CompletedTask;
+            }
         }
 
-        [Fact]
-        public async Task Dado_Usuario_Quando_SendReadStateChangeToClients_Entao_DeveEnviarNotificacao()
+        private class FakeHubClients : IHubClients
         {
-            // Dado
-            var client = CriarCliente();
-            var sut = CriarSUT();
+            private readonly IClientProxy _clientProxy;
 
-            // Quando
-            await sut.SendReadStateChangeToClients(new List<IOnlineClient> { client }, new UserIdentifier(null, 1));
+            public FakeHubClients(IClientProxy clientProxy)
+            {
+                _clientProxy = clientProxy;
+            }
 
-            // Então: sucesso sem exceções
-            true.ShouldBeTrue();
-        }
+            public IClientProxy All => _clientProxy;
 
-        [Fact]
-        public async Task Dado_Friendship_Quando_SendFriendshipRequestToClient_Entao_DeveMapearEEnviar()
-        {
-            // Dado
-            var objectMapper = Substitute.For<IObjectMapper>();
-            objectMapper.Map<FriendshipDto>(Arg.Any<object>()).Returns(new FriendshipDto { FriendUserId = 2 });
+            public IClientProxy AllExcept(IReadOnlyList<string> excludedConnectionIds) => _clientProxy;
 
-            var chatHub = Substitute.For<IHubContext<ChatHub>>();
-            var clientProxy = Substitute.For<ISingleClientProxy>();
-            var hubClients = new FakeHubClients(clientProxy);
-            chatHub.Clients.Returns(hubClients);
+            public IClientProxy Client(string connectionId) => _clientProxy;
 
-            var sut = new SignalRChatCommunicator(objectMapper, Substitute.For<IOnlineClientManager<ChatChannel>>(), chatHub);
-            var client = CriarCliente();
-            var friendship = new Friendship(
-                new UserIdentifier(null, 1),
-                new UserIdentifier(null, 2),
-                "host",
-                "user2",
-                null,
-                FriendshipState.Accepted);
+            public IClientProxy Clients(IReadOnlyList<string> connectionIds) => _clientProxy;
 
-            // Quando
-            await sut.SendFriendshipRequestToClient(new List<IOnlineClient> { client }, friendship, true, false);
+            public IClientProxy Group(string groupName) => _clientProxy;
 
-            // Então
-            objectMapper.Received(1).Map<FriendshipDto>(friendship);
-            await clientProxy.Received(1).SendCoreAsync("getFriendshipRequest", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+            public IClientProxy GroupExcept(string groupName, IReadOnlyList<string> excludedConnectionIds) => _clientProxy;
+
+            public IClientProxy Groups(IReadOnlyList<string> groupNames) => _clientProxy;
+
+            public IClientProxy User(string userId) => _clientProxy;
+
+            public IClientProxy Users(IReadOnlyList<string> userIds) => _clientProxy;
         }
     }
 }
