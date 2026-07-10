@@ -1,43 +1,28 @@
-# EAF Agent Memory
+# EAF Coverage Audit Memory
 
-This file is automatically maintained by the AI agent to persist learnings about the EAF codebase.
+Last session branch: `devin/1783704603-priority25-coverage-audit`
+Baseline coverage (P24): Line 63.9%, Branch 48.1%, Method 83.4%.
+Current coverage (after P25): Line 66.4%, Branch 49.7%, Method 85.0%.
 
-## Recent Learnings
+## Mocking gotchas
+- `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
+- `AbpUserManager.GetOldUserNameAsync` is protected virtual; the admin-rename branch in `UserManager.UpdateWithValidateAsync` is not reachable with NSubstitute without reflection.
+- `IEmailSender.SendAsync` returns `Task` non-generic. To simulate failure, use `emailSender.SendAsync(...).Returns(Task.FromException(new Exception(...)))` — `Throws`/`ThrowsAsync` from `NSubstitute.ExceptionExtensions` is not applicable.
+- `SimpleStringCipher.Instance.Encrypt` defaults to `SimpleStringCipher.DefaultPassPhrase` (`gsKnGZ041HLL4IM8`). Web.Core/Worker classes that decrypt token/userId use `MiddlewareCoreConsts.DefaultPassPhrase` (`gsKxGZ012HLL3MI5`). Tests must pass the correct passphrase to `Encrypt`.
+- `PerformContext` has no parameterless constructor; create a real instance with `new PerformContext(null, Substitute.For<IStorageConnection>(), new BackgroundJob("id", null, DateTime.UtcNow), Substitute.For<IJobCancellationToken>())`.
+- `SmtpClient` is not easily mocked with `NSubstitute` because `Authenticate`/`Connect` are non-virtual/intercept complex. Prefer a `TestableSmtpClient : SmtpClient` that overrides `Authenticate(Encoding, ICredentials, ct)` and `Connect(...)`.
+- `BinaryObject` constructor signature is `(int? tenantId, byte[] bytes, string fileType, string fileName)`; the `Id` is generated, so tests that need a specific `Id` must set `binaryObject.Id = fileId` after construction.
 
-### Module System
-- EAF follows ABP module system with lifecycle methods: PreInitialize, Initialize, PostInitialize, Shutdown
-- Modules use DependsOn attribute to declare dependencies
-- Core modules: Eaf.Middleware.Core, Eaf.Middleware.Application, Eaf.Middleware.Web.Core
-- Middleware modules: KeyVault, OpenTelemetry, SqlServerCache, SqliteCache, Castle.Serilog, etc.
+## Coverage command
+- `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 
-### Testing Patterns
-- BDD pattern in Portuguese: Dado/Quando/Então (Given/When/Then)
-- Test base classes: ProjectNameTestBase for integration tests
-- Use Shouldly for assertions, NSubstitute for mocking
-- Target 90% code coverage
-- Tests in Templates/Api/test/Eaf.ProjectName.Tests
-
-### Build Commands
-- Restore: `dotnet restore Eaf.sln`
-- Build: `dotnet build Eaf.sln`
-- Test with coverage: `dotnet test Eaf.sln --collect:"XPlat Code Coverage" --settings coverlet.runsettings`
-
-### API Template
-- Located in Templates/Api/
-- 122 tests implemented (121 passing, 1 skipped)
-- Follows ABP dynamic API generation pattern
-- Application Services exposed as REST APIs automatically
-
-### Coverage Audit
-- Active coverage-audit series across sessions P17-P23.
-- Latest P23 baseline: line 62.9% → 63.2%, branch 46.2% → 46.9%, method 83.2% → 83.3%.
-- `IOnlineClientManager.IsOnlineAsync` is an extension method in `Abp.RealTime`; cannot be stubbed directly with NSubstitute — configure `GetAllByUserIdAsync` instead.
-- `UserManager.GetUser` / `GetUserOrNull` are non-virtual sync methods that call virtual `GetUserOrNullAsync`; configure `GetUserOrNullAsync` to drive them.
-- `TenantManager.GetById` is non-virtual and throws `NotImplementedException`; the sync `MiddlewareAppServiceBase.GetCurrentTenant` hits this.
-- `UiCustomizationSettingsAppService.UseSystemDefaultSettings` remains hard to unit-test because `SettingManager.GetSettingValueForTenantAsync`/`GetSettingValueForApplicationAsync` are `IsFinal`/`sealed`.
-
-### Documentation
-- Main docs in docs/ directory
-- MODULE_SYSTEM.md contains module system documentation
-- API docs in docs/api/
-- Architecture docs in docs/architecture/
+## Notable classes with remaining low coverage
+- `Eaf.Middleware.Web.Swagger.SwaggerExtensions` (0%) / `SwaggerOperationFilter` (0%) / `SwaggerNullableParameterFilter` (0%) / `SwaggerEnumParameterFilter` (0%)
+- `Eaf.Middleware.Web.WebHooks.EafWebhookDefinitionProvider` (0%)
+- `Eaf.Middleware.Web.UiCustomization.Metronic.*` (0%)
+- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` / `SerilogMvcLoggingAttribute` (0%)
+- `Eaf.Notifications.EmailRealTimeNotifier` (0%)
+- `Eaf.WebHooks.EafWebHookReceiver` (0%)
+- `Eaf.Middleware.Worker.MiddlewareWorkerModule` (16.4%)
+- `Eaf.Middleware.Worker.EafServiceCollectionExtensions` / `EafHostBuilderExtensions` (0%)
+- `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (38.5%)

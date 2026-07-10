@@ -33,5 +33,19 @@ namespace Eaf.Middleware.Tests.WebCore.Authentication.JwtBearer
             var sut = new MiddlewareJwtSecurityTokenHandler();
             sut.CanReadToken("invalid_token").ShouldBeFalse();
         }
+
+        [Fact]
+        public void Dado_Instancia_Quando_CanReadTokenComJwtValido_Entao_DeveRetornarTrue()
+        {
+            // Dado
+            var sut = new MiddlewareJwtSecurityTokenHandler();
+            var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+
+            // Quando
+            var result = sut.CanReadToken(token);
+
+            // Então
+            result.ShouldBeTrue();
+        }
     }
 }

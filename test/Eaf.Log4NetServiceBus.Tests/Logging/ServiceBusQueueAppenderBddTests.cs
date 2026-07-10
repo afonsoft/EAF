@@ -225,6 +225,51 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             appendMethod.IsFamily.ShouldBeTrue(); // protected
         }
 
+        [Fact]
+        public void Dado_GetParams_Quando_MensagemComSeparadores_Entao_DeveRetornarValorLimpo()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender();
+            var getParamsMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Quando
+            var result = getParamsMethod!.Invoke(appender, new object[] { 2, "INFO | server | event | message | json" });
+
+            // Então
+            result!.ShouldBe("event");
+        }
+
+        [Fact]
+        public void Dado_GetParams_Quando_ValorNull_Entao_DeveRetornarVazio()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender();
+            var getParamsMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Quando
+            var result = getParamsMethod!.Invoke(appender, new object[] { 0, "(null) | server" });
+
+            // Então
+            result!.ShouldBe("");
+        }
+
+        [Fact]
+        public void Dado_GetParams_Quando_IndiceForaDoRange_Entao_DeveRetornarMensagemDeErro()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender();
+            var getParamsMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Quando
+            var result = getParamsMethod!.Invoke(appender, new object[] { 10, "apenas um valor" });
+
+            // Então
+            result!.ShouldBe("Params parse error");
+        }
+
         #endregion
     }
 }
