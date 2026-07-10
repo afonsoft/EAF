@@ -1,43 +1,81 @@
-using Abp.Application.Services;
+using Abp.Domain.Uow;
+using Abp.Runtime.Session;
+using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.MultiTenancy;
+using NSubstitute;
 using Shouldly;
+using System.Threading.Tasks;
 using Xunit;
 
-namespace Eaf.Middleware.Tests.Application
+namespace Eaf.Middleware.Application.Tests
 {
     /// <summary>
-    /// Testes BDD para MiddlewareAppServiceBase seguindo o padrão Dado/Quando/Então.
+    /// Testes BDD para MiddlewareAppServiceBase seguindo o padrão Dado/Quando/Então
     /// </summary>
     public class MiddlewareAppServiceBaseBddTests
     {
-        private sealed class TestableAppService : MiddlewareAppServiceBase
+        private class TestMiddlewareAppService : MiddlewareAppServiceBase
         {
+            public Task<User> PublicGetCurrentUserAsync() => GetCurrentUserAsync();
+            public User PublicGetCurrentUser() => GetCurrentUser();
+            public Task<Tenant> PublicGetCurrentTenantAsync() => GetCurrentTenantAsync();
+            public Tenant PublicGetCurrentTenant() => GetCurrentTenant();
         }
 
-        [Fact]
-        public void Dado_TipoMiddlewareAppServiceBase_Quando_Verificar_Entao_DeveSerAbstrato()
+        private static TestMiddlewareAppService CreateSut()
         {
-            typeof(MiddlewareAppServiceBase).IsAbstract.ShouldBeTrue();
-        }
+            var userManager = ManagerTestHelper.CreateUserManager();
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
 
-        [Fact]
-        public void Dado_Subclasse_Quando_Criar_Entao_DeveSerApplicationService()
-        {
-            var sut = new TestableAppService();
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
 
-            sut.ShouldBeAssignableTo<ApplicationService>();
-        }
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns(1);
 
-        [Fact]
-        public void Dado_Subclasse_Quando_DefinirManagers_Entao_DeveArmazenar()
-        {
-            var sut = new TestableAppService
+            return new TestMiddlewareAppService
             {
-                TenantManager = null,
-                UserManager = null
+                UserManager = userManager,
+                TenantManager = tenantManager,
+                UnitOfWorkManager = unitOfWorkManager,
+                AbpSession = abpSession
             };
+        }
 
-            sut.TenantManager.ShouldBeNull();
-            sut.UserManager.ShouldBeNull();
+        [Fact]
+        public async Task Dado_UsuarioLogado_Quando_GetCurrentUserAsync_Entao_DeveRetornarUsuarioAtual()
+        {
+            // Dado
+            var currentUser = new User { Id = 1, UserName = "admin" };
+            var sut = CreateSut();
+            sut.UserManager.FindByIdAsync("1").Returns(currentUser);
+
+            // Quando
+            var result = await sut.PublicGetCurrentUserAsync();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_TenantExistente_Quando_GetCurrentTenantAsync_Entao_DeveRetornarTenantAtual()
+        {
+            // Dado
+            var currentTenant = new Tenant("tenant1", "Tenant One") { Id = 1 };
+            var sut = CreateSut();
+            sut.TenantManager.GetByIdAsync(1).Returns(currentTenant);
+
+            // Quando
+            var result = await sut.PublicGetCurrentTenantAsync();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
         }
     }
 }

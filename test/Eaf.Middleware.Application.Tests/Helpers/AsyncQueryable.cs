@@ -155,15 +155,36 @@ namespace Eaf.Middleware.Application.Tests.Helpers
     }
 
     /// <summary>
-    /// Visitor que substitui constantes <see cref="AsyncQueryable{T}"/> pela fonte em memória.
+    /// Visitor que substitui constantes <see cref="AsyncQueryable{T}"/> pela fonte em memória
+    /// e ignora métodos do Entity Framework Core que não têm equivalente em memória
+    /// (AsNoTracking, AsTracking, AsQueryable).
     /// </summary>
     internal class AsyncQueryableRewriter<T> : ExpressionVisitor
     {
+        private static readonly HashSet<string> IgnoredMethods = new HashSet<string>
+        {
+            "AsNoTracking",
+            "AsTracking",
+            "AsQueryable",
+            "AsNoTrackingWithIdentityResolution"
+        };
+
         private readonly IQueryable<T> _source;
 
         public AsyncQueryableRewriter(IQueryable<T> source)
         {
             _source = source;
+        }
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (IgnoredMethods.Contains(node.Method.Name))
+            {
+                // Remove o envoltório e continua a reescrita a partir do operando original.
+                return Visit(node.Arguments[0]);
+            }
+
+            return base.VisitMethodCall(node);
         }
 
         protected override Expression VisitConstant(ConstantExpression node)
