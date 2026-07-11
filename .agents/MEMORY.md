@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `devin/1783804609-priority30-coverage-audit`
-Baseline coverage (P29): Line 80.3%, Branch 59.2%, Method 93.4%.
-Current coverage (after P30): Line 81.3%, Branch 60.6%, Method 93.7%.
+Last session branch: `feature/devin-20260711-priority32-coverage-audit`
+Baseline coverage (P31): Line 83.4%, Branch 62.6%, Method 94.3%.
+Current coverage (after P32): Line 83.6%, Branch 62.8%, Method 94.4%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -30,7 +30,7 @@ Current coverage (after P30): Line 81.3%, Branch 60.6%, Method 93.7%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P31)
+## Notable classes with remaining low coverage (target for P33)
 - `Eaf.Middleware.Web.Controllers.TokenAuthController` (0%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (45.5%)
 - `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
@@ -42,10 +42,18 @@ Current coverage (after P30): Line 81.3%, Branch 60.6%, Method 93.7%.
 - `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (60.7%)
 - `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (53.4%)
 - `Eaf.Middleware.Web.Startup.AuthConfigurer` (69.3%)
-- `Eaf.Middleware.Web.Startup.HangFireConfigurer` (77.5%)
 - `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (85%)
 - `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (87.6%)
-- `Eaf.OpenTelemetry` (71.4%) — `EafOpenTelemetryServiceCollectionExtensions` (57.5%)
+- `Eaf.OpenTelemetry` (78.5%) — `EafOpenTelemetryServiceCollectionExtensions` (68.1%)
+- `Eaf.Middleware.Application.Authorization.Users.Profile.ProfileAppService` (81.3%)
+- `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
+
+## P32 gotchas
+- `ICache.GetOrDefault("userId@tenantId")` is the key shape used by `AuthorizationExtensions.GetExternalTokenInformation`; `NSubstitute.Arg.Any<string>()` does not always match the `IAbpCache<string, object>` method, so use the explicit key.
+- `SettingManager.GetSettingValueForTenantAsync`/`GetSettingValueForApplicationAsync` are virtual and return `Task<string>`; configure with `Task.FromResult(value)` and do not attempt to `Returns` on `IAbpSession.ToUserIdentifier()` (extension method, not a virtual member).
+- `TenantManager.CreateWithAdminUserAsync` is non-virtual; cannot be directly mocked with `NSubstitute.Returns` on `Substitute.For<TenantManager>`.
+- `EafSqliteCache` will reuse an existing database file, and `DbCommandPool.CheckExistingDb` falls back to `DELETE`/`CREATE` when the schema is invalid; tests should clean up temp files.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` mutates `OTEL_*` environment variables; tests that set `OtlpVariables` should use a dedicated key and reset it.
 
 ## P30 gotchas
 - `Microsoft.Extensions.Caching.StackExchangeRedis` (10.0.8) registers `IDistributedCache` with implementation type `RedisCacheImpl`; assertions must check `ImplementationType.Name.Contains("RedisCache")`.
