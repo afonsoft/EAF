@@ -153,7 +153,7 @@ EAF follows Domain-Driven Design (DDD) principles and implements patterns such a
 |------------|--------|--------|
 | **ASP.NET Core** | 10.0 | Supported |
 | **Entity Framework Core** | 10.0 | Supported |
-| **Angular** | 19 | Supported |
+| **Angular** | 20 | Supported |
 | **.NET** | 10.0 | Supported |
 
 ### Main Components
@@ -201,13 +201,13 @@ EAF follows Domain-Driven Design (DDD) principles and implements patterns such a
 - **NSubstitute**: Mocking framework
 
 ### Frontend (Template)
-- **Angular 19**: SPA framework
-- **Node.js 20.20.0**: JavaScript runtime
-- **TypeScript 5.2**: Main language
-- **Bootstrap 5**: CSS framework
+- **Angular 20**: SPA framework
+- **Node.js 20.20.2**: JavaScript runtime
+- **TypeScript 5.8.3**: Main language
+- **ngx-bootstrap 12.0.0** / **Bootstrap 5**: CSS framework
 - **PrimeNG 17**: UI components
-- **Chart.js**: Charts and visualizations
-- **RxJS 7**: Reactive programming
+- **Chart.js 4.4.7**: Charts and visualizations
+- **RxJS 7.8.0**: Reactive programming
 
 ### Infrastructure
 - **SQLite**: Local database
@@ -233,12 +233,12 @@ The detailed technical documentation of the EAF system, covering architecture, m
 
 **Required:**
 - .NET 10.0 SDK or higher
-- Node.js 20.20.0 (for frontend development)
+- Node.js 20.20.2 (for frontend development)
 - Git
 
 **For Frontend Development:**
 ```bash
-npm install -g @angular/cli@19
+npm install -g @angular/cli@20.3.32
 ```
 
 **For Coverage Reports:**
