@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority35-coverage-audit`
-Baseline coverage (P34): Line 84.5%, Branch 64.1%, Method 95.2%.
-Current coverage (after P35): Line 86.1%, Branch 65.4%, Method 95.7%.
+Last session branch: `feature/devin-20260711-priority36-coverage-audit`
+Baseline coverage (P35): Line 86.1%, Branch 65.4%, Method 95.7%.
+Current coverage (after P36): Line 87.6%, Branch 67.2%, Method 96.2%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -35,15 +35,27 @@ Current coverage (after P35): Line 86.1%, Branch 65.4%, Method 95.7%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P36)
-- `Eaf.Middleware.Web.Controllers.TokenAuthController` (26.4%)
-- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
-- `Eaf.KeyVault.OCIKeyVaultManager` (49.3%)
+## Notable classes with remaining low coverage (target for P37)
+- `Eaf.Middleware.Web.Controllers.TokenAuthController` (46.4%)
+- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (47.6%)
 - `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (51.4%)
-- `Eaf.AspNetCore.Configuration.EafOpenTelemetryServiceCollectionExtensions` (75.6%)
-- `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (94.3%)
-- `Eaf.Middleware.Application.Authorization.Users.Profile.ProfileAppService` (93.2%)
-- `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
+- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
+- `Eaf.Middleware.Web.WebContentDirectoryFinder` (70.8%)
+- `Eaf.KeyVault.AzureKeyVaultManager` (75.3%)
+- `Eaf.WebHooks.EafWebHookReceiver` (75.7%)
+- `Eaf.Middleware.Web.Startup.HangFireConfigurer` (77.5%)
+- `Eaf.AspNetCore.Configuration.EafOpenTelemetryServiceCollectionExtensions` (78.7%)
+- `Eaf.Middleware.MultiTenancy.TenantAppService` (79.6%)
+
+## P36 gotchas
+- `TokenAuthController.SendTwoFactorAuthCode` uses `UserIdentifier.ToUserIdentifier()` and `CacheManager.GetTwoFactorCodeCache()`; use `Abp.Runtime.Caching.Memory.AbpMemoryCacheManager` with a real `ICachingConfiguration` substitute to avoid `CacheManagerExtensions.GetCache<TKey,TValue>` NSubstitute limitations.
+- `AbpController.LocalizationManager` has a `protected` getter; configure a local `ILocalizationManager` substitute and assign it to `controller.LocalizationManager` instead of chaining `controller.LocalizationManager.GetString(...)`.
+- `MiddlewareWebCoreModule.PostInitialize` requires `IEntityHistoryConfiguration` and `IAuditingConfiguration` set on `AbpStartupConfiguration` to avoid null-reference when `Hangfire.IsEnabled` is true.
+- `MiddlewareWebCoreModule.PostInitialize` with `Hangfire.IsEnabled` true registers `IBackgroundWorkerManager` and sets `JobStorage.Current` to `InMemoryStorage`; stub `IBackgroundWorkerManager` to avoid `RecurringJob` side effects.
+- `TokenAuthController.LogOut` uses `AbpSession`, `IPrincipalAccessor`, and `ControllerBase.User` set via `ControllerContext.HttpContext`.
+- `TokenAuthController.ImpersonatedAuthenticate` uses `_impersonationManager.GetImpersonationToken(...)` and `Encoding.UTF8.GetString(Convert.FromBase64String(...))` to decode the supplied token.
+- `TokenAuthController.ExternalAuthenticate` returns a `UserFriendlyException` when `_externalAuthManager.Authenticate` returns null; configure `_externalAuthManager` to return a valid `ExternalAuthUserInfo`.
+- `OCIKeyVaultManager.GetKeyValues` returns an empty dictionary when the OCI service returns null; `GetValue` throws the original exception when `GetSecret` fails.
 
 ## P35 gotchas
 - `Abp.Authorization.Users.AbpLoginResult<TTenant, TUser>` has a constructor `(TTenant tenant, TUser user, ClaimsIdentity identity)` and exposes `Identity`, `User`, and `Tenant` properties.
