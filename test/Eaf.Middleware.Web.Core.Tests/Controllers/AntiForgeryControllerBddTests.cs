@@ -1,5 +1,6 @@
 using Eaf.Middleware.Web.Controllers;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -26,6 +27,22 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         public void Dado_Antiforgery_Quando_CriarInstancia_Entao_DeveInicializarCorretamente()
         {
             _sut.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_Antiforgery_Quando_GetToken_Entao_DeveChamarSetCookieTokenAndHeader()
+        {
+            // Dado
+            _sut.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            // Quando
+            _sut.GetToken();
+
+            // Então
+            _antiforgery.Received(1).SetCookieTokenAndHeader(Arg.Any<HttpContext>());
         }
 
         #endregion

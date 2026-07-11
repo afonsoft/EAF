@@ -6,6 +6,7 @@ using Eaf.Middleware.Web.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Abp.Web.Models;
 using NSubstitute;
 using Shouldly;
 using SixLabors.ImageSharp;
@@ -142,6 +143,35 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
 
             // Quando & Então
             Should.Throw<System.InvalidOperationException>(() => sut.UploadProfilePicture());
+        }
+
+        [Fact]
+        public void Dado_ArquivoMaiorQueLimite_Quando_UploadProfilePicture_Entao_DeveRetornarErro()
+        {
+            // Dado
+            var sut = CreateController(_tempFileCacheManager, _profileAppService);
+            var file = new FormFile(
+                new MemoryStream(new byte[5242881]),
+                0,
+                5242881,
+                "file",
+                "large.png")
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/png"
+            };
+            sut.Request.Form = new FormCollection(
+                new System.Collections.Generic.Dictionary<string, StringValues>(),
+                new FormFileCollection { file });
+
+            // Quando
+            var result = sut.UploadProfilePicture();
+
+            // Então
+            result.ShouldBeOfType<JsonResult>();
+            var jsonResult = (JsonResult)result;
+            var error = (ErrorInfo)jsonResult.Value.GetType().GetProperty("Error")?.GetValue(jsonResult.Value);
+            error.ShouldNotBeNull();
         }
 
         [Fact]

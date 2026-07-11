@@ -61,5 +61,37 @@ namespace Eaf.OpenTelemetry.Tests
 
             result.ShouldNotBeNull();
         }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComOtlpEndpoint_Entao_DeveConfigurarExporters()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.OtlpEndpoint = "http://localhost:4317";
+                options.ConsoleExporter = true;
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComOtlpVariables_Entao_DeveConfigurarVariaveisAmbiente()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.OtlpVariables["OTEL_TEST_VAR"] = "test-value";
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+            Environment.GetEnvironmentVariable("OTEL_TEST_VAR").ShouldBe("test-value");
+        }
     }
 }

@@ -154,6 +154,26 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
         }
 
         [Fact]
+        public void Dado_HangfireAtivadoComSqlServer_Quando_Configure_Entao_DeveRegistrarServicosHangfire()
+        {
+            // Dado
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Hangfire:IsEnabled"] = "true",
+                    ["Database:Provider"] = "SqlServer"
+                })
+                .Build();
+
+            // Quando
+            Should.NotThrow(() => HangFireConfigurer.Configure(services, configuration));
+
+            // Então
+            services.ShouldContain(s => s.ServiceType.FullName != null && s.ServiceType.FullName.Contains("Hangfire"));
+        }
+
+        [Fact]
         public void Dado_HangfireAtivadoComRedis_Quando_Configure_Entao_DeveRegistrarServicosHangfire()
         {
             // Dado
