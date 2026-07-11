@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Shouldly;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace Eaf.MiddlewareCore.Tests.Configuration
@@ -34,6 +36,31 @@ namespace Eaf.MiddlewareCore.Tests.Configuration
 
             result.ShouldBeSameAs(hostBuilder);
             hostBuilder.Received(1).ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, IConfigurationBuilder>>());
+        }
+
+        [Fact]
+        public void Dado_HostBuilderReal_Quando_UsarEafConfigurationEBuild_Entao_DeveCriarHost()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+            var originalDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string>()))
+                    .UseEafConfiguration();
+
+                using var host = builder.Build();
+
+                host.ShouldNotBeNull();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
         }
     }
 }

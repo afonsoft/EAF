@@ -1,5 +1,21 @@
+using Abp;
+using Abp.AspNetCore.SignalR;
+using Abp.AspNetCore.SignalR.Hubs;
+using Abp.Localization;
+using Abp.Localization.Sources;
+using Abp.RealTime;
+using Abp.Runtime.Security;
+using Abp.Runtime.Session;
+using Castle.Core.Logging;
+using Castle.Windsor;
 using Eaf.AspNetCore.SignalR.Chat;
+using Eaf.Middleware.Chat;
+using Microsoft.AspNetCore.SignalR;
+using NSubstitute;
 using Shouldly;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
@@ -16,6 +32,115 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
         public void Dado_Tipo_Quando_VerificarHeranca_Entao_DeveHerdarDeOnlineClientHubBase()
         {
             typeof(ChatHub).BaseType.Name.ShouldBe("OnlineClientHubBase");
+        }
+
+        [Fact]
+        public void Dado_ChatHub_Quando_InvocarRegister_Entao_DeveLogarConexao()
+        {
+            var chatHub = CriarChatHub();
+            var context = Substitute.For<HubCallerContext>();
+            context.ConnectionId.Returns("conn-123");
+            chatHub.Context = context;
+
+            chatHub.Register();
+
+            context.Received(1).ConnectionId.ShouldNotBeNull();
+            context.ConnectionId.ShouldBe("conn-123");
+        }
+
+        [Fact]
+        public async Task Dado_MensagemNaoEncontrada_Quando_DeleteMessage_Entao_DeveRetornarMensagemDeNaoEncontrado()
+        {
+            var chatHub = CriarChatHub();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var result = await chatHub.DeleteMessage(1);
+
+            result.ShouldContain("Could not find chat message 1");
+            result.ShouldContain("1@1");
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioDestinoValido_Quando_SendMessage_Entao_DeveEnviarMensagemERetornarVazio()
+        {
+            var chatHub = CriarChatHub();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                UserId = 2,
+                TenantId = 1,
+                Message = "Hello",
+                UserName = "user2",
+                TenancyName = "tenant1"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public async Task Dado_GrupoDestinoValido_Quando_SendMessage_Entao_DeveEnviarMensagemParaGrupoERetornarVazio()
+        {
+            var chatHub = CriarChatHub();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                GroupId = 5,
+                TenantId = 1,
+                Message = "Hello group"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe(string.Empty);
+        }
+
+        private static ChatHub CriarChatHub()
+        {
+            var chatMessageManager = Substitute.For<IChatMessageManager>();
+            chatMessageManager.FindMessageAsync(Arg.Any<int>(), Arg.Any<long>())
+                .Returns(Task.FromResult<ChatMessage?>(null));
+            chatMessageManager.SendMessageAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>(),
+                Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Guid?>())
+                .Returns(Task.CompletedTask);
+            chatMessageManager.SendMessageToGroupAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>(),
+                Arg.Any<string>())
+                .Returns(Task.CompletedTask);
+
+            var localizationSource = Substitute.For<ILocalizationSource>();
+            localizationSource.GetString("InternalServerError").Returns("InternalServerError");
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            localizationManager.GetSource("Eaf").Returns(localizationSource);
+
+            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+            var clientInfoProvider = Substitute.For<IOnlineClientInfoProvider>();
+            var windsorContainer = Substitute.For<IWindsorContainer>();
+
+            return new ChatHub(
+                chatMessageManager,
+                localizationManager,
+                windsorContainer,
+                onlineClientManager,
+                clientInfoProvider);
+        }
+
+        private static HubCallerContext CriarContextoComUsuario(long userId, int tenantId)
+        {
+            var context = Substitute.For<HubCallerContext>();
+            context.ConnectionId.Returns("conn-123");
+            context.User.Returns(new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(AbpClaimTypes.UserId, userId.ToString()),
+                new Claim(AbpClaimTypes.TenantId, tenantId.ToString())
+            })));
+            return context;
         }
     }
 }

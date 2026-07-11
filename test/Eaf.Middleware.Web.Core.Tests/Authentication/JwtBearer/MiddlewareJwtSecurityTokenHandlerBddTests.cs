@@ -1,5 +1,8 @@
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Shouldly;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.WebCore.Authentication.JwtBearer
@@ -7,45 +10,56 @@ namespace Eaf.Middleware.Tests.WebCore.Authentication.JwtBearer
     public class MiddlewareJwtSecurityTokenHandlerBddTests
     {
         [Fact]
-        public void Dado_NovaInstancia_Quando_Criar_Entao_DeveInicializarCorretamente()
+        public void Dado_MiddlewareJwtSecurityTokenHandler_Quando_CriarInstancia_Entao_CanValidateTokenDeveSerVerdadeiro()
         {
-            var sut = new MiddlewareJwtSecurityTokenHandler();
-            sut.ShouldNotBeNull();
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+
+            handler.CanValidateToken.ShouldBeTrue();
         }
 
         [Fact]
-        public void Dado_Instancia_Quando_VerificarCanValidateToken_Entao_DeveSerTrue()
+        public void Dado_TokenJwtValido_Quando_CanReadToken_Entao_DeveRetornarVerdadeiro()
         {
-            var sut = new MiddlewareJwtSecurityTokenHandler();
-            sut.CanValidateToken.ShouldBeTrue();
-        }
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+            var token = CriarTokenJwtValido();
 
-        [Fact]
-        public void Dado_Instancia_Quando_VerificarMaximumTokenSizeInBytes_Entao_DeveSerPadrao()
-        {
-            var sut = new MiddlewareJwtSecurityTokenHandler();
-            sut.MaximumTokenSizeInBytes.ShouldBeGreaterThan(0);
-        }
+            var result = handler.CanReadToken(token);
 
-        [Fact]
-        public void Dado_Instancia_Quando_CanReadTokenComTokenInvalido_Entao_DeveRetornarFalse()
-        {
-            var sut = new MiddlewareJwtSecurityTokenHandler();
-            sut.CanReadToken("invalid_token").ShouldBeFalse();
-        }
-
-        [Fact]
-        public void Dado_Instancia_Quando_CanReadTokenComJwtValido_Entao_DeveRetornarTrue()
-        {
-            // Dado
-            var sut = new MiddlewareJwtSecurityTokenHandler();
-            var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-
-            // Quando
-            var result = sut.CanReadToken(token);
-
-            // Então
             result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtInvalido_Quando_CanReadToken_Entao_DeveRetornarFalso()
+        {
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+
+            var result = handler.CanReadToken("not-a-jwt");
+
+            result.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_Handler_Quando_VerificarMaximumTokenSizeInBytes_Entao_DeveTerValorPadrao()
+        {
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+
+            handler.MaximumTokenSizeInBytes.ShouldBeGreaterThan(0);
+        }
+
+        private static string CriarTokenJwtValido()
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = new JwtSecurityToken(
+                issuer: "test-issuer",
+                audience: "test-audience",
+                claims: new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "1")
+                },
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: null);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }

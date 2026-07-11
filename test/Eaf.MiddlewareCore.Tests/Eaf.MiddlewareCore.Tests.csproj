@@ -51,6 +51,9 @@
 	  <ProjectReference Include="..\..\src\Eaf.Middleware.Core\Eaf.Middleware.Core.csproj" />
 	  <ProjectReference Include="..\..\src\Eaf.Middleware.AzureActiveDirectory\Eaf.Middleware.AzureActiveDirectory.csproj" />
 	  <ProjectReference Include="..\..\src\Eaf.Middleware.Ldap\Eaf.Middleware.Ldap.csproj" />
+	  <ProjectReference Include="..\..\src\Eaf.KeyVault\Eaf.KeyVault.csproj" />
+	  <ProjectReference Include="..\..\src\Eaf.KeyVault.AspNetCore\Eaf.KeyVault.AspNetCore.csproj" />
+	  <ProjectReference Include="..\..\src\Eaf.SqliteCache\Eaf.SqliteCache.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
