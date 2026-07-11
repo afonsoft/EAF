@@ -2,6 +2,7 @@ using Abp.Runtime.Caching.Sqlite;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using Xunit;
 
@@ -14,6 +15,66 @@ namespace Eaf.SqliteCache.Tests
         private string GetUniqueCacheName()
         {
             return $"test-cache-{Interlocked.Increment(ref _cacheCounter)}";
+        }
+
+        [Fact]
+        public void Constructor_WithExistingFile_ShouldReuseDatabase()
+        {
+            // Arrange
+            var cacheName = GetUniqueCacheName();
+            var tempPath = Path.Combine(Path.GetTempPath(), $"eaf-sqlite-cache-{Guid.NewGuid()}.db");
+            var options = new EafSqliteCacheOptions
+            {
+                MemoryOnly = false,
+                CachePath = tempPath
+            };
+
+            try
+            {
+                // First instance creates the file
+                using (var first = new EafSqliteCache(cacheName, options))
+                {
+                    first.Set("key", "value");
+                }
+
+                // Second instance should reuse the existing database
+                using var second = new EafSqliteCache(cacheName, options);
+                var result = second.TryGetValue("key", out var value);
+
+                result.ShouldBeTrue();
+                value.ShouldBe("value");
+            }
+            finally
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Constructor_WithExistingFileButInvalidSchema_ShouldRecreateDatabase()
+        {
+            // Arrange
+            var cacheName = GetUniqueCacheName();
+            var tempPath = Path.Combine(Path.GetTempPath(), $"eaf-sqlite-cache-{Guid.NewGuid()}.db");
+            var options = new EafSqliteCacheOptions
+            {
+                MemoryOnly = false,
+                CachePath = tempPath
+            };
+
+            try
+            {
+                // Create an invalid database file
+                File.WriteAllText(tempPath, "invalid sqlite data");
+
+                using var cache = new EafSqliteCache(cacheName, options);
+                cache.ShouldNotBeNull();
+                cache.Name.ShouldBe(cacheName);
+            }
+            finally
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
         }
 
         [Fact]

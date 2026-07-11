@@ -102,6 +102,20 @@ namespace Eaf.Middleware.Tests.Web.Core.Configuration
             services.Count.ShouldBe(0);
         }
 
+        [Fact]
+        public void Dado_RedisHabilitadoComValorInvalido_Quando_Configure_Entao_DeveLancarFormatException()
+        {
+            // Dado
+            var services = new ServiceCollection();
+            var config = BuildConfiguration(new Dictionary<string, string>
+            {
+                { "RedisCache:IsRedisEnabled", "invalid" }
+            });
+
+            // Quando & Então
+            Should.Throw<FormatException>(() => RedisConfigurer.Configure(services, config));
+        }
+
         #endregion
 
         private static IConfiguration BuildConfiguration(Dictionary<string, string> data)
