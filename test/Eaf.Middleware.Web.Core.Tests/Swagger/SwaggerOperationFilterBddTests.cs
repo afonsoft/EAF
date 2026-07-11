@@ -1,10 +1,13 @@
 using Eaf.Middleware.Web.Swagger;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using NSubstitute;
 using Shouldly;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.WebCore.Swagger
@@ -12,71 +15,99 @@ namespace Eaf.Middleware.Tests.WebCore.Swagger
     public class SwaggerOperationFilterBddTests
     {
         [Fact]
-        public void Dado_NovaInstancia_Quando_Criar_Entao_DeveInicializarCorretamente()
+        public void Dado_OperacaoComParametrosNulos_Quando_AplicarFiltro_Entao_DeveRetornarSemErro()
         {
-            var sut = new SwaggerOperationFilter();
-            sut.ShouldNotBeNull();
-        }
-
-        [Fact]
-        public void Dado_Instancia_Quando_VerificarInterface_Entao_DeveImplementarIOperationFilter()
-        {
-            var sut = new SwaggerOperationFilter();
-            sut.ShouldBeAssignableTo<IOperationFilter>();
-        }
-
-        [Fact]
-        public void Dado_OperationComParametrosNulos_Quando_Apply_Entao_DeveRetornarSemErro()
-        {
-            var sut = new SwaggerOperationFilter();
+            var filter = new SwaggerOperationFilter();
             var operation = new OpenApiOperation();
-            var context = Substitute.For<OperationFilterContext>(
-                new object[] { null, null, null, null });
+            var context = CriarContexto(operation, CriarApiDescription(), new List<ApiParameterDescription>());
 
-            Should.NotThrow(() => sut.Apply(operation, context));
+            Should.NotThrow(() => filter.Apply(operation, context));
         }
 
         [Fact]
-        public void Dado_OperationComParametroNaoEnum_Quando_Apply_Entao_DeveManterSchemaInalterado()
+        public void Dado_OperacaoComParametroEnum_Quando_AplicarFiltro_Entao_DeveSubstituirSchema()
         {
-            var sut = new SwaggerOperationFilter();
-            var parameter = new OpenApiParameter { Schema = new OpenApiSchema { Type = "string" } };
-            var operation = new OpenApiOperation { Parameters = new List<OpenApiParameter> { parameter } };
+            var filter = new SwaggerOperationFilter();
+            var operation = new OpenApiOperation
+            {
+                Parameters = new List<OpenApiParameter>
+                {
+                    new OpenApiParameter { Name = "status" }
+                }
+            };
 
-            var apiDescription = new Microsoft.AspNetCore.Mvc.ApiExplorer.ApiDescription { };
-            var parameterDescriptor = new Microsoft.AspNetCore.Mvc.Abstractions.ParameterDescriptor { ParameterType = typeof(string) };
-            var parameterDescription = new Microsoft.AspNetCore.Mvc.ApiExplorer.ApiParameterDescription { ParameterDescriptor = parameterDescriptor };
-            var list = (System.Collections.IList?)typeof(Microsoft.AspNetCore.Mvc.ApiExplorer.ApiDescription)
-                .GetProperty("ParameterDescriptions")?.GetValue(apiDescription);
-            list?.Add(parameterDescription);
+            var apiDescription = CriarApiDescription();
+            var parameterDescriptor = new ControllerParameterDescriptor
+            {
+                ParameterInfo = typeof(SampleController).GetMethod("GetByStatus")!.GetParameters()[0],
+                ParameterType = typeof(SampleStatus)
+            };
+            apiDescription.ParameterDescriptions.Add(new ApiParameterDescription
+            {
+                ParameterDescriptor = parameterDescriptor
+            });
 
-            var context = Substitute.For<OperationFilterContext>(
-                new object[] { apiDescription, null, null, null });
+            var context = CriarContexto(operation, apiDescription, apiDescription.ParameterDescriptions, typeof(SampleController).GetMethod("GetByStatus")!);
 
-            sut.Apply(operation, context);
+            filter.Apply(operation, context);
 
-            parameter.Schema.Type.ShouldBe("string");
+            operation.Parameters[0].Schema.ShouldNotBeNull();
         }
 
         [Fact]
-        public void Dado_OperationComParametroEnum_Quando_Apply_Entao_DeveSubstituirSchema()
+        public void Dado_OperacaoComParametroNaoEnum_Quando_AplicarFiltro_Entao_DeveManterSchema()
         {
-            var sut = new SwaggerOperationFilter();
-            var parameter = new OpenApiParameter { Schema = new OpenApiSchema { Type = "string" } };
-            var operation = new OpenApiOperation { Parameters = new List<OpenApiParameter> { parameter } };
+            var filter = new SwaggerOperationFilter();
+            var schema = new OpenApiSchema();
+            var operation = new OpenApiOperation
+            {
+                Parameters = new List<OpenApiParameter>
+                {
+                    new OpenApiParameter { Name = "id", Schema = schema }
+                }
+            };
 
-            var apiDescription = new Microsoft.AspNetCore.Mvc.ApiExplorer.ApiDescription();
-            var parameterDescriptor = new Microsoft.AspNetCore.Mvc.Abstractions.ParameterDescriptor { ParameterType = typeof(ConsoleColor) };
-            var parameterDescription = new Microsoft.AspNetCore.Mvc.ApiExplorer.ApiParameterDescription { ParameterDescriptor = parameterDescriptor };
-            var list = (System.Collections.IList?)typeof(Microsoft.AspNetCore.Mvc.ApiExplorer.ApiDescription)
-                .GetProperty("ParameterDescriptions")?.GetValue(apiDescription);
-            list?.Add(parameterDescription);
+            var apiDescription = CriarApiDescription();
+            var parameterDescriptor = new ControllerParameterDescriptor
+            {
+                ParameterInfo = typeof(SampleController).GetMethod("GetById")!.GetParameters()[0],
+                ParameterType = typeof(int)
+            };
+            apiDescription.ParameterDescriptions.Add(new ApiParameterDescription
+            {
+                ParameterDescriptor = parameterDescriptor
+            });
 
+            var context = CriarContexto(operation, apiDescription, apiDescription.ParameterDescriptions, typeof(SampleController).GetMethod("GetById")!);
+
+            filter.Apply(operation, context);
+
+            operation.Parameters[0].Schema.ShouldBe(schema);
+        }
+
+        private static OperationFilterContext CriarContexto(OpenApiOperation operation, ApiDescription apiDescription, IList<ApiParameterDescription> parameterDescriptions, MethodInfo methodInfo = null!)
+        {
             var schemaGenerator = Substitute.For<ISchemaGenerator>();
-            var schemaRepository = new SchemaRepository();
-            var context = new OperationFilterContext(apiDescription, schemaGenerator, schemaRepository, null);
+            schemaGenerator.GenerateSchema(Arg.Any<Type>(), Arg.Any<SchemaRepository>()).Returns(new OpenApiSchema { Type = "string" });
 
-            Should.NotThrow(() => sut.Apply(operation, context));
+            return new OperationFilterContext(apiDescription, schemaGenerator, new SchemaRepository(), methodInfo ?? typeof(SampleController).GetMethod("GetByStatus")!);
+        }
+
+        private static ApiDescription CriarApiDescription()
+        {
+            return new ApiDescription { RelativePath = "/test" };
+        }
+
+        private enum SampleStatus
+        {
+            Active,
+            Inactive
+        }
+
+        private class SampleController
+        {
+            public void GetByStatus(SampleStatus status) { }
+            public void GetById(int id) { }
         }
     }
 }

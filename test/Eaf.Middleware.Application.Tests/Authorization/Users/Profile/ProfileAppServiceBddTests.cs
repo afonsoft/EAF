@@ -647,6 +647,134 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
 
         #endregion
 
+        [Fact]
+        public async Task Dado_UsuarioSemFoto_Quando_GetProfilePictureById_Entao_DeveRetornarVazio()
+        {
+            var profilePictureId = Guid.NewGuid();
+            _binaryObjectManager.GetOrNullAsync(profilePictureId).Returns((BinaryObject)null);
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(Arg.Any<int?>()).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var result = await _sut.GetProfilePictureById(profilePictureId);
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioInexistente_Quando_GetProfilePictureByUser_Entao_DeveRetornarVazio()
+        {
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(99).Returns(Task.FromException<User>(new UserFriendlyException("User not found")));
+
+            _sut.UserManager = userManager;
+
+            var result = await _sut.GetProfilePictureByUser(99);
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioInexistente_Quando_GetFriendProfilePicture_Entao_DeveRetornarVazio()
+        {
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(99).Returns(Task.FromException<User>(new UserFriendlyException("User not found")));
+
+            _sut.UserManager = userManager;
+
+            var result = await _sut.GetFriendProfilePicture(99, 1);
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioLogadoComTimezoneIgualPadrao_Quando_GetCurrentUserProfileForEdit_Entao_DeveRetornarTimezoneVazio()
+        {
+            var user = new User { Id = 1, UserName = "admin", Name = "Admin", Surname = "User" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(user);
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns((int?)null);
+
+            var originalProvider = Abp.Timing.Clock.Provider;
+            var clockProvider = Substitute.For<IClockProvider>();
+            clockProvider.SupportsMultipleTimezone.Returns(true);
+            Abp.Timing.Clock.Provider = clockProvider;
+
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueAsync(Arg.Is<string>(s => s.Contains("TimeZone"))).Returns("UTC");
+
+            _timeZoneService.GetDefaultTimezoneAsync(SettingScopes.User, Arg.Any<int?>()).Returns("UTC");
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.ObjectMapper = CreateObjectMapper();
+            _sut.SettingManager = settingManager;
+
+            try
+            {
+                var result = await _sut.GetCurrentUserProfileForEdit();
+
+                result.ShouldNotBeNull();
+                result.Timezone.ShouldBe(string.Empty);
+            }
+            finally
+            {
+                Abp.Timing.Clock.Provider = originalProvider;
+            }
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioLogadoSemTimezone_Quando_UpdateCurrentUserProfile_Entao_DeveAtualizarParaPadrao()
+        {
+            var user = new User { Id = 1, UserName = "admin", Name = "Admin", Surname = "User" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByIdAsync("1").Returns(user);
+            userManager.UpdateAsync(user).Returns(IdentityResult.Success);
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns((int?)null);
+
+            var originalProvider = Abp.Timing.Clock.Provider;
+            var clockProvider = Substitute.For<IClockProvider>();
+            clockProvider.SupportsMultipleTimezone.Returns(true);
+            Abp.Timing.Clock.Provider = clockProvider;
+
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.ChangeSettingForUserAsync(Arg.Any<UserIdentifier>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.CompletedTask);
+
+            _timeZoneService.GetDefaultTimezoneAsync(SettingScopes.User, Arg.Any<int?>()).Returns("UTC");
+
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+            _sut.ObjectMapper = CreateObjectMapper();
+            _sut.SettingManager = settingManager;
+
+            try
+            {
+                await _sut.UpdateCurrentUserProfile(new CurrentUserProfileEditDto { Name = "Admin", Surname = "User", Timezone = string.Empty });
+
+                await settingManager.Received(1).ChangeSettingForUserAsync(
+                    Arg.Any<UserIdentifier>(),
+                    TimingSettingNames.TimeZone,
+                    "UTC");
+            }
+            finally
+            {
+                Abp.Timing.Clock.Provider = originalProvider;
+            }
+        }
+
         private IObjectMapper CreateObjectMapper()
         {
             var objectMapper = Substitute.For<IObjectMapper>();

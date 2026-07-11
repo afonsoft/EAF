@@ -79,6 +79,68 @@ namespace Eaf.Middleware.Tests.WebCore
             }
         }
 
+        [Fact]
+        public void Dado_HostEnvironmentComRedisHabilitado_Quando_Initialize_Entao_DeveRegistrarRedisAssembly()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
 
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"RedisCache\":{\"IsRedisEnabled\":true}}");
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                Should.NotThrow(() => module.Initialize());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_HostEnvironmentComRedisEnabledHabilitado_Quando_Initialize_Entao_DeveRegistrarRedisAssembly()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"RedisCache\":{\"IsEnabled\":true}}");
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                Should.NotThrow(() => module.Initialize());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
     }
 }

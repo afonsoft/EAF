@@ -11,13 +11,30 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.WebCore.Authentication.JwtBearer
 {
-    public class MiddlewareJwtSecurityTokenHandlerBddTests
+    public class MiddlewareJwtSecurityTokenHandlerBddTests : IDisposable
     {
+        private readonly IocManager _originalIocManager;
+        private readonly IocManager _iocManager;
+
+        public MiddlewareJwtSecurityTokenHandlerBddTests()
+        {
+            _originalIocManager = IocManager.Instance;
+            _iocManager = new IocManager();
+            var instanceProperty = typeof(IocManager).GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            instanceProperty?.SetValue(null, _iocManager, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, null, null);
+        }
+
+        public void Dispose()
+        {
+            var instanceProperty = typeof(IocManager).GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            instanceProperty?.SetValue(null, _originalIocManager, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, null, null);
+        }
         [Fact]
         public void Dado_MiddlewareJwtSecurityTokenHandler_Quando_CriarInstancia_Entao_CanValidateTokenDeveSerVerdadeiro()
         {
@@ -143,10 +160,106 @@ namespace Eaf.Middleware.Tests.WebCore.Authentication.JwtBearer
             return settingManager;
         }
 
+        private static ISettingManager CriarSettingManagerComLoginUnico()
+        {
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValue(Arg.Any<string>()).Returns(callInfo =>
+            {
+                var name = callInfo.Arg<string>();
+                if (name == AppSettings.UserManagement.TokenExpiration)
+                    return "1";
+                if (name == AppSettings.UserManagement.AllowOneConcurrentLoginPerUser)
+                    return "true";
+                return "false";
+            });
+            return settingManager;
+        }
+
+        [Fact]
+        public void Dado_TokenJaNoCache_Quando_ValidateToken_Entao_DeveRetornarPrincipalSemConsultarUsuario()
+        {
+            var tokenKey = "token-key-cache";
+            var securityStamp = "stamp-cache";
+            var user = IdentityTestHelper.CreateUser(securityStamp: securityStamp);
+
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var unitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            var settingManager = CriarSettingManager();
+            var cacheManager = CriarCacheManagerComValor(tokenKey, securityStamp);
+
+            IdentityTestHelper.RegisterJwtDependencies(userManager, unitOfWorkManager, settingManager, cacheManager);
+
+            var token = CriarTokenJwtValido(user, tokenKey, securityStamp);
+            var validationParameters = CriarValidationParameters();
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+
+            var principal = handler.ValidateToken(token, validationParameters, out var validatedToken);
+
+            principal.ShouldNotBeNull();
+            validatedToken.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_TokenComSecurityStampDiferenteELoginUnico_Quando_ValidateToken_Entao_DeveLancarSecurityTokenException()
+        {
+            var tokenKey = "token-key-2";
+            var securityStamp = "stamp-different";
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-expected");
+            user.Tokens.Add(IdentityTestHelper.CreateTokenValidityKeyToken(user, tokenKey));
+
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var unitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            var settingManager = CriarSettingManagerComLoginUnico();
+            var cacheManager = CriarCacheManager();
+
+            IdentityTestHelper.RegisterJwtDependencies(userManager, unitOfWorkManager, settingManager, cacheManager);
+
+            var token = CriarTokenJwtValido(user, tokenKey, securityStamp);
+            var validationParameters = CriarValidationParameters();
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+
+            Should.Throw<SecurityTokenException>(() => handler.ValidateToken(token, validationParameters, out _));
+        }
+
+        [Fact]
+        public void Dado_TokenSemSecurityStampNoUsuario_Quando_ValidateToken_Entao_DeveLancarSecurityTokenException()
+        {
+            var tokenKey = "token-key-3";
+            var user = IdentityTestHelper.CreateUser();
+            user.SecurityStamp = null;
+
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var unitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            var settingManager = CriarSettingManager();
+            var cacheManager = CriarCacheManager();
+
+            IdentityTestHelper.RegisterJwtDependencies(userManager, unitOfWorkManager, settingManager, cacheManager);
+
+            var token = CriarTokenJwtValido(user, tokenKey, "any-value");
+            var validationParameters = CriarValidationParameters();
+            var handler = new MiddlewareJwtSecurityTokenHandler();
+
+            Should.Throw<SecurityTokenException>(() => handler.ValidateToken(token, validationParameters, out _));
+        }
+
         private static ICacheManager CriarCacheManager()
         {
             var cache = Substitute.For<ICache>();
             cache.GetOrDefault(Arg.Any<string>()).Returns(null);
+
+            var cacheManager = Substitute.For<ICacheManager>();
+            cacheManager.GetCache(Arg.Any<string>()).Returns(cache);
+            return cacheManager;
+        }
+
+        private static ICacheManager CriarCacheManagerComValor(string tokenKey, string tokenValue)
+        {
+            var cache = Substitute.For<ICache>();
+            cache.GetOrDefault(Arg.Any<string>()).Returns(callInfo =>
+            {
+                var key = callInfo.Arg<string>();
+                return key == tokenKey ? tokenValue : null;
+            });
 
             var cacheManager = Substitute.For<ICacheManager>();
             cacheManager.GetCache(Arg.Any<string>()).Returns(cache);
