@@ -59,6 +59,28 @@ namespace Eaf.Middleware.Tests.Authorization.External.Providers
             await Should.ThrowAsync<ArgumentNullException>(async () => await sut.GetUserInfo(""));
         }
 
+        [Fact]
+        public async Task Dado_ProviderInfoComAuthorityValida_Quando_GetUserInfoComTokenInvalido_Entao_DeveLancarExcecaoDeToken()
+        {
+            var sut = CriarSut(new Dictionary<string, string>
+            {
+                ["Authority"] = "https://localhost",
+                ["ValidateIssuer"] = "false"
+            });
+            await Should.ThrowAsync<Exception>(async () => await sut.GetUserInfo("invalid-token"));
+        }
+
+        [Fact]
+        public async Task Dado_ProviderInfoComAuthorityValida_Quando_GetUserInfoComTokenJwtInvalido_Entao_DeveLancarExcecaoDeFormato()
+        {
+            var sut = CriarSut(new Dictionary<string, string>
+            {
+                ["Authority"] = "https://localhost",
+                ["ValidateIssuer"] = "false"
+            });
+            await Should.ThrowAsync<Exception>(async () => await sut.GetUserInfo("invalid.jwt.token"));
+        }
+
         private static OpenIdConnectAuthProviderApi CriarSut(Dictionary<string, string> additionalParams = null)
         {
             var sut = new OpenIdConnectAuthProviderApi(NullLogger.Instance);

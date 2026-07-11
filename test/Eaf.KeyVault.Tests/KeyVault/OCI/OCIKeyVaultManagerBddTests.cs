@@ -46,5 +46,31 @@ namespace Eaf.KeyVault.Tests.KeyVault.OCI
             var sut = (OCIKeyVaultManager)RuntimeHelpers.GetUninitializedObject(typeof(OCIKeyVaultManager));
             Should.Throw<NotImplementedException>(() => sut.SetValueAsync("key", "value"));
         }
+
+        [Fact]
+        public void Dado_StringBase64_Quando_Base64Decode_Entao_DeveRetornarStringOriginal()
+        {
+            var sut = (OCIKeyVaultManager)RuntimeHelpers.GetUninitializedObject(typeof(OCIKeyVaultManager));
+            var method = typeof(OCIKeyVaultManager).GetMethod("Base64Decode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            method.ShouldNotBeNull();
+
+            var original = "test-value";
+            var base64 = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(original));
+            var result = method.Invoke(sut, new object[] { base64 });
+
+            result.ShouldBe(original);
+        }
+
+        [Fact]
+        public void Dado_StringNaoBase64_Quando_Base64Decode_Entao_DeveRetornarEntradaOriginal()
+        {
+            var sut = (OCIKeyVaultManager)RuntimeHelpers.GetUninitializedObject(typeof(OCIKeyVaultManager));
+            var method = typeof(OCIKeyVaultManager).GetMethod("Base64Decode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            method.ShouldNotBeNull();
+
+            var result = method.Invoke(sut, new object[] { "plain-text" });
+
+            result.ShouldBe("plain-text");
+        }
     }
 }

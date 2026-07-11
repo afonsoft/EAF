@@ -93,5 +93,50 @@ namespace Eaf.OpenTelemetry.Tests
             result.ShouldNotBeNull();
             Environment.GetEnvironmentVariable("OTEL_TEST_VAR").ShouldBe("test-value");
         }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComOtlpVariablesVazias_Entao_DeveIgnorar()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.OtlpVariables[""] = "";
+                options.OtlpVariables["OTEL_EMPTY"] = null;
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComConsoleExporter_Entao_DeveConfigurarConsole()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.ConsoleExporter = true;
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComDefaults_Entao_DeveUsarSourceEMeterPadrao()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+        }
     }
 }

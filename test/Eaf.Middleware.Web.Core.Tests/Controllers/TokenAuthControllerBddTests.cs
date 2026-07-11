@@ -15,6 +15,9 @@ using Eaf.Middleware.Authorization.Impersonation;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Core.Authentication.External;
+using Eaf.Middleware.AzureActiveDirectory.Configuration;
+using Eaf.Middleware.Ldap.Configuration;
+using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Storage;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Eaf.Middleware.Web.Controllers;
@@ -150,6 +153,75 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var settingManager = Substitute.For<ISettingManager>();
             settingManager.GetSettingValueForApplication(Arg.Any<string>()).Returns("false");
             return settingManager;
+        }
+
+        [Fact]
+        public void Dado_UsuarioNaoEncontrado_Quando_GetAuthenticationProviders_Entao_DeveRetornarSystemProvider()
+        {
+            // Dado
+            var user = IdentityTestHelper.CreateUser();
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = IdentityTestHelper.CreateApplicationLogInManager(userManager, roleManager);
+            var controller = CriarController(userManager, roleManager, logInManager);
+
+            // Quando
+            var result = controller.GetAuthenticationProviders("unknown@user.com");
+
+            // Então
+            result.ShouldNotBeNull();
+            result.AuthenticationSource.ShouldBe("System");
+            result.UsernameOrEmailAddress.ShouldBe("unknown@user.com");
+        }
+
+        [Fact]
+        public void Dado_LdapHabilitado_Quando_GetDefaultEnabledProvider_Entao_DeveRetornarLdap()
+        {
+            // Dado
+            var user = IdentityTestHelper.CreateUser();
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = IdentityTestHelper.CreateApplicationLogInManager(userManager, roleManager);
+            var controller = CriarController(userManager, roleManager, logInManager);
+
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueForApplication(LdapSettingNames.IsEnabled).Returns("true");
+            controller.SettingManager = settingManager;
+
+            var method = typeof(TokenAuthController).GetMethod("GetDefaultEnabledProvider", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            // Quando
+            var result = method.Invoke(controller, null);
+
+            // Então
+            result.ShouldBe("LDAP");
+        }
+
+        [Fact]
+        public void Dado_MicrosoftHabilitado_Quando_GetDefaultEnabledProvider_Entao_DeveRetornarMicrosoft()
+        {
+            // Dado
+            var user = IdentityTestHelper.CreateUser();
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = IdentityTestHelper.CreateApplicationLogInManager(userManager, roleManager);
+            var controller = CriarController(userManager, roleManager, logInManager);
+
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueForApplication(LdapSettingNames.IsEnabled).Returns("false");
+            settingManager.GetSettingValueForApplication(AzureActiveDirectorySettingNames.IsEnabled).Returns("false");
+            settingManager.GetSettingValueForApplication(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled).Returns("true");
+            controller.SettingManager = settingManager;
+
+            var method = typeof(TokenAuthController).GetMethod("GetDefaultEnabledProvider", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            // Quando
+            var result = method.Invoke(controller, null);
+
+            // Então
+            result.ShouldBe("Microsoft");
         }
 
         private static IObjectMapper CriarObjectMapper()

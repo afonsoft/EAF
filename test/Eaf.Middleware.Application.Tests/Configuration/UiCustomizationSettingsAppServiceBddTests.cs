@@ -128,5 +128,42 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             await uiCustomizer.Received(1).UpdateApplicationUiManagementSettingsAsync(settings);
         }
 
+        [Fact]
+        public async Task Dado_TenantLogado_Quando_UseSystemDefaultSettings_Entao_DeveAplicarConfiguracaoDoTenant()
+        {
+            // Dado
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession, out var settingManager);
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns(1);
+            settingManager.GetSettingValueForTenantAsync(AppSettings.UiManagement.Theme, 1).Returns(Task.FromResult("Default"));
+            uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
+            uiCustomizer.GetTenantUiCustomizationSettings(1).Returns(Task.FromResult(new ThemeSettingsDto { Theme = "Default" }));
+
+            // Quando
+            await sut.UseSystemDefaultSettings();
+
+            // Então
+            uiThemeCustomizerFactory.Received(1).GetUiCustomizer("Default");
+            await uiCustomizer.Received(1).UpdateUserUiManagementSettingsAsync(Arg.Any<UserIdentifier>(), Arg.Any<ThemeSettingsDto>());
+        }
+
+        [Fact]
+        public async Task Dado_HostSemTenant_Quando_UseSystemDefaultSettings_Entao_DeveAplicarConfiguracaoDoHost()
+        {
+            // Dado
+            var sut = CreateSut(out _, out var uiThemeCustomizerFactory, out var uiCustomizer, out var abpSession, out var settingManager);
+            abpSession.UserId.Returns(1L);
+            abpSession.TenantId.Returns((int?)null);
+            settingManager.GetSettingValueForApplicationAsync(AppSettings.UiManagement.Theme).Returns(Task.FromResult("Default"));
+            uiThemeCustomizerFactory.GetUiCustomizer("Default").Returns(uiCustomizer);
+            uiCustomizer.GetHostUiManagementSettings().Returns(Task.FromResult(new ThemeSettingsDto { Theme = "Default" }));
+
+            // Quando
+            await sut.UseSystemDefaultSettings();
+
+            // Então
+            uiThemeCustomizerFactory.Received(1).GetUiCustomizer("Default");
+            await uiCustomizer.Received(1).UpdateUserUiManagementSettingsAsync(Arg.Any<UserIdentifier>(), Arg.Any<ThemeSettingsDto>());
+        }
     }
 }
