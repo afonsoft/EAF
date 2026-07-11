@@ -1,10 +1,6 @@
 using Abp;
 using Abp.Configuration;
-using Abp.Configuration.Startup;
 using Abp.Dependency;
-using Abp.Domain.Uow;
-using Abp.MultiTenancy;
-using Abp.Runtime.Caching;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Configuration.Dto;
@@ -27,22 +23,14 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             out IUiThemeCustomizerFactory uiThemeCustomizerFactory,
             out IUiCustomizer uiCustomizer,
             out IAbpSession abpSession,
-            out SettingManager settingManager)
+            out ISettingManager settingManager)
         {
             iocResolver = Substitute.For<IIocResolver>();
             uiThemeCustomizerFactory = Substitute.For<IUiThemeCustomizerFactory>();
             uiCustomizer = Substitute.For<IUiCustomizer>();
             abpSession = Substitute.For<IAbpSession>();
 
-            settingManager = Substitute.For<SettingManager>(new object[]
-            {
-                Substitute.For<ISettingDefinitionManager>(),
-                Substitute.For<ICacheManager>(),
-                Substitute.For<IMultiTenancyConfig>(),
-                Substitute.For<ITenantStore>(),
-                Substitute.For<ISettingEncryptionService>(),
-                Substitute.For<IUnitOfWorkManager>()
-            });
+            settingManager = Substitute.For<ISettingManager>();
 
             var sut = new UiCustomizationSettingsAppService(settingManager, iocResolver, uiThemeCustomizerFactory)
             {
@@ -70,6 +58,26 @@ namespace Eaf.Middleware.Application.Tests.Configuration
             result.ShouldNotBeNull();
             result.Count.ShouldBe(1);
             result[0].Theme.ShouldBe("Default");
+        }
+
+        [Fact]
+        public async Task Dado_ThemeSemBaseSettings_Quando_GetUiManagementSettings_Entao_DeveRetornarListaComNulo()
+        {
+            // Dado
+            var sut = CreateSut(out var iocResolver, out _, out var uiCustomizer, out _, out _);
+            iocResolver.ResolveAll<IUiCustomizer>().Returns(new[] { uiCustomizer });
+            uiCustomizer.GetUiSettings().Returns(new UiCustomizationSettingsDto
+            {
+                BaseSettings = null
+            });
+
+            // Quando
+            var result = await sut.GetUiManagementSettings();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(1);
+            result[0].ShouldBeNull();
         }
 
         [Fact]

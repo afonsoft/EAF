@@ -223,6 +223,30 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             Should.NotThrow(() => onCloseMethod?.Invoke(appender, null));
         }
 
+        [Fact]
+        public void Dado_AppenderComConexaoAberta_Quando_OnClose_Entao_NaoDeveLancarExcecao()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "Endpoint=sb://localhost:1;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+                QueueName = "log-queue",
+                StorageType = "Blob"
+            };
+
+            var appendBufferMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("AppendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            appendBufferMethod.ShouldNotBeNull();
+            Should.NotThrow(() => appendBufferMethod.Invoke(appender, new object[] { new log4net.Core.LoggingEvent[] { } }));
+
+            var onCloseMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("OnClose", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Quando & Então
+            Should.NotThrow(() => onCloseMethod?.Invoke(appender, null));
+        }
+
         #endregion
 
         #region GetParams

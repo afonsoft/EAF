@@ -8,6 +8,7 @@ using Abp.ObjectMapping;
 using Abp.Runtime.Caching;
 using Abp.Runtime.Security;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Abp.Webhooks;
 using Castle.Core.Logging;
 using Eaf.Middleware.Authorization;
@@ -222,6 +223,24 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
 
             // Então
             result.ShouldBe("Microsoft");
+        }
+
+        [Fact]
+        public async Task Dado_SessaoNula_Quando_LogOut_Entao_DeveCompletarSemErro()
+        {
+            // Dado
+            var user = IdentityTestHelper.CreateUser();
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = IdentityTestHelper.CreateApplicationLogInManager(userManager, roleManager);
+            var controller = CriarController(userManager, roleManager, logInManager);
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns((long?)null);
+            controller.AbpSession = abpSession;
+
+            // Quando & Então
+            await Should.NotThrowAsync(controller.LogOut());
         }
 
         private static IObjectMapper CriarObjectMapper()
