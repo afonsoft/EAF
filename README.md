@@ -488,11 +488,7 @@ Beyond this simple example, EAF provides a robust infrastructure and development
 
 ## Star History
 
-[![GitHub stars](https://img.shields.io/github/stars/afonsoft/eaf?style=social)](https://github.com/afonsoft/eaf/stargazers)
-
-[View live star history on star-history.com](https://www.star-history.com/?repos=afonsoft%2Feaf&type=date&legend=top-left)
-
-> The live chart image is currently unavailable because GitHub restricted the stargazers API in July 2026. A personal access token with read access to the repository metadata is required to render it. See [star-history.com](https://www.star-history.com/blog/github-stargazer-api-restriction) for details.
+[![Star History Chart](https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&legend=top-left&sealed_token=LuAl7DTwrVSZjyWlqewFeoezq4tojGQ6ESqMVSmAJErLd2FM9PStjfERSyqaN3tSXTNTVQ02MXxKOq5_hG9N_W8hyMGZqr2uFrlblerV0uAcAHU1LRvzog)](https://www.star-history.com/?repos=afonsoft%2Feaf&type=date&legend=top-left)
 
 ## StarMapper
 
