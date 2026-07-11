@@ -624,20 +624,14 @@ Além deste exemplo simples, o EAF fornece uma infraestrutura robusta e modelo d
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=afonsoft%2Feaf&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=afonsoft/eaf&type=date&legend=top-left" />
- </picture>
-</a>
+[![GitHub stars](https://img.shields.io/github/stars/afonsoft/eaf?style=social)](https://github.com/afonsoft/eaf/stargazers)
+
+[Ver histórico de estrelas ao vivo em star-history.com](https://www.star-history.com/?repos=afonsoft%2Feaf&type=date&legend=top-left)
+
+> A imagem do gráfico ao vivo não está disponível porque o GitHub restringiu a API de stargazers em julho de 2026. É necessário um token de acesso pessoal com permissão de leitura dos metadados do repositório para renderizá-lo. Veja mais detalhes em [star-history.com](https://www.star-history.com/blog/github-stargazer-api-restriction).
 
 ## StarMapper
 
-<a href="https://starmapper.bruniaux.com/afonsoft/eaf">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://starmapper.bruniaux.com/api/map-image/afonsoft/eaf?theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://starmapper.bruniaux.com/api/map-image/afonsoft/eaf?theme=light" />
-    <img alt="StarMapper" src="https://starmapper.bruniaux.com/api/map-image/afonsoft/eaf" />
-  </picture>
-</a>
+[![StarMapper](https://img.shields.io/badge/StarMapper-afonsoft%2Feaf-blue)](https://starmapper.bruniaux.com/afonsoft/eaf)
+
+> O StarMapper também requer um token do GitHub para obter os dados de geolocalização das estrelas. O mapa ao vivo não está disponível até que o repositório seja escaneado.
