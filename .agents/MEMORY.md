@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority34-coverage-audit`
-Baseline coverage (P33): Line 83.8%, Branch 63.3%, Method 94.6%.
-Current coverage (after P34): Line 84.5%, Branch 64.1%, Method 95.2%.
+Last session branch: `feature/devin-20260711-priority35-coverage-audit`
+Baseline coverage (P34): Line 84.5%, Branch 64.1%, Method 95.2%.
+Current coverage (after P35): Line 86.1%, Branch 65.4%, Method 95.7%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -35,18 +35,27 @@ Current coverage (after P34): Line 84.5%, Branch 64.1%, Method 95.2%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P35)
-- `Eaf.Middleware.Web.Controllers.TokenAuthController` (14.0%)
+## Notable classes with remaining low coverage (target for P36)
+- `Eaf.Middleware.Web.Controllers.TokenAuthController` (26.4%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
-- `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
-- `Eaf.Middleware.Identity.LogInManager`, `SecurityStampValidator`, `SignInManager` (0%)
-- `Eaf.KeyVault.OCIKeyVaultManager` (34.9%)
+- `Eaf.KeyVault.OCIKeyVaultManager` (49.3%)
 - `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (51.4%)
-- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (60.4%)
-- `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (60.7%)
-- `Eaf.AspNetCore.Configuration.EafOpenTelemetryServiceCollectionExtensions` (65.6%)
-- `Eaf.Middleware.Application.Authorization.Users.Profile.ProfileAppService` (81.3%)
+- `Eaf.AspNetCore.Configuration.EafOpenTelemetryServiceCollectionExtensions` (75.6%)
+- `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (94.3%)
+- `Eaf.Middleware.Application.Authorization.Users.Profile.ProfileAppService` (93.2%)
 - `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
+
+## P35 gotchas
+- `Abp.Authorization.Users.AbpLoginResult<TTenant, TUser>` has a constructor `(TTenant tenant, TUser user, ClaimsIdentity identity)` and exposes `Identity`, `User`, and `Tenant` properties.
+- `TokenAuthController.Authenticate` uses `ISettingManager.GetSettingValue` (sync) for `UseCaptchaOnLogin` and `AllowOneConcurrentLoginPerUser`, and `GetSettingValueAsync` (async) for `TokenExpiration`; mock the non-generic string return accordingly.
+- `UserManager.AddTokenValidityKeyAsync` returns `Task` (non-generic), not `Task<IdentityResult>`.
+- `AbpController.UnitOfWorkManager` has a public setter; `AbpController.AbpSession` can be assigned a substitute `IAbpSession`.
+- `MiddlewareWebCoreModule.Initialize` covers Redis branches when `appsettings.json` contains `RedisCache.IsRedisEnabled` or `RedisCache.IsEnabled` set to `true`.
+- `SwaggerOperationFilter.Apply` requires a real `OperationFilterContext` with `ApiDescription` and `MethodInfo`.
+- `MiddlewareJwtSecurityTokenHandler.ValidateToken` needs `user.Tokens` populated to validate the token validity key; removing `Tokens` forces the invalid-key branch.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` registers `ILoggerFactory` after `BuildServiceProvider`; `GetService<TracerProvider>()` returns null in this test harness.
+- `OCIKeyVaultManager` constructor with explicit OCI authentication creates a `SecretsClient` successfully; `Base64Decode` is a private static method and can be exercised via reflection.
+- `ServiceBusQueueAppender` remains low-coverage; use a dummy Service Bus connection string to exercise `SendAsync` failure paths safely.
 
 ## P34 gotchas
 - `Abp.Configuration.SettingManager.GetSettingValueForTenantAsync`/`GetSettingValueForApplicationAsync` are `virtual sealed` (IsFinal) and cannot be mocked; prefer `ISettingManager` in constructors and tests.

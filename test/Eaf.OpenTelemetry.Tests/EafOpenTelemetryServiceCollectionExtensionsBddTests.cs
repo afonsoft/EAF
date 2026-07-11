@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
 using System;
@@ -137,6 +138,22 @@ namespace Eaf.OpenTelemetry.Tests
             var result = services.AddEafOpenTelemetry(optionsAction);
 
             result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_BuildarEObterLoggerFactory_Entao_DeveCriarFactory()
+        {
+            var services = new ServiceCollection();
+            services.AddEafOpenTelemetry(options =>
+            {
+                options.ServiceName = "TestService";
+                options.ConsoleExporter = true;
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+
+            loggerFactory.ShouldNotBeNull();
         }
     }
 }
