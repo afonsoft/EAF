@@ -10,6 +10,8 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -166,6 +168,128 @@ namespace Eaf.Middleware.Tests.Authorization.External.Providers
 
             // Quando & Então
             await Should.ThrowAsync<FormatException>(async () => await ((Task)method.Invoke(sut, new object[] { "any-token", "https://localhost", configurationManager, default(CancellationToken) })));
+        }
+
+        [Fact]
+        public async Task Dado_TokenValido_Quando_ValidateTokenInternal_Entao_DeveRetornarPrincipalEIdentity()
+        {
+            // Dado
+            var key = new SymmetricSecurityKey(new byte[32]);
+            var token = CriarTokenJwtValido("https://localhost", "client-id", "Test User", "test@example.com", DateTime.UtcNow.AddHours(1));
+            var sut = CriarSut(new Dictionary<string, string>
+            {
+                ["Authority"] = "https://localhost",
+                ["ValidateIssuer"] = "true"
+            });
+
+            var configurationManager = CriarConfigurationManagerSubstitute(key);
+
+            var method = typeof(OpenIdConnectAuthProviderApi).GetMethod("ValidateTokenInternal", BindingFlags.NonPublic | BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            // Quando
+            var task = (Task)method.Invoke(sut, new object[] { token, "https://localhost", configurationManager, default(CancellationToken) })!;
+            await task;
+
+            // Então
+            var validated = task.GetType().GetProperty("Result")!.GetValue(task);
+            var validatedType = validated.GetType();
+            validatedType.GetProperty("Principal")!.GetValue(validated).ShouldNotBeNull();
+            validatedType.GetProperty("Token")!.GetValue(validated).ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TokenValido_Quando_ValidateToken_Entao_DeveRetornarValidateTokenResult()
+        {
+            // Dado
+            var key = new SymmetricSecurityKey(new byte[32]);
+            var token = CriarTokenJwtValido("https://localhost", "client-id", "Test User", "test@example.com", DateTime.UtcNow.AddHours(1));
+            var sut = CriarSut(new Dictionary<string, string>
+            {
+                ["Authority"] = "https://localhost",
+                ["ValidateIssuer"] = "false"
+            });
+
+            var configurationManager = CriarConfigurationManagerSubstitute(key);
+
+            var method = typeof(OpenIdConnectAuthProviderApi).GetMethod("ValidateToken", BindingFlags.NonPublic | BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            // Quando
+            var task = (Task)method.Invoke(sut, new object[] { token, "https://localhost", configurationManager })!;
+            await task;
+
+            // Então
+            var validated = task.GetType().GetProperty("Result")!.GetValue(task);
+            var validatedType = validated.GetType();
+            validatedType.GetProperty("Principal")!.GetValue(validated).ShouldNotBeNull();
+            validatedType.GetProperty("Token")!.GetValue(validated).ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TokenJwtComAudIncorreto_Quando_ValidateTokenInternal_Entao_DeveLancarAbpException()
+        {
+            // Dado
+            var key = new SymmetricSecurityKey(new byte[32]);
+            var token = CriarTokenJwtValido("https://localhost", "wrong-client", "Test User", "test@example.com", DateTime.UtcNow.AddHours(1));
+            var sut = CriarSut(new Dictionary<string, string>
+            {
+                ["Authority"] = "https://localhost",
+                ["ValidateIssuer"] = "false"
+            });
+
+            var configurationManager = CriarConfigurationManagerSubstitute(key);
+
+            var method = typeof(OpenIdConnectAuthProviderApi).GetMethod("ValidateTokenInternal", BindingFlags.NonPublic | BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            // Quando & Então
+            await Should.ThrowAsync<AbpException>(async () => await ((Task)method.Invoke(sut, new object[] { token, "https://localhost", configurationManager, default(CancellationToken) })));
+        }
+
+        [Fact]
+        public async Task Dado_IssuerNulo_Quando_ValidateToken_Entao_DeveLancarArgumentNullException()
+        {
+            var sut = CriarSut(new Dictionary<string, string>
+            {
+                ["Authority"] = "https://localhost",
+                ["ValidateIssuer"] = "false"
+            });
+
+            var method = typeof(OpenIdConnectAuthProviderApi).GetMethod("ValidateToken", BindingFlags.NonPublic | BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            var ex = await Should.ThrowAsync<TargetInvocationException>(async () => await ((Task)method.Invoke(sut, new object[] { "token", null, Substitute.For<IConfigurationManager<OpenIdConnectConfiguration>>() })));
+            ex.InnerException.ShouldBeOfType<ArgumentNullException>();
+        }
+
+        private static IConfigurationManager<OpenIdConnectConfiguration> CriarConfigurationManagerSubstitute(SymmetricSecurityKey key)
+        {
+            var config = new OpenIdConnectConfiguration();
+            config.SigningKeys.Add(key);
+            var configurationManager = Substitute.For<IConfigurationManager<OpenIdConnectConfiguration>>();
+            configurationManager.GetConfigurationAsync(Arg.Any<CancellationToken>()).Returns(config);
+            return configurationManager;
+        }
+
+        private static string CriarTokenJwtValido(string issuer, string audience, string name, string uniqueName, DateTime expires)
+        {
+            var key = new SymmetricSecurityKey(new byte[32]);
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = issuer,
+                Expires = expires,
+                SigningCredentials = signingCredentials,
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("aud", audience),
+                    new Claim("name", name),
+                    new Claim("unique_name", uniqueName)
+                })
+            };
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
         }
 
         private static OpenIdConnectAuthProviderApi CriarSut(Dictionary<string, string> additionalParams = null)

@@ -4,12 +4,12 @@
 
 **[English](README.md)** | Português
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-88.1%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-68.0%25-yellow)
-![Method Coverage](https://img.shields.io/badge/Method%20Coverage-96.3%25-brightgreen)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-90.4%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-71.2%25-brightgreen)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-96.9%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4063-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4062-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4104-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4104-brightgreen)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-68-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
@@ -382,22 +382,23 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.Castle.Serilog** | 71 | 98.9% | ✅ Excelente |
 | **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excelente |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
-| **Eaf.Middleware.Application** | 1399 | 95.7% | ✅ Excelente |
-| **Eaf.Middleware.Core** | 1185 | 94.8% | ✅ Excelente |
+| **Eaf.Middleware.Application** | 1400 | 96.0% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1191 | 95.2% | ✅ Excelente |
+| **Eaf.Middleware.Web.Core** | 642 | 90.6% | ✅ Excelente |
 | **Eaf.Middleware.Worker** | 154 | 92.5% | ✅ Excelente |
 | **Eaf.SqliteCache** | 134 | 91.6% | ✅ Excelente |
-| **Eaf.OpenTelemetry** | 61 | 98.7% | ✅ Excelente |
+| **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excelente |
+| **Eaf.OpenTelemetry** | 61 | 93.6% | ✅ Excelente |
 | **Eaf.KeyVault** | 241 | 95.4% | ✅ Excelente |
 | **Eaf.Log4NetServiceBus** | 49 | 80.3% | ✅ Boa |
-| **Eaf.Middleware.Web.Core** | 607 | 81.1% | ✅ Boa |
 | **Eaf.Middleware.AzureActiveDirectory** | 23 | 32.2% | ⚠️ Precisa melhorar |
 | **Eaf.Middleware.Ldap** | 34 | 20.1% | ❌ Baixa |
-| **TOTAL** | **4063** | **88.1%** | ✅ Em progresso |
+| **TOTAL** | **4104** | **90.4%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 88.1% linha, 68.0% branch, 96.3% método
-- **Testes Backend**: 4063 total, 4062 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Atual**: 90.4% linha, 71.2% branch, 96.9% método
+- **Testes Backend**: 4104 total, 4104 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
 - **Próximos passos**: Melhorar cobertura dos módulos Middleware.Ldap, AzureActiveDirectory e cobertura de branch geral
@@ -407,13 +408,13 @@ Este exemplo demonstra vários recursos do EAF:
 - **Documentação XML**: Summaries em português adicionados
 - **Padrão BDD**: Dado/Quando/Então implementado
 - **Castle.Serilog**: 71 testes BDD implementados (100% sucesso, 98.9% cobertura)
-- **OpenTelemetry**: 61/61 testes passando (100% sucesso, 98.7% cobertura)
+- **OpenTelemetry**: 61/61 testes passando (100% sucesso, 93.6% cobertura)
 - **SqlServerCache**: 95/95 testes passando (100% sucesso, 98.1% cobertura)
 - **SqliteCache**: 134/134 testes passando (100% sucesso, 91.6% cobertura)
 - **Worker**: 154/154 testes passando (100% sucesso, 92.5% cobertura)
-- **Middleware.Application**: 1399/1399 testes passando (100% sucesso, 95.7% cobertura)
-- **Middleware.Web.Core**: 607/607 testes passando (100% sucesso, 81.1% cobertura)
-- **Expansão de Testes (Julho 2026)**: +4 arquivos de testes implementados (P37 coverage audit)
+- **Middleware.Application**: 1400/1400 testes passando (100% sucesso, 96.0% cobertura)
+- **Middleware.Web.Core**: 642/642 testes passando (100% sucesso, 90.6% cobertura)
+- **Expansão de Testes (Julho 2026)**: +4 arquivos de testes implementados (P37 coverage audit) e +6 arquivos no P38 coverage audit
   - **Eaf.KeyVault**: +testes BDD para AzureKeyVaultManager (GetValue, GetKeyValues, SetValue, async)
   - **Eaf.Log4NetServiceBus**: +testes BDD para ServiceBusQueueAppender (SendBuffer, OnClose)
   - **Eaf.Middleware.Web.Core**: +testes BDD para EafWebHookReceiver (LocalizationSource)

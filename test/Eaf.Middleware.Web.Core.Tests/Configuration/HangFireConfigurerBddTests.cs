@@ -1,8 +1,11 @@
 using Eaf.Hangfire;
 using Eaf.Middleware.Web.Startup;
+using Hangfire;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -192,6 +195,29 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
 
             // Então
             services.ShouldContain(s => s.ServiceType.FullName != null && s.ServiceType.FullName.Contains("Hangfire"));
+        }
+
+        [Fact]
+        public void Dado_HangfireAtivado_Quando_ResolverJobStorage_Entao_DeveExecutarConfiguracao()
+        {
+            // Dado
+            Log.Logger = new LoggerConfiguration().CreateLogger();
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Hangfire:IsEnabled"] = "true",
+                    ["Database:Provider"] = "PostgreSQL"
+                })
+                .Build();
+
+            // Quando
+            HangFireConfigurer.Configure(services, configuration);
+            var provider = services.BuildServiceProvider();
+
+            // Então
+            var jobStorage = provider.GetService<JobStorage>();
+            jobStorage.ShouldNotBeNull();
         }
     }
 }

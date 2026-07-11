@@ -1,17 +1,34 @@
+using Abp.Application.Features;
+using Abp.AspNetCore.Configuration;
+using Abp.Auditing;
+using Abp.BackgroundJobs;
+using Abp.Collections;
 using Abp.Configuration;
+using Abp.Configuration.Startup;
 using Abp.Dependency;
+using Abp.EntityHistory;
+using Abp.Notifications;
 using Abp.Runtime.Caching;
+using Abp.Runtime.Caching.Configuration;
 using Abp.Runtime.Session;
 using Abp.Threading.BackgroundWorkers;
+using Abp.Web.Configuration;
+using Abp.Web.MultiTenancy;
+using Abp.Webhooks;
+using Abp.Zero.Configuration;
 using Castle.MicroKernel.Registration;
 using Eaf.Middleware.Core.Authentication.External;
 using Eaf.Middleware.Core.Authentication.ExternalLoginInfoProviders;
 using Eaf.Middleware.Web;
+using Eaf.Middleware.Web.Features;
+using Eaf.Middleware.Web.Notifications;
+using Eaf.Middleware.Web.WebHooks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Xunit;
@@ -271,6 +288,71 @@ namespace Eaf.Middleware.Tests.WebCore
             {
                 try { Directory.Delete(tempDirectory, true); } catch { }
             }
+        }
+
+        [Fact]
+        public void Dado_ConfiguracaoInicializada_Quando_PreInitialize_Entao_DeveConfigurarModulos()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, CriarConfiguracao(iocManager));
+
+                Should.NotThrow(() => module.PreInitialize());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        private static IAbpStartupConfiguration CriarConfiguracao(IIocManager iocManager)
+        {
+            var configuration = Substitute.For<IAbpStartupConfiguration>();
+            configuration.IocManager.Returns(iocManager);
+            configuration.DefaultNameOrConnectionString.Returns(string.Empty);
+
+            var modules = Substitute.For<IModuleConfigurations>();
+            modules.AbpConfiguration.Returns(configuration);
+            configuration.Modules.Returns(modules);
+
+            var aspNetCoreConfiguration = Substitute.For<IAbpAspNetCoreConfiguration>();
+            configuration.Get<IAbpAspNetCoreConfiguration>().Returns(aspNetCoreConfiguration);
+
+            var webCommonConfiguration = Substitute.For<IAbpWebCommonModuleConfiguration>();
+            var webMultiTenancyConfiguration = Substitute.For<IWebMultiTenancyConfiguration>();
+            webCommonConfiguration.MultiTenancy.Returns(webMultiTenancyConfiguration);
+            configuration.Get<IAbpWebCommonModuleConfiguration>().Returns(webCommonConfiguration);
+
+            var zeroConfig = Substitute.For<IAbpZeroConfig>();
+            var languageManagementConfig = Substitute.For<ILanguageManagementConfig>();
+            zeroConfig.LanguageManagement.Returns(languageManagementConfig);
+            configuration.Get<IAbpZeroConfig>().Returns(zeroConfig);
+
+            configuration.Notifications.Returns(Substitute.For<INotificationConfiguration>());
+            configuration.Notifications.Providers.Returns(new TypeList<NotificationProvider>());
+            configuration.Features.Returns(Substitute.For<IFeatureConfiguration>());
+            configuration.Features.Providers.Returns(new TypeList<FeatureProvider>());
+            configuration.Webhooks.Returns(Substitute.For<IWebhooksConfiguration>());
+            configuration.Webhooks.Providers.Returns(new TypeList<WebhookDefinitionProvider>());
+            configuration.Caching.Returns(Substitute.For<ICachingConfiguration>());
+            configuration.Auditing.Returns(Substitute.For<IAuditingConfiguration>());
+            configuration.EntityHistory.Returns(Substitute.For<IEntityHistoryConfiguration>());
+            configuration.BackgroundJobs.Returns(Substitute.For<IBackgroundJobConfiguration>());
+
+            return configuration;
         }
     }
 }
