@@ -397,6 +397,26 @@ namespace Eaf.SqliteCache.Tests
         }
 
         [Fact]
+        public void Dispose_DoubleDispose_ShouldNotThrow()
+        {
+            // Arrange
+            var options = new EafSqliteCacheOptions
+            {
+                MemoryOnly = true,
+                CleanupInterval = TimeSpan.FromSeconds(1)
+            };
+
+            var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+
+            // Act & Assert
+            Should.NotThrow(() =>
+            {
+                cache.Dispose();
+                cache.Dispose();
+            });
+        }
+
+        [Fact]
         public void Multiple_Operations_ShouldWorkCorrectly()
         {
             // Arrange

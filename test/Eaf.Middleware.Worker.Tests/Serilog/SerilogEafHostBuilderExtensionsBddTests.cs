@@ -189,6 +189,58 @@ namespace Eaf.Middleware.Worker.Tests.Serilog
         }
 
         [Fact]
+        public void Dado_HostBuilder_Quando_UsarEafSerilogComNivelWarning_Entao_DeveRetornarMesmoBuilder()
+        {
+            var tempDirectory = CriarTempDirectory();
+            var originalDirectory = Directory.GetCurrentDirectory();
+            var originalLog = Log.Logger;
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()));
+
+                var result = builder.UseEafSerilog(LogEventLevel.Warning);
+
+                result.ShouldBeSameAs(builder);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                LimparTempDirectory(tempDirectory);
+                Log.CloseAndFlush();
+                Log.Logger = originalLog;
+            }
+        }
+
+        [Fact]
+        public void Dado_HostBuilder_Quando_UsarEafSerilogComNivelDebug_Entao_DeveRetornarMesmoBuilder()
+        {
+            var tempDirectory = CriarTempDirectory();
+            var originalDirectory = Directory.GetCurrentDirectory();
+            var originalLog = Log.Logger;
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()));
+
+                var result = builder.UseEafSerilog(LogEventLevel.Debug);
+
+                result.ShouldBeSameAs(builder);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                LimparTempDirectory(tempDirectory);
+                Log.CloseAndFlush();
+                Log.Logger = originalLog;
+            }
+        }
+
+        [Fact]
         public void Dado_HostBuilderComConfigSeqApiKey_Quando_UsarEafSerilogComNivelEBuild_Entao_DeveCriarHost()
         {
             var tempDirectory = CriarTempDirectory();

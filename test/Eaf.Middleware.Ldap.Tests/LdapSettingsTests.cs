@@ -2,6 +2,7 @@ using Abp.Configuration;
 using Eaf.Middleware.Ldap.Configuration;
 using NSubstitute;
 using Shouldly;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -93,6 +94,97 @@ namespace Eaf.Middleware.Ldap.Tests
             // Assert
             result.ShouldBe(container);
             await _settingManager.Received(1).GetSettingValueForApplicationAsync(LdapSettingNames.Container);
+        }
+
+        [Fact]
+        public async Task GetIsEnabled_WithoutTenantId_ShouldCallCorrectMethod()
+        {
+            _settingManager.GetSettingValueForApplicationAsync<bool>(LdapSettingNames.IsEnabled)
+                .Returns(Task.FromResult(true));
+
+            var result = await _ldapSettings.GetIsEnabled(null);
+
+            result.ShouldBeTrue();
+            await _settingManager.Received(1).GetSettingValueForApplicationAsync<bool>(LdapSettingNames.IsEnabled);
+        }
+
+        [Fact]
+        public async Task GetContextType_WithoutTenantId_ShouldReturnNullOnNonWindows()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                var result = await _ldapSettings.GetContextType(null);
+                result.ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public async Task GetContextType_WithTenantId_ShouldReturnNullOnNonWindows()
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                var result = await _ldapSettings.GetContextType(1);
+                result.ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public async Task GetIsEnabled_WithTenantId_ShouldCallCorrectMethod()
+        {
+            _settingManager.GetSettingValueForTenantAsync<bool>(LdapSettingNames.IsEnabled, 1).Returns(Task.FromResult(true));
+
+            var result = await _ldapSettings.GetIsEnabled(1);
+
+            result.ShouldBeTrue();
+            await _settingManager.Received(1).GetSettingValueForTenantAsync<bool>(LdapSettingNames.IsEnabled, 1);
+        }
+
+        [Fact]
+        public async Task GetUserName_WithTenantId_ShouldCallCorrectMethod()
+        {
+            var userName = "tenantuser";
+            _settingManager.GetSettingValueForTenantAsync(LdapSettingNames.UserName, 1).Returns(Task.FromResult(userName));
+
+            var result = await _ldapSettings.GetUserName(1);
+
+            result.ShouldBe(userName);
+            await _settingManager.Received(1).GetSettingValueForTenantAsync(LdapSettingNames.UserName, 1);
+        }
+
+        [Fact]
+        public async Task GetPassword_WithoutTenantId_ShouldCallCorrectMethod()
+        {
+            var password = "password";
+            _settingManager.GetSettingValueForApplicationAsync(LdapSettingNames.Password).Returns(Task.FromResult(password));
+
+            var result = await _ldapSettings.GetPassword(null);
+
+            result.ShouldBe(password);
+            await _settingManager.Received(1).GetSettingValueForApplicationAsync(LdapSettingNames.Password);
+        }
+
+        [Fact]
+        public async Task GetContainer_WithTenantId_ShouldCallCorrectMethod()
+        {
+            var container = "CN=Users,DC=example,DC=com";
+            _settingManager.GetSettingValueForTenantAsync(LdapSettingNames.Container, 1).Returns(Task.FromResult(container));
+
+            var result = await _ldapSettings.GetContainer(1);
+
+            result.ShouldBe(container);
+            await _settingManager.Received(1).GetSettingValueForTenantAsync(LdapSettingNames.Container, 1);
+        }
+
+        [Fact]
+        public async Task GetDomain_WithoutTenantId_ShouldCallCorrectMethod()
+        {
+            var domain = "example.com";
+            _settingManager.GetSettingValueForApplicationAsync(LdapSettingNames.Domain).Returns(Task.FromResult(domain));
+
+            var result = await _ldapSettings.GetDomain(null);
+
+            result.ShouldBe(domain);
+            await _settingManager.Received(1).GetSettingValueForApplicationAsync(LdapSettingNames.Domain);
         }
     }
 }

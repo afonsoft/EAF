@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority32-coverage-audit`
-Baseline coverage (P31): Line 83.4%, Branch 62.6%, Method 94.3%.
-Current coverage (after P32): Line 83.6%, Branch 62.8%, Method 94.4%.
+Last session branch: `feature/devin-20260711-priority33-coverage-audit`
+Baseline coverage (P32): Line 83.6%, Branch 62.8%, Method 94.4%.
+Current coverage (after P33): Line 83.8%, Branch 63.3%, Method 94.6%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -47,6 +47,18 @@ Current coverage (after P32): Line 83.6%, Branch 62.8%, Method 94.4%.
 - `Eaf.OpenTelemetry` (78.5%) — `EafOpenTelemetryServiceCollectionExtensions` (68.1%)
 - `Eaf.Middleware.Application.Authorization.Users.Profile.ProfileAppService` (81.3%)
 - `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
+
+## P33 gotchas
+- `AbpModule.IocManager` and `Configuration` are protected properties; set them via reflection when unit-testing module `Initialize`/`PreInitialize` methods.
+- `MiddlewareWebCoreModule` constructor sets environment variables (`ASPNETCORE_ENVIRONMENT`, `EAF_ENVIRONMENT`, `ASPNET_ENV`) from `IHostEnvironment.EnvironmentName`; tests should use a temporary directory and restore original values.
+- `TokenAuthController.GetDefaultEnabledProvider` uses `SettingManagerExtensions.GetSettingValueForApplication<bool>` which is an extension method; mock the non-generic `ISettingManager.GetSettingValueForApplication(string)` with `"true"`/`"false"` strings.
+- `TokenAuthController.GetExternalAuthenticationProviders` requires `ObjectMapper` to be set; otherwise `NullObjectMapper` throws `AbpException`.
+- `OpenIdConnectAuthProviderApi.GetUserInfo` with invalid tokens reaches `ConfigurationManager.GetConfigurationAsync` and throws `Exception`; tests should assert `Exception` rather than specific error types.
+- `EafSqliteCache` `Dispose` is idempotent; calling `Dispose()` twice should not throw.
+- `UiCustomizationSettingsAppService.UseSystemDefaultSettings` uses `SettingManager.GetSettingValueForTenantAsync`/`GetSettingValueForApplicationAsync` for `AppSettings.UiManagement.Theme` and `IUiCustomizer.GetTenantUiCustomizationSettings`/`GetHostUiManagementSettings`.
+- `LdapSettings.GetContextType` returns `null` on non-Windows platforms regardless of `tenantId`.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` ignores `OtlpVariables` entries with empty keys or null/empty values; tests can safely pass empty entries.
+- `OCIKeyVaultManager.Base64Decode` is private static; exercise it via reflection in uninitialized instances.
 
 ## P32 gotchas
 - `ICache.GetOrDefault("userId@tenantId")` is the key shape used by `AuthorizationExtensions.GetExternalTokenInformation`; `NSubstitute.Arg.Any<string>()` does not always match the `IAbpCache<string, object>` method, so use the explicit key.
