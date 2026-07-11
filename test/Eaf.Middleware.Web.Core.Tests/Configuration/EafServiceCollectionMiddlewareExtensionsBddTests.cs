@@ -1,10 +1,15 @@
 using Eaf.Middleware.Web.Startup;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Shouldly;
 using System.Linq;
 using Xunit;
@@ -104,6 +109,45 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
             services.AddEafConfigurer(configuration);
 
             services.Any(s => s.ImplementationType != null && s.ImplementationType.Name == "SqlServerCache").ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafConfigurerComTudoHabilitado_Entao_DeveConfigurarOptions()
+        {
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new[]
+                {
+                    new KeyValuePair<string, string?>("Authentication:JwtBearer:IsEnabled", "true"),
+                    new KeyValuePair<string, string?>("Authentication:JwtBearer:SecurityKey", "8CFB2EC534E14D56_EAF_8CFB2EC534E14D56"),
+                    new KeyValuePair<string, string?>("Authentication:JwtBearer:Issuer", "EAF"),
+                    new KeyValuePair<string, string?>("Authentication:JwtBearer:Audience", "EAF"),
+                    new KeyValuePair<string, string?>("Hangfire:IsEnabled", "true"),
+                    new KeyValuePair<string, string?>("RedisCache:IsEnabled", "true"),
+                    new KeyValuePair<string, string?>("RedisCache:ConnectionString", "localhost:6379"),
+                    new KeyValuePair<string, string?>("SqlServerCache:IsEnabled", "true"),
+                    new KeyValuePair<string, string?>("SqlServerCache:ConnectionString", "Server=.;Database=Cache;"),
+                    new KeyValuePair<string, string?>("SqlServerCache:SchemaName", "dbo"),
+                    new KeyValuePair<string, string?>("SqlServerCache:TableName", "EafCache")
+                })
+                .Build();
+
+            services.AddEafConfigurer(configuration);
+
+            var provider = services.BuildServiceProvider();
+            var hubOptions = provider.GetRequiredService<IOptions<HubOptions>>().Value;
+            var responseCompression = provider.GetRequiredService<IOptions<ResponseCompressionOptions>>().Value;
+            var cookiePolicy = provider.GetRequiredService<IOptions<CookiePolicyOptions>>().Value;
+            var brCompression = provider.GetRequiredService<IOptions<BrotliCompressionProviderOptions>>().Value;
+            var gzipCompression = provider.GetRequiredService<IOptions<GzipCompressionProviderOptions>>().Value;
+            var jwtOptions = provider.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
+
+            hubOptions.ShouldNotBeNull();
+            responseCompression.ShouldNotBeNull();
+            cookiePolicy.ShouldNotBeNull();
+            brCompression.ShouldNotBeNull();
+            gzipCompression.ShouldNotBeNull();
+            jwtOptions.ShouldNotBeNull();
         }
     }
 }
