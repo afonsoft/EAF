@@ -220,6 +220,29 @@ namespace Eaf.Middleware.Worker.Tests.Serilog
             }
         }
 
+        [Fact]
+        public void Dado_HostBuilderComConfigureLoggerCustomizado_Quando_UsarEafSerilog_Entao_DeveRetornarMesmoBuilder()
+        {
+            var tempDirectory = CriarTempDirectory();
+            var originalDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()));
+
+                var result = builder.UseEafSerilog((ctx, cfg) => cfg.WriteTo.Console());
+
+                result.ShouldBeSameAs(builder);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                LimparTempDirectory(tempDirectory);
+            }
+        }
+
         private static string CriarTempDirectory()
         {
             var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
