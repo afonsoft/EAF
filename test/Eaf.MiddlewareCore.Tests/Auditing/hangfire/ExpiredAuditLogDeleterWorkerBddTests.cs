@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -129,6 +130,46 @@ namespace Eaf.MiddlewareCore.Tests.Auditing.hangfire
 
             // Então
             _auditLogRepository.DidNotReceive().Delete(Arg.Any<AuditLog>());
+        }
+
+        [Fact]
+        public void Dado_AuditingDesabilitado_Quando_DoWork_Entao_DeveEscreverDisabledJob()
+        {
+            // Dado
+            _auditLogRepository.LongCount(Arg.Any<Expression<Func<AuditLog, bool>>>()).Returns(5L);
+            var sut = CreateWorker(false);
+            var context = CriarPerformContext();
+
+            // Quando
+            sut.DoWorkPublic(context);
+
+            // Então
+            _auditLogRepository.DidNotReceive().Delete(Arg.Any<AuditLog>());
+        }
+
+        [Fact]
+        public void Dado_AuditLogsExpiradosExcedendoLimite_Quando_DoWork_Entao_DeveDeletarPorIdLimitado()
+        {
+            // Dado
+            var auditLogs = Enumerable.Range(1, 3)
+                .Select(i => new AuditLog { Id = i, ExecutionTime = DateTime.UtcNow.AddDays(-400) })
+                .ToList();
+
+            _auditLogRepository.GetAll().Returns(auditLogs.AsQueryable());
+            _auditLogRepository.LongCount(Arg.Any<Expression<Func<AuditLog, bool>>>()).Returns(3L);
+            _auditLogRepository.When(x => x.Delete(Arg.Any<AuditLog>())).Do(_ => { });
+
+            var sut = CreateWorker(true);
+            var maxDeletionField = typeof(ExpiredAuditLogDeleterWorker).GetField("MaxDeletionCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            maxDeletionField.SetValue(sut, 2);
+
+            var context = CriarPerformContext();
+
+            // Quando
+            sut.DoWorkPublic(context);
+
+            // Então
+            _auditLogRepository.Received(2).Delete(Arg.Any<AuditLog>());
         }
     }
 }

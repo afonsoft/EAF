@@ -143,6 +143,19 @@ namespace Eaf.Middleware.Tests.Authorization.External
         }
 
         [Fact]
+        public async Task Dado_OpenIdConnectComTokenNulo_Quando_GetUserInfo_Entao_DeveLancarArgumentNullException()
+        {
+            var api = new OpenIdConnectAuthProviderApi(NullLogger.Instance);
+            api.ProviderInfo = CriarProviderInfo("OpenIdConnect", typeof(OpenIdConnectAuthProviderApi), new Dictionary<string, string>
+            {
+                { "Authority", "http://localhost:1" },
+                { "ValidateIssuer", "false" }
+            });
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() => api.GetUserInfo(null));
+        }
+
+        [Fact]
         public async Task Dado_MicrosoftProviderConfiguradoComFoto_Quando_GetUserInfo_Entao_DevePreencherPicture()
         {
             var handler = CriarHandler(
@@ -157,6 +170,24 @@ namespace Eaf.Middleware.Tests.Authorization.External
 
             result.Provider.ShouldBe("Microsoft");
             result.Picture.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task Dado_MicrosoftProviderComErroNaFoto_Quando_GetUserInfo_Entao_DeveRetornarDadosSemPicture()
+        {
+            var handler = CriarHandler(
+                MicrosoftAccountDefaults.UserInformationEndpoint,
+                "{\"id\":\"456\",\"displayName\":\"Bob Jones\",\"surname\":\"Jones\",\"mail\":\"bob@example.com\"}");
+            handler.AddException("https://graph.microsoft.com/v1.0/me/photo/$value", new HttpRequestException("photo error"));
+
+            var factory = CriarHttpClientFactory(handler);
+            var api = new MicrosoftAuthProviderApi(NullLogger.Instance, factory);
+            api.ProviderInfo = CriarProviderInfo("Microsoft", typeof(MicrosoftAuthProviderApi), new Dictionary<string, string>());
+
+            var result = await api.GetUserInfo("access-token");
+
+            result.Provider.ShouldBe("Microsoft");
+            result.Picture.ShouldBeNull();
         }
 
         [Fact]
@@ -223,15 +254,26 @@ namespace Eaf.Middleware.Tests.Authorization.External
         private class TestHttpMessageHandler : HttpMessageHandler
         {
             private readonly Dictionary<string, (string content, HttpStatusCode status)> _responses = new Dictionary<string, (string, HttpStatusCode)>();
+            private readonly Dictionary<string, Exception> _exceptions = new Dictionary<string, Exception>();
 
             public void AddResponse(string uri, string content, HttpStatusCode status)
             {
                 _responses[uri] = (content, status);
             }
 
+            public void AddException(string uri, Exception exception)
+            {
+                _exceptions[uri] = exception;
+            }
+
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 var key = request.RequestUri?.ToString() ?? string.Empty;
+                if (_exceptions.TryGetValue(key, out var exception))
+                {
+                    throw exception;
+                }
+
                 if (_responses.TryGetValue(key, out var response))
                 {
                     var message = new HttpResponseMessage(response.status)

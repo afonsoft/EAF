@@ -4,6 +4,7 @@ using Abp.Runtime.Caching;
 using Abp.Runtime.Security;
 using Abp.Runtime.Session;
 using Eaf.AspNetCore.Hangfire;
+using Eaf.Middleware;
 using Hangfire;
 using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Http;
@@ -124,6 +125,134 @@ namespace Eaf.Middleware.Tests.Hangfire
             result.ShouldBeFalse();
         }
 
+        [Fact]
+        public void Dado_TokenJwtNaQueryComChaveAuth_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtValido(2, 1);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "auth", token }
+            });
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtNaQueryComChaveAccessToken_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtValido(2, 1);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "accessToken", token }
+            });
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtNoCookieEafAuthToken_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtValido(2, 1);
+            httpContext.Request.Headers["Cookie"] = $"Eaf.AuthToken={token}";
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtNoHeaderEafAuthToken_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtValido(2, 1);
+            httpContext.Request.Headers["Eaf.AuthToken"] = token;
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtNoCachePorIp_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            httpContext.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("127.0.0.1");
+            var token = CriarTokenJwtValido(2, 1);
+            var dashboardContext = CriarDashboardContext(httpContext);
+            var cache = dashboardContext.GetHttpContext().RequestServices.GetRequiredService<ICacheManager>().GetCache("HangFireCache");
+            cache.GetOrDefault("127.0.0.1").Returns(token);
+
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(dashboardContext);
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtComUserIdentifierClaim_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtComUserIdentifier(2, 1);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "token", token }
+            });
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_SemPermissoesComUsuarioNaSessao_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var sut = new EafHangfireAuthorizationFilter(System.Array.Empty<string>());
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext, withUser: true));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_SemPermissoesComTokenJwt_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtValido(2, 1);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "token", token }
+            });
+            var sut = new EafHangfireAuthorizationFilter(System.Array.Empty<string>());
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_ContextoNulo_Quando_Authorize_Entao_DeveRetornarFalso()
+        {
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(null);
+
+            result.ShouldBeFalse();
+        }
+
         #endregion
 
         private static DashboardContext CriarDashboardContext(HttpContext httpContext, bool withUser = false)
@@ -167,6 +296,19 @@ namespace Eaf.Middleware.Tests.Hangfire
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                     new Claim(AbpClaimTypes.TenantId, tenantId.ToString())
+                });
+            return tokenHandler.WriteToken(token);
+        }
+
+        private static string CriarTokenJwtComUserIdentifier(long userId, int tenantId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = new JwtSecurityToken(
+                claims: new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                    new Claim(AbpClaimTypes.TenantId, tenantId.ToString()),
+                    new Claim(MiddlewareCoreConsts.UserIdentifier, $"{userId}@{tenantId}")
                 });
             return tokenHandler.WriteToken(token);
         }

@@ -137,5 +137,44 @@ namespace Eaf.MiddlewareCore.Tests.Auditing.hangfire
 
             _entityChangeRepository.DidNotReceive().Delete(Arg.Any<EntityChange>());
         }
+
+        [Fact]
+        public void Dado_SettingsDesabilitado_Quando_DoWork_Entao_DeveRetornarSemDeletar()
+        {
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.IsEnabled).Returns("false");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.DeletedQuantity).Returns("2");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.ExpiredDays).Returns("180");
+            _entityChangeRepository.LongCount(Arg.Any<Expression<Func<EntityChange, bool>>>()).Returns(5L);
+
+            var sut = CreateWorker(true);
+            var context = CriarPerformContext();
+
+            sut.DoWorkPublic(context);
+
+            _entityChangeRepository.DidNotReceive().Delete(Arg.Any<EntityChange>());
+        }
+
+        [Fact]
+        public void Dado_EntityChangesExcedendoLimite_Quando_DoWork_Entao_DeveDeletarPorIdLimitado()
+        {
+            var entityChanges = Enumerable.Range(1, 3)
+                .Select(i => new EntityChange { Id = i, ChangeTime = DateTime.UtcNow.AddDays(-400) })
+                .ToList();
+
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.IsEnabled).Returns("true");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.DeletedQuantity).Returns("2");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.ExpiredDays).Returns("180");
+
+            _entityChangeRepository.GetAll().Returns(entityChanges.AsQueryable());
+            _entityChangeRepository.LongCount(Arg.Any<Expression<Func<EntityChange, bool>>>()).Returns(3L);
+            _entityChangeRepository.When(x => x.Delete(Arg.Any<EntityChange>())).Do(_ => { });
+
+            var sut = CreateWorker(true);
+            var context = CriarPerformContext();
+
+            sut.DoWorkPublic(context);
+
+            _entityChangeRepository.Received(2).Delete(Arg.Any<EntityChange>());
+        }
     }
 }
