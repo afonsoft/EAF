@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority36-coverage-audit`
-Baseline coverage (P35): Line 86.1%, Branch 65.4%, Method 95.7%.
-Current coverage (after P36): Line 87.6%, Branch 67.2%, Method 96.2%.
+Last session branch: `feature/devin-20260711-priority37-coverage-audit`
+Baseline coverage (P36): Line 87.6%, Branch 67.2%, Method 96.2%.
+Current coverage (after P37): Line 88.1%, Branch 68.0%, Method 96.3%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -35,17 +35,21 @@ Current coverage (after P36): Line 87.6%, Branch 67.2%, Method 96.2%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P37)
+## Notable classes with remaining low coverage (target for P38)
 - `Eaf.Middleware.Web.Controllers.TokenAuthController` (46.4%)
 - `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (47.6%)
-- `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (51.4%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
 - `Eaf.Middleware.Web.WebContentDirectoryFinder` (70.8%)
-- `Eaf.KeyVault.AzureKeyVaultManager` (75.3%)
-- `Eaf.WebHooks.EafWebHookReceiver` (75.7%)
 - `Eaf.Middleware.Web.Startup.HangFireConfigurer` (77.5%)
-- `Eaf.AspNetCore.Configuration.EafOpenTelemetryServiceCollectionExtensions` (78.7%)
 - `Eaf.Middleware.MultiTenancy.TenantAppService` (79.6%)
+
+## P37 gotchas
+- `AzureKeyVaultManager` is `internal` in `Eaf.KeyVault` and accessible via `InternalsVisibleTo("Eaf.KeyVault.Tests")`; its `SecretClient` field is `private readonly` and can be replaced via reflection in tests.
+- `ServiceBusQueueAppender.AppendBuffer` creates a real `QueueClient`; pre-set `_serviceBusConnection` with `OperationTimeout = 1ms` to force a `ServiceBusTimeoutException` and exercise the `catch (ServiceBusException)` branch.
+- `EafWebHookReceiver.LocalizationSource` is `protected` and throws `AbpException` when `LocalizationSourceName` is null; use a test subclass to access it.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` registers `IHostedService` instances for `TracerProvider`/`MeterProvider`; starting them via `IHostedService.StartAsync` builds the providers and covers the `AddOtlpExporter`/`AddConsoleExporter` lambda bodies.
+- `HangFireConfigurer.Configure` uses `services.AddHangfire(...)`; the `config` lambda is deferred and executed when `GetService<JobStorage>()` is resolved, but `UseConsole` throws "Console is already initialized" if invoked multiple times in the same process.
+- `TenantManager.CreateWithAdminUserAsync` is non-virtual; cannot be directly mocked with `NSubstitute.Returns` on `Substitute.For<TenantManager>()`.
 
 ## P36 gotchas
 - `TokenAuthController.SendTwoFactorAuthCode` uses `UserIdentifier.ToUserIdentifier()` and `CacheManager.GetTwoFactorCodeCache()`; use `Abp.Runtime.Caching.Memory.AbpMemoryCacheManager` with a real `ICachingConfiguration` substitute to avoid `CacheManagerExtensions.GetCache<TKey,TValue>` NSubstitute limitations.
