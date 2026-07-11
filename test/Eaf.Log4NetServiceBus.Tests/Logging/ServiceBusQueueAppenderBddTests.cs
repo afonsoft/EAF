@@ -1,7 +1,9 @@
 using Eaf.Log4NetServiceBus.Logging;
+using Microsoft.Azure.ServiceBus;
 using Shouldly;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.Log4NetServiceBus.Tests.Logging
@@ -208,6 +210,74 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
         }
 
         #endregion
+
+        [Fact]
+        public void Dado_ConexaoPreConfiguradaComTimeout_Quando_SendBufferComEventos_Entao_DeveTratarServiceBusTimeoutException()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+                QueueName = "log-queue",
+                StorageType = "Blob"
+            };
+
+            var connectionField = typeof(ServiceBusQueueAppender)
+                .GetField("_serviceBusConnection", BindingFlags.NonPublic | BindingFlags.Instance);
+            connectionField.ShouldNotBeNull();
+
+            var connection = new ServiceBusConnection(appender.ConnectionString)
+            {
+                OperationTimeout = TimeSpan.FromMilliseconds(1)
+            };
+            connectionField.SetValue(appender, connection);
+
+            var sendBufferMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull("SendBuffer deve existir como método protegido");
+
+            var events = new[]
+            {
+                new log4net.Core.LoggingEvent(new log4net.Core.LoggingEventData
+                {
+                    Message = "INFO | server | event | message | json"
+                })
+            };
+
+            // Quando & Então
+            Should.NotThrow(() => sendBufferMethod!.Invoke(appender, new object[] { events }));
+            connection.IsClosedOrClosing.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task Dado_AppenderComConexaoAberta_Quando_OnClose_Entao_DeveFecharConexaoSemLancarExcecao()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+                QueueName = "log-queue",
+                StorageType = "Blob"
+            };
+
+            var connectionField = typeof(ServiceBusQueueAppender)
+                .GetField("_serviceBusConnection", BindingFlags.NonPublic | BindingFlags.Instance);
+            var connection = new ServiceBusConnection(appender.ConnectionString)
+            {
+                OperationTimeout = TimeSpan.FromMilliseconds(1)
+            };
+            connectionField!.SetValue(appender, connection);
+
+            var onCloseMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("OnClose", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // Quando & Então
+            Should.NotThrow(() => onCloseMethod?.Invoke(appender, null));
+            await Task.Yield();
+            connection.IsClosedOrClosing.ShouldBeTrue();
+        }
 
         #region OnClose
 

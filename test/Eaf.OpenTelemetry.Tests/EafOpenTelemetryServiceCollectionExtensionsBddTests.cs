@@ -4,11 +4,15 @@ using Microsoft.AspNetCore.Hosting.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.OpenTelemetry.Tests
@@ -153,6 +157,29 @@ namespace Eaf.OpenTelemetry.Tests
             var serviceProvider = services.BuildServiceProvider();
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
 
+            loggerFactory.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ServiceCollection_Quando_IniciarHostedServices_Entao_DeveCriarTracerEMeterProviders()
+        {
+            var services = new ServiceCollection();
+            services.AddEafOpenTelemetry(options =>
+            {
+                options.ServiceName = "TestService";
+                options.OtlpEndpoint = "http://localhost:4317";
+                options.ConsoleExporter = true;
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+            var hostedServices = serviceProvider.GetServices<IHostedService>();
+
+            foreach (var hostedService in hostedServices)
+            {
+                await hostedService.StartAsync(CancellationToken.None);
+            }
+
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.ShouldNotBeNull();
         }
     }

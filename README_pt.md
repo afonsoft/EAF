@@ -4,12 +4,13 @@
 
 **[English](README.md)** | Português
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-36.6%25-yellow)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-20.1%25-orange)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-88.1%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-68.0%25-yellow)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-96.3%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-2384-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-2383-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-0-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4063-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4062-brightgreen)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-68-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -374,44 +375,49 @@ Este exemplo demonstra vários recursos do EAF:
 
 ## Cobertura de Código
 
-### Status dos Testes (Junho 2026)
+### Status dos Testes (Julho 2026)
 
 | Módulo | Testes | Cobertura de Linha | Status |
 |--------|--------|-------------------|--------|
-| **Eaf.Castle.Serilog** | 71 | 98.6% | ✅ Excelente |
-| **Eaf.SqlServerCache** | 95 | 88.3% | ✅ Excelente |
-| **Eaf.KeyVault.AspNetCore** | 10 | 88.8% | ✅ Excelente |
-| **Eaf.SqliteCache** | 126 | 82.7% | ✅ Boa |
-| **Eaf.OpenTelemetry** | 49 | 75.4% | ✅ Boa |
-| **Eaf.KeyVault** | 222 | 69.4% | ✅ Boa |
-| **Eaf.Log4NetServiceBus** | 41 | 62.2% | ⚠️ Moderada |
-| **Eaf.Middleware.Worker** | 101 | 33.3% | ⚠️ Precisa melhorar |
-| **Eaf.Middleware.Application** | 410 | 23.6% | ⚠️ Precisa melhorar |
-| **Eaf.Middleware.AzureActiveDirectory** | 21 | 7.4% | ❌ Baixa |
-| **Eaf.Middleware.Ldap** | 21 | 6.0% | ❌ Baixa |
-| **Eaf.Middleware.Web.Core** | 122 | 4.9% | ❌ Baixa |
-| **Eaf.Middleware.Core** | — | 0.1% | ❌ Baixa |
-| **TOTAL** | **1289** | **19%** | Em progresso |
+| **Eaf.Castle.Serilog** | 71 | 98.9% | ✅ Excelente |
+| **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excelente |
+| **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
+| **Eaf.Middleware.Application** | 1399 | 95.7% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1185 | 94.8% | ✅ Excelente |
+| **Eaf.Middleware.Worker** | 154 | 92.5% | ✅ Excelente |
+| **Eaf.SqliteCache** | 134 | 91.6% | ✅ Excelente |
+| **Eaf.OpenTelemetry** | 61 | 98.7% | ✅ Excelente |
+| **Eaf.KeyVault** | 241 | 95.4% | ✅ Excelente |
+| **Eaf.Log4NetServiceBus** | 49 | 80.3% | ✅ Boa |
+| **Eaf.Middleware.Web.Core** | 607 | 81.1% | ✅ Boa |
+| **Eaf.Middleware.AzureActiveDirectory** | 23 | 32.2% | ⚠️ Precisa melhorar |
+| **Eaf.Middleware.Ldap** | 34 | 20.1% | ❌ Baixa |
+| **TOTAL** | **4063** | **88.1%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 19% linha, 13.1% branch, 41.7% método
-- **Testes Backend**: 1289 total, 1289 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Atual**: 88.1% linha, 68.0% branch, 96.3% método
+- **Testes Backend**: 4063 total, 4062 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
-- **Testes API Template**: 212 total, 211 passando, 1 ignorado (problema de EF Core corrigido)
-- **Próximos passos**: Melhorar cobertura dos módulos Middleware.Core, Middleware.Web.Core, Middleware.Ldap e AzureActiveDirectory
+- **Testes API Template**: 212 total, 211 passando, 1 ignorado
+- **Próximos passos**: Melhorar cobertura dos módulos Middleware.Ldap, AzureActiveDirectory e cobertura de branch geral
 
 ### Melhorias Implementadas
-- **KeyVault**: 222 testes BDD implementados (100% sucesso, 69.4% cobertura)
+- **KeyVault**: 241 testes BDD implementados (100% sucesso, 95.4% cobertura)
 - **Documentação XML**: Summaries em português adicionados
 - **Padrão BDD**: Dado/Quando/Então implementado
-- **Castle.Serilog**: 71 testes BDD implementados (100% sucesso, 98.6% cobertura)
-- **OpenTelemetry**: 49/49 testes passando (100% sucesso, 75.4% cobertura)
-- **SqlServerCache**: 95/95 testes passando (100% sucesso, 88.3% cobertura)
-- **SqliteCache**: 126/126 testes passando (100% sucesso, 82.7% cobertura)
-- **Worker**: 101/101 testes passando (100% sucesso, 33.3% cobertura)
-- **Middleware.Application**: 410/410 testes passando (100% sucesso, 23.6% cobertura)
-- **Middleware.Web.Core**: 122/122 testes passando (100% sucesso)
+- **Castle.Serilog**: 71 testes BDD implementados (100% sucesso, 98.9% cobertura)
+- **OpenTelemetry**: 61/61 testes passando (100% sucesso, 98.7% cobertura)
+- **SqlServerCache**: 95/95 testes passando (100% sucesso, 98.1% cobertura)
+- **SqliteCache**: 134/134 testes passando (100% sucesso, 91.6% cobertura)
+- **Worker**: 154/154 testes passando (100% sucesso, 92.5% cobertura)
+- **Middleware.Application**: 1399/1399 testes passando (100% sucesso, 95.7% cobertura)
+- **Middleware.Web.Core**: 607/607 testes passando (100% sucesso, 81.1% cobertura)
+- **Expansão de Testes (Julho 2026)**: +4 arquivos de testes implementados (P37 coverage audit)
+  - **Eaf.KeyVault**: +testes BDD para AzureKeyVaultManager (GetValue, GetKeyValues, SetValue, async)
+  - **Eaf.Log4NetServiceBus**: +testes BDD para ServiceBusQueueAppender (SendBuffer, OnClose)
+  - **Eaf.Middleware.Web.Core**: +testes BDD para EafWebHookReceiver (LocalizationSource)
+  - **Eaf.OpenTelemetry**: +testes BDD para EafOpenTelemetryServiceCollectionExtensions (hosted services)
 - **Expansão de Testes (Junho 2026)**: +12 novos arquivos de testes implementados (PR #63)
   - **Eaf.Middleware.Web.Core**: +10 testes (Swagger filters, TokenAuth, Impersonation models)
   - **Eaf.MiddlewareCore**: +30 testes (Entities, DTOs, Extensions, Cache items)

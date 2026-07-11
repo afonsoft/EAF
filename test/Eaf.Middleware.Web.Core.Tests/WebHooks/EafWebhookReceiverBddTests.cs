@@ -7,6 +7,7 @@ using Abp.Localization.Sources;
 using Abp.ObjectMapping;
 using Castle.Core.Logging;
 using Castle.MicroKernel.Registration;
+using Eaf.Middleware.Localization;
 using Eaf.WebHooks;
 using NSubstitute;
 using Shouldly;
@@ -38,6 +39,17 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
             {
                 get => base.UnitOfWorkManager;
                 set => base.UnitOfWorkManager = value!;
+            }
+
+            public new ILocalizationSource? LocalizationSourceProperty
+            {
+                get => base.LocalizationSource;
+            }
+
+            public string? LocalizationSourceNameOverride
+            {
+                get => base.LocalizationSourceName;
+                set => base.LocalizationSourceName = value;
             }
 
             public override Task ProcessRequest(string requestBody)
@@ -109,6 +121,36 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
             var receiver = new TestWebhookReceiver();
 
             receiver.PublicL("TestKey").ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_LocalizationSourceNaoDefinido_Quando_Acessar_Entao_DeveLancarExcecao()
+        {
+            var receiver = new TestWebhookReceiver();
+            receiver.LocalizationSourceNameOverride = null;
+
+            var exception = Should.Throw<AbpException>(() => { _ = receiver.LocalizationSourceProperty; });
+            exception.Message.ShouldContain("LocalizationSourceName");
+        }
+
+        [Fact]
+        public void Dado_LocalizationManagerComSource_Quando_AcessarLocalizationSource_Entao_DeveRetornarSource()
+        {
+            // Dado
+            var receiver = new TestWebhookReceiver();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var localizationSource = Substitute.For<ILocalizationSource>();
+            localizationSource.Name.Returns(MiddlewareLocalizationHelper.DefaultSourceName);
+            localizationManager.GetSource(MiddlewareLocalizationHelper.DefaultSourceName).Returns(localizationSource);
+
+            receiver.LocalizationManager = localizationManager;
+
+            // Quando
+            var source = receiver.LocalizationSourceProperty;
+
+            // Então
+            source.ShouldNotBeNull();
+            source.Name.ShouldBe(MiddlewareLocalizationHelper.DefaultSourceName);
         }
 
         [Fact]
