@@ -1,11 +1,20 @@
 using Abp;
+using Abp.Application.Editions;
 using Abp.Application.Features;
 using Abp.Application.Services.Dto;
+using Abp.Authorization;
+using Abp.Dependency;
+using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Events.Bus;
+using Abp.MultiTenancy;
+using Abp.Notifications;
 using Abp.ObjectMapping;
+using Abp.Zero.Configuration;
 using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.Dto;
 using Eaf.Middleware.Editions.Dto;
 using Eaf.Middleware.MultiTenancy;
@@ -13,6 +22,7 @@ using Eaf.Middleware.MultiTenancy.Dto;
 using Eaf.Middleware.Url;
 using NSubstitute;
 using Shouldly;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,6 +86,43 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
             var customEventBus = Substitute.For<IEventBus>();
             _sut.EventBus = customEventBus;
             _sut.EventBus.ShouldBe(customEventBus);
+        }
+
+        #region CreateTenant
+
+        [Fact]
+        public async Task Dado_InputValido_Quando_CreateTenant_Entao_DeveChamarCreateWithAdminUserAsync()
+        {
+            // Dado
+            var tenantManager = CriarTenantManagerParaCreateTenant(out var roleManager, out var userManager);
+
+            var appUrlService = Substitute.For<IAppUrlService>();
+            appUrlService.CreateEmailActivationUrlFormat(Arg.Any<string>()).Returns("http://example.com/activate");
+
+            var sut = new TenantAppService();
+            sut.TenantManager = tenantManager;
+            sut.AppUrlService = appUrlService;
+
+            var input = new CreateTenantInput
+            {
+                TenancyName = "tenant1",
+                Name = "Tenant One",
+                AdminEmailAddress = "admin@example.com",
+                AdminPassword = "Password123!",
+                IsActive = true,
+                ShouldChangePasswordOnNextLogin = false,
+                SendActivationEmail = false
+            };
+
+            // Quando
+            await sut.CreateTenant(input);
+
+            // Então
+            await tenantManager.Received(1).CreateAsync(Arg.Any<Tenant>());
+            await roleManager.Received(1).CreateStaticRoles(Arg.Any<int>());
+            await roleManager.Received(1).SetGrantedPermissionsAsync(Arg.Any<Role>(), Arg.Any<IEnumerable<Permission>>());
+            await userManager.Received(1).CreateAsync(Arg.Any<User>());
+            await userManager.Received(1).AddToRoleAsync(Arg.Any<User>(), Arg.Any<string>());
         }
 
         #endregion
@@ -312,6 +359,63 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
         }
 
         #endregion
+
+        #endregion
+
+        private TenantManager CriarTenantManagerParaCreateTenant(out RoleManager roleManager, out UserManager userManager)
+        {
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var tenantFeatureRepository = Substitute.For<IRepository<TenantFeatureSetting, long>>();
+            var unitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
+            var notificationSubscriptionManager = Substitute.For<INotificationSubscriptionManager>();
+            var featureValueStore = Substitute.For<IAbpZeroFeatureValueStore>();
+            var passwordHasher = Substitute.For<IPasswordHasher<User>>();
+            passwordHasher.HashPassword(Arg.Any<User>(), Arg.Any<string>()).Returns("hashed");
+
+            var editionRepository = Substitute.For<IRepository<Edition>>();
+            var editionManager = Substitute.For<EditionManager>(new object[]
+            {
+                editionRepository,
+                featureValueStore,
+                unitOfWorkManager
+            });
+
+            roleManager = ManagerTestHelper.CreateRoleManager();
+            roleManager.Roles.Returns(new List<Role> { new Role { Name = StaticRoleNames.Tenants.Admin, Id = 1 } }.AsQueryable());
+            roleManager.CreateStaticRoles(Arg.Any<int>()).Returns(IdentityResult.Success);
+            roleManager.SetGrantedPermissionsAsync(Arg.Any<Role>(), Arg.Any<IEnumerable<Permission>>()).Returns(Task.CompletedTask);
+            roleManager.FeatureDependencyContext = new FeatureDependencyContext(Substitute.For<IIocResolver>(), Substitute.For<IFeatureChecker>());
+
+            userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CreateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            userManager.AddToRoleAsync(Arg.Any<User>(), Arg.Any<string>()).Returns(IdentityResult.Success);
+
+            var userEmailer = Substitute.For<IUserEmailer>();
+            userEmailer.SendEmailActivationLinkAsync(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.CompletedTask);
+
+            var tenantManager = Substitute.For<TenantManager>(new object[]
+            {
+                tenantRepository,
+                tenantFeatureRepository,
+                unitOfWorkManager,
+                roleManager,
+                userEmailer,
+                userManager,
+                notificationSubscriptionManager,
+                featureValueStore,
+                passwordHasher,
+                editionManager
+            });
+
+            tenantManager.When(t => t.CreateAsync(Arg.Any<Tenant>())).Do(call =>
+            {
+                var tenant = call.Arg<Tenant>();
+                tenant.Id = 1;
+            });
+            notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(Arg.Any<UserIdentifier>()).Returns(Task.CompletedTask);
+
+            return tenantManager;
+        }
 
         private IObjectMapper CreateObjectMapper()
         {

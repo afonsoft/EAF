@@ -63,8 +63,9 @@ namespace Eaf.Middleware.Tests.Application.Authorization
             );
 
             var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var tenant = new Tenant("Default", "Default") { Id = 1, IsActive = true };
             tenantRepository.FirstOrDefaultAsync(Arg.Any<System.Linq.Expressions.Expression<Func<Tenant, bool>>>())
-                .Returns(new Tenant("Default", "Default") { Id = 1, IsActive = true });
+                .Returns(tenant);
 
             var settingManager = Substitute.For<ISettingManager>();
             var settingValue = isEmailConfirmationRequired ? "true" : "false";

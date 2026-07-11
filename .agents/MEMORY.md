@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority37-coverage-audit`
-Baseline coverage (P36): Line 87.6%, Branch 67.2%, Method 96.2%.
-Current coverage (after P37): Line 88.1%, Branch 68.0%, Method 96.3%.
+Last session branch: `feature/devin-20260711-priority38-coverage-audit`
+Baseline coverage (P37): Line 88.1%, Branch 68.0%, Method 96.3%.
+Current coverage (after P38): Line 90.4%, Branch 71.2%, Method 96.9%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -35,13 +35,22 @@ Current coverage (after P37): Line 88.1%, Branch 68.0%, Method 96.3%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P38)
-- `Eaf.Middleware.Web.Controllers.TokenAuthController` (46.4%)
-- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (47.6%)
+## Notable classes with remaining low coverage (target for P39)
+- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (66.6%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
 - `Eaf.Middleware.Web.WebContentDirectoryFinder` (70.8%)
-- `Eaf.Middleware.Web.Startup.HangFireConfigurer` (77.5%)
-- `Eaf.Middleware.MultiTenancy.TenantAppService` (79.6%)
+- `Eaf.Middleware.Web.Controllers.TokenAuthController` (80.7%)
+
+## P38 gotchas
+- `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.
+- `HangFireConfigurer.Configure` deferred `AddHangfire` lambda is executed when `GetService<JobStorage>()` is called; set `Serilog.Log.Logger` before `BuildServiceProvider` to avoid `InvalidOperationException`.
+- `MiddlewareWebCoreModule.PreInitialize` requires a full `IAbpStartupConfiguration` substitute with `IocManager`, `Modules`, `Notifications.Providers`, `Features.Providers`, `Webhooks.Providers`, `Caching`, `Auditing`, `EntityHistory` and `BackgroundJobs` configured.
+- `TenantManager.CreateWithAdminUserAsync` is non-virtual; it still runs for real when called via `TenantAppService.CreateTenant`, so configure `CreateAsync` via `NSubstitute.When(...).Do(...)` to assign `tenant.Id` and set `RoleManager.FeatureDependencyContext` to avoid `NullReferenceException` in `GrantAllPermissionsAsync`.
+- `AbpRoleManager.GrantAllPermissionsAsync` is `public virtual` but sealed (`IsFinal`); assert `SetGrantedPermissionsAsync` and `CreateStaticRoles` on the substituted `RoleManager` instead.
+- `Clock.Provider` can be a `NSubstitute` substitute when other tests run in parallel; creating `new Tenant(...)` inside a `.Returns(...)` call records `IClockProvider.get_Now` as the last NSubstitute call, causing `CouldNotSetReturnDueToTypeMismatchException`. Extract the tenant instance before calling `.Returns(...)`.
+- `OpenIdConnectAuthProviderApi.ValidateToken` and `ValidateTokenInternal` are private; invoke them via `MethodInfo.Invoke` and unwrap `TargetInvocationException` for exception assertions.
+- `WebContentDirectoryFinder.DirectoryContains` is private static; exercise it via reflection with a temporary directory containing `Eaf.sln`.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` coverage can vary depending on `IHostedService` execution order; ensure `StartAsync` is awaited on all registered `IHostedService` instances.
 
 ## P37 gotchas
 - `AzureKeyVaultManager` is `internal` in `Eaf.KeyVault` and accessible via `InternalsVisibleTo("Eaf.KeyVault.Tests")`; its `SecretClient` field is `private readonly` and can be replaced via reflection in tests.

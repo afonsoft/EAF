@@ -47,7 +47,7 @@ using Xunit;
 
 namespace Eaf.Middleware.Tests.WebCore.Controllers
 {
-    public class TokenAuthControllerBddTests
+    public partial class TokenAuthControllerBddTests
     {
         [Fact]
         public void Dado_Tipo_Quando_VerificarNome_Entao_DeveSerCorreto()

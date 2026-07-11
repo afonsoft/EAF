@@ -134,6 +134,9 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             var errors = Substitute.For<IdentityErrorDescriber>();
             var logger = Substitute.For<ILogger<RoleManager>>();
             var permissionManager = Substitute.For<IPermissionManager>();
+            var emptyPermissions = Task.FromResult<IReadOnlyList<Permission>>(new List<Permission>().AsReadOnly());
+            permissionManager.GetAllPermissionsAsync(Arg.Any<MultiTenancySides>()).Returns(emptyPermissions);
+            permissionManager.GetAllPermissionsAsync(Arg.Any<bool>()).Returns(emptyPermissions);
             var roleManagementConfig = Substitute.For<IRoleManagementConfig>();
             var cacheManager = Substitute.For<ICacheManager>();
             var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
@@ -141,12 +144,15 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             var organizationUnitRepository = Substitute.For<IRepository<OrganizationUnit, long>>();
             var organizationUnitRoleRepository = Substitute.For<IRepository<OrganizationUnitRole, long>>();
 
-            return Substitute.For<RoleManager>(new object[]
+            var roleManager = Substitute.For<RoleManager>(new object[]
             {
                 roleStore, roleValidators, keyNormalizer, errors, logger, permissionManager,
                 roleManagementConfig, cacheManager, unitOfWorkManager, localizationManager,
                 organizationUnitRepository, organizationUnitRoleRepository
             });
+
+            roleManager.SetGrantedPermissionsAsync(Arg.Any<Role>(), Arg.Any<IEnumerable<Permission>>()).Returns(Task.CompletedTask);
+            return roleManager;
         }
 
         public static TenantManager CreateTenantManager()
