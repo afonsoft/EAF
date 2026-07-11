@@ -104,5 +104,43 @@ namespace Eaf.KeyVault.Tests.KeyVault.OCI
             Should.Throw<Exception>(() => new OCIKeyVaultManager(options, logger));
             logger.Received(1).ErrorFormat(Arg.Any<Exception>(), Arg.Any<string>(), Arg.Any<object[]>());
         }
+
+        [Fact]
+        public void Dado_ClienteComAutenticacaoExplicita_Quando_GetKeyValues_Entao_DeveRetornarDicionarioVazioSemLancarExcecao()
+        {
+            var options = new EafKeyVaultOptions();
+            options.Oci.UserId = "user-id";
+            options.Oci.TenantId = "tenant-id";
+            options.Oci.Region = "us-ashburn-1";
+            options.Oci.Fingerprint = "fingerprint";
+            options.Oci.KeySupplier = Substitute.For<ISupplier<RsaKeyParameters>>();
+            options.Oci.SecretId = "secret-id";
+            options.Endpoint = new Uri("https://secrets.us-ashburn-1.oci.oraclecloud.com");
+
+            var logger = Substitute.For<ILogger>();
+            var sut = new OCIKeyVaultManager(options, logger);
+
+            var result = Should.NotThrow(() => sut.GetKeyValues());
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public void Dado_ClienteComAutenticacaoExplicita_Quando_GetValue_Entao_DeveLancarExcecaoQuandoServicoFalhar()
+        {
+            var options = new EafKeyVaultOptions();
+            options.Oci.UserId = "user-id";
+            options.Oci.TenantId = "tenant-id";
+            options.Oci.Region = "us-ashburn-1";
+            options.Oci.Fingerprint = "fingerprint";
+            options.Oci.KeySupplier = Substitute.For<ISupplier<RsaKeyParameters>>();
+            options.Oci.SecretId = "secret-id";
+            options.Endpoint = new Uri("https://secrets.us-ashburn-1.oci.oraclecloud.com");
+
+            var logger = Substitute.For<ILogger>();
+            var sut = new OCIKeyVaultManager(options, logger);
+
+            Should.Throw<Exception>(() => sut.GetValue("secret-name"));
+        }
     }
 }

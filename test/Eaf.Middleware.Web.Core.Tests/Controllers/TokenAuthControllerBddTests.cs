@@ -1,3 +1,4 @@
+using Abp;
 using Abp.Authorization;
 using Abp.Authorization.Users;
 using Abp.Configuration;
@@ -12,6 +13,7 @@ using Abp.ObjectMapping;
 using Abp.Organizations;
 using Abp.Runtime.Caching;
 using Abp.Runtime.Security;
+using Eaf.Middleware.Authorization.TwoFactor;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Abp.Webhooks;
@@ -122,7 +124,13 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             result.First().Name.ShouldBe("Test");
         }
 
-        private static TokenAuthController CriarController(UserManager userManager, RoleManager roleManager, LogInManager logInManager)
+        private static TokenAuthController CriarController(
+            UserManager userManager,
+            RoleManager roleManager,
+            LogInManager logInManager,
+            IExternalAuthManager externalAuthManager = null,
+            IImpersonationManager impersonationManager = null,
+            ICacheManager cacheManager = null)
         {
             var settingManager = CriarSettingManager();
             var tenantCache = Substitute.For<ITenantCache>();
@@ -135,12 +143,12 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
                 userManager,
                 roleManager,
                 tenantCache,
-                Substitute.For<ICacheManager>(),
-                Substitute.For<IImpersonationManager>(),
+                cacheManager ?? Substitute.For<ICacheManager>(),
+                impersonationManager ?? Substitute.For<IImpersonationManager>(),
                 Options.Create(new IdentityOptions()),
                 Substitute.For<ILogger>(),
                 settingManager,
-                Substitute.For<IExternalAuthManager>(),
+                externalAuthManager ?? Substitute.For<IExternalAuthManager>(),
                 Substitute.For<IExternalAuthConfiguration>(),
                 Substitute.For<IIocManager>(),
                 Substitute.For<IPasswordHasher<User>>(),
@@ -292,6 +300,251 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             result.UserId.ShouldBe(user.Id);
         }
 
+        [Fact]
+        public async Task Dado_UsuarioDeveAlterarSenha_Quando_Authenticate_Entao_DeveRetornarPasswordResetCode()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            user.ShouldChangePasswordOnNextLogin = true;
+            var tenant = new Eaf.Middleware.MultiTenancy.Tenant("Default", "Default") { Id = 1, IsActive = true };
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) });
+            var loginResult = new AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User>(tenant, user, identity);
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            var result = await controller.Authenticate(new AuthenticateModel
+            {
+                UserNameOrEmailAddress = "admin",
+                Password = "password"
+            });
+
+            result.ShouldNotBeNull();
+            result.ShouldResetPassword.ShouldBeTrue();
+            result.PasswordResetCode.ShouldNotBeNullOrWhiteSpace();
+            result.UserId.ShouldBe(user.Id);
+        }
+
+        [Fact]
+        public async Task Dado_CredenciaisInvalidas_Quando_Authenticate_Entao_DeveLancarUserFriendlyException()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var tenant = new Eaf.Middleware.MultiTenancy.Tenant("Default", "Default") { Id = 1, IsActive = true };
+            var loginResult = new AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User>(AbpLoginResultType.InvalidPassword, tenant, user);
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            var exception = await Should.ThrowAsync<Abp.UI.UserFriendlyException>(async () =>
+                await controller.Authenticate(new AuthenticateModel
+                {
+                    UserNameOrEmailAddress = "admin",
+                    Password = "wrongpassword"
+                }));
+
+            exception.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ExternalLoginValido_Quando_ExternalAuthenticate_Entao_DeveRetornarAccessToken()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            user.Name = "Admin";
+            user.Surname = "User";
+            var tenant = new Eaf.Middleware.MultiTenancy.Tenant("Default", "Default") { Id = 1, IsActive = true };
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) });
+            var loginResult = new AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User>(tenant, user, identity);
+
+            var externalAuthManager = Substitute.For<IExternalAuthManager>();
+            externalAuthManager.GetUserInfo("Microsoft", "access-code").Returns(new ExternalAuthUserInfo
+            {
+                Provider = "Microsoft",
+                ProviderKey = "provider-key",
+                Name = "Admin User",
+                Surname = "User",
+                Picture = string.Empty
+            });
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
+            var controller = CriarController(userManager, roleManager, logInManager, externalAuthManager: externalAuthManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            var result = await controller.ExternalAuthenticate(new ExternalAuthenticateModel
+            {
+                AuthProvider = "Microsoft",
+                ProviderKey = "provider-key",
+                ProviderAccessCode = "access-code"
+            });
+
+            result.ShouldNotBeNull();
+            result.AccessToken.ShouldNotBeNullOrWhiteSpace();
+            result.UserId.ShouldBe(user.Id);
+        }
+
+        [Fact]
+        public async Task Dado_ImpersonationTokenValido_Quando_ImpersonatedAuthenticate_Entao_DeveRetornarAccessToken()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var tenant = new Eaf.Middleware.MultiTenancy.Tenant("Default", "Default") { Id = 1, IsActive = true };
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) });
+
+            var impersonationManager = Substitute.For<IImpersonationManager>();
+            impersonationManager.GetImpersonatedUserAndIdentity("token-123").Returns(new UserAndIdentity(user, identity));
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, null!);
+            var controller = CriarController(userManager, roleManager, logInManager, impersonationManager: impersonationManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            var result = await controller.ImpersonatedAuthenticate("token-123");
+
+            result.ShouldNotBeNull();
+            result.AccessToken.ShouldNotBeNullOrWhiteSpace();
+            result.ExpireInSeconds.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_SingleSignInHabilitado_Quando_Authenticate_Entao_DeveRetornarAccessTokenComReturnUrlModificado()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var tenant = new Eaf.Middleware.MultiTenancy.Tenant("Default", "Default") { Id = 1, IsActive = true };
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) });
+            var loginResult = new AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User>(tenant, user, identity);
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            var result = await controller.Authenticate(new AuthenticateModel
+            {
+                UserNameOrEmailAddress = "admin",
+                Password = "password",
+                SingleSignIn = true,
+                ReturnUrl = "https://example.com"
+            });
+
+            result.ShouldNotBeNull();
+            result.AccessToken.ShouldNotBeNullOrWhiteSpace();
+            result.ReturnUrl.ShouldContain("accessToken=");
+            result.ReturnUrl.ShouldContain("userId=");
+        }
+
+        [Fact]
+        public async Task Dado_LoginUnicoPorUsuario_Quando_Authenticate_Entao_DeveAtualizarSecurityStamp()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var tenant = new Eaf.Middleware.MultiTenancy.Tenant("Default", "Default") { Id = 1, IsActive = true };
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) });
+            var loginResult = new AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User>(tenant, user, identity);
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerComLoginUnico();
+
+            var result = await controller.Authenticate(new AuthenticateModel
+            {
+                UserNameOrEmailAddress = "admin",
+                Password = "password"
+            });
+
+            result.ShouldNotBeNull();
+            result.AccessToken.ShouldNotBeNullOrWhiteSpace();
+            await userManager.Received(1).UpdateSecurityStampAsync(user);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioAutenticado_Quando_LogOut_Entao_DeveAtualizarSecurityStampELimparCache()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, null!);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            controller.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+            {
+                HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(
+                        new ClaimsIdentity(new[]
+                        {
+                            new Claim(AbpClaimTypes.TenantId, user.TenantId.ToString()!),
+                            new Claim(AbpClaimTypes.UserId, user.Id.ToString()),
+                            new Claim(MiddlewareCoreConsts.TokenValidityKey, "token-key")
+                        }))
+                }
+            };
+
+            var principalAccessor = (IPrincipalAccessor)typeof(TokenAuthController).GetField("_principalAccessor", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(controller)!;
+            principalAccessor.Principal.Returns(new ClaimsPrincipal(
+                new ClaimsIdentity(new[]
+                {
+                    new Claim(MiddlewareCoreConsts.UserIdentifier, $"{user.Id}@{user.TenantId}"),
+                    new Claim(MiddlewareCoreConsts.TokenValidityKey, "token-key")
+                })));
+
+            await Should.NotThrowAsync(() => controller.LogOut());
+
+            await userManager.Received().UpdateSecurityStampAsync(user);
+            await userManager.Received().RemoveTokenValidityKeyAsync(user, Arg.Any<string>(), Arg.Any<System.Threading.CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_CacheItemExistente_Quando_SendTwoFactorAuthCode_Entao_DeveEnviarCodigoPorEmail()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, null!);
+
+            var cacheManager = new Abp.Runtime.Caching.Memory.AbpMemoryCacheManager(Substitute.For<Abp.Runtime.Caching.Configuration.ICachingConfiguration>());
+            var cacheKey = new UserIdentifier(user.TenantId, user.Id).ToString();
+            await cacheManager.GetTwoFactorCodeCache().SetAsync(cacheKey, new TwoFactorCodeCacheItem("old"));
+
+            var controller = CriarController(userManager, roleManager, logInManager, cacheManager: cacheManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            await Should.NotThrowAsync(() => controller.SendTwoFactorAuthCode(new SendTwoFactorAuthCodeModel
+            {
+                UserId = user.Id,
+                Provider = "Email"
+            }));
+
+            await userManager.Received().GenerateTwoFactorTokenAsync(user, "Email");
+            var cacheItem = await cacheManager.GetTwoFactorCodeCache().GetOrDefaultAsync(cacheKey);
+            cacheItem.ShouldNotBeNull();
+            cacheItem.Code.ShouldBe("123456");
+        }
+
         private static UserManager CriarUserManagerSubstituto(User user)
         {
             var userStore = Substitute.For<UserStore>(new object[10]);
@@ -326,8 +579,34 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             userManager.UpdateAsync(user).Returns(IdentityResult.Success);
             userManager.AddTokenValidityKeyAsync(user, Arg.Any<string>(), Arg.Any<DateTime>()).Returns(Task.CompletedTask);
             userManager.InitializeOptionsAsync(Arg.Any<int?>()).Returns(Task.CompletedTask);
+            userManager.UpdateSecurityStampAsync(user).Returns(IdentityResult.Success);
+            userManager.RemoveTokenValidityKeyAsync(user, Arg.Any<string>()).Returns(Task.CompletedTask);
+            userManager.GetSecurityStampAsync(user).Returns("new-stamp");
+            userManager.GetUserOrNullAsync(Arg.Any<UserIdentifier>()).Returns(user);
+            userManager.GenerateTwoFactorTokenAsync(user, Arg.Any<string>()).Returns("123456");
+            userManager.GetEmailAsync(user).Returns("user@example.com");
 
             return userManager;
+        }
+
+        private static LogInManager CriarLogInManagerSubstituto(UserManager userManager, RoleManager roleManager, AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User> result)
+        {
+            var logInManager = Substitute.For<LogInManager>(
+                userManager,
+                Substitute.For<IMultiTenancyConfig>(),
+                Substitute.For<IRepository<Eaf.Middleware.MultiTenancy.Tenant>>(),
+                IdentityTestHelper.CreateUnitOfWorkManager(),
+                CriarSettingManagerAsync(),
+                Substitute.For<IRepository<UserLoginAttempt, long>>(),
+                Substitute.For<IUserManagementConfig>(),
+                Substitute.For<IIocResolver>(),
+                roleManager,
+                Substitute.For<IPasswordHasher<User>>(),
+                IdentityTestHelper.CreateUserClaimsPrincipalFactory(userManager, roleManager));
+
+            logInManager.LoginAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(result);
+            logInManager.LoginAsync(Arg.Any<UserLoginInfo>(), Arg.Any<string>()).Returns(result);
+            return logInManager;
         }
 
         private static IAbpSession CriarAbpSession(User user)
@@ -346,6 +625,28 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
                 var name = callInfo.Arg<string>();
                 if (name == AppSettings.UserManagement.TokenExpiration)
                     return "1";
+                return "false";
+            });
+            settingManager.GetSettingValueAsync(Arg.Any<string>()).Returns(callInfo =>
+            {
+                var name = callInfo.Arg<string>();
+                if (name == AppSettings.UserManagement.TokenExpiration)
+                    return Task.FromResult("1");
+                return Task.FromResult("false");
+            });
+            return settingManager;
+        }
+
+        private static ISettingManager CriarSettingManagerComLoginUnico()
+        {
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValue(Arg.Any<string>()).Returns(callInfo =>
+            {
+                var name = callInfo.Arg<string>();
+                if (name == AppSettings.UserManagement.TokenExpiration)
+                    return "1";
+                if (name == AppSettings.UserManagement.AllowOneConcurrentLoginPerUser)
+                    return "true";
                 return "false";
             });
             settingManager.GetSettingValueAsync(Arg.Any<string>()).Returns(callInfo =>
