@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority33-coverage-audit`
-Baseline coverage (P32): Line 83.6%, Branch 62.8%, Method 94.4%.
-Current coverage (after P33): Line 83.8%, Branch 63.3%, Method 94.6%.
+Last session branch: `feature/devin-20260711-priority34-coverage-audit`
+Baseline coverage (P33): Line 83.8%, Branch 63.3%, Method 94.6%.
+Current coverage (after P34): Line 84.5%, Branch 64.1%, Method 95.2%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -24,29 +24,42 @@ Current coverage (after P33): Line 83.8%, Branch 63.3%, Method 94.6%.
 - `Serilog.Sinks.File` with `rollingInterval: RollingInterval.Day` writes `log<yyyyMMdd>.txt` and the file is only created after `Emit`; write a test event and match `log*.txt`.
 - `GoogleAuthProviderApi.GetUserInfo` throws `AbpException` when `UserInfoEndpoint` is empty, but `KeyNotFoundException` when the key is absent; supply an empty string for the expected `AbpException`.
 - `SettingManagerExtensions.GetSettingValue<T>` is an ABP extension that calls `ISettingManager.GetSettingValue(string)`; mock the non-generic string return (e.g., `"587"`, `"true"`) instead of `GetSettingValue<T>`.
+- `Abp.Configuration.SettingManager.GetSettingValueForTenantAsync` and `GetSettingValueForApplicationAsync` are `virtual` but `IsFinal` (sealed) in ABP 10.4.0; `NSubstitute` cannot override them. Use `ISettingManager` in production code and `Substitute.For<ISettingManager>()` in tests.
 - `WebContentDirectoryFinder.CalculateContentRootFolder()` throws when `src/Eaf.Middleware.Web.Host` does not exist; test the exception branch.
+- `Microsoft.Data.Sqlite` connection pooling can keep stale file handles on deleted/recreated invalid database files; set `SqliteConnectionStringBuilder.Pooling = false` for SQLite cache and call `SqliteConnection.ClearAllPools()` when deleting an invalid cache file.
+- `AuthorizationExtensions.GetExternalTokenInformation` relies on `IocManager.Instance`; isolate it by swapping the static instance via reflection and restoring it after the test.
+- `IocManager.Instance` has a non-public setter; use reflection to get/set the static property in tests that require isolation.
+- `OpenIdConnectAuthProviderApi.ValidateTokenInternal` is private; invoke it via reflection and await the resulting `Task` (not `Task<ExternalAuthUserInfo>`).
 
 ## Coverage command
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P33)
-- `Eaf.Middleware.Web.Controllers.TokenAuthController` (0%)
-- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (45.5%)
+## Notable classes with remaining low coverage (target for P35)
+- `Eaf.Middleware.Web.Controllers.TokenAuthController` (14.0%)
+- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
 - `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
 - `Eaf.Middleware.Identity.LogInManager`, `SecurityStampValidator`, `SignInManager` (0%)
-- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (17.4%)
-- `Eaf.KeyVault.OCIKeyVaultManager` (19.2%)
+- `Eaf.KeyVault.OCIKeyVaultManager` (34.9%)
 - `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (51.4%)
 - `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (60.4%)
 - `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (60.7%)
-- `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (53.4%)
-- `Eaf.Middleware.Web.Startup.AuthConfigurer` (69.3%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (85%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (87.6%)
-- `Eaf.OpenTelemetry` (78.5%) — `EafOpenTelemetryServiceCollectionExtensions` (68.1%)
+- `Eaf.AspNetCore.Configuration.EafOpenTelemetryServiceCollectionExtensions` (65.6%)
 - `Eaf.Middleware.Application.Authorization.Users.Profile.ProfileAppService` (81.3%)
 - `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
+
+## P34 gotchas
+- `Abp.Configuration.SettingManager.GetSettingValueForTenantAsync`/`GetSettingValueForApplicationAsync` are `virtual sealed` (IsFinal) and cannot be mocked; prefer `ISettingManager` in constructors and tests.
+- `Microsoft.Data.Sqlite` connection pooling can keep stale handles to deleted cache files; disable pooling (`SqliteConnectionStringBuilder.Pooling = false`) and call `SqliteConnection.ClearAllPools()` when recreating a corrupt cache.
+- `AuthorizationExtensions.GetExternalTokenInformation` uses `IocManager.Instance`; replace the static instance with a fresh `IocManager` via reflection and restore it to avoid cross-test state leaks.
+- `OpenIdConnectAuthProviderApi.ValidateTokenInternal` is private and returns `Task`; invoke via reflection and await the returned `Task`.
+- `EafSqliteCache` `Dispose` is idempotent; calling `Dispose()` twice should not throw.
+- `UiCustomizationSettingsAppService` now accepts `ISettingManager` so it can be mocked with `NSubstitute`.
+- `LdapSettings.GetContextType` returns `null` on non-Windows platforms regardless of `tenantId`.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` mutates `OTEL_*` environment variables; isolate tests that set `OtlpVariables`.
+- `OCIKeyVaultManager.Base64Decode` is private static; exercise it via reflection in uninitialized instances.
+- `DbCommandPool` is `internal` in `Eaf.SqliteCache`; create an initial `SQLiteConnection` with `EafSqliteCache.TableInitCommand` and `Cache=Shared` to exercise `Use`/`UseAsync`.
+- `EafCastleWindsorHostBuilderExtensions.UseCastleWindsor` requires `HostBuilder.Build()` to actually run the `ConfigureServices` lambda and register the `IWindsorContainer` singleton.
 
 ## P33 gotchas
 - `AbpModule.IocManager` and `Configuration` are protected properties; set them via reflection when unit-testing module `Initialize`/`PreInitialize` methods.

@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using System;
 using System.IO;
 using System.Linq;
@@ -257,14 +258,25 @@ namespace Abp.Runtime.Caching.Sqlite
             if (!config.MemoryOnly && File.Exists(config.CachePath))
             {
                 db = new DbConnection(config.ConnectionString);
-                db.Open();
-
-                if (!CheckExistingDb(db, logger))
+                try
                 {
-                    db.Close();
+                    db.Open();
+
+                    if (!CheckExistingDb(db, logger))
+                    {
+                        db.Close();
+                        db.Dispose();
+                        db = null;
+                        File.Delete(config.CachePath);
+                    }
+                }
+                catch (SqliteException ex)
+                {
+                    logger.Warn("Error while opening existing cache db, recreating it!", ex);
                     db.Dispose();
                     db = null;
                     File.Delete(config.CachePath);
+                    SqliteConnection.ClearAllPools();
                 }
             }
 

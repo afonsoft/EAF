@@ -6,6 +6,7 @@ using Castle.MicroKernel.Registration;
 using NSubstitute;
 using Shouldly;
 using System;
+using System.Reflection;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.Authorization
@@ -15,6 +16,22 @@ namespace Eaf.Middleware.Tests.Authorization
     /// </summary>
     public class AuthorizationExtensionsBddTests
     {
+        private static readonly PropertyInfo InstanceProperty = typeof(IocManager).GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+
+        private static IDisposable SetIocManagerInstance(IocManager instance)
+        {
+            var original = IocManager.Instance;
+            InstanceProperty.SetValue(null, instance, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, null, null);
+            return new RestoreIocManager(original);
+        }
+
+        private sealed class RestoreIocManager : IDisposable
+        {
+            private readonly IocManager _original;
+            public RestoreIocManager(IocManager original) => _original = original;
+            public void Dispose() => InstanceProperty.SetValue(null, _original, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, null, null);
+        }
+
         [Fact]
         public void Dado_ClasseAuthorizationExtensions_Quando_VerificarTipo_Entao_DeveSerEstatica()
         {
@@ -45,15 +62,18 @@ namespace Eaf.Middleware.Tests.Authorization
             var cacheManager = Substitute.For<ICacheManager>();
             cacheManager.GetCache("ExternalTokenInformationCache").Returns(cache);
 
-            if (!IocManager.Instance.IsRegistered<ICacheManager>())
-                IocManager.Instance.IocContainer.Register(Component.For<ICacheManager>().Instance(cacheManager).LifestyleSingleton());
+            var iocManager = new IocManager();
+            iocManager.IocContainer.Register(Component.For<ICacheManager>().Instance(cacheManager).LifestyleSingleton());
 
-            // Quando
-            var result = session.GetExternalTokenInformation();
+            using (SetIocManagerInstance(iocManager))
+            {
+                // Quando
+                var result = session.GetExternalTokenInformation();
 
-            // Então
-            cache.Received(1).GetOrDefault("1@1");
-            result.ShouldBe("external-token");
+                // Então
+                cache.Received(1).GetOrDefault("1@1");
+                result.ShouldBe("external-token");
+            }
         }
     }
 }

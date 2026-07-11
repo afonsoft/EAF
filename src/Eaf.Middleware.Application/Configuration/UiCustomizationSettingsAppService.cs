@@ -16,7 +16,7 @@ namespace Eaf.Middleware.Configuration
     public class UiCustomizationSettingsAppService : MiddlewareAppServiceBase, IUiCustomizationSettingsAppService
     {
         private readonly IIocResolver _iocResolver;
-        private readonly SettingManager _settingManager;
+        private readonly ISettingManager _settingManager;
         private readonly IUiThemeCustomizerFactory _uiThemeCustomizerFactory;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Eaf.Middleware.Configuration
         /// <param name="uiThemeCustomizerFactory">Parâmetro uiThemeCustomizerFactory.</param>
         /// <returns>Resultado da operação.</returns>
         public UiCustomizationSettingsAppService(
-            SettingManager settingManager,
+            ISettingManager settingManager,
             IIocResolver iocResolver,
             IUiThemeCustomizerFactory uiThemeCustomizerFactory
         )

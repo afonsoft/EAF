@@ -3,6 +3,7 @@ using Abp.Dependency;
 using Abp.Domain.Uow;
 using Abp.Events.Bus;
 using Abp.Localization;
+using Abp.Localization.Sources;
 using Abp.ObjectMapping;
 using Castle.Core.Logging;
 using Castle.MicroKernel.Registration;
@@ -28,7 +29,9 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
         private sealed class TestWebhookReceiver : EafWebHookReceiver
         {
             public string? PublicL(string name) => L(name);
-
+            public string? PublicL(string name, params object[] args) => L(name, args);
+            public string? PublicL(string name, System.Globalization.CultureInfo culture) => L(name, culture);
+            public string? PublicL(string name, System.Globalization.CultureInfo culture, params object[] args) => L(name, culture, args);
             public ILocalizationManager? ExposedLocalizationManager => LocalizationManager;
 
             public new IUnitOfWorkManager? UnitOfWorkManagerProperty
@@ -114,6 +117,20 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
             var receiver = new TestWebhookReceiver();
 
             await receiver.ProcessRequest("{}");
+        }
+
+        [Fact]
+        public void Dado_Receiver_Quando_UsarLocalizacaoComCultura_Entao_DeveRetornarChaveComoFallback()
+        {
+            var receiver = new TestWebhookReceiver();
+            receiver.PublicL("TestKey", System.Globalization.CultureInfo.InvariantCulture).ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_Receiver_Quando_UsarLocalizacaoComCulturaEArgs_Entao_DeveRetornarChaveComoFallback()
+        {
+            var receiver = new TestWebhookReceiver();
+            receiver.PublicL("TestKey", System.Globalization.CultureInfo.InvariantCulture, "arg1").ShouldBe("TestKey");
         }
     }
 }

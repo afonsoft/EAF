@@ -63,6 +63,7 @@ namespace Abp.Runtime.Caching.Sqlite
                 sb.Mode = MemoryOnly
                     ? SqliteOpenMode.Memory : SqliteOpenMode.ReadWriteCreate;
                 sb.Cache = SqliteCacheMode.Shared;
+                sb.Pooling = false;
 
                 return sb.ConnectionString;
             }

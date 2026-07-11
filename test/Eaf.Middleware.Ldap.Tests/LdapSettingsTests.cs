@@ -99,13 +99,13 @@ namespace Eaf.Middleware.Ldap.Tests
         [Fact]
         public async Task GetIsEnabled_WithoutTenantId_ShouldCallCorrectMethod()
         {
-            _settingManager.GetSettingValueForApplicationAsync<bool>(LdapSettingNames.IsEnabled)
-                .Returns(Task.FromResult(true));
+            _settingManager.GetSettingValueForApplicationAsync(LdapSettingNames.IsEnabled)
+                .Returns(Task.FromResult("true"));
 
             var result = await _ldapSettings.GetIsEnabled(null);
 
             result.ShouldBeTrue();
-            await _settingManager.Received(1).GetSettingValueForApplicationAsync<bool>(LdapSettingNames.IsEnabled);
+            await _settingManager.Received(1).GetSettingValueForApplicationAsync(LdapSettingNames.IsEnabled);
         }
 
         [Fact]
@@ -131,12 +131,12 @@ namespace Eaf.Middleware.Ldap.Tests
         [Fact]
         public async Task GetIsEnabled_WithTenantId_ShouldCallCorrectMethod()
         {
-            _settingManager.GetSettingValueForTenantAsync<bool>(LdapSettingNames.IsEnabled, 1).Returns(Task.FromResult(true));
+            _settingManager.GetSettingValueForTenantAsync(LdapSettingNames.IsEnabled, 1).Returns(Task.FromResult("true"));
 
             var result = await _ldapSettings.GetIsEnabled(1);
 
             result.ShouldBeTrue();
-            await _settingManager.Received(1).GetSettingValueForTenantAsync<bool>(LdapSettingNames.IsEnabled, 1);
+            await _settingManager.Received(1).GetSettingValueForTenantAsync(LdapSettingNames.IsEnabled, 1);
         }
 
         [Fact]
