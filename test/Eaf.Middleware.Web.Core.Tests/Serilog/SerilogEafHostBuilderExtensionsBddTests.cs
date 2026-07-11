@@ -1,6 +1,7 @@
 using Eaf.Middleware.Web.Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Serilog.Events;
 using Shouldly;
 using System;
@@ -17,6 +18,7 @@ namespace Eaf.Middleware.Tests.WebCore.Serilog
         {
             var tempDirectory = CriarTempDirectory();
             var originalDirectory = Directory.GetCurrentDirectory();
+            var originalLog = Log.Logger;
 
             try
             {
@@ -32,6 +34,40 @@ namespace Eaf.Middleware.Tests.WebCore.Serilog
             {
                 Directory.SetCurrentDirectory(originalDirectory);
                 LimparTempDirectory(tempDirectory);
+                Log.CloseAndFlush();
+                Log.Logger = originalLog;
+            }
+        }
+
+        [Fact]
+        public void Dado_HostBuilderReal_Quando_UsarEafSerilogComNivelEBuild_Entao_DeveCriarHost()
+        {
+            var tempDirectory = CriarTempDirectory();
+            var originalDirectory = Directory.GetCurrentDirectory();
+            var originalLog = Log.Logger;
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()))
+                    .UseEafSerilog(LogEventLevel.Information);
+
+                using var host = builder.Build();
+
+                host.ShouldNotBeNull();
+                Log.Logger.Information("Test");
+                var logsDir = Path.Combine(tempDirectory, "Logs");
+                Log.CloseAndFlush();
+                Directory.Exists(logsDir).ShouldBeTrue();
+                Directory.GetFiles(logsDir, "log*.txt").Length.ShouldBeGreaterThan(0);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                LimparTempDirectory(tempDirectory);
+                Log.CloseAndFlush();
+                Log.Logger = originalLog;
             }
         }
 
