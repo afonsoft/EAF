@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `devin/1783735348-priority29-coverage-audit`
-Baseline coverage (P28): Line 78.3%, Branch 56.1%, Method 92.8%.
-Current coverage (after P29): Line 80.3%, Branch 59.2%, Method 93.4%.
+Last session branch: `devin/1783804609-priority30-coverage-audit`
+Baseline coverage (P29): Line 80.3%, Branch 59.2%, Method 93.4%.
+Current coverage (after P30): Line 81.3%, Branch 60.6%, Method 93.7%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -30,26 +30,33 @@ Current coverage (after P29): Line 80.3%, Branch 59.2%, Method 93.4%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P30)
+## Notable classes with remaining low coverage (target for P31)
 - `Eaf.Middleware.Web.Controllers.TokenAuthController` (0%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (45.5%)
 - `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
 - `Eaf.Middleware.Identity.LogInManager`, `SecurityStampValidator`, `SignInManager` (0%)
-- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (11.1%)
+- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (17.4%)
 - `Eaf.KeyVault.OCIKeyVaultManager` (19.2%)
-- `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (38.5%)
-- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (45.3%)
-- `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (45.2%)
-- `Eaf.Middleware.Worker.EafHostBuilderExtensions` (40.7%)
+- `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (51.4%)
+- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (60.4%)
+- `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (60.7%)
 - `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (53.4%)
-- `Eaf.Middleware.Web.Startup.AuthConfigurer` (67.3%)
-- `Eaf.Middleware.Web.Configuration.SqlServerCacheConfigurer` (66.6%)
+- `Eaf.Middleware.Web.Startup.AuthConfigurer` (69.3%)
 - `Eaf.Middleware.Web.Startup.HangFireConfigurer` (77.5%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (65.6%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (66.6%)
-- `Eaf.OpenTelemetry` (75.2%) — `EafOpenTelemetryServiceCollectionExtensions` (63.1%)
+- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (85%)
+- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (87.6%)
+- `Eaf.OpenTelemetry` (71.4%) — `EafOpenTelemetryServiceCollectionExtensions` (57.5%)
 
-## P29 gotchas
+## P30 gotchas
+- `Microsoft.Extensions.Caching.StackExchangeRedis` (10.0.8) registers `IDistributedCache` with implementation type `RedisCacheImpl`; assertions must check `ImplementationType.Name.Contains("RedisCache")`.
+- `EafHangfireAuthorizationFilter.Authorize` accepts tokens from query string (`auth`, `access_token`), cookie `Eaf.AuthToken`, header `Eaf.AuthToken`, and from the `EafCache` by remote IP.
+- `ExpiredAuditLogDeleterWorker` uses a private `MaxDeletionCount` of 30,000; reflection can lower it to avoid large test data sets.
+- `AuthConfigurer.Configure` uses `IocManager.Instance` to resolve `TokenAuthConfiguration`; tests reuse the static singleton already initialized by other tests.
+- `ServiceBusQueueAppender` creates a real `QueueClient` when `ConnectionString` and `QueueName` are valid; a dummy `Endpoint=sb://localhost:1;SharedAccessKeyName=x;SharedAccessKey=y` string safely fails during `SendAsync` and exercises the `catch` branch.
+- `OpenIdConnectAuthProviderApi` validates `Token` and `Authority` before attempting `ConfigurationManager.GetConfigurationAsync`; pass null/empty values to trigger early exceptions.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` mutates `OTEL_*` environment variables; tests that set `OtlpEndpoint` should not reassign `OtlpProtocol` to unsupported values without restoring state.
+- `ChatHub.DeleteMessage` and `SendMessage` group paths throw `AbpException`/`UserFriendlyException` and a generic `Exception` branch; they require a `DefaultHttpContext` with `RequestServices` configured.
+- `MicrosoftAuthProviderApi.GetUserInfo` falls back to `Provider` "Microsoft" and `Picture` null when the photo endpoint throws.
 - `EafHangfireAuthorizationFilter.Authorize` requires a real `AspNetCoreDashboardContext` built with `JobStorage`, `DashboardOptions` and `HttpContext`; `GetHttpContext()` returns `HttpContext` only for that concrete type.
 - `AspNetCoreDashboardContext` needs `RequestServices` with `IAbpSession`, `IPermissionChecker` (the interface method `IsGranted(UserIdentifier, string)` is used by `PermissionCheckerExtensions`, not the `params` extension) and `ICacheManager`.
 - `ExpiredEntityLogDeleterWorker` is structurally similar to `ExpiredAuditLogDeleterWorker`, but uses `IEntityHistoryConfiguration`, `ISettingManager` and `IRepository<EntityChange, long>`.
