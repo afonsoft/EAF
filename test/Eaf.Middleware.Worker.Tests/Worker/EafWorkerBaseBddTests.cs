@@ -25,6 +25,8 @@ namespace Eaf.Middleware.Worker.Tests.Worker
             public string PublicL(string name, System.Globalization.CultureInfo culture, params object[] args) => L(name, culture, args);
             public IUnitOfWorkManager PublicUnitOfWorkManager => UnitOfWorkManager;
             public ILocalizationSource PublicLocalizationSource => LocalizationSource;
+            public IActiveUnitOfWork PublicCurrentUnitOfWork => CurrentUnitOfWork;
+            public new string LocalizationSourceName { get => base.LocalizationSourceName; set => base.LocalizationSourceName = value; }
         }
 
         [Fact]
@@ -158,6 +160,79 @@ namespace Eaf.Middleware.Worker.Tests.Worker
             var result = worker.PublicL(string.Empty);
 
             result.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public void Dado_LocalizationSourceNameNulo_Quando_AcessarLocalizationSource_Entao_DeveLancarAbpException()
+        {
+            var worker = new TestWorker();
+            worker.LocalizationSourceName = null;
+
+            Should.Throw<AbpException>(() => worker.PublicLocalizationSource)
+                .Message.ShouldContain("Must set LocalizationSourceName");
+        }
+
+        [Fact]
+        public void Dado_LocalizationSourceNameMudado_Quando_AcessarLocalizationSource_Entao_DeveAtualizarSource()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var eafSource = Substitute.For<ILocalizationSource>();
+            eafSource.Name.Returns("EafCore");
+            var abpSource = Substitute.For<ILocalizationSource>();
+            abpSource.Name.Returns("Abp");
+            localizationManager.GetSource("EafCore").Returns(eafSource);
+            localizationManager.GetSource("Abp").Returns(abpSource);
+            worker.LocalizationManager = localizationManager;
+
+            _ = worker.PublicLocalizationSource;
+            worker.LocalizationSourceName = "Abp";
+
+            worker.PublicLocalizationSource.ShouldBeSameAs(abpSource);
+        }
+
+        [Fact]
+        public void Dado_Worker_Quando_LComCultura_Entao_DeveLocalizar()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            source.GetStringOrNull("Key", System.Globalization.CultureInfo.GetCultureInfo("pt-BR")).Returns("Valor");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("Key", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+
+            result.ShouldBe("Valor");
+        }
+
+        [Fact]
+        public void Dado_Worker_Quando_LComCulturaEArgs_Entao_DeveFormatar()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            source.GetStringOrNull("Hello", System.Globalization.CultureInfo.GetCultureInfo("en-US")).Returns("Hello {0}");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("Hello", System.Globalization.CultureInfo.GetCultureInfo("en-US"), "World");
+
+            result.ShouldBe("Hello World");
+        }
+
+        [Fact]
+        public void Dado_Worker_Quando_AcessarCurrentUnitOfWork_Entao_DeveRetornarCurrent()
+        {
+            var worker = new TestWorker();
+            var uowManager = Substitute.For<IUnitOfWorkManager>();
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            uowManager.Current.Returns(activeUow);
+            worker.UnitOfWorkManager = uowManager;
+
+            worker.PublicCurrentUnitOfWork.ShouldBeSameAs(activeUow);
         }
 
         [Fact]

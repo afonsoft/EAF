@@ -167,6 +167,25 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             Should.NotThrow(() => sendBufferMethod.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
         }
 
+        [Fact]
+        public void Dado_PropriedadesValidas_Quando_SendBuffer_Entao_NaoDeveLancarExcecao()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "Endpoint=sb://localhost:1;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+                QueueName = "log-queue",
+                StorageType = "Blob"
+            };
+            var sendBufferMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull("SendBuffer deve existir como método protegido");
+
+            // Quando & Então
+            Should.NotThrow(() => sendBufferMethod.Invoke(appender, new object[] { Array.Empty<log4net.Core.LoggingEvent>() }));
+        }
+
         #endregion
 
         #region OnClose

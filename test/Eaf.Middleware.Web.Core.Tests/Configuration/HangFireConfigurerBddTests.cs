@@ -132,5 +132,46 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
             // Então
             result.ShouldBe(HangfireStorageType.Redis);
         }
+
+        [Fact]
+        public void Dado_HangfireAtivadoComProviderNaoSql_Quando_Configure_Entao_DeveRegistrarServicosHangfire()
+        {
+            // Dado
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Hangfire:IsEnabled"] = "true",
+                    ["Database:Provider"] = "PostgreSQL"
+                })
+                .Build();
+
+            // Quando
+            Should.NotThrow(() => HangFireConfigurer.Configure(services, configuration));
+
+            // Então
+            services.ShouldContain(s => s.ServiceType.FullName != null && s.ServiceType.FullName.Contains("Hangfire"));
+        }
+
+        [Fact]
+        public void Dado_HangfireAtivadoComRedis_Quando_Configure_Entao_DeveRegistrarServicosHangfire()
+        {
+            // Dado
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Hangfire:IsEnabled"] = "true",
+                    ["Database:Provider"] = "PostgreSQL",
+                    ["RedisCache:IsEnabled"] = "true"
+                })
+                .Build();
+
+            // Quando
+            Should.NotThrow(() => HangFireConfigurer.Configure(services, configuration));
+
+            // Então
+            services.ShouldContain(s => s.ServiceType.FullName != null && s.ServiceType.FullName.Contains("Hangfire"));
+        }
     }
 }

@@ -1,4 +1,5 @@
 using Abp.Authorization;
+using Abp.Dependency;
 using Abp.Runtime.Security;
 using Eaf.Middleware;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
@@ -144,6 +145,127 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
 
             // Então
             context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_PathExigeToken_Quando_ProfileHeaderAuthorizationPresente_Entao_DeveRetornarCompleted()
+        {
+            // Dado
+            var context = CriarMessageReceivedContext(path: "/Profile/GetProfilePictureByUser?", hasToken: false);
+            context.Request.Headers["authorization"] = "Bearer token";
+
+            // Quando
+            await AuthConfigurer.QueryStringTokenResolver(context);
+
+            // Então
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_PathExigeToken_Quando_TokenNullLiteral_Entao_DeveLancarAbpAuthorizationException()
+        {
+            // Dado
+            var context = CriarMessageReceivedContext(path: "/Chat/GetUploadedObject?", token: "null");
+
+            // Quando & Então
+            await Should.ThrowAsync<AbpAuthorizationException>(async () => await AuthConfigurer.QueryStringTokenResolver(context));
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoHangfire_Quando_QueryStringTokenResolver_Entao_DevePermitirSemToken()
+        {
+            var context = CriarMessageReceivedContext(path: "/hangfire", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoJob_Quando_QueryStringTokenResolver_Entao_DevePermitirSemToken()
+        {
+            var context = CriarMessageReceivedContext(path: "/job", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoHeartbeat_Quando_QueryStringTokenResolver_Entao_DevePermitirSemToken()
+        {
+            var context = CriarMessageReceivedContext(path: "/heartbeat", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoHealthChecksUi_Quando_QueryStringTokenResolver_Entao_DevePermitirSemToken()
+        {
+            var context = CriarMessageReceivedContext(path: "/healthchecks-ui", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoHealth_Quando_QueryStringTokenResolver_Entao_DevePermitirSemToken()
+        {
+            var context = CriarMessageReceivedContext(path: "/health", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoSignalrComSubPath_Quando_QueryStringTokenResolver_Entao_DevePermitirSemToken()
+        {
+            var context = CriarMessageReceivedContext(path: "/signalr/test", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+            context.Token.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_CaminhoNaoMapeado_Quando_QueryStringTokenResolver_Entao_DeveRetornarCompleted()
+        {
+            var context = CriarMessageReceivedContext(path: "/unmapped", hasToken: false);
+
+            var task = AuthConfigurer.QueryStringTokenResolver(context);
+
+            task.ShouldBe(Task.CompletedTask);
+        }
+
+        [Fact]
+        public void Dado_JwtBearerAtivadoSemSecurityKey_Quando_Configure_Entao_DeveUsarChavePadrao()
+        {
+            // Dado
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new System.Collections.Generic.Dictionary<string, string?>
+                {
+                    ["Authentication:JwtBearer:IsEnabled"] = "true"
+                })
+                .Build();
+
+            // Quando
+            Should.NotThrow(() => AuthConfigurer.Configure(services, configuration));
+
+            // Então
+            var tokenAuthConfig = IocManager.Instance.Resolve<TokenAuthConfiguration>();
+            tokenAuthConfig.ShouldNotBeNull();
+            tokenAuthConfig.SecurityKey.ShouldNotBeNull();
         }
 
         private static MessageReceivedContext CriarMessageReceivedContext(

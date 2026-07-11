@@ -195,6 +195,78 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
         }
 
         [Fact]
+        public async Task Dado_DeleteMessageComAbpException_Quando_Deletar_Entao_DeveRetornarMensagemDeErro()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            chatMessageManager.FindMessageAsync(10, 1).Returns(Task.FromException<ChatMessage?>(new AbpException("Erro abp")));
+
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var result = await chatHub.DeleteMessage(10);
+
+            result.ShouldBe("Erro abp");
+        }
+
+        [Fact]
+        public async Task Dado_DeleteMessageComExceptionGenerica_Quando_Deletar_Entao_DeveRetornarInternalServerError()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            chatMessageManager.FindMessageAsync(10, 1).Returns(Task.FromException<ChatMessage?>(new Exception("falha")));
+
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var result = await chatHub.DeleteMessage(10);
+
+            result.ShouldBe("InternalServerError");
+        }
+
+        [Fact]
+        public async Task Dado_SendMessageParaGrupoComUserFriendlyException_Quando_Enviar_Entao_DeveRetornarMensagemDeErro()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            chatMessageManager.SendMessageToGroupAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>(), Arg.Any<string>())
+                .Returns(Task.FromException(new UserFriendlyException("Grupo offline")));
+
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                GroupId = 5,
+                TenantId = 1,
+                Message = "Hello group"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("Grupo offline");
+        }
+
+        [Fact]
+        public async Task Dado_SendMessageParaGrupoComExceptionGenerica_Quando_Enviar_Entao_DeveRetornarInternalServerError()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            chatMessageManager.SendMessageToGroupAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>(), Arg.Any<string>())
+                .Returns(Task.FromException(new Exception("falha")));
+
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                GroupId = 5,
+                TenantId = 1,
+                Message = "Hello group"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("InternalServerError");
+        }
+
+        [Fact]
         public void Dado_ChatHub_Quando_Dispose_Entao_DeveLiberarViaWindsorContainer()
         {
             var (chatHub, _, windsorContainer) = CriarChatHubCompleto();

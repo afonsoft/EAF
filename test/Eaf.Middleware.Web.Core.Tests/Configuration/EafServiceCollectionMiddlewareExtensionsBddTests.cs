@@ -69,5 +69,41 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
 
             services.Count.ShouldBeGreaterThan(0);
         }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafConfigurerComRedis_Entao_DeveRegistrarRedisCache()
+        {
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new[]
+                {
+                    new KeyValuePair<string, string?>("RedisCache:IsEnabled", "true"),
+                    new KeyValuePair<string, string?>("RedisCache:ConnectionString", "localhost:6379")
+                })
+                .Build();
+
+            services.AddEafConfigurer(configuration);
+
+            services.Any(s => s.ImplementationType != null && s.ImplementationType.Name.Contains("RedisCache")).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafConfigurerComSqlServerCache_Entao_DeveRegistrarSqlServerCache()
+        {
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new[]
+                {
+                    new KeyValuePair<string, string?>("SqlServerCache:IsEnabled", "true"),
+                    new KeyValuePair<string, string?>("SqlServerCache:ConnectionString", "Server=.;Database=Cache;"),
+                    new KeyValuePair<string, string?>("SqlServerCache:SchemaName", "dbo"),
+                    new KeyValuePair<string, string?>("SqlServerCache:TableName", "EafCache")
+                })
+                .Build();
+
+            services.AddEafConfigurer(configuration);
+
+            services.Any(s => s.ImplementationType != null && s.ImplementationType.Name == "SqlServerCache").ShouldBeTrue();
+        }
     }
 }

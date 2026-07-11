@@ -163,6 +163,22 @@ namespace Eaf.OpenTelemetry.Tests
             Should.NotThrow(() => services.AddEafOpenTelemetry(configureOptions));
         }
 
+        [Fact]
+        public void AddEafOpenTelemetry_WithOtlpEndpointAndNoConsoleExporter_ShouldNotThrow()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> configureOptions = options =>
+            {
+                options.ServiceName = "ServiceWithOtlpNoConsole";
+                options.OtlpEndpoint = "http://localhost:4317";
+                options.ConsoleExporter = false;
+                options.OtlpHeaders = "key=value";
+                options.RecordException = true;
+            };
 
+            // Act & Assert
+            Should.NotThrow(() => services.AddEafOpenTelemetry(configureOptions));
+        }
     }
 }
