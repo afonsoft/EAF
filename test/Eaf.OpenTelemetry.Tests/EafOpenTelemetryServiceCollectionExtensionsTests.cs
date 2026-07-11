@@ -2,6 +2,7 @@ using Eaf.AspNetCore.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Eaf.OpenTelemetry.Tests
@@ -141,5 +142,27 @@ namespace Eaf.OpenTelemetry.Tests
             // Act & Assert
             Should.NotThrow(() => services.AddEafOpenTelemetry(configureOptions));
         }
+
+        [Fact]
+        public void AddEafOpenTelemetry_WithOtlpEndpointAndConsoleExporter_ShouldNotThrow()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> configureOptions = options =>
+            {
+                options.ServiceName = "ServiceWithOtlp";
+                options.OtlpEndpoint = "http://localhost:4317";
+                options.ConsoleExporter = true;
+                options.OtlpHeaders = "key=value";
+                options.RecordException = false;
+                options.SetDbStatementForStoredProcedure = false;
+                options.SetDbStatementForText = false;
+            };
+
+            // Act & Assert
+            Should.NotThrow(() => services.AddEafOpenTelemetry(configureOptions));
+        }
+
+
     }
 }

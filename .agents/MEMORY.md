@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `devin/1783727214-priority28-coverage-audit`
-Baseline coverage (P27): Line 75.6%, Branch 54.0%, Method 90.8%.
-Current coverage (after P28): Line 78.3%, Branch 56.1%, Method 92.8%.
+Last session branch: `devin/1783735348-priority29-coverage-audit`
+Baseline coverage (P28): Line 78.3%, Branch 56.1%, Method 92.8%.
+Current coverage (after P29): Line 80.3%, Branch 59.2%, Method 93.4%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -30,26 +30,32 @@ Current coverage (after P28): Line 78.3%, Branch 56.1%, Method 92.8%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P29)
+## Notable classes with remaining low coverage (target for P30)
 - `Eaf.Middleware.Web.Controllers.TokenAuthController` (0%)
-- `Eaf.Middleware.Web.Controllers.FileController` (8.6%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (45.5%)
-- `Eaf.Middleware.Web.Configuration.SqlServerCacheConfigurer` (66.6%)
-- `Eaf.Middleware.Web.Startup.AuthConfigurer` (67.3%)
-- `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (53.4%)
+- `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
+- `Eaf.Middleware.Identity.LogInManager`, `SecurityStampValidator`, `SignInManager` (0%)
+- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (11.1%)
+- `Eaf.KeyVault.OCIKeyVaultManager` (19.2%)
+- `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (38.5%)
 - `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (45.3%)
 - `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (45.2%)
 - `Eaf.Middleware.Worker.EafHostBuilderExtensions` (40.7%)
-- `Eaf.Middleware.Worker.EafWorkerBase` (71.6%)
-- `Eaf.Middleware.Configuration.HostingEnvironmentExtensions` (50%) — MiddlewareCore
-- `Eaf.Middleware.Identity.LogInManager`, `SecurityStampValidator`, `SignInManager` (0%)
-- `Eaf.AspNetCore.Hangfire.EafHangfireAuthorizationFilter` (6.2%)
+- `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (53.4%)
+- `Eaf.Middleware.Web.Startup.AuthConfigurer` (67.3%)
+- `Eaf.Middleware.Web.Configuration.SqlServerCacheConfigurer` (66.6%)
+- `Eaf.Middleware.Web.Startup.HangFireConfigurer` (77.5%)
 - `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (65.6%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (9.8%)
-- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (11.1%)
-- `Eaf.Middleware.Core.Authentication.External.Microsoft.MicrosoftAuthProviderApi` (79.1%)
-- `Eaf.AspNetCore.SignalR.Chat.ChatHub` (45.8%)
-- `Eaf.Middleware.Web.Authentication.JwtBearer.MiddlewareJwtSecurityTokenHandler` (12.6%)
-- `Eaf.KeyVault.OCIKeyVaultManager` (19.2%)
-- `Eaf.Log4NetServiceBus.Logging.ServiceBusQueueAppender` (38.5%)
-- `Eaf.OpenTelemetry` (70.1%) — `EafOpenTelemetryServiceCollectionExtensions` (55.6%)
+- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (66.6%)
+- `Eaf.OpenTelemetry` (75.2%) — `EafOpenTelemetryServiceCollectionExtensions` (63.1%)
+
+## P29 gotchas
+- `EafHangfireAuthorizationFilter.Authorize` requires a real `AspNetCoreDashboardContext` built with `JobStorage`, `DashboardOptions` and `HttpContext`; `GetHttpContext()` returns `HttpContext` only for that concrete type.
+- `AspNetCoreDashboardContext` needs `RequestServices` with `IAbpSession`, `IPermissionChecker` (the interface method `IsGranted(UserIdentifier, string)` is used by `PermissionCheckerExtensions`, not the `params` extension) and `ICacheManager`.
+- `ExpiredEntityLogDeleterWorker` is structurally similar to `ExpiredAuditLogDeleterWorker`, but uses `IEntityHistoryConfiguration`, `ISettingManager` and `IRepository<EntityChange, long>`.
+- `OpenIdConnectAuthProviderApi` and `MicrosoftAuthProviderApi` tests need a `TestHttpMessageHandler` that supports multiple staged responses (`(uri, status, content)`).
+- `AddEafOpenTelemetry` mutates `OTEL_*` environment variables; avoid changing `OtlpProtocol` to non-default values without isolating/restoring environment variables.
+- `MapEafOpenTelemetryMetrics` depends on `MapPrometheusScrapingEndpoint` which requires a real `MeterProvider` in `IEndpointRouteBuilder.ServiceProvider`; leave it for an integration test harness.
+- `FileController` `FormFile.ContentType` setter requires `formFile.Headers` to be initialized first (`new HeaderDictionary()`).
+- `BinaryObject` constructor formats `FileName` as `{Id}_{fileName}`, so `FileDownloadName` assertions must use the constructed name.
+- `ChatHub.Dispose` uses `WindsorContainer` injection; capture the container substitute in the test setup to assert `Release`.

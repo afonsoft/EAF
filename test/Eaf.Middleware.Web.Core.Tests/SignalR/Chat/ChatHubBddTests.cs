@@ -6,6 +6,7 @@ using Abp.Localization.Sources;
 using Abp.RealTime;
 using Abp.Runtime.Security;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Castle.Core.Logging;
 using Castle.Windsor;
 using Eaf.AspNetCore.SignalR.Chat;
@@ -101,7 +102,114 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
             result.ShouldBe(string.Empty);
         }
 
+        [Fact]
+        public async Task Dado_MensagemComSharedMessageId_Quando_DeleteMessage_Entao_DeveDeletarERetornarVazio()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var message = new ChatMessage(
+                new UserIdentifier(1, 1),
+                new UserIdentifier(1, 2),
+                ChatSide.Sender,
+                "mensagem",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            chatMessageManager.FindMessageAsync(10, 1).Returns(Task.FromResult<ChatMessage?>(message));
+
+            var result = await chatHub.DeleteMessage(10);
+
+            result.ShouldBe(string.Empty);
+            chatMessageManager.Received(1).Delete(message.SharedMessageId!.Value);
+        }
+
+        [Fact]
+        public async Task Dado_SendMessageComUserFriendlyException_Quando_Enviar_Entao_DeveRetornarMensagemDeErro()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            chatMessageManager.SendMessageAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>(),
+                Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Guid?>())
+                .Returns(Task.FromException(new UserFriendlyException("Usuário offline")));
+
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                UserId = 2,
+                TenantId = 1,
+                Message = "Hello",
+                UserName = "user2",
+                TenancyName = "tenant1"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("Usuário offline");
+        }
+
+        [Fact]
+        public async Task Dado_SendMessageComExceptionGenerica_Quando_Enviar_Entao_DeveRetornarInternalServerError()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            chatMessageManager.SendMessageAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>(),
+                Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Guid?>())
+                .Returns(Task.FromException(new Exception("falha")));
+
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                UserId = 2,
+                TenantId = 1,
+                Message = "Hello",
+                UserName = "user2",
+                TenancyName = "tenant1"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("InternalServerError");
+        }
+
+        [Fact]
+        public async Task Dado_DestinoInvalido_Quando_SendMessage_Entao_DeveRetornarInternalServerError()
+        {
+            var chatHub = CriarChatHub();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                TenantId = 1,
+                Message = "No destination"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("InternalServerError");
+        }
+
+        [Fact]
+        public void Dado_ChatHub_Quando_Dispose_Entao_DeveLiberarViaWindsorContainer()
+        {
+            var (chatHub, _, windsorContainer) = CriarChatHubCompleto();
+
+            chatHub.Dispose();
+
+            windsorContainer.Received(1).Release(chatHub);
+        }
+
         private static ChatHub CriarChatHub()
+        {
+            return CriarChatHubCompleto().Hub;
+        }
+
+        private static (ChatHub Hub, IChatMessageManager ChatMessageManager, IWindsorContainer WindsorContainer) CriarChatHubCompleto()
         {
             var chatMessageManager = Substitute.For<IChatMessageManager>();
             chatMessageManager.FindMessageAsync(Arg.Any<int>(), Arg.Any<long>())
@@ -123,12 +231,14 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
             var clientInfoProvider = Substitute.For<IOnlineClientInfoProvider>();
             var windsorContainer = Substitute.For<IWindsorContainer>();
 
-            return new ChatHub(
+            var hub = new ChatHub(
                 chatMessageManager,
                 localizationManager,
                 windsorContainer,
                 onlineClientManager,
                 clientInfoProvider);
+
+            return (hub, chatMessageManager, windsorContainer);
         }
 
         private static HubCallerContext CriarContextoComUsuario(long userId, int tenantId)

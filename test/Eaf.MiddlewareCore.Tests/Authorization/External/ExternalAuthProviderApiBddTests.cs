@@ -62,7 +62,7 @@ namespace Eaf.Middleware.Tests.Authorization.External
             var handler = CriarHandler(
                 MicrosoftAccountDefaults.UserInformationEndpoint,
                 "{\"id\":\"456\",\"displayName\":\"Bob Jones\",\"surname\":\"Jones\",\"mail\":\"bob@example.com\"}",
-                ("https://graph.microsoft.com/v1.0/me/photo/$value", HttpStatusCode.NotFound));
+                ("https://graph.microsoft.com/v1.0/me/photo/$value", HttpStatusCode.NotFound, string.Empty));
             var factory = CriarHttpClientFactory(handler);
             var api = new MicrosoftAuthProviderApi(NullLogger.Instance, factory);
             api.ProviderInfo = CriarProviderInfo("Microsoft", typeof(MicrosoftAuthProviderApi), new Dictionary<string, string>());
@@ -83,7 +83,7 @@ namespace Eaf.Middleware.Tests.Authorization.External
             var handler = CriarHandler(
                 "https://authzero.example.com/userinfo",
                 "{\"sub\":\"789\",\"name\":\"Carol Doe\",\"given_name\":\"Carol\",\"family_name\":\"Doe\",\"email\":\"carol@example.com\",\"picture\":\"https://authzero.example.com/photo.png\"}",
-                ("https://authzero.example.com/photo.png", HttpStatusCode.NotFound));
+                ("https://authzero.example.com/photo.png", HttpStatusCode.NotFound, string.Empty));
             var factory = CriarHttpClientFactory(handler);
             var api = new AuthZeroAuthProviderApi(NullLogger.Instance, factory);
             api.ProviderInfo = CriarProviderInfo("AuthZero", typeof(AuthZeroAuthProviderApi), new Dictionary<string, string>
@@ -134,6 +134,32 @@ namespace Eaf.Middleware.Tests.Authorization.External
         }
 
         [Fact]
+        public async Task Dado_OpenIdConnectAuthorityAusente_Quando_GetUserInfo_Entao_DeveLancarKeyNotFoundException()
+        {
+            var api = new OpenIdConnectAuthProviderApi(NullLogger.Instance);
+            api.ProviderInfo = CriarProviderInfo("OpenIdConnect", typeof(OpenIdConnectAuthProviderApi), new Dictionary<string, string>());
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => api.GetUserInfo("access-token"));
+        }
+
+        [Fact]
+        public async Task Dado_MicrosoftProviderConfiguradoComFoto_Quando_GetUserInfo_Entao_DevePreencherPicture()
+        {
+            var handler = CriarHandler(
+                MicrosoftAccountDefaults.UserInformationEndpoint,
+                "{\"id\":\"456\",\"displayName\":\"Bob Jones\",\"surname\":\"Jones\",\"mail\":\"bob@example.com\"}",
+                ("https://graph.microsoft.com/v1.0/me/photo/$value", HttpStatusCode.OK, "fake-image"));
+            var factory = CriarHttpClientFactory(handler);
+            var api = new MicrosoftAuthProviderApi(NullLogger.Instance, factory);
+            api.ProviderInfo = CriarProviderInfo("Microsoft", typeof(MicrosoftAuthProviderApi), new Dictionary<string, string>());
+
+            var result = await api.GetUserInfo("access-token");
+
+            result.Provider.ShouldBe("Microsoft");
+            result.Picture.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
         public async Task Dado_ProviderApi_Quando_IsValidUserComProviderKeyCorrespondente_Entao_DeveRetornarVerdadeiro()
         {
             var handler = CriarHandler("https://google.com/userinfo", "{\"id\":\"123\",\"name\":\"Alice Smith\",\"given_name\":\"Alice\",\"family_name\":\"Smith\",\"email\":\"alice@example.com\"}");
@@ -165,13 +191,13 @@ namespace Eaf.Middleware.Tests.Authorization.External
             result.ShouldBeFalse();
         }
 
-        private static TestHttpMessageHandler CriarHandler(string expectedUri, string successContent, params (string uri, HttpStatusCode status)[] additionalResponses)
+        private static TestHttpMessageHandler CriarHandler(string expectedUri, string successContent, params (string uri, HttpStatusCode status, string content)[] additionalResponses)
         {
             var handler = new TestHttpMessageHandler();
             handler.AddResponse(expectedUri, successContent, HttpStatusCode.OK);
-            foreach (var (uri, status) in additionalResponses)
+            foreach (var (uri, status, content) in additionalResponses)
             {
-                handler.AddResponse(uri, "", status);
+                handler.AddResponse(uri, content ?? string.Empty, status);
             }
             return handler;
         }

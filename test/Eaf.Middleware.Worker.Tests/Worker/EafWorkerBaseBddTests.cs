@@ -24,6 +24,7 @@ namespace Eaf.Middleware.Worker.Tests.Worker
             public string PublicL(string name, System.Globalization.CultureInfo culture) => L(name, culture);
             public string PublicL(string name, System.Globalization.CultureInfo culture, params object[] args) => L(name, culture, args);
             public IUnitOfWorkManager PublicUnitOfWorkManager => UnitOfWorkManager;
+            public ILocalizationSource PublicLocalizationSource => LocalizationSource;
         }
 
         [Fact]
@@ -110,6 +111,61 @@ namespace Eaf.Middleware.Worker.Tests.Worker
             var result = worker.PublicL("MissingKey");
 
             result.ShouldBe("MissingKey");
+        }
+
+        [Fact]
+        public void Dado_PrimeiroSourceSemValor_Quando_L_Entao_DeveUsarFallback()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var eafSource = Substitute.For<ILocalizationSource>();
+            eafSource.Name.Returns("EafCore");
+            eafSource.GetStringOrNull("FallbackKey", Arg.Any<System.Globalization.CultureInfo>()).Returns((string)null);
+            var abpSource = Substitute.For<ILocalizationSource>();
+            abpSource.Name.Returns("Abp");
+            abpSource.GetStringOrNull("FallbackKey", Arg.Any<System.Globalization.CultureInfo>()).Returns("FallbackValue");
+            localizationManager.GetSource("EafCore").Returns(eafSource);
+            localizationManager.GetSource("Abp").Returns(abpSource);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("FallbackKey");
+
+            result.ShouldBe("FallbackValue");
+        }
+
+        [Fact]
+        public void Dado_LocalizationSourceName_Quando_AcessarLocalizationSource_Entao_DeveRetornarSource()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicLocalizationSource;
+
+            result.ShouldBeSameAs(source);
+        }
+
+        [Fact]
+        public void Dado_ChaveVazia_Quando_L_Entao_DeveRetornarChave()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL(string.Empty);
+
+            result.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public void Dado_EafWorkerBase_Quando_Instanciar_Entao_DeveImplementarIEafWorkerBase()
+        {
+            var worker = new TestWorker();
+
+            worker.ShouldBeAssignableTo<IEafWorkerBase>();
         }
     }
 }
