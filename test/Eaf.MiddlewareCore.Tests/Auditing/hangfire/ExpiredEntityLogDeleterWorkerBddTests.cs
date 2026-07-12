@@ -155,6 +155,53 @@ namespace Eaf.MiddlewareCore.Tests.Auditing.hangfire
         }
 
         [Fact]
+        public void Dado_ExcecaoAoDeletarEntityChangesAcimaDoLimite_Quando_DoWork_Entao_DeveCapturarExcecaoEContinuar()
+        {
+            var entityChanges = Enumerable.Range(1, 3)
+                .Select(i => new EntityChange { Id = i, ChangeTime = DateTime.UtcNow.AddDays(-400) })
+                .ToList();
+
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.IsEnabled).Returns("true");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.DeletedQuantity).Returns("2");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.ExpiredDays).Returns("180");
+
+            _entityChangeRepository.GetAll().Returns(entityChanges.AsQueryable());
+            _entityChangeRepository.LongCount(Arg.Any<Expression<Func<EntityChange, bool>>>()).Returns(3L);
+            _entityChangeRepository.When(x => x.Delete(Arg.Any<EntityChange>())).Do(_ => throw new Exception("Delete error"));
+
+            var sut = CreateWorker(true);
+            var context = CriarPerformContext();
+
+            sut.DoWorkPublic(context);
+
+            _entityChangeRepository.Received(2).Delete(Arg.Any<EntityChange>());
+        }
+
+        [Fact]
+        public void Dado_ExcecaoAoDeletarEntityChangesAbaixoDoLimite_Quando_DoWork_Entao_DeveCapturarExcecaoEContinuar()
+        {
+            var entityChanges = new List<EntityChange>
+            {
+                new EntityChange { Id = 1, ChangeTime = DateTime.UtcNow.AddDays(-400) }
+            };
+
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.IsEnabled).Returns("true");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.DeletedQuantity).Returns("30000");
+            _settingManager.GetSettingValue(EafMiddlewareSettingNames.LogDeleter.ExpiredDays).Returns("180");
+
+            _entityChangeRepository.GetAll().Returns(entityChanges.AsQueryable());
+            _entityChangeRepository.LongCount(Arg.Any<Expression<Func<EntityChange, bool>>>()).Returns(1L);
+            _entityChangeRepository.When(x => x.Delete(entityChanges[0])).Do(_ => throw new Exception("Delete error"));
+
+            var sut = CreateWorker(true);
+            var context = CriarPerformContext();
+
+            sut.DoWorkPublic(context);
+
+            _entityChangeRepository.Received(1).Delete(entityChanges[0]);
+        }
+
+        [Fact]
         public void Dado_EntityChangesExcedendoLimite_Quando_DoWork_Entao_DeveDeletarPorIdLimitado()
         {
             var entityChanges = Enumerable.Range(1, 3)

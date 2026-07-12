@@ -6,6 +6,7 @@ using Eaf.Middleware.Friendships;
 using NSubstitute;
 using Shouldly;
 using System;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
@@ -168,6 +169,40 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             result.ShouldNotBeNull();
             result!.UserId.ShouldBe(1);
             result.FriendUserId.ShouldBe(2);
+        }
+
+        [Fact]
+        public void Dado_ChaveLocalizada_Quando_LComArgs_Entao_DeveRetornarTextoFormatado()
+        {
+            var sut = new TestableFriendshipManager(Substitute.For<IRepository<Friendship, long>>());
+            var result = sut.LocalizeComArgs("TestKey", "arg1");
+            result.ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_ChaveLocalizada_Quando_LComCultura_Entao_DeveRetornarChave()
+        {
+            var sut = new TestableFriendshipManager(Substitute.For<IRepository<Friendship, long>>());
+            var result = sut.LocalizeComCultura("TestKey", CultureInfo.InvariantCulture);
+            result.ShouldBe("TestKey");
+        }
+
+        public class TestableFriendshipManager : FriendshipManager
+        {
+            public TestableFriendshipManager(IRepository<Friendship, long> friendshipRepository)
+                : base(friendshipRepository)
+            {
+            }
+
+            public string LocalizeComArgs(string name, params object[] args)
+            {
+                return L(name, args);
+            }
+
+            public string LocalizeComCultura(string name, CultureInfo culture)
+            {
+                return L(name, culture);
+            }
         }
     }
 }

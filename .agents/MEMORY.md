@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260712-priority41-coverage-audit`
+Last session branch: `feature/devin-20260712-priority42-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
-Current coverage (after P41): Line 95%, Branch 80.1%, Method 98.5%.
+Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -30,6 +30,17 @@ Current coverage (after P41): Line 95%, Branch 80.1%, Method 98.5%.
 - `AuthorizationExtensions.GetExternalTokenInformation` relies on `IocManager.Instance`; isolate it by swapping the static instance via reflection and restoring it after the test.
 - `IocManager.Instance` has a non-public setter; use reflection to get/set the static property in tests that require isolation.
 - `OpenIdConnectAuthProviderApi.ValidateTokenInternal` is private; invoke it via reflection and await the resulting `Task` (not `Task<ExternalAuthUserInfo>`).
+
+## P42 gotchas
+- `Novell.Directory.Ldap.LdapConnection` `SearchAsync`, `ConnectAsync`, `BindAsync`, `Disconnect` and `Connected` are `virtual` but `IsFinal` in ABP 10.4.0; `Castle DynamicProxy` cannot override them. Use `ILdapSearchResults` (interface) for NSubstitute, and test `CreateLdapContext` branch logic only.
+- `HangfireBackgroundJobManager.EnqueueAsync`/`Enqueue` have separate branches for `IBackgroundJob<TArgs>`, `Abp.BackgroundJobs.IAsyncBackgroundJob<TArgs>` and `Eaf.BackgroundJobs.IAsyncBackgroundJob<TArgs>`, with and without `delay`; test each combination.
+- `ExpiredEntityLogDeleterWorker` has two `Delete` catch branches based on `MaxDeletionCount` and exception `Message` count; exercise both with `IRepository<EntityChange, long>` returning exceptions.
+- `RedisConfigurer.Configure` uses `bool.Parse` on `RedisCache:IsEnabled`/`IsRedisEnabled` and `Configuration.GetValue` for `RedisCache:DatabaseId`; use `ConfigurationBuilder` with `Dictionary<string, string?>` and resolve `IOptions<RedisCacheOptions>` to cover the lambda body.
+- `ServiceBusQueueAppender.AppendBuffer` builds a `BrokeredMessage` and logs the body; set `ServiceBusConnection.OperationTimeout = 1ms` to force `ServiceBusTimeoutException` and cover the `SendAsync` catch branch.
+- `MiddlewareWorkerModule.PreInitialize` calls `Configuration.Caching.ConfigureAll` and `Configuration.ReplaceService`; `ConfigureAll` is exercised by resolving `ICacheManager`/`GetCache` after `PreInitialize`. Calling all `ServiceReplaceActions` is unsafe because `Castle Windsor` may throw duplicate component registration.
+- `MiddlewareWebCoreModule.PostInitialize` uses concrete `AbpStartupConfiguration`; create it via `Type.GetType`/`Activator.CreateInstance` and set `BackgroundJobs`, `Auditing` and `EntityHistory` properties to avoid `NullReferenceException`.
+- `FriendshipManager` has three `protected` `L` overloads; create a `TestableFriendshipManager` subclass and call the overloads to cover them.
+- `WebContentDirectoryFinder` `CalculateContentRootFolder` throws `DirectoryNotFoundException` when `src/Eaf.Middleware.Web.Host` is not found; test the exception branch and the `directoryInfo.Parent == null` path with a temporary directory.
 
 ## P41 gotchas
 - `UserManager.UpdateWithValidateAsync` is public but not virtual; cannot be stubbed with `NSubstitute.Returns`. Use a real `UserManager` with a substitute `UserStore` and `IRepository<User, long>` to exercise the update branch.
@@ -69,29 +80,25 @@ Current coverage (after P41): Line 95%, Branch 80.1%, Method 98.5%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P41)
-- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (80.6%)
-- `Eaf.Middleware.Authorization.Impersonation.ImpersonationManager` (81.0%)
-- `Eaf.Middleware.Web.Controllers.TokenAuthController` (81.4%)
-- `Eaf.AspNetCore.SignalR.Chat.SignalRChatCommunicator` (81.5%)
-- `Eaf.Middleware.Worker.MiddlewareWorkerModule` (82.1%)
-- `Eaf.Middleware.AzureActiveDirectory.Configuration.AzureActiveDirectorySettings` (82.3%)
-- `Eaf.KeyVault.OCIKeyVaultManager` (84.3%)
-- `Eaf.Middleware.DataExporting.Excel.EpPlus.EpPlusExcelExporterBase` (85.1%)
-- `Eaf.Middleware.Web.Controllers.ProfileControllerBase` (86.7%)
-- `Eaf.Middleware.Authorization.Users.UserAppService` (86.9%)
-- `Eaf.Middleware.Friendships.Cache.UserFriendsCache` (87.2%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (87.6%)
-- `Eaf.Middleware.Web.Controllers.ChatControllerBase` (88.2%)
-- `Eaf.Middleware.Web.Swagger.SwaggerEnumParameterFilter` (88.2%)
-- `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
-- `Eaf.Middleware.Configuration.AppConfigurations` (88.4%)
-- `Eaf.Middleware.Web.Controllers.FileController` (89.1%)
-- `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (89.2%)
-- `Eaf.Middleware.MiddlewareAppServiceBase` (89.4%)
-- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (89.5%)
-- `Eaf.Middleware.Chat.ChatFeatureChecker` (90.2%)
+## Notable classes with remaining low coverage (target for P43)
+- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (50.3%)
+- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.Advertisement` (50.0%)
+- `Eaf.MiddlewareCore.SampleApp.Core.UserClaimsPrincipalFactory` (70.0%)
+- `Eaf.MiddlewareCore.SampleApp.Core.Shop.OrderTranslation` (75.0%)
+- `Eaf.MiddlewareCore.SampleApp.Core.Shop.ProductTranslation` (75.0%)
+- `Eaf.MiddlewareCore.SampleApp.Core.User` (80.0%)
+- `Eaf.MiddlewareCore.SampleApp.EafMiddlewareCoreSampleAppModule` (76.9%)
+- `Eaf.Middleware.Web.WebContentDirectoryFinder` (83.3%)
+- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (84.8%)
+- `Eaf.MiddlewareCore.SampleApp.EntityFramework.Seed.Host.DefaultSettingsCreator` (87.5%)
+- `Eaf.MiddlewareCore.SampleApp.EntityFramework.Seed.Tenants.DefaultTenantBuilder` (87.5%)
+- `Eaf.Middleware.Auditing.EntityHistoryConfigurationExtensions` (87.5%)
+- `Abp.Runtime.Caching.Sqlite.DbCommandPool` (89.4%)
+- `Abp.Runtime.Caching.Sqlite.EafSqliteCache` (88.8%)
 - `Eaf.Middleware.Localization.CultureHelper` (78.5%)
+- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.Country` (0%)
+- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.Foo` (0%)
+- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.AdvertisementFeedback` (0%)
 
 ## P38 gotchas
 - `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.

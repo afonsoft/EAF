@@ -201,6 +201,22 @@ namespace Eaf.Middleware.Tests.Hangfire
         }
 
         [Fact]
+        public void Dado_JobAbpAsyncComDelay_Quando_Enqueue_Entao_DeveRetornarJobId()
+        {
+            var sut = new HangfireBackgroundJobManager();
+            var result = sut.Enqueue<FakeAbpAsyncJob, string>("args", delay: TimeSpan.FromMinutes(1));
+            result.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void Dado_JobEafAsyncComDelay_Quando_Enqueue_Entao_DeveRetornarJobId()
+        {
+            var sut = new HangfireBackgroundJobManager();
+            var result = sut.Enqueue<FakeEafAsyncJob, string>("args", delay: TimeSpan.FromMinutes(1));
+            result.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
         public void Dado_JobSemInterfaceCompativelEComDelay_Quando_Enqueue_Entao_DeveRetornarStringVazia()
         {
             var sut = new HangfireBackgroundJobManager();
@@ -249,6 +265,22 @@ namespace Eaf.Middleware.Tests.Hangfire
         {
             var sut = new HangfireBackgroundJobManager();
             var result = await sut.EnqueueAsync<FakeSyncJob, string>("args", delay: TimeSpan.FromMinutes(1));
+            result.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task Dado_JobAbpAsyncComDelay_Quando_EnqueueAsync_Entao_DeveRetornarJobId()
+        {
+            var sut = new HangfireBackgroundJobManager();
+            var result = await sut.EnqueueAsync<FakeAbpAsyncJob, string>("args", delay: TimeSpan.FromMinutes(1));
+            result.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task Dado_JobEafAsyncComDelay_Quando_EnqueueAsync_Entao_DeveRetornarJobId()
+        {
+            var sut = new HangfireBackgroundJobManager();
+            var result = await sut.EnqueueAsync<FakeEafAsyncJob, string>("args", delay: TimeSpan.FromMinutes(1));
             result.ShouldNotBeNullOrEmpty();
         }
 
