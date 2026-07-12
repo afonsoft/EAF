@@ -918,6 +918,107 @@ namespace Eaf.Middleware.Tests.WebCore
             }
         }
 
+        [Fact]
+        public void Dado_VariaveisAmbienteNaoDefinidas_Quando_CriarModulo_Entao_DeveResolverPelaVariavelDotnetEnvironment()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            var originalAspNetCore = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var originalEaf = Environment.GetEnvironmentVariable("EAF_ENVIRONMENT");
+            var originalHosting = Environment.GetEnvironmentVariable("Hosting:Environment");
+            var originalAspNet = Environment.GetEnvironmentVariable("ASPNET_ENV");
+            var originalDotnet = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
+            try
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("EAF_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("Hosting:Environment", null);
+                Environment.SetEnvironmentVariable("ASPNET_ENV", null);
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns((string)null!);
+
+                var module = new MiddlewareWebCoreModule(env);
+                module.ShouldNotBeNull();
+                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").ShouldBe("");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", originalAspNetCore);
+                Environment.SetEnvironmentVariable("EAF_ENVIRONMENT", originalEaf);
+                Environment.SetEnvironmentVariable("Hosting:Environment", originalHosting);
+                Environment.SetEnvironmentVariable("ASPNET_ENV", originalAspNet);
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", originalDotnet);
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_ContentRootPathNulo_Quando_PostInitialize_Entao_DeveUsarDiretorioAtualEConfigurarPastas()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+            var originalCurrentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+
+                iocManager.IocContainer.Register(
+                    Component.For<ISettingManager>().Instance(Substitute.For<ISettingManager>()),
+                    Component.For<IAbpSession>().Instance(Substitute.For<IAbpSession>()),
+                    Component.For<ICacheManager>().Instance(Substitute.For<ICacheManager>()),
+                    Component.For<ExternalAuthConfiguration>().Instance(new ExternalAuthConfiguration()),
+                    Component.For<AppFolders>().Instance(new AppFolders { WebRootFileProvider = null! })
+                );
+
+                iocManager.Register<TenantBasedOpenIdConnectExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedGoogleExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedMicrosoftExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedAuthZeroExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+
+                var backgroundJobs = Substitute.For<Abp.BackgroundJobs.IBackgroundJobConfiguration>();
+                backgroundJobs.IsJobExecutionEnabled.Returns(false);
+                configType.GetProperty("BackgroundJobs")?.SetValue(config, backgroundJobs);
+
+                var auditing = Substitute.For<Abp.Auditing.IAuditingConfiguration>();
+                auditing.IsEnabled.Returns(false);
+                configType.GetProperty("Auditing")?.SetValue(config, auditing);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                env.ContentRootPath.Returns((string)null!);
+
+                Should.NotThrow(() => module.PostInitialize());
+
+                var appFolders = iocManager.Resolve<AppFolders>();
+                appFolders.WebRootFileProvider.ShouldNotBeNull();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalCurrentDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
         private static IAbpStartupConfiguration CriarConfiguracao(IIocManager iocManager)
         {
             var configuration = Substitute.For<IAbpStartupConfiguration>();

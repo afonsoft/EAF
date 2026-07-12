@@ -11,6 +11,7 @@ using Abp.Dependency;
 using Abp.EntityFrameworkCore.Configuration;
 using AutoMapper;
 using Eaf.MiddlewareCore.SampleApp;
+using Microsoft.EntityFrameworkCore;
 using Eaf.MiddlewareCore.SampleApp.Application;
 using Eaf.MiddlewareCore.SampleApp.EntityFramework;
 using NSubstitute;
@@ -93,6 +94,48 @@ namespace Eaf.MiddlewareCore.Tests.SampleApp
             authorizationProviders.Received().Add<AppAuthorizationProvider>();
             featureProviders.Received().Add<AppFeatureProvider>();
             efCore.DidNotReceive().AddDbContext<SampleAppDbContext>(Arg.Any<Action<AbpDbContextConfiguration<SampleAppDbContext>>>());
+        }
+
+        [Fact]
+        public void Dado_ModuloComDbContextRegistration_Quando_PreInitialize_Entao_DeveConfigurarDbContextComSqlServer()
+        {
+            var module = new EafMiddlewareCoreSampleAppModule { SkipDbContextRegistration = false };
+
+            var iocManager = Substitute.For<IIocManager>();
+
+            var config = Substitute.For<IAbpStartupConfiguration>();
+            var authorization = Substitute.For<IAuthorizationConfiguration>();
+            var authorizationProviders = Substitute.For<ITypeList<AuthorizationProvider>>();
+            var features = Substitute.For<IFeatureConfiguration>();
+            var featureProviders = Substitute.For<ITypeList<FeatureProvider>>();
+            var modules = Substitute.For<IModuleConfigurations>();
+            var efCore = Substitute.For<IAbpEfCoreConfiguration>();
+            var customProviders = new List<ICustomConfigProvider>();
+
+            authorization.Providers.Returns(authorizationProviders);
+            features.Providers.Returns(featureProviders);
+            modules.AbpEfCore().Returns(efCore);
+
+            config.Authorization.Returns(authorization);
+            config.Features.Returns(features);
+            config.Modules.Returns(modules);
+            config.CustomConfigProviders.Returns(customProviders);
+
+            efCore.When(x => x.AddDbContext<SampleAppDbContext>(Arg.Any<Action<AbpDbContextConfiguration<SampleAppDbContext>>>()))
+                .Do(info =>
+                {
+                    var action = info.ArgAt<Action<AbpDbContextConfiguration<SampleAppDbContext>>>(0);
+                    var dbContextConfiguration = new AbpDbContextConfiguration<SampleAppDbContext>(connectionString: "", existingConnection: null);
+                    action(dbContextConfiguration);
+                });
+
+            var moduleType = typeof(Abp.Modules.AbpModule);
+            moduleType.GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(module, iocManager);
+            moduleType.GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(module, config);
+
+            Should.NotThrow(() => module.PreInitialize());
+
+            efCore.Received().AddDbContext<SampleAppDbContext>(Arg.Any<Action<AbpDbContextConfiguration<SampleAppDbContext>>>());
         }
 
         [Fact]
