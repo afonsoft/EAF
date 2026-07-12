@@ -110,5 +110,36 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             // Então
             result.ShouldBeOfType<JsonResult>();
         }
+
+        [Fact]
+        public async Task Dado_ArquivoNuloNaLista_Quando_UploadFile_Entao_DeveRetornarErroJson()
+        {
+            var sut = CreateController();
+            sut.Request.Form = new FormCollection(
+                new System.Collections.Generic.Dictionary<string, StringValues>(),
+                new FormFileCollection { null! });
+
+            var result = await sut.UploadFile();
+
+            result.ShouldBeOfType<JsonResult>();
+        }
+
+        [Fact]
+        public async Task Dado_ArquivoMuitoGrande_Quando_UploadFile_Entao_DeveRetornarErroJson()
+        {
+            var sut = CreateController();
+            var file = new FormFile(new MemoryStream(new byte[20000001]), 0, 20000001, "file", "large.bin")
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "application/octet-stream"
+            };
+            sut.Request.Form = new FormCollection(
+                new System.Collections.Generic.Dictionary<string, StringValues>(),
+                new FormFileCollection { file });
+
+            var result = await sut.UploadFile();
+
+            result.ShouldBeOfType<JsonResult>();
+        }
     }
 }

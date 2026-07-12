@@ -25,6 +25,16 @@ namespace Eaf.Middleware.Tests.WebCore.Swagger
         }
 
         [Fact]
+        public void Dado_OperacaoComListaDeParametrosNula_Quando_AplicarFiltro_Entao_DeveRetornarSemErro()
+        {
+            var filter = new SwaggerOperationFilter();
+            var operation = new OpenApiOperation { Parameters = null };
+            var context = CriarContexto(operation, CriarApiDescription(), new List<ApiParameterDescription>());
+
+            Should.NotThrow(() => filter.Apply(operation, context));
+        }
+
+        [Fact]
         public void Dado_OperacaoComParametroEnum_Quando_AplicarFiltro_Entao_DeveSubstituirSchema()
         {
             var filter = new SwaggerOperationFilter();

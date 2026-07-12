@@ -3,6 +3,7 @@ using Abp.Authorization;
 using Abp.Authorization.Roles;
 using Abp.Authorization.Users;
 using Abp.Configuration;
+using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Localization;
@@ -35,6 +36,8 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -459,6 +462,74 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
             // Então
             _sut.AbpSession.TenantId.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameVazioNaLista_Quando_CreateUsersByActiveDirectory_Entao_DeveIgnorarUserNameVazio()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            _sut.AbpSession.TenantId.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameJaExistente_Quando_CreateUsersByActiveDirectory_Entao_DeveIgnorarUsuarioExistente()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>())
+                .Returns(new User { Id = 2, UserName = "existing", NormalizedUserName = "EXISTING" });
+            _sut.UserManager = userManager;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "existing" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            await userRepository.Received(1).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>());
+            await _appAzureActiveDirectoryAuthenticationSource.DidNotReceiveWithAnyArgs().GetUserAsync(Arg.Any<string>());
+        }
+
+        [Fact]
+        public async Task Dado_UserNameComDominioJaExistente_Quando_CreateUsersByActiveDirectory_Entao_DeveIgnorarUsuarioExistente()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>())
+                .Returns(new User { Id = 3, UserName = "existing", NormalizedUserName = "EXISTING" });
+            _sut.UserManager = userManager;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "existing@tenant.com" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            await userRepository.Received(1).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>());
         }
 
         #endregion
@@ -1003,6 +1074,69 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             result.ShouldNotBeNull();
             result.ShouldBe(expectedFile);
             var _ = userManager.DidNotReceive().Users;
+        }
+
+        #endregion
+
+        #region NotificationNewUser
+
+        [Fact]
+        public async Task Dado_ExcecoesNaNotificacaoEWebhook_Quando_NotificationNewUser_Entao_DeveCapturarSemLancar()
+        {
+            // Dado
+            typeof(Abp.AbpServiceBase).GetProperty("LocalizationSourceName", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(_sut, "Eaf");
+
+            var notificationPublisher = Substitute.For<INotificationPublisher>();
+            notificationPublisher.PublishAsync(
+                Arg.Any<string>(),
+                Arg.Any<NotificationData>(),
+                Arg.Any<EntityIdentifier>(),
+                Arg.Any<NotificationSeverity>(),
+                Arg.Any<Abp.UserIdentifier[]>(),
+                Arg.Any<Abp.UserIdentifier[]>(),
+                Arg.Any<int?[]>(),
+                Arg.Any<Type[]>()
+            ).Returns(Task.FromException(new Exception("Notification error")));
+
+            var webhookPublisher = Substitute.For<IWebhookPublisher>();
+            webhookPublisher.PublishAsync(
+                Arg.Any<string>(),
+                Arg.Any<object>(),
+                Arg.Any<bool>(),
+                Arg.Any<WebhookHeader>()
+            ).Returns(Task.FromException(new Exception("Webhook error")));
+
+            typeof(UserAppService).GetField("_notificationPublisher", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(_sut, notificationPublisher);
+            typeof(UserAppService).GetField("_webhookPublisher", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(_sut, webhookPublisher);
+
+            var user = new User { Id = 1, UserName = "testuser", Name = "Test", Surname = "User", TenantId = null };
+            var method = typeof(UserAppService).GetMethod("NotificationNewUser", BindingFlags.NonPublic | BindingFlags.Instance);
+            method.ShouldNotBeNull();
+
+            // Quando / Então
+            var task = (Task)method.Invoke(_sut, new object[] { user });
+            await Should.NotThrowAsync(() => task);
+
+            await notificationPublisher.Received(1).PublishAsync(
+                Arg.Any<string>(),
+                Arg.Any<NotificationData>(),
+                Arg.Any<EntityIdentifier>(),
+                Arg.Any<NotificationSeverity>(),
+                Arg.Any<Abp.UserIdentifier[]>(),
+                Arg.Any<Abp.UserIdentifier[]>(),
+                Arg.Any<int?[]>(),
+                Arg.Any<Type[]>()
+            );
+
+            await webhookPublisher.Received(1).PublishAsync(
+                Arg.Any<string>(),
+                Arg.Any<object>(),
+                Arg.Any<bool>(),
+                Arg.Any<WebhookHeader>()
+            );
         }
 
         #endregion

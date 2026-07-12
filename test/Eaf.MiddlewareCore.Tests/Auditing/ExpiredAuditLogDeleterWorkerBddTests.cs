@@ -59,6 +59,8 @@ namespace Eaf.MiddlewareCore.Tests.Auditing
             }
 
             public void DoWorkPublic() => DoWork();
+
+            public void DeleteAuditLogsOnTenantDatabasePublic(int tenantId, DateTime expireDate) => DeleteAuditLogsOnTenantDatabase(tenantId, expireDate);
         }
 
         [Fact]
@@ -143,6 +145,16 @@ namespace Eaf.MiddlewareCore.Tests.Auditing
 
             // Então
             _auditLogRepository.Received(1).Delete(Arg.Any<Expression<Func<AuditLog, bool>>>());
+        }
+
+        [Fact]
+        public void Dado_ErroNoUowDoTenant_Quando_DeleteAuditLogsOnTenantDatabase_Entao_NaoDeveLancarExcecao()
+        {
+            _unitOfWorkManager.Begin().Returns(_ => throw new Exception("UOW tenant error"));
+
+            var sut = CreateWorker();
+
+            Should.NotThrow(() => sut.DeleteAuditLogsOnTenantDatabasePublic(1, DateTime.UtcNow.AddDays(-400)));
         }
 
         [Fact]

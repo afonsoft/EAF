@@ -88,5 +88,21 @@ namespace Eaf.Middleware.Tests.Application.Chat
 
             _sut.CheckChatFeatures(null, 1);
         }
+
+        [Fact]
+        public void Dado_ChatFeatureDesabilitado_Quando_CheckChatFeatures_Entao_DeveLancarUserFriendlyException()
+        {
+            _featureChecker.IsEnabled(1, AppFeatures.ChatFeature).Returns(false);
+
+            Should.Throw<UserFriendlyException>(() => _sut.CheckChatFeatures(1, null));
+        }
+
+        [Fact]
+        public void Dado_HostParaTenantComTenantToHostDesabilitado_Quando_CheckChatFeatures_Entao_DeveLancarUserFriendlyException()
+        {
+            _featureChecker.IsEnabled(1, AppFeatures.TenantToHostChatFeature).Returns(false);
+
+            Should.Throw<UserFriendlyException>(() => _sut.CheckChatFeatures(null, 1));
+        }
     }
 }

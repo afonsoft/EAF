@@ -171,5 +171,49 @@ namespace Eaf.MiddlewareCore.Tests.Auditing.hangfire
             // Então
             _auditLogRepository.Received(2).Delete(Arg.Any<AuditLog>());
         }
+
+        [Fact]
+        public void Dado_AuditLogsExpiradosExcedendoLimite_Quando_DeleteLancarExcecao_Entao_DeveCapturarEContinuar()
+        {
+            // Dado
+            var auditLogs = Enumerable.Range(1, 3)
+                .Select(i => new AuditLog { Id = i, ExecutionTime = DateTime.UtcNow.AddDays(-400) })
+                .ToList();
+
+            _auditLogRepository.GetAll().Returns(auditLogs.AsQueryable());
+            _auditLogRepository.LongCount(Arg.Any<Expression<Func<AuditLog, bool>>>()).Returns(3L);
+            _auditLogRepository.When(x => x.Delete(Arg.Any<AuditLog>())).Do(_ => throw new Exception("Delete error"));
+
+            var sut = CreateWorker(true);
+            var maxDeletionField = typeof(ExpiredAuditLogDeleterWorker).GetField("MaxDeletionCount", BindingFlags.NonPublic | BindingFlags.Instance);
+            maxDeletionField.SetValue(sut, 2);
+
+            var context = CriarPerformContext();
+
+            // Quando / Então
+            Should.NotThrow(() => sut.DoWorkPublic(context));
+            _auditLogRepository.Received(2).Delete(Arg.Any<AuditLog>());
+        }
+
+        [Fact]
+        public void Dado_AuditLogsExpiradosDentroLimite_Quando_DeleteLancarExcecao_Entao_DeveCapturarEContinuar()
+        {
+            // Dado
+            var auditLogs = new List<AuditLog>
+            {
+                new AuditLog { Id = 1, ExecutionTime = DateTime.UtcNow.AddDays(-400) }
+            };
+
+            _auditLogRepository.GetAll().Returns(auditLogs.AsQueryable());
+            _auditLogRepository.LongCount(Arg.Any<Expression<Func<AuditLog, bool>>>()).Returns(1L);
+            _auditLogRepository.When(x => x.Delete(Arg.Any<AuditLog>())).Do(_ => throw new Exception("Delete error"));
+
+            var sut = CreateWorker(true);
+            var context = CriarPerformContext();
+
+            // Quando / Então
+            Should.NotThrow(() => sut.DoWorkPublic(context));
+            _auditLogRepository.Received(1).Delete(Arg.Any<AuditLog>());
+        }
     }
 }

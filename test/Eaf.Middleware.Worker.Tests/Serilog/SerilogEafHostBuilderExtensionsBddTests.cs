@@ -305,6 +305,68 @@ namespace Eaf.Middleware.Worker.Tests.Serilog
         }
 
         [Fact]
+        public void Dado_HostBuilderComConfigElastic_Quando_UsarEafSerilogSemNivelEBuild_Entao_DeveCriarHost()
+        {
+            var tempDirectory = CriarTempDirectory();
+            var originalDirectory = Directory.GetCurrentDirectory();
+            var originalLog = Log.Logger;
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config =>
+                        config.AddInMemoryCollection(new Dictionary<string, string?>
+                        {
+                            { "ElasticSearch:Url", "http://localhost:9200" }
+                        }))
+                    .UseEafSerilog();
+
+                using var host = builder.Build();
+                host.ShouldNotBeNull();
+                Log.CloseAndFlush();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                LimparTempDirectory(tempDirectory);
+                Log.CloseAndFlush();
+                Log.Logger = originalLog;
+            }
+        }
+
+        [Fact]
+        public void Dado_HostBuilderComConfigSeqSemApiKey_Quando_UsarEafSerilogSemNivelEBuild_Entao_DeveCriarHost()
+        {
+            var tempDirectory = CriarTempDirectory();
+            var originalDirectory = Directory.GetCurrentDirectory();
+            var originalLog = Log.Logger;
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config =>
+                        config.AddInMemoryCollection(new Dictionary<string, string?>
+                        {
+                            { "Seq:Url", "http://localhost:5341" }
+                        }))
+                    .UseEafSerilog();
+
+                using var host = builder.Build();
+                host.ShouldNotBeNull();
+                Log.CloseAndFlush();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                LimparTempDirectory(tempDirectory);
+                Log.CloseAndFlush();
+                Log.Logger = originalLog;
+            }
+        }
+
+        [Fact]
         public void Dado_HostBuilderComConfigureLoggerCustomizado_Quando_UsarEafSerilog_Entao_DeveRetornarMesmoBuilder()
         {
             var tempDirectory = CriarTempDirectory();

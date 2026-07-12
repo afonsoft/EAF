@@ -20,14 +20,14 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
     public class SignalRChatCommunicatorBddTests
     {
         private readonly IHubContext<ChatHub> _chatHub;
-        private readonly IClientProxy _clientProxy;
+        private readonly ISingleClientProxy _clientProxy;
         private readonly IObjectMapper _objectMapper;
         private readonly IOnlineClientManager<ChatChannel> _onlineClientManager;
 
         public SignalRChatCommunicatorBddTests()
         {
             _chatHub = Substitute.For<IHubContext<ChatHub>>();
-            _clientProxy = Substitute.For<IClientProxy>();
+            _clientProxy = Substitute.For<ISingleClientProxy>();
             _objectMapper = Substitute.For<IObjectMapper>();
             _onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
 
@@ -48,9 +48,7 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
         [Fact]
         public async Task Dado_UsuarioOffline_Quando_SendReadStateChangeToClients_Entao_NaoDeveChamarSendAsync()
         {
-            var nullProxy = new NullClientProxy();
-            var communicator = new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
-            _chatHub.Clients.Returns(new FakeHubClients(nullProxy));
+            var communicator = CriarComunicadorComClienteNulo();
             var onlineClient = CriarOnlineClient("conn-2", 2);
 
             await communicator.SendReadStateChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1));
@@ -130,12 +128,87 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
             await _clientProxy.Received(1).SendCoreAsync("getallUnreadMessagesOfUserRead", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
         }
 
+        [Fact]
+        public async Task Dado_ClientesOffline_Quando_SendAllUnreadMessagesOfUserReadToClients_Entao_NaoDeveChamarSendAsync()
+        {
+            var communicator = CriarComunicadorComClienteNulo();
+            var onlineClient = CriarOnlineClient("conn-off", 1);
+
+            await communicator.SendAllUnreadMessagesOfUserReadToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1));
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getallUnreadMessagesOfUserRead", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_ClientesOffline_Quando_SendFriendshipRequestToClient_Entao_NaoDeveChamarSendAsync()
+        {
+            var communicator = CriarComunicadorComClienteNulo();
+            var onlineClient = CriarOnlineClient("conn-off", 1);
+            var friendship = CriarFriendship();
+
+            await communicator.SendFriendshipRequestToClient(new List<IOnlineClient> { onlineClient }, friendship, true, false);
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getFriendshipRequest", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_ClientesOffline_Quando_SendMessageToAll_Entao_NaoDeveChamarSendAsync()
+        {
+            var communicator = CriarComunicadorComClienteNulo();
+            var onlineClient = CriarOnlineClient("conn-off", 1);
+            _onlineClientManager.GetAllClientsAsync().Returns(new List<IOnlineClient> { onlineClient });
+
+            await communicator.SendMessageToAll("hello");
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getMessage", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_ClientesOffline_Quando_SendMessageToClient_Entao_NaoDeveChamarSendAsync()
+        {
+            var communicator = CriarComunicadorComClienteNulo();
+            var onlineClient = CriarOnlineClient("conn-off", 1);
+            var message = CriarChatMessage();
+
+            await communicator.SendMessageToClient(new List<IOnlineClient> { onlineClient }, message);
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getChatMessage", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_ClientesOffline_Quando_SendUserConnectionChangeToClients_Entao_NaoDeveChamarSendAsync()
+        {
+            var communicator = CriarComunicadorComClienteNulo();
+            var onlineClient = CriarOnlineClient("conn-off", 1);
+
+            await communicator.SendUserConnectionChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1), true);
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getUserConnectNotification", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Dado_ClientesOffline_Quando_SendUserStateChangeToClients_Entao_NaoDeveChamarSendAsync()
+        {
+            var communicator = CriarComunicadorComClienteNulo();
+            var onlineClient = CriarOnlineClient("conn-off", 1);
+
+            await communicator.SendUserStateChangeToClients(new List<IOnlineClient> { onlineClient }, new UserIdentifier(null, 1), FriendshipState.Accepted);
+
+            await _clientProxy.DidNotReceive().SendCoreAsync("getUserStateChange", Arg.Any<object[]>(), Arg.Any<CancellationToken>());
+        }
+
         private static IOnlineClient CriarOnlineClient(string connectionId, long userId)
         {
             var client = Substitute.For<IOnlineClient>();
             client.ConnectionId.Returns(connectionId);
             client.UserId.Returns(userId);
             return client;
+        }
+
+        private SignalRChatCommunicator CriarComunicadorComClienteNulo()
+        {
+            _chatHub.Clients.Returns(new FakeHubClients(null!));
+            return new SignalRChatCommunicator(_objectMapper, _onlineClientManager, _chatHub);
         }
 
         private static Friendship CriarFriendship()
@@ -170,6 +243,8 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
             public IClientProxy AllExcept(IReadOnlyList<string> excludedConnectionIds) => _clientProxy;
 
             public IClientProxy Client(string connectionId) => _clientProxy;
+
+            ISingleClientProxy IHubClients.Client(string connectionId) => _clientProxy as ISingleClientProxy;
 
             public IClientProxy Clients(IReadOnlyList<string> connectionIds) => _clientProxy;
 

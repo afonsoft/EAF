@@ -11,6 +11,9 @@ using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
 
+using System.Globalization;
+using Abp.Localization.Sources;
+
 namespace Eaf.Middleware.Application.Tests
 {
     /// <summary>
@@ -25,6 +28,7 @@ namespace Eaf.Middleware.Application.Tests
             public Task<Tenant> PublicGetCurrentTenantAsync() => GetCurrentTenantAsync();
             public Tenant PublicGetCurrentTenant() => GetCurrentTenant();
             public void PublicCheckErrors(IdentityResult result) => CheckErrors(result);
+            public string PublicL(string name, CultureInfo culture) => L(name, culture);
         }
 
         private static TestMiddlewareAppService CreateSut()
@@ -130,6 +134,21 @@ namespace Eaf.Middleware.Application.Tests
 
             // Quando / Então
             Should.Throw<UserFriendlyException>(() => sut.PublicCheckErrors(identityResult));
+        }
+
+        [Fact]
+        public void Dado_CultureInfoEspecifica_Quando_Localizar_Entao_DeveRetornarTextoLocalizado()
+        {
+            var sut = CreateSut();
+            var localizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("TestKey", Arg.Any<CultureInfo>()).Returns("Localized");
+            localizationManager.GetSource("EafCore").Returns(source);
+            sut.LocalizationManager = localizationManager;
+
+            var result = sut.PublicL("TestKey", CultureInfo.InvariantCulture);
+
+            result.ShouldBe("Localized");
         }
 
     }
