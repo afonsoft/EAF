@@ -25,9 +25,10 @@
           <div class="m-form m-form--label-align-right">
             <div class="row align-items-center m--margin-bottom-10">
               <div class="col-xl-12">
-                <label>{{ 'Number' | localize }} / {{ 'Model' | localize }}</label>
+                <label for="AirplanesFilterText">{{ 'Number' | localize }} / {{ 'Model' | localize }}</label>
                 <div class="input-group">
                   <input
+                    id="AirplanesFilterText"
                     [(ngModel)]="filters.filterText"
                     name="filterText"
                     class="form-control m-input"
@@ -61,12 +62,12 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 80px" [hidden]="!isGrantedAny('Pages.Airplanes.Edit', 'Pages.Airplanes.Delete')">{{ l('Actions') }}</th>
-                  <th style="width: 140px" pSortableColumn="number">
+                  <th scope="col" style="width: 80px" [hidden]="!isGrantedAny('Pages.Airplanes.Edit', 'Pages.Airplanes.Delete')">{{ l('Actions') }}</th>
+                  <th scope="col" style="width: 140px" pSortableColumn="number">
                     {{ l('Number') }}
                     <p-sortIcon field="airplane.number"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="model">
+                  <th scope="col" pSortableColumn="model">
                     {{ l('Model') }}
                     <p-sortIcon field="airplane.model"></p-sortIcon>
                   </th>

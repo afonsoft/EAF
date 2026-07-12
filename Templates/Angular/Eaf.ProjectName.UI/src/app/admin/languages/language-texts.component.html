@@ -93,16 +93,16 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 80px">{{ 'Actions' | localize }}</th>
-                  <th pSortableColumn="key">
+                  <th scope="col" style="width: 80px">{{ 'Actions' | localize }}</th>
+                  <th scope="col" pSortableColumn="key">
                     {{ 'Key' | localize }}
                     <p-sortIcon field="key"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="baseValue">
+                  <th scope="col" pSortableColumn="baseValue">
                     {{ 'BaseValue' | localize }}
                     <p-sortIcon field="baseValue"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="targetValue">
+                  <th scope="col" pSortableColumn="targetValue">
                     {{ 'TargetValue' | localize }}
                     <p-sortIcon field="targetValue"></p-sortIcon>
                   </th>

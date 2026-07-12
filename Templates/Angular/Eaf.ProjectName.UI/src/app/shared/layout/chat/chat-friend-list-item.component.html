@@ -1,4 +1,10 @@
-<div (click)="selectChatFriend.emit($event)" class="d-flex align-items-center justify-content-between mb-2 chat-user">
+<div
+  (click)="selectChatFriend.emit($event)"
+  (keyup.enter)="selectChatFriend.emit($event)"
+  role="button"
+  tabindex="0"
+  class="d-flex align-items-center justify-content-between mb-2 chat-user"
+>
   <div class="row d-flex align-items-center" style="width: 100%">
     <div *ngIf="friend.isOnline" class="col-1 symbol symbol-circle symbol-50 mr-2" style="width: 100%">
       <friend-profile-picture

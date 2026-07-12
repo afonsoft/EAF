@@ -82,6 +82,7 @@
                 *ngIf="!chatConnected"
                 src="./assets/common/images/loading.gif"
                 style="width: 23px"
+                alt="{{ 'ChatIsConnecting' | localize }}"
                 tooltip="{{ 'ChatIsConnecting' | localize }}"
                 placement="left"
               />
@@ -132,7 +133,7 @@
             <div class="m-dropdown__body">
               <nav class="m-dropdown__content" [attr.aria-label]="l('UserAccount')">
                 <ul class="m-nav m-nav--skin-light" [attr.aria-label]="l('UserAccount')" role="menu">
-                  <li *ngIf="isImpersonatedLogin" class="m-nav__item" role="none">
+                  <li *ngIf="isImpersonatedLogin" class="m-nav__item" role="presentation">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -155,10 +156,10 @@
                       </span>
                     </a>
                   </li>
-                  <li *ngIf="isImpersonatedLogin" class="m-nav__separator m-nav__separator--fit" role="none"></li>
+                  <li *ngIf="isImpersonatedLogin" class="m-nav__separator m-nav__separator--fit" role="presentation"></li>
 
-                  <li class="m-nav__separator m-nav__separator--fit" role="none"></li>
-                  <li class="m-nav__item" role="none" *ngIf="isSystemUser">
+                  <li class="m-nav__separator m-nav__separator--fit" role="presentation"></li>
+                  <li class="m-nav__item" role="presentation" *ngIf="isSystemUser">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -178,7 +179,7 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__item" role="none">
+                  <li class="m-nav__item" role="presentation">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -198,7 +199,7 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__item" role="none">
+                  <li class="m-nav__item" role="presentation">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -218,7 +219,7 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__item" role="none">
+                  <li class="m-nav__item" role="presentation">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -238,8 +239,8 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__separator m-nav__separator--fit" role="none"></li>
-                  <li class="m-nav__item" role="none">
+                  <li class="m-nav__separator m-nav__separator--fit" role="presentation"></li>
+                  <li class="m-nav__item" role="presentation">
                     <a
                       href="javascript:;"
                       (click)="logout()"

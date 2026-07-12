@@ -57,20 +57,20 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 80px">{{ 'Actions' | localize }}</th>
-                  <th pSortableColumn="tenancyName" style="width: 150px">
+                  <th scope="col" style="width: 80px">{{ 'Actions' | localize }}</th>
+                  <th scope="col" pSortableColumn="tenancyName" style="width: 150px">
                     {{ 'Code' | localize }}
                     <p-sortIcon field="tenancyName"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="name">
+                  <th scope="col" pSortableColumn="name">
                     {{ 'Name' | localize }}
                     <p-sortIcon field="name"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="creationTime" style="width: 160px">
+                  <th scope="col" pSortableColumn="creationTime" style="width: 160px">
                     {{ 'ModificationTime' | localize }}
                     <p-sortIcon field="creationTime"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="isActive" style="width: 70px">
+                  <th scope="col" pSortableColumn="isActive" style="width: 70px">
                     {{ 'Active' | localize }}
                     <p-sortIcon field="isActive"></p-sortIcon>
                   </th>

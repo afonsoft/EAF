@@ -59,9 +59,9 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'IsCookieConsentEnabled' | localize }}
-                </label>
+                </span>
               </label>
             </span>
 
@@ -76,7 +76,7 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label"> Google ReCaptcha </label>
+                <span class="m-switch-label"> Google ReCaptcha </span>
               </label>
             </span>
             <div *ngIf="hostSettings.userManagement.useCaptchaOnLogin">
@@ -98,9 +98,9 @@
                     type="checkbox"
                   />
                   <span></span>
-                  <label class="m-switch-label">
+                  <span class="m-switch-label">
                     {{ 'EmailConfirmationRequiredForLogin' | localize }}
-                  </label>
+                  </span>
                 </label>
               </span>
 
@@ -111,16 +111,16 @@
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
-                      (click)="clearAdSettings()"
+                      (change)="clearAdSettings()"
                       [(ngModel)]="hostSettings.azureActiveDirectory.isEnabled"
                       id="Setting_AzureActiveDirectoryIsEnabled"
                       name="AzureActiveDirectoryIsEnabled"
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'EnableAzureActiveDirectoryAuthentication' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
 
@@ -173,9 +173,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'RegisterRequiredForLogin' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
                 <br />
@@ -189,9 +189,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'StoreAdTokenInformation' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
               </div>
@@ -204,16 +204,16 @@
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
-                      (click)="clearLdapSettings()"
+                      (change)="clearLdapSettings()"
                       [(ngModel)]="hostSettings.ldap.isEnabled"
                       id="Setting_LdapIsEnabled"
                       name="LdapIsEnabled"
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'EnableLdapAuthentication' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
 
@@ -266,9 +266,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'RegisterRequiredForLogin' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
                 <br />
@@ -282,9 +282,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'StoreAdTokenInformation' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
               </div>
@@ -303,9 +303,9 @@
                     type="checkbox"
                   />
                   <span></span>
-                  <label class="m-switch-label">
+                  <span class="m-switch-label">
                     {{ 'UseDefaultSettings' | localize }}
-                  </label>
+                  </span>
                 </label>
               </span>
 
@@ -319,9 +319,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'PasswordComplexity_RequireDigit' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
                 <br />
@@ -335,9 +335,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'PasswordComplexity_RequireLowercase' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
                 <br />
@@ -351,9 +351,9 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'PasswordComplexity_RequireNonAlphanumeric' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
                 <br />
@@ -367,14 +367,14 @@
                       type="checkbox"
                     />
                     <span></span>
-                    <label class="m-switch-label">
+                    <span class="m-switch-label">
                       {{ 'PasswordComplexity_RequireUppercase' | localize }}
-                    </label>
+                    </span>
                   </label>
                 </span>
 
                 <div class="form-group">
-                  <label>
+                  <label for="Setting_RequiredLength">
                     {{ 'PasswordComplexity_RequiredLength' | localize }}
                   </label>
                   <input
@@ -382,6 +382,7 @@
                     [ngClass]="{ edited: hostSettings.security.passwordComplexity.requiredLength }"
                     *ngIf="!hostSettings.security.useDefaultPasswordComplexitySettings"
                     class="form-control"
+                    id="Setting_RequiredLength"
                     name="RequiredLength"
                     type="number"
                   />
@@ -409,9 +410,9 @@
                     type="checkbox"
                   />
                   <span></span>
-                  <label class="m-switch-label">
+                  <span class="m-switch-label">
                     {{ 'EnableUserAccountLockingOnFailedLoginAttemts' | localize }}
-                  </label>
+                  </span>
                 </label>
               </span>
 
@@ -505,9 +506,9 @@
               <label>
                 <input [(ngModel)]="hostSettings.email.smtpEnableSsl" id="Settings_SmtpEnableSsl" name="SmtpEnableSsl" type="checkbox" />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'UseSsl' | localize }}
-                </label>
+                </span>
               </label>
             </span>
             <br />
@@ -520,9 +521,9 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'UseDefaultCredentials' | localize }}
-                </label>
+                </span>
               </label>
             </span>
 
@@ -596,9 +597,9 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'EnableAuth0Authentication' | localize }}
-                </label>
+                </span>
               </label>
             </span>
             <div *ngIf="hostSettings.externalLoginProviderSettings.authZero_IsEnabled">
@@ -612,7 +613,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>{{ 'ClientSecret' | localize }}*</label>
+                <label for="Setting_Auth0_ClientSecret">{{ 'ClientSecret' | localize }}*</label>
                 <input
                   [(ngModel)]="hostSettings.externalLoginProviderSettings.authZero.clientSecret"
                   class="form-control m-input"
@@ -642,9 +643,9 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'EnableGoogleAuthentication' | localize }}
-                </label>
+                </span>
               </label>
             </span>
             <div *ngIf="hostSettings.externalLoginProviderSettings.google_IsEnabled">
@@ -658,7 +659,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>{{ 'ClientSecret' | localize }}*</label>
+                <label for="Setting_Google_ClientSecret">{{ 'ClientSecret' | localize }}*</label>
                 <input
                   [(ngModel)]="hostSettings.externalLoginProviderSettings.google.clientSecret"
                   class="form-control m-input"
@@ -688,9 +689,9 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'EnableMicrosoftAuthentication' | localize }}
-                </label>
+                </span>
               </label>
             </span>
             <div *ngIf="hostSettings.externalLoginProviderSettings.microsoft_IsEnabled">
@@ -717,7 +718,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>{{ 'ClientSecret' | localize }}*</label>
+                <label for="Setting_Microsoft_ClientSecret">{{ 'ClientSecret' | localize }}*</label>
                 <input
                   [(ngModel)]="hostSettings.externalLoginProviderSettings.microsoft.clientSecret"
                   class="form-control m-input"
@@ -738,9 +739,9 @@
                   type="checkbox"
                 />
                 <span></span>
-                <label class="m-switch-label">
+                <span class="m-switch-label">
                   {{ 'EnableOpenIdConnectAuthentication' | localize }}
-                </label>
+                </span>
               </label>
             </span>
             <div *ngIf="hostSettings.externalLoginProviderSettings.openIdConnect_IsEnabled">
