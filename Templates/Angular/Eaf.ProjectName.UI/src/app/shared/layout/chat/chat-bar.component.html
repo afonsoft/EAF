@@ -162,7 +162,7 @@
                       <div class="d-flex align-items-center">
                         <div class="symbol symbol-circle symbol-40 mr-3 ml-1 mt-1">
                           <img
-                            alt="image"
+                            alt=""
                             class="header-profile-picture m--img-rounded m--marginless m--img-centered mr-2"
                             src="{{ profilePicture }}"
                             style="width: 32px"
@@ -239,7 +239,7 @@
             <!--begin::Footer-->
             <div class="card-footer align-items-center row">
               <!--begin::Compose-->
-              <form id="chatMessageForm" name="chatMessageForm" role="form" style="width: 99%">
+              <form id="chatMessageForm" name="chatMessageForm" style="width: 99%">
                 <div class="files" id="files"></div>
                 <div *ngIf="selectedUser.state === friendDtoState.Blocked" class="col-md-12" style="margin: 5px; padding-right: 25px">
                   <button (click)="unblock(selectedUser)" class="btn btn-block btn-success" id="UnblockUserButton" type="button">

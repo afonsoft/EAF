@@ -62,7 +62,7 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th
+                  <th scope="col"
                     style="width: 80px"
                     [hidden]="
                       !isGrantedAny(
@@ -74,21 +74,21 @@
                   >
                     {{ 'Actions' | localize }}
                   </th>
-                  <th pSortableColumn="name" style="width: 150px">
+                  <th scope="col" pSortableColumn="name" style="width: 150px">
                     {{ 'Code' | localize }}
                     <p-sortIcon field="name"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="displayName">
+                  <th scope="col" pSortableColumn="displayName">
                     {{ 'Name' | localize }}
                     <p-sortIcon field="displayName"></p-sortIcon>
                   </th>
 
-                  <th *ngIf="appSession.tenantId ? true : false">{{ 'Default' | localize }} *</th>
-                  <th pSortableColumn="creationTime" style="width: 160px">
+                  <th scope="col" *ngIf="appSession.tenantId ? true : false">{{ 'Default' | localize }} *</th>
+                  <th scope="col" pSortableColumn="creationTime" style="width: 160px">
                     {{ 'ModificationTime' | localize }}
                     <p-sortIcon field="creationTime"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="isDisabled" style="width: 70px">
+                  <th scope="col" pSortableColumn="isDisabled" style="width: 70px">
                     {{ 'Active' | localize }}
                     <p-sortIcon field="isDisabled"></p-sortIcon>
                   </th>

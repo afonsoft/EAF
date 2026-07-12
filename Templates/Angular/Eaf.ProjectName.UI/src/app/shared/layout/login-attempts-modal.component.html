@@ -50,7 +50,7 @@
                   </div>
                   <div class="m-alert__text">
                     <div class="row" *ngIf="userLoginAttempt.clientIpAddress">
-                      <label class="control-label col-sm-3 text-right">{{ 'IpAddress' | localize }}</label>
+                      <span class="control-label col-sm-3 text-right">{{ 'IpAddress' | localize }}</span>
                       <div class="col-sm-9">
                         <p class="form-control-static">
                           {{ userLoginAttempt.clientIpAddress }}
@@ -59,7 +59,7 @@
                     </div>
 
                     <div class="row" *ngIf="userLoginAttempt.clientName">
-                      <label class="control-label col-sm-3 text-right">{{ 'Client' | localize }}</label>
+                      <span class="control-label col-sm-3 text-right">{{ 'Client' | localize }}</span>
                       <div class="col-sm-9">
                         <p class="form-control-static">
                           {{ userLoginAttempt.clientName }}
@@ -68,7 +68,7 @@
                     </div>
 
                     <div class="row" *ngIf="userLoginAttempt.browserInfo">
-                      <label class="control-label col-sm-3 text-right">{{ 'Browser' | localize }}</label>
+                      <span class="control-label col-sm-3 text-right">{{ 'Browser' | localize }}</span>
                       <div class="col-sm-9">
                         <p class="form-control-static">
                           {{ userLoginAttempt.browserInfo }}
@@ -77,7 +77,7 @@
                     </div>
 
                     <div class="row">
-                      <label class="control-label col-sm-3 text-right">{{ 'Time' | localize }}</label>
+                      <span class="control-label col-sm-3 text-right">{{ 'Time' | localize }}</span>
                       <div class="col-sm-9">
                         <p class="form-control-static login-attempt-date">
                           {{ getLoginAttemptTime(userLoginAttempt) }}

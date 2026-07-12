@@ -276,14 +276,14 @@
                     >
                       <ng-template pTemplate="header">
                         <tr>
-                          <th style="width: 40px">
+                          <th scope="col" style="width: 40px">
                             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                           </th>
-                          <th style="width: 200px" pSortableColumn="username">
+                          <th scope="col" style="width: 200px" pSortableColumn="username">
                             {{ 'UserName' | localize }}
                             <p-sortIcon field="username"></p-sortIcon>
                           </th>
-                          <th pSortableColumn="name">
+                          <th scope="col" pSortableColumn="name">
                             {{ 'Name' | localize }}
                             <p-sortIcon field="name"></p-sortIcon>
                           </th>
@@ -374,14 +374,14 @@
                     >
                       <ng-template pTemplate="header">
                         <tr>
-                          <th style="width: 40px">
+                          <th scope="col" style="width: 40px">
                             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                           </th>
-                          <th style="width: 200px" pSortableColumn="username">
+                          <th scope="col" style="width: 200px" pSortableColumn="username">
                             {{ 'UserName' | localize }}
                             <p-sortIcon field="username"></p-sortIcon>
                           </th>
-                          <th pSortableColumn="name">
+                          <th scope="col" pSortableColumn="name">
                             {{ 'Name' | localize }}
                             <p-sortIcon field="name"></p-sortIcon>
                           </th>

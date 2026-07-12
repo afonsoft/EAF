@@ -20,7 +20,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form novalidate (ngSubmit)="refreshTable()" autocomplete="new-password">
+        <form novalidate (ngSubmit)="refreshTable()" autocomplete="off">
           <div *ngIf="options.isFilterEnabled" class="input-group mb-4">
             <input
               autoFocus
@@ -48,10 +48,10 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 15%">
+                  <th scope="col" style="width: 15%">
                     {{ 'Select' | localize }}
                   </th>
-                  <th>
+                  <th scope="col">
                     {{ 'Name' | localize }}
                   </th>
                 </tr>

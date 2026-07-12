@@ -1,7 +1,7 @@
 ﻿<div class="form-group mb-2">
-  <label>{{ header }}</label>
+  <label for="KeyValueListManagerKey">{{ header }}</label>
   <div class="input-group">
-    <input type="text" class="form-control" [(ngModel)]="addOrEditKey" placeholder="{{ keyPlaceHolder }}" (change)="onKeyChange()" />
+    <input id="KeyValueListManagerKey" type="text" class="form-control" [(ngModel)]="addOrEditKey" placeholder="{{ keyPlaceHolder }}" (change)="onKeyChange()" />
     <input type="text" class="form-control" [(ngModel)]="addOrEditValue" placeholder="{{ valuePlaceHolder }}" />
     <div class="input-group-append">
       <button class="btn btn-primary" (click)="addOrEdit()" type="button">
@@ -20,11 +20,11 @@
     >
       <div class="alert-text">"{{ keyValueItem.key }}" : "{{ keyValueItem.value }}"</div>
       <div class="alert-close">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true" (click)="openItemEdit(keyValueItem)"><i class="la la-edit fa-1x"></i></span>
+        <button type="button" class="close" data-dismiss="alert" [attr.aria-label]="l('Edit')" (click)="openItemEdit(keyValueItem)">
+          <span aria-hidden="true"><i class="la la-edit fa-1x"></i></span>
         </button>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true" (click)="removeItem(keyValueItem)"><i class="la la-close fa-1x"></i></span>
+        <button type="button" class="close" data-dismiss="alert" [attr.aria-label]="l('Delete')" (click)="removeItem(keyValueItem)">
+          <span aria-hidden="true"><i class="la la-close fa-1x"></i></span>
         </button>
       </div>
     </div>

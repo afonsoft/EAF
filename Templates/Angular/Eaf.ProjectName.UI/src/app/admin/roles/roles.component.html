@@ -25,9 +25,10 @@
             <div class="form-body">
               <div class="row m--margin-bottom-10">
                 <div class="col-xl-12">
-                  <label>{{ 'Permissions' | localize }}</label>
+                  <label for="RolePermissionFilter">{{ 'Permissions' | localize }}</label>
                   <div class="input-group">
                     <permission-combo
+                      id="RolePermissionFilter"
                       name="permissionFilter"
                       class="form-control"
                       [(ngModel)]="filters.filterText"
@@ -57,14 +58,14 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 80px" [hidden]="!isGrantedAny('Pages.Administration.Roles.Edit', 'Pages.Administration.Roles.Delete')">
+                  <th scope="col" style="width: 80px" [hidden]="!isGrantedAny('Pages.Administration.Roles.Edit', 'Pages.Administration.Roles.Delete')">
                     {{ 'Actions' | localize }}
                   </th>
-                  <th pSortableColumn="name">
+                  <th scope="col" pSortableColumn="name">
                     {{ 'Name' | localize }}
                     <p-sortIcon field="name"></p-sortIcon>
                   </th>
-                  <th pSortableColumn="creationTime" style="width: 160px">
+                  <th scope="col" pSortableColumn="creationTime" style="width: 160px">
                     {{ 'ModificationTime' | localize }}
                     <p-sortIcon field="creationTime"></p-sortIcon>
                   </th>

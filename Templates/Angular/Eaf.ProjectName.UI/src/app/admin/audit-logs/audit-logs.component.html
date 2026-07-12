@@ -66,25 +66,25 @@
                 >
                   <ng-template pTemplate="header">
                     <tr>
-                      <th style="width: 80px">{{ 'Actions' | localize }}</th>
-                      <th style="width: 200px" pSortableColumn="executionTime">
+                      <th scope="col" style="width: 80px">{{ 'Actions' | localize }}</th>
+                      <th scope="col" style="width: 200px" pSortableColumn="executionTime">
                         {{ 'ExecutionTime' | localize }}
                         <p-sortIcon field="executionTime"></p-sortIcon>
                       </th>
-                      <th style="width: 150px" pSortableColumn="userName">
+                      <th scope="col" style="width: 150px" pSortableColumn="userName">
                         {{ 'UserName' | localize }}
                         <p-sortIcon field="userName"></p-sortIcon>
                       </th>
-                      <th style="width: 250px">
+                      <th scope="col" style="width: 250px">
                         {{ 'Service' | localize }}
                       </th>
-                      <th style="width: 250px">
+                      <th scope="col" style="width: 250px">
                         {{ 'Action' | localize }}
                       </th>
-                      <th style="width: 150px">
+                      <th scope="col" style="width: 150px">
                         {{ 'IpAddress' | localize }}
                       </th>
-                      <th style="width: 150px">
+                      <th scope="col" style="width: 150px">
                         {{ 'Browser' | localize }}
                       </th>
                     </tr>
@@ -189,18 +189,18 @@
                 >
                   <ng-template pTemplate="header">
                     <tr>
-                      <th style="width: 80px">{{ 'Actions' | localize }}</th>
-                      <th style="width: 150px">
+                      <th scope="col" style="width: 80px">{{ 'Actions' | localize }}</th>
+                      <th scope="col" style="width: 150px">
                         {{ 'Operation' | localize }}
                       </th>
-                      <th pSortableColumn="entityTypeFullName">
+                      <th scope="col" pSortableColumn="entityTypeFullName">
                         {{ 'Object' | localize }}
                       </th>
-                      <th style="width: 250px" pSortableColumn="userName">
+                      <th scope="col" style="width: 250px" pSortableColumn="userName">
                         {{ 'UserName' | localize }}
                         <p-sortIcon field="userName"></p-sortIcon>
                       </th>
-                      <th style="width: 150px" pSortableColumn="changeTime">
+                      <th scope="col" style="width: 150px" pSortableColumn="changeTime">
                         {{ 'ChangeTime' | localize }}
                         <p-sortIcon field="changeTime"></p-sortIcon>
                       </th>

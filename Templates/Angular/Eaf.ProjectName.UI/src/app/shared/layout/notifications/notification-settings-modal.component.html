@@ -48,7 +48,7 @@
                     [disabled]="!settings.receiveNotifications"
                   />
                   <span></span>
-                  <label class="m-switch-label">{{ notification.displayName | localize }}</label>
+                  <span class="m-switch-label">{{ notification.displayName | localize }}</span>
                 </label>
               </span>
               <span *ngIf="notification.description" class="help-block">{{ notification.description }}</span>

@@ -40,6 +40,9 @@
                 *ngFor="let notification of notifications"
                 class="m-list-timeline__item user-notification-item"
                 (click)="gotoUrl(notification.url)"
+                (keyup.enter)="gotoUrl(notification.url)"
+                [attr.role]="notification.url ? 'button' : null"
+                [attr.tabindex]="notification.url ? 0 : null"
                 [ngClass]="{ 'user-notification-item-clickable': notification.url, 'user-notification-item-unread': notification.isUnread }"
               >
                 <span class="m-list-timeline__badge m-list-timeline__badge--success"></span>

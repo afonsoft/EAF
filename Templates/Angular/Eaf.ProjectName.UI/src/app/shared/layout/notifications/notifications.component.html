@@ -27,9 +27,9 @@
             <div class="form-body">
               <div class="row m--margin-bottom-10">
                 <div class="col-xl-12">
-                  <label>{{ 'Status' | localize }}</label>
+                  <label for="NotificationsStatusFilter">{{ 'Status' | localize }}</label>
                   <div class="input-group">
-                    <select #TargetValueFilterSelectionCombobox class="form-control" [(ngModel)]="readStateFilter" name="readStateFilter">
+                    <select id="NotificationsStatusFilter" #TargetValueFilterSelectionCombobox class="form-control" [(ngModel)]="readStateFilter" name="readStateFilter">
                       <option value="ALL">{{ 'All' | localize }}</option>
                       <option value="UNREAD">{{ 'Unread' | localize }}</option>
                     </select>
@@ -58,11 +58,11 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 80px">{{ 'Actions' | localize }}</th>
-                  <th>
+                  <th scope="col" style="width: 80px">{{ 'Actions' | localize }}</th>
+                  <th scope="col">
                     {{ 'Notification' | localize }}
                   </th>
-                  <th pSortableColumn="creationTime" style="width: 160px">
+                  <th scope="col" pSortableColumn="creationTime" style="width: 160px">
                     {{ 'NotificationTime' | localize }}
                     <p-sortIcon field="creationTime"></p-sortIcon>
                   </th>
