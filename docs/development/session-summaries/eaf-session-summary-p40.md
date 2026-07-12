@@ -3,7 +3,7 @@
 ## Sessão
 - **Branch:** `feature/devin-20260712-priority40-coverage-audit`
 - **Data:** 2026-07-12
-- **PR:** A ser vinculado após criação.
+- **PR:** #156 (https://github.com/afonsoft/EAF/pull/156)
 
 ## Baseline
 | Métrica | Valor |
