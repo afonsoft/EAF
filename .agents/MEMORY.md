@@ -154,3 +154,10 @@ Current coverage (after P39): Line 90.8%, Branch 72%, Method 96.9%.
 - `FileController` `FormFile.ContentType` setter requires `formFile.Headers` to be initialized first (`new HeaderDictionary()`).
 - `BinaryObject` constructor formats `FileName` as `{Id}_{fileName}`, so `FileDownloadName` assertions must use the constructed name.
 - `ChatHub.Dispose` uses `WindsorContainer` injection; capture the container substitute in the test setup to assert `Release`.
+
+## Sonar fix (2026-07-12)
+Branch: `feature/devin-20260712-fix-sonar-jwt`
+- `src/Eaf.Middleware.Web.Core/Authentication/JwtBearer/MiddlewareJwtSecurityTokenHandler.cs`:
+  - S2583 (line 117): `tokenValidityValueInClaims` is never null, so remove the unreachable `?? user.SecurityStamp` fallback from the cache `Set` call.
+  - S6667 (line 133): pass the caught `SecurityTokenException` as the first argument to `LogHelper.Logger.DebugFormat`.
+- Tests: `Eaf.Middleware.Web.Core.Tests` passed (662 tests).

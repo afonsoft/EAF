@@ -114,7 +114,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
 
                                         cacheManager
                                             .GetCache(MiddlewareCoreConsts.TokenValidityKey)
-                                            .Set(tokenValidityKeyInClaims, tokenValidityValueInClaims ?? user.SecurityStamp,
+                                            .Set(tokenValidityKeyInClaims, tokenValidityValueInClaims,
                                             slidingExpireTime: expiration,
                                             absoluteExpireTime: DateTimeOffset.UtcNow.Add(expiration).AddHours(1));
                                     }
@@ -130,7 +130,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
             }
             catch (SecurityTokenException ex)
             {
-                LogHelper.Logger.DebugFormat("JwtSecurityTokenHandler : {0}", ex.Message.Split('.').FirstOrDefault());
+                LogHelper.Logger.DebugFormat(ex, "JwtSecurityTokenHandler : {0}", ex.Message.Split('.').FirstOrDefault());
                 throw;
             }
             catch (Exception ex)
