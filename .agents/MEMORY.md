@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority38-coverage-audit`
-Baseline coverage (P37): Line 88.1%, Branch 68.0%, Method 96.3%.
-Current coverage (after P38): Line 90.4%, Branch 71.2%, Method 96.9%.
+Last session branch: `feature/devin-20260711-priority39-coverage-audit`
+Baseline coverage (P38): Line 90.4%, Branch 71.2%, Method 96.9%.
+Current coverage (after P39): Line 90.8%, Branch 72%, Method 96.9%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -31,15 +31,36 @@ Current coverage (after P38): Line 90.4%, Branch 71.2%, Method 96.9%.
 - `IocManager.Instance` has a non-public setter; use reflection to get/set the static property in tests that require isolation.
 - `OpenIdConnectAuthProviderApi.ValidateTokenInternal` is private; invoke it via reflection and await the resulting `Task` (not `Task<ExternalAuthUserInfo>`).
 
+## P39 gotchas
+- `JwtSecurityTokenHandler.DefaultInboundClaimTypeMap` maps `unique_name` to `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name` by default; remove `unique_name` from the map before OIDC token validation and restore it in `finally`.
+- `OpenIdConnectAuthProviderApi.GetUserInfo` cannot mock `HttpDocumentRetriever` directly; replace the static `_defaultHttpClient` field's `HttpMessageHandler` via reflection and serve a fake JWKS with the same RSA key used to sign the JWT.
+- `MiddlewareWebCoreModule.PostInitialize` uses concrete `AbpStartupConfiguration`; create it via `Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp")` and `Activator.CreateInstance` so `BackgroundJobs`, `Auditing` and `EntityHistory` are writable.
+- `TokenAuthController` private methods (`CreateJwtClaims`, `TwoFactorAuthenticateAsync`, `IsTwoFactorAuthRequiredAsync`, `UpdateExternalUserAsync`, `RegisterExternalUserAsync`) are `[UnitOfWork]`; invoke via reflection and set `controller.UnitOfWorkManager` to a real `IUnitOfWorkManager` substitute.
+- `RegisterExternalUserAsync` calls `_iocManager.ResolveAsDisposable<DefaultExternalLoginInfoManager>()`; use a real `IocManager` with `Component.For<DefaultExternalLoginInfoManager>().Instance(...)` to resolve the external login manager in tests.
+- `CreateJwtClaims` uses `ClaimsIdentity.ReplaceClaim` (extension that returns `IEnumerable<Claim>`), but the returned sequence is not assigned, so the `amr`/`ExternalAuthProviderformation` claims are not present in the result.
+- `ProviderKeysAreEqual`, `AddSingleSignInParametersToReturnUrl` and `ByteArrayCompare` are private (static) helpers; invoke via reflection with `BindingFlags.NonPublic | BindingFlags.Static` or `BindingFlags.Instance`.
+- `TwoFactorAuthenticateAsync` requires `TokenAuthConfiguration` configured with `SecurityKey`, `SigningCredentials`, `Issuer` and `Audience` so `CreateAccessToken` can write a valid JWT.
+
 ## Coverage command
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P39)
-- `Eaf.Middleware.Core.Authentication.External.OpenIdConnect.OpenIdConnectAuthProviderApi` (66.6%)
-- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (69.6%)
-- `Eaf.Middleware.Web.WebContentDirectoryFinder` (70.8%)
-- `Eaf.Middleware.Web.Controllers.TokenAuthController` (80.7%)
+## Notable classes with remaining low coverage (target for P40)
+- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (2.8%)
+- `Eaf.Middleware.AzureActiveDirectory.Authentication.AzureActiveDirectoryAuthenticationSource<T1, T2>` (8.7%)
+- `Eaf.Middleware.Localization.CultureHelper` (78.5%)
+- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (80.6%)
+- `Eaf.Middleware.Authorization.Impersonation.ImpersonationManager` (81.0%)
+- `Eaf.Middleware.Web.Controllers.TokenAuthController` (81.4%)
+- `Eaf.Middleware.Worker.MiddlewareWorkerModule` (82.1%)
+- `Eaf.Middleware.Web.Configuration.EafHostBuilderExtensions` (83.3%)
+- `Eaf.Middleware.Web.WebContentDirectoryFinder` (83.3%)
+- `Eaf.Middleware.Web.Startup.RedisConfigurer` (84.6%)
+- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (85.0%)
+- `Eaf.Middleware.DataExporting.Excel.EpPlus.EpPlusExcelExporterBase` (85.1%)
+- `Eaf.Middleware.Friendships.FriendshipManager` (85.9%)
+- `Eaf.Middleware.Web.Controllers.ProfileControllerBase` (86.7%)
+- `Eaf.Middleware.Authorization.Users.UserAppService` (86.9%)
 
 ## P38 gotchas
 - `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.
