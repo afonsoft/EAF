@@ -54,5 +54,12 @@ namespace Eaf.MiddlewareCore.Tests.Localization
             var usingLunarCalendar = CultureHelper.UsingLunarCalendar;
             usingLunarCalendar.ShouldBe(false);
         }
+
+        [Fact]
+        public void Dado_CulturaComCaracteresInvalidos_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCurrentCulture()
+        {
+            var result = CultureHelper.GetCultureInfoByChecking("\n");
+            result.Name.ShouldBe(CultureInfo.CurrentCulture.Name);
+        }
     }
 }
