@@ -234,6 +234,133 @@ namespace Eaf.Middleware.Application.Tests.Friendships.Cache
         }
 
         [Fact]
+        public void Dado_UsuarioForaDoCacheComAmigoDetalhado_Quando_GetCacheItem_Entao_DevePreencherDetalhesDoAmigo()
+        {
+            var userIdentifier = new UserIdentifier(1, 1);
+            var user = new User
+            {
+                Id = 1,
+                UserName = "user1",
+                Name = "User",
+                Surname = "One",
+                EmailAddress = "user1@example.com"
+            };
+
+            var friendship = new Friendship(
+                new UserIdentifier(1, 1),
+                new UserIdentifier(2, 2),
+                "tenant2",
+                "friend2",
+                null,
+                FriendshipState.Accepted
+            );
+
+            var friendUser = new User
+            {
+                Id = 2,
+                UserName = "friend2",
+                Name = "Friend",
+                Surname = "Two",
+                EmailAddress = "friend2@example.com"
+            };
+
+            _friendshipRepository.GetAll().Returns(new List<Friendship> { friendship }.AsQueryable());
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage>().AsQueryable());
+            _tenantCache.GetOrNull(1).Returns(new TenantCacheItem { Id = 1, TenancyName = "Default" });
+            _userStore.FindById("1", Arg.Any<CancellationToken>()).Returns(user);
+            _userStore.FindById("2", Arg.Any<CancellationToken>()).Returns(friendUser);
+
+            var result = _sut.GetCacheItem(userIdentifier);
+
+            result.ShouldNotBeNull();
+            result.Friends.Count.ShouldBe(1);
+            result.Friends[0].Name.ShouldBe("Friend");
+            result.Friends[0].Surname.ShouldBe("Two");
+            result.Friends[0].Email.ShouldBe("friend2@example.com");
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemCache_Quando_AddFriend_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 99);
+            var friend = new FriendCacheItem { FriendTenantId = 2, FriendUserId = 2 };
+
+            _sut.AddFriend(userIdentifier, friend);
+
+            _friendCache.GetOrDefault(userIdentifier.ToUserIdentifierString()).ShouldBeNull();
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemCache_Quando_RemoveFriend_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 99);
+            var friend = new FriendCacheItem { FriendTenantId = 2, FriendUserId = 2 };
+
+            _sut.RemoveFriend(userIdentifier, friend);
+
+            _friendCache.GetOrDefault(userIdentifier.ToUserIdentifierString()).ShouldBeNull();
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemCache_Quando_UpdateFriend_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 99);
+            var friend = new FriendCacheItem { FriendTenantId = 2, FriendUserId = 2 };
+
+            _sut.UpdateFriend(userIdentifier, friend);
+
+            _friendCache.GetOrDefault(userIdentifier.ToUserIdentifierString()).ShouldBeNull();
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemCache_Quando_IncreaseUnreadMessageCount_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 99);
+            var friendIdentifier = new UserIdentifier(2, 2);
+
+            _sut.IncreaseUnreadMessageCount(userIdentifier, friendIdentifier, 1);
+
+            _friendCache.GetOrDefault(userIdentifier.ToUserIdentifierString()).ShouldBeNull();
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemAmigoCorrespondente_Quando_IncreaseUnreadMessageCount_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 1);
+            var user = CriarUsuarioEmCache();
+            user.Friends.Add(new FriendCacheItem { FriendTenantId = 2, FriendUserId = 2 });
+            _friendCache.Set(userIdentifier.ToUserIdentifierString(), user);
+
+            _sut.IncreaseUnreadMessageCount(userIdentifier, new UserIdentifier(3, 3), 1);
+
+            user.Friends[0].UnreadMessageCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemCache_Quando_ResetUnreadMessageCount_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 99);
+            var friendIdentifier = new UserIdentifier(2, 2);
+
+            _sut.ResetUnreadMessageCount(userIdentifier, friendIdentifier);
+
+            _friendCache.GetOrDefault(userIdentifier.ToUserIdentifierString()).ShouldBeNull();
+        }
+
+        [Fact]
+        public void Dado_UsuarioSemAmigoCorrespondente_Quando_ResetUnreadMessageCount_Entao_DeveRetornarSemErro()
+        {
+            var userIdentifier = new UserIdentifier(1, 1);
+            var user = CriarUsuarioEmCache();
+            user.Friends.Add(new FriendCacheItem { FriendTenantId = 2, FriendUserId = 2, UnreadMessageCount = 5 });
+            _friendCache.Set(userIdentifier.ToUserIdentifierString(), user);
+
+            _sut.ResetUnreadMessageCount(userIdentifier, new UserIdentifier(3, 3));
+
+            user.Friends[0].UnreadMessageCount.ShouldBe(5);
+        }
+
+        [Fact]
         public void Dado_UsuarioEmCache_Quando_GetCacheItem_Entao_DeveRetornarUsuarioSemChamarRepositorio()
         {
             // Dado
