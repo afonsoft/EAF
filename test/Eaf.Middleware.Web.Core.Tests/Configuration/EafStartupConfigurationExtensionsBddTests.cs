@@ -118,5 +118,32 @@ namespace Eaf.Middleware.Tests.Web.Core.Configuration
         }
 
         #endregion
+
+        #region Duplicate key
+
+        [Fact]
+        public void Dado_SectionComChavesDuplicadas_Quando_GetChildren_Entao_DeveLancarAbpException()
+        {
+            var section = Substitute.For<IConfigurationSection>();
+            section.Key.Returns("TestSection");
+            section.Value.Returns("Value");
+
+            var child1 = Substitute.For<IConfigurationSection>();
+            child1.Key.Returns("TestSection:DuplicateKey");
+            child1.Value.Returns("Value1");
+            child1.GetChildren().Returns(Enumerable.Empty<IConfigurationSection>());
+
+            var child2 = Substitute.For<IConfigurationSection>();
+            child2.Key.Returns("TestSection:DuplicateKey");
+            child2.Value.Returns("Value2");
+            child2.GetChildren().Returns(Enumerable.Empty<IConfigurationSection>());
+
+            section.GetChildren().Returns(new[] { child1, child2 });
+
+            var ex = Should.Throw<Abp.AbpException>(() => _configuration.SetConfiguration(section));
+            ex.Message.ShouldContain("DUPLICATE KEY");
+        }
+
+        #endregion
     }
 }

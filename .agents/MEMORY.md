@@ -1,9 +1,10 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260712-priority43-coverage-audit`
+Last session branch: `feature/devin-20260712-priority44-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
+Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -42,6 +43,15 @@ Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
 - `MiddlewareWebCoreModule.PostInitialize` uses concrete `AbpStartupConfiguration`; create it via `Type.GetType`/`Activator.CreateInstance` and set `BackgroundJobs`, `Auditing` and `EntityHistory` properties to avoid `NullReferenceException`.
 - `FriendshipManager` has three `protected` `L` overloads; create a `TestableFriendshipManager` subclass and call the overloads to cover them.
 - `WebContentDirectoryFinder` `CalculateContentRootFolder` throws `DirectoryNotFoundException` when `src/Eaf.Middleware.Web.Host` is not found; test the exception branch and the `directoryInfo.Parent == null` path with a temporary directory.
+
+## P44 gotchas
+|- `EafStartupConfigurationExtensions.GetChildren` throws `AbpException` on duplicate keys; use `NSubstitute` for `IConfigurationSection` and `GetChildren` with duplicate children to cover the branch.
+|- `IConfigurationSection.Exists()` is an extension method; cannot be mocked with `NSubstitute`. Set `IConfigurationSection.Value` to a non-null value and `GetChildren()` to non-empty to make `Exists()` return true.
+|- `AddSession` lambda body in `EafServiceCollectionMiddlewareExtensions.AddEafConfigurer` is only executed when `IOptions<SessionOptions>` is resolved; include `provider.GetRequiredService<IOptions<SessionOptions>>().Value` in the full-config test to reach 100% line coverage.
+|- `EafMiddlewareCoreSampleAppModule.Initialize` requires a real `IocManager` and `IAbpStartupConfiguration` with `IAbpAutoMapperConfiguration.Configurators` set to a real `List<Action<IMapperConfigurationExpression>>`; otherwise `Configurators.Add` throws `NullReferenceException`.
+|- `Substitute.For<ILdapConnection>()` `SearchAsync` returns `Task<ILdapSearchResults>`; use `.Returns(callInfo => CriarSearchResults())` instead of `.Returns(CriarSearchResults())` when `CriarSearchResults` configures other substitutes, so `NSubstitute` does not lose the last call context.
+|- `LdapAuthenticationSource.CreateUserAsync` delegates to `DefaultExternalAuthenticationSource.CreateUserAsync`, which sets `IsEmailConfirmed` and `IsActive` to `true`; do not assert these flags when testing the empty-search result branch.
+|- `MiddlewareWebCoreModule.PostInitialize` with `Hangfire:IsEnabled=true` and `Database:Provider=SqlServer` plus `ConnectionStrings:Default` sets `JobStorage.Current = new SqlServerStorage(...)`; set `Auditing.IsEnabled=true` and `EntityHistory.IsEnabled=true` to exercise `SetExpiredAuditWoker`/`SetExpiredHistoryEntityWoker` and `RecurringJob.AddOrUpdate`.
 
 ## P43 gotchas
 - `Novell.Directory.Ldap.LdapConnection` `SearchAsync`, `ConnectAsync`, `BindAsync` and `Connected` are `virtual` but `IsFinal` (sealed) in `Novell.Directory.Ldap.NETStandard` 4.0.0; `NSubstitute` cannot override them with `Returns`. Use `ILdapConnection` instead of `LdapConnection` in production code and `Substitute.For<ILdapConnection>()` in tests.
@@ -91,13 +101,11 @@ Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P44)
-- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (58.5%)
+## Notable classes with remaining low coverage (target for P45)
+- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (60.3%)
 - `Eaf.Middleware.Web.WebContentDirectoryFinder` (83.3%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (84.8%)
 - `Eaf.MiddlewareCore.SampleApp.EafMiddlewareCoreSampleAppModule` (92.3%)
-- `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (90.6%)
-- `Eaf.Middleware.Core.Configuration.EafStartupConfigurationExtensions` (92.5%)
 
 ## P38 gotchas
 - `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.

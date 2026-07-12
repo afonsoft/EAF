@@ -463,6 +463,53 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             sut.LastPassword.ShouldBe("pass");
         }
 
+        [Fact]
+        public async Task Dado_LdapContextSemResultado_Quando_CreateUserAsync_Entao_DeveRetornarUsuarioSemAlterar()
+        {
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var user = await sut.CreateUserAsync("user@example.com", new TestTenant());
+
+            user.ShouldNotBeNull();
+            user.UserName.ShouldBe("user");
+        }
+
+        [Fact]
+        public async Task Dado_LdapContextSemResultado_Quando_UpdateUserAsync_Entao_DeveManterUsuarioOriginal()
+        {
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var user = new TestUser { UserName = "olduser", Name = "Old", Surname = "Surname", EmailAddress = "old@example.com" };
+            await sut.UpdateUserAsync(user, new TestTenant());
+
+            user.UserName.ShouldBe("olduser");
+            user.Name.ShouldBe("Old");
+            user.EmailAddress.ShouldBe("old@example.com");
+        }
+
+        [Fact]
+        public async Task Dado_LdapContextComErroNoResultado_Quando_GetUsersAsync_Entao_DeveLancarAggregateException()
+        {
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResultsComErro());
+
+            var ex = await Should.ThrowAsync<AggregateException>(async () => await sut.GetUsersAsync("user@example.com"));
+            ex.InnerExceptions.ShouldNotBeEmpty();
+        }
+
+        private static ILdapSearchResults CriarSearchResultsComErro()
+        {
+            var search = Substitute.For<ILdapSearchResults>();
+            search.HasMoreAsync().Returns(true, false);
+            search.NextAsync().Returns(x => (LdapEntry)null!);
+            return search;
+        }
+
         public class TestTenant : AbpTenant<TestUser>
         {
             public TestTenant()

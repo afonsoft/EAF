@@ -857,6 +857,67 @@ namespace Eaf.Middleware.Tests.WebCore
             }
         }
 
+        [Fact]
+        public void Dado_HangfireInMemoryHabilitadoAuditingEnabled_Quando_PostInitialize_Entao_DeveRegistrarExpiredWorkers()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"Hangfire\":{\"IsEnabled\":true,\"IsInMemoryDatabase\":true}}");
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+
+                iocManager.IocContainer.Register(
+                    Component.For<ISettingManager>().Instance(Substitute.For<ISettingManager>()),
+                    Component.For<IAbpSession>().Instance(Substitute.For<IAbpSession>()),
+                    Component.For<ICacheManager>().Instance(Substitute.For<ICacheManager>()),
+                    Component.For<ExternalAuthConfiguration>().Instance(new ExternalAuthConfiguration()),
+                    Component.For<AppFolders>().Instance(new AppFolders())
+                );
+
+                iocManager.Register<TenantBasedOpenIdConnectExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedGoogleExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedMicrosoftExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedAuthZeroExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+
+                var backgroundJobs = Substitute.For<Abp.BackgroundJobs.IBackgroundJobConfiguration>();
+                backgroundJobs.IsJobExecutionEnabled.Returns(true);
+                configType.GetProperty("BackgroundJobs")?.SetValue(config, backgroundJobs);
+
+                var auditing = Substitute.For<Abp.Auditing.IAuditingConfiguration>();
+                auditing.IsEnabled.Returns(true);
+                configType.GetProperty("Auditing")?.SetValue(config, auditing);
+
+                var entityHistory = Substitute.For<Abp.EntityHistory.IEntityHistoryConfiguration>();
+                entityHistory.IsEnabled.Returns(true);
+                configType.GetProperty("EntityHistory")?.SetValue(config, entityHistory);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                Should.NotThrow(() => module.PostInitialize());
+
+                global::Hangfire.JobStorage.Current.ShouldNotBeNull();
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
         private static IAbpStartupConfiguration CriarConfiguracao(IIocManager iocManager)
         {
             var configuration = Substitute.For<IAbpStartupConfiguration>();
