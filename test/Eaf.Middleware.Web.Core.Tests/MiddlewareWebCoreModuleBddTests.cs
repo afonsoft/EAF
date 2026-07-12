@@ -792,6 +792,71 @@ namespace Eaf.Middleware.Tests.WebCore
             }
         }
 
+        [Fact]
+        public void Dado_RedisEnabledHabilitadoIsRedisEnabledDesabilitado_Quando_Initialize_Entao_DeveRegistrarRedisAssembly()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"RedisCache\":{\"IsRedisEnabled\":false,\"IsEnabled\":true}}");
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                Should.NotThrow(() => module.Initialize());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_BackgroundJobsHabilitadoHangfireDesabilitado_Quando_PreInitialize_Entao_NaoDeveUsarHangfire()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"Hangfire\":{\"IsEnabled\":false}}");
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configuration = CriarConfiguracao(iocManager);
+                configuration.BackgroundJobs.IsJobExecutionEnabled.Returns(true);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, configuration);
+
+                Should.NotThrow(() => module.PreInitialize());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
         private static IAbpStartupConfiguration CriarConfiguracao(IIocManager iocManager)
         {
             var configuration = Substitute.For<IAbpStartupConfiguration>();

@@ -6,6 +6,7 @@ using Eaf.Middleware.Ldap.Authentication;
 using Eaf.Middleware.Ldap.Configuration;
 using Novell.Directory.Ldap;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         {
             var search = Substitute.For<ILdapSearchResults>();
             var queue = new Queue<LdapEntry>(entries);
-            search.HasMoreAsync().Returns(queue.Count > 0, queue.Count > 0);
+            search.HasMoreAsync().Returns(callInfo => queue.Count > 0);
             search.NextAsync().Returns(callInfo =>
             {
                 if (queue.Count == 0)
@@ -117,7 +118,7 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         public async Task Dado_CreateLdapContextFalhando_Quando_CreateUserAsync_Entao_DeveLancarExcecao()
         {
             var sut = CriarSut();
-            sut.LdapContextToReturn = Substitute.For<LdapConnection>();
+            sut.LdapContextToReturn = null!;
             await Should.ThrowAsync<Exception>(async () => await sut.CreateUserAsync("user", new TestTenant()));
         }
 
@@ -133,7 +134,7 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         public async Task Dado_LdapContextInvalido_Quando_UpdateUserAsync_Entao_DeveCapturarExcecaoELogar()
         {
             var sut = CriarSut();
-            sut.LdapContextToReturn = Substitute.For<LdapConnection>();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
             var user = new TestUser { UserName = "user", EmailAddress = "user@example.com" };
             await Should.NotThrowAsync(async () => await sut.UpdateUserAsync(user, new TestTenant()));
             user.UserName.ShouldBe("user");
@@ -151,7 +152,8 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         public async Task Dado_LdapContextInvalido_Quando_GetUsersAsync_Entao_DeveLancarExcecao()
         {
             var sut = CriarSut();
-            sut.LdapContextToReturn = Substitute.For<LdapConnection>();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).ReturnsNull();
             await Should.ThrowAsync<Exception>(async () => await sut.GetUsersAsync("user"));
         }
 
@@ -287,6 +289,13 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         }
 
         [Fact]
+        public async Task Dado_FillUsersLdapNulo_Quando_Executar_Entao_DeveLancarExcecao()
+        {
+            var sut = CriarSut();
+            await Should.ThrowAsync<Exception>(async () => await sut.InvokeFillUsersLdapAsync(null!));
+        }
+
+        [Fact]
         public async Task Dado_FillUsersLdapComResultado_Quando_Executar_Entao_DeveRetornarUsuariosConvertidos()
         {
             var sut = CriarSut();
@@ -376,6 +385,84 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             TestableLdapAuthenticationSource.ConvertToNullIfEmptyPublic(input).ShouldBe(expected);
         }
 
+        [Fact]
+        public async Task Dado_LdapContextComResultado_Quando_CreateUserAsync_Entao_DeveAtualizarUsuario()
+        {
+            var entry = CriarLdapEntry("john.doe", "jdoe", "John Doe", "john@example.com", "john@example.com");
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults(entry));
+
+            var user = await sut.CreateUserAsync("user@example.com", new TestTenant());
+
+            user.ShouldNotBeNull();
+            user.UserName.ShouldBe("jdoe");
+            user.Name.ShouldBe("John");
+            user.EmailAddress.ShouldBe("john@example.com");
+            user.IsActive.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_LdapContextComResultado_Quando_UpdateUserAsync_Entao_DeveAtualizarUsuario()
+        {
+            var entry = CriarLdapEntry("john.doe", "jdoe", "John Doe", "john@example.com", "john@example.com");
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults(entry));
+
+            var user = new TestUser { UserName = "olduser", Name = "Old", Surname = "Surname", EmailAddress = "old@example.com" };
+            await sut.UpdateUserAsync(user, new TestTenant());
+
+            user.UserName.ShouldBe("jdoe");
+            user.Name.ShouldBe("John");
+            user.EmailAddress.ShouldBe("john@example.com");
+            user.IsActive.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_LdapContextComResultado_Quando_GetUsersAsync_Entao_DeveRetornarUsuarios()
+        {
+            var entry = CriarLdapEntry("john.doe", "jdoe", "John Doe", "john@example.com", "john@example.com");
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults(entry));
+
+            var users = await sut.GetUsersAsync("john@example.com");
+
+            users.ShouldNotBeEmpty();
+            users[0].UserName.ShouldBe("jdoe");
+            users[0].Name.ShouldBe("John");
+            users[0].EmailAddress.ShouldBe("john@example.com");
+        }
+
+        [Fact]
+        public async Task Dado_LdapConectado_Quando_TryAuthenticateAsync_Entao_DeveRetornarTrue()
+        {
+            var sut = CriarSut();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.Connected.Returns(true);
+
+            var result = await sut.TryAuthenticateAsync("user", "pass", new TestTenant());
+
+            result.ShouldBeTrue();
+            sut.LastUserNameOrEmailAddress.ShouldBe("user");
+            sut.LastPassword.ShouldBe("pass");
+        }
+
+        [Fact]
+        public async Task Dado_LdapConectadoComEmail_Quando_TryAuthenticateAsync_Entao_DeveRemoverDominio()
+        {
+            var sut = CriarSut();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.Connected.Returns(true);
+
+            var result = await sut.TryAuthenticateAsync("user@example.com", "pass", new TestTenant());
+
+            result.ShouldBeTrue();
+            sut.LastUserNameOrEmailAddress.ShouldBe("user");
+            sut.LastPassword.ShouldBe("pass");
+        }
+
         public class TestTenant : AbpTenant<TestUser>
         {
             public TestTenant()
@@ -396,12 +483,12 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
                 LdapContextToReturn = new LdapConnection();
             }
 
-            public LdapConnection LdapContextToReturn { get; set; }
+            public ILdapConnection LdapContextToReturn { get; set; }
             public PrincipalContext? PrincipalContextToReturn { get; set; }
             public string? LastUserNameOrEmailAddress { get; set; }
             public string? LastPassword { get; set; }
 
-            protected override Task<LdapConnection> CreateLdapContext(TestTenant tenant, string? userNameOrEmailAddress, string? plainPassword)
+            protected override Task<ILdapConnection> CreateLdapContext(TestTenant tenant, string? userNameOrEmailAddress, string? plainPassword)
             {
                 LastUserNameOrEmailAddress = userNameOrEmailAddress;
                 LastPassword = plainPassword;
@@ -416,7 +503,7 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             public async Task<LdapConnection> CreateLdapContextBaseAsync(TestTenant? tenant, string? userNameOrEmailAddress = null, string? plainPassword = null)
             {
 #pragma warning disable CS8604
-                return await base.CreateLdapContext(tenant!, userNameOrEmailAddress, plainPassword);
+                return (LdapConnection)(await base.CreateLdapContext(tenant!, userNameOrEmailAddress, plainPassword));
 #pragma warning restore CS8604
             }
 

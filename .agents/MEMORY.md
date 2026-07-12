@@ -1,8 +1,9 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260712-priority42-coverage-audit`
+Last session branch: `feature/devin-20260712-priority43-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
+Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -42,6 +43,16 @@ Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 - `FriendshipManager` has three `protected` `L` overloads; create a `TestableFriendshipManager` subclass and call the overloads to cover them.
 - `WebContentDirectoryFinder` `CalculateContentRootFolder` throws `DirectoryNotFoundException` when `src/Eaf.Middleware.Web.Host` is not found; test the exception branch and the `directoryInfo.Parent == null` path with a temporary directory.
 
+## P43 gotchas
+- `Novell.Directory.Ldap.LdapConnection` `SearchAsync`, `ConnectAsync`, `BindAsync` and `Connected` are `virtual` but `IsFinal` (sealed) in `Novell.Directory.Ldap.NETStandard` 4.0.0; `NSubstitute` cannot override them with `Returns`. Use `ILdapConnection` instead of `LdapConnection` in production code and `Substitute.For<ILdapConnection>()` in tests.
+- `Substitute.For<ILdapConnection>()` implements `IDisposable` because `LdapConnection` implements `IDisposable`, even though `ILdapConnection` itself does not. Use `using (var principalContext = await CreateLdapContext(null) as IDisposable)` and then cast to `ILdapConnection`.
+- `ILdapSearchResults` `HasMoreAsync()` and `NextAsync()` can be mocked with a `Queue<LdapEntry>` to simulate one or more results and exceptions.
+- `CultureHelper` `IsRtl` and `UsingLunarCalendar` depend on `CultureInfo.CurrentUICulture`; set `CurrentUICulture` to `ar-SA` for RTL and `zh-CN` for lunar calendar and restore in `finally`.
+- `EntityHistoryConfigurationExtensions.AddAllAuditedEntities` uses `IEntityHistorySelectorList`; wire `When(x => x.Add(...)).Do(...)` to a real `List<NamedTypeSelector>` to assert idempotent insertion.
+- `EafSqliteCache` tests must disable connection pooling (`SqliteConnectionStringBuilder.Pooling = false`) and call `SqliteConnection.ClearAllPools()` after deleting test database files.
+- `DefaultSettingsCreator` and `DefaultTenantBuilder` can be covered with `EafMiddlewareTestBase` and `UsingDbContext` using the in-memory SQLite `SampleAppDbContext`.
+- `EafMiddlewareTemplateDbContextConfigurer.Configure` accepts `DbContextOptionsBuilder` and `IConfigurationRoot`; use `ConfigurationBuilder().AddInMemoryCollection()` to supply connection strings.
+
 ## P41 gotchas
 - `UserManager.UpdateWithValidateAsync` is public but not virtual; cannot be stubbed with `NSubstitute.Returns`. Use a real `UserManager` with a substitute `UserStore` and `IRepository<User, long>` to exercise the update branch.
 - `ILookupNormalizer` in .NET 10 exposes `NormalizeName` and `NormalizeEmail` (no `Normalize` method).
@@ -80,25 +91,13 @@ Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P43)
-- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (50.3%)
-- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.Advertisement` (50.0%)
-- `Eaf.MiddlewareCore.SampleApp.Core.UserClaimsPrincipalFactory` (70.0%)
-- `Eaf.MiddlewareCore.SampleApp.Core.Shop.OrderTranslation` (75.0%)
-- `Eaf.MiddlewareCore.SampleApp.Core.Shop.ProductTranslation` (75.0%)
-- `Eaf.MiddlewareCore.SampleApp.Core.User` (80.0%)
-- `Eaf.MiddlewareCore.SampleApp.EafMiddlewareCoreSampleAppModule` (76.9%)
+## Notable classes with remaining low coverage (target for P44)
+- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (58.5%)
 - `Eaf.Middleware.Web.WebContentDirectoryFinder` (83.3%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (84.8%)
-- `Eaf.MiddlewareCore.SampleApp.EntityFramework.Seed.Host.DefaultSettingsCreator` (87.5%)
-- `Eaf.MiddlewareCore.SampleApp.EntityFramework.Seed.Tenants.DefaultTenantBuilder` (87.5%)
-- `Eaf.Middleware.Auditing.EntityHistoryConfigurationExtensions` (87.5%)
-- `Abp.Runtime.Caching.Sqlite.DbCommandPool` (89.4%)
-- `Abp.Runtime.Caching.Sqlite.EafSqliteCache` (88.8%)
-- `Eaf.Middleware.Localization.CultureHelper` (78.5%)
-- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.Country` (0%)
-- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.Foo` (0%)
-- `Eaf.MiddlewareCore.SampleApp.Core.EntityHistory.AdvertisementFeedback` (0%)
+- `Eaf.MiddlewareCore.SampleApp.EafMiddlewareCoreSampleAppModule` (92.3%)
+- `Eaf.Middleware.Web.Startup.EafServiceCollectionMiddlewareExtensions` (90.6%)
+- `Eaf.Middleware.Core.Configuration.EafStartupConfigurationExtensions` (92.5%)
 
 ## P38 gotchas
 - `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.
