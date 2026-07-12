@@ -4,12 +4,12 @@
 
 English | **[Português](README_pt.md)**
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-90.8%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-72%25-brightgreen)
-![Method Coverage](https://img.shields.io/badge/Method%20Coverage-96.9%25-brightgreen)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-93.2%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-77%25-brightgreen)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-98.1%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4128-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4127-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4189-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4188-brightgreen)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-6-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)

@@ -1,86 +1,87 @@
+using Abp.Reflection.Extensions;
 using Eaf.Middleware.Web;
 using Shouldly;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace Eaf.Middleware.Tests.Net.Web
+namespace Eaf.MiddlewareCore.Tests.Net.Web
 {
-    public class WebContentDirectoryFinderBddTests
+    public class WebContentDirectoryFinderBddTests : IDisposable
     {
-        [Fact]
-        public void Dado_AssemblyCore_Quando_CalculateContentRootFolder_Entao_DeveLancarExcecaoSeWebHostNaoExistir()
-        {
-            var exception = Assert.Throws<Exception>(() => WebContentDirectoryFinder.CalculateContentRootFolder());
+        private readonly string _webHostFolder;
 
-            exception.Message.ShouldContain("Could not find root folder of the web project");
-        }
-
-        [Fact]
-        public void Dado_WebHostExistente_Quando_CalculateContentRootFolder_Entao_DeveRetornarCaminhoWebHost()
+        public WebContentDirectoryFinderBddTests()
         {
-            var assemblyPath = Path.GetDirectoryName(typeof(MiddlewareCoreModule).Assembly.Location);
-            var directoryInfo = new DirectoryInfo(assemblyPath);
-            while (directoryInfo != null && !File.Exists(Path.Combine(directoryInfo.FullName, "Eaf.sln")))
+            var coreAssemblyDirectoryPath = Path.GetDirectoryName(typeof(Eaf.Middleware.MiddlewareCoreModule).GetAssembly().Location);
+            if (coreAssemblyDirectoryPath == null)
             {
+                throw new InvalidOperationException("Could not find location of Eaf.Middleware.Core assembly!");
+            }
+
+            var directoryInfo = new DirectoryInfo(coreAssemblyDirectoryPath);
+            while (!DirectoryContains(directoryInfo.FullName, "Eaf.sln")
+                   && !DirectoryContains(directoryInfo.FullName, "Eaf.ProjectName.sln")
+                   && !DirectoryContains(directoryInfo.FullName, "Web.Host.csproj"))
+            {
+                if (directoryInfo.Parent == null)
+                {
+                    throw new InvalidOperationException("Could not find content root folder!");
+                }
+
                 directoryInfo = directoryInfo.Parent;
             }
 
-            directoryInfo.ShouldNotBeNull();
+            _webHostFolder = Path.Combine(directoryInfo.FullName, $"src{Path.DirectorySeparatorChar}Eaf.Middleware.Web.Host");
+        }
 
-            var webHostFolder = Path.Combine(directoryInfo.FullName, $"src{Path.DirectorySeparatorChar}Eaf.Middleware.Web.Host");
-            Directory.CreateDirectory(webHostFolder);
+        private static bool DirectoryContains(string directory, string fileName)
+        {
+            return Directory.GetFiles(directory).Any(filePath => string.Equals(Path.GetFileName(filePath), fileName, StringComparison.OrdinalIgnoreCase));
+        }
 
-            try
+        public void Dispose()
+        {
+            if (Directory.Exists(_webHostFolder))
             {
-                var result = WebContentDirectoryFinder.CalculateContentRootFolder();
-                result.ShouldBe(webHostFolder);
-            }
-            finally
-            {
-                try { Directory.Delete(webHostFolder, true); } catch { }
+                Directory.Delete(_webHostFolder, recursive: true);
             }
         }
 
         [Fact]
-        public void Dado_DiretorioComArquivo_Quando_DirectoryContains_Entao_DeveRetornarVerdadeiro()
+        public void Dado_ProjetoWebHostInexistente_Quando_CalculateContentRootFolder_Entao_DeveLancarExcecao()
         {
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(tempDirectory);
-            var filePath = Path.Combine(tempDirectory, "Eaf.sln");
-            File.WriteAllText(filePath, string.Empty);
+            if (Directory.Exists(_webHostFolder))
+            {
+                Directory.Delete(_webHostFolder, recursive: true);
+            }
 
-            try
-            {
-                var method = typeof(WebContentDirectoryFinder).GetMethod("DirectoryContains", BindingFlags.NonPublic | BindingFlags.Static);
-                method.ShouldNotBeNull();
-                var result = method!.Invoke(null, new object[] { tempDirectory, "Eaf.sln" });
-                result.ShouldBe(true);
-            }
-            finally
-            {
-                try { Directory.Delete(tempDirectory, true); } catch { }
-            }
+            var ex = Should.Throw<Exception>(() => WebContentDirectoryFinder.CalculateContentRootFolder());
+            ex.Message.ShouldContain("Could not find root folder of the web project!");
         }
 
         [Fact]
-        public void Dado_DiretorioVazio_Quando_DirectoryContains_Entao_DeveRetornarFalso()
+        public void Dado_ProjetoWebHostExistente_Quando_CalculateContentRootFolder_Entao_DeveRetornarPasta()
         {
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(tempDirectory);
+            Directory.CreateDirectory(_webHostFolder);
 
-            try
-            {
-                var method = typeof(WebContentDirectoryFinder).GetMethod("DirectoryContains", BindingFlags.NonPublic | BindingFlags.Static);
-                method.ShouldNotBeNull();
-                var result = method!.Invoke(null, new object[] { tempDirectory, "Inexistente.txt" });
-                result.ShouldBe(false);
-            }
-            finally
-            {
-                try { Directory.Delete(tempDirectory, true); } catch { }
-            }
+            var result = WebContentDirectoryFinder.CalculateContentRootFolder();
+
+            result.ShouldBe(_webHostFolder);
+        }
+
+        [Fact]
+        public void Dado_DiretorioSemArquivosEsperados_Quando_DirectoryContains_Entao_DeveRetornarFalse()
+        {
+            var directoryContains = typeof(WebContentDirectoryFinder).GetMethod("DirectoryContains", BindingFlags.NonPublic | BindingFlags.Static);
+            directoryContains.ShouldNotBeNull();
+
+            var tempPath = Path.GetTempPath();
+            var result = directoryContains!.Invoke(null, new object[] { tempPath, "arquivo-nao-existente.txt" });
+
+            result.ShouldBe(false);
         }
     }
 }
