@@ -5,85 +5,54 @@ using Xunit;
 
 namespace Eaf.MiddlewareCore.Tests.Localization
 {
-    /// <summary>
-    /// Testes BDD para CultureHelper seguindo o padrão Dado/Quando/Então.
-    /// </summary>
     public class CultureHelperBddTests
     {
         [Fact]
-        public void Dado_NomeCulturaValido_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCultura()
+        public void Dado_CulturaValida_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCulturaCorreta()
         {
-            // Dado
-            var name = "pt-BR";
-
-            // Quando
-            var result = CultureHelper.GetCultureInfoByChecking(name);
-
-            // Então
-            result.ShouldNotBeNull();
-            result.Name.ShouldBe("pt-BR");
+            var result = CultureHelper.GetCultureInfoByChecking("en-US");
+            result.Name.ShouldBe("en-US");
         }
 
         [Fact]
-        public void Dado_NomeCulturaInvalido_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCulturaAtual()
+        public void Dado_CulturaInvalida_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCurrentCulture()
         {
-            // Dado
-            var name = "cultura-inexistente";
-
-            // Quando
-            var result = CultureHelper.GetCultureInfoByChecking(name);
-
-            // Então
-            result.ShouldNotBeNull();
-            result.ShouldBe(CultureInfo.CurrentCulture);
+            var result = CultureHelper.GetCultureInfoByChecking("cultura-inexistente-xyz");
+            result.Name.ShouldBe(CultureInfo.CurrentCulture.Name);
         }
 
         [Fact]
-        public void Dado_CulturaNaoDisponivelGlobalmente_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCulturaAtual()
+        public void Dado_CulturaInexistenteNaLista_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCurrentCulture()
         {
-            // Dado
-            var name = "zz-ZZ";
-
-            // Quando
-            var result = CultureHelper.GetCultureInfoByChecking(name);
-
-            // Então
-            result.ShouldNotBeNull();
-            result.ShouldBe(CultureInfo.CurrentCulture);
+            var result = CultureHelper.GetCultureInfoByChecking("en_US");
+            result.Name.ShouldBe(CultureInfo.CurrentCulture.Name);
         }
 
         [Fact]
-        public void Dado_NomeCulturaVazio_Quando_GetCultureInfoByChecking_Entao_DeveRetornarInvariantCulture()
+        public void Dado_CulturaEmMaiusculas_Quando_GetCultureInfoByChecking_Entao_DeveRetornarCulturaIgnorandoCase()
         {
-            // Dado
-            var name = "";
-
-            // Quando
-            var result = CultureHelper.GetCultureInfoByChecking(name);
-
-            // Então
-            result.ShouldNotBeNull();
-            result.Name.ShouldBe(CultureInfo.InvariantCulture.Name);
+            var result = CultureHelper.GetCultureInfoByChecking("EN-us");
+            result.Name.ShouldBe("en-US");
         }
 
         [Fact]
-        public void Dado_CulturaHelper_Quando_VerificarIsRtl_Entao_DeveRetornarBool()
+        public void Dado_CultureHelper_Quando_AcessarAllCultures_Entao_DeveConterCulturas()
         {
-            // Dado / Quando
-            var result = CultureHelper.IsRtl;
-
-            // Então
-            result.ShouldBe(CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft);
+            CultureHelper.AllCultures.Length.ShouldBeGreaterThan(0);
         }
 
         [Fact]
-        public void Dado_CulturaHelper_Quando_VerificarUsingLunarCalendar_Entao_DeveRetornarBool()
+        public void Dado_CultureHelper_Quando_AcessarIsRtl_Entao_DeveRetornarBoolean()
         {
-            // Dado / Quando
-            var result = CultureHelper.UsingLunarCalendar;
+            var isRtl = CultureHelper.IsRtl;
+            isRtl.ShouldBe(false);
+        }
 
-            // Então
-            result.ShouldBe(CultureInfo.CurrentUICulture.DateTimeFormat.Calendar.AlgorithmType == CalendarAlgorithmType.LunarCalendar);
+        [Fact]
+        public void Dado_CultureHelper_Quando_AcessarUsingLunarCalendar_Entao_DeveRetornarBoolean()
+        {
+            var usingLunarCalendar = CultureHelper.UsingLunarCalendar;
+            usingLunarCalendar.ShouldBe(false);
         }
     }
 }

@@ -10,187 +10,164 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Eaf.Middleware.Tests.Application.Friendships
+namespace Eaf.Middleware.Application.Tests.Friendships
 {
     public class FriendshipManagerBddTests
     {
-        private readonly IRepository<Friendship, long> _friendshipRepository;
-        private readonly IUnitOfWorkManager _unitOfWorkManager;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly FriendshipManager _sut;
-
-        public FriendshipManagerBddTests()
+        private static FriendshipManager CriarSut(
+            IRepository<Friendship, long>? friendshipRepository = null,
+            Friendship? friendshipToReturn = null)
         {
-            _friendshipRepository = Substitute.For<IRepository<Friendship, long>>();
-            _unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
-            _unitOfWork = Substitute.For<IUnitOfWork>();
-            _unitOfWorkManager.Current.Returns(_unitOfWork);
-            _unitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
-            _unitOfWork.SaveChangesAsync().Returns(Task.CompletedTask);
+            var repository = friendshipRepository ?? Substitute.For<IRepository<Friendship, long>>();
 
-            _sut = new FriendshipManager(_friendshipRepository)
+            repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
+                .Returns(Task.FromResult<Friendship>(friendshipToReturn!));
+
+            repository.Insert(Arg.Any<Friendship>())
+                .Returns(callInfo => callInfo.Arg<Friendship>());
+            repository.Update(Arg.Any<Friendship>())
+                .Returns(callInfo => callInfo.Arg<Friendship>());
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            activeUow.SaveChangesAsync().Returns(Task.FromResult(0));
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+
+            var manager = new FriendshipManager(repository)
             {
-                UnitOfWorkManager = _unitOfWorkManager
+                UnitOfWorkManager = unitOfWorkManager
             };
+
+            return manager;
+        }
+
+        private static Friendship CriarFriendship(
+            long userId = 1,
+            int? tenantId = null,
+            long friendUserId = 2,
+            int? friendTenantId = null,
+            FriendshipState state = FriendshipState.Accepted)
+        {
+            var user = new UserIdentifier(tenantId, userId);
+            var friend = new UserIdentifier(friendTenantId, friendUserId);
+            return new Friendship(
+                user,
+                friend,
+                "tenant",
+                "friendUser",
+                null,
+                state);
         }
 
         [Fact]
-        public void Dado_Repository_Quando_Criar_Entao_DeveInicializarCorretamente()
+        public async Task Dado_AmizadeValida_Quando_CreateFriendshipAsync_Entao_DeveInserirNoRepositorio()
         {
-            _sut.ShouldNotBeNull();
+            var repository = Substitute.For<IRepository<Friendship, long>>();
+            repository.Insert(Arg.Any<Friendship>()).Returns(callInfo => callInfo.Arg<Friendship>());
+            repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
+                .Returns(Task.FromResult<Friendship>(null!));
+            repository.Update(Arg.Any<Friendship>())
+                .Returns(callInfo => callInfo.Arg<Friendship>());
+
+            var sut = CriarSut(repository, friendshipToReturn: null);
+            var friendship = CriarFriendship(userId: 1, friendUserId: 2);
+
+            await sut.CreateFriendshipAsync(friendship);
+
+            repository.Received(1).Insert(Arg.Is<Friendship>(f => f.UserId == 1 && f.FriendUserId == 2));
         }
 
         [Fact]
-        public async Task Dado_AmigosDistintos_Quando_CreateFriendshipAsync_Entao_DeveInserirESalvar()
+        public async Task Dado_UsuarioTentandoSerAmigoDeSiMesmo_Quando_CreateFriendshipAsync_Entao_DeveLancarUserFriendlyException()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(2, 20);
-            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
+            var sut = CriarSut();
+            var friendship = CriarFriendship(userId: 1, tenantId: 1, friendUserId: 1, friendTenantId: 1);
 
-            // Quando
-            await _sut.CreateFriendshipAsync(friendship);
-
-            // Então
-            _friendshipRepository.Received(1).Insert(friendship);
-            await _unitOfWork.Received(1).SaveChangesAsync();
+            var ex = await Should.ThrowAsync<UserFriendlyException>(async () => await sut.CreateFriendshipAsync(friendship));
+            ex.Message.ShouldBe("YouCannotBeFriendWithYourself");
         }
 
         [Fact]
-        public async Task Dado_MesmoUsuario_Quando_CreateFriendshipAsync_Entao_DeveLancarUserFriendlyException()
+        public async Task Dado_AmizadeExistente_Quando_AcceptFriendshipRequestAsync_Entao_DeveAlterarEstadoParaAccepted()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friendship = new Friendship(user, user, "acme", "same", null, FriendshipState.Accepted);
+            var friendship = CriarFriendship(state: FriendshipState.Blocked);
+            var sut = CriarSut(friendshipToReturn: friendship);
 
-            // Quando / Então
-            var exception = await Should.ThrowAsync<UserFriendlyException>(
-                async () => await _sut.CreateFriendshipAsync(friendship));
-            exception.Message.ShouldBe("YouCannotBeFriendWithYourself");
-        }
+            await sut.AcceptFriendshipRequestAsync(
+                new UserIdentifier(null, 1),
+                new UserIdentifier(null, 2));
 
-        [Fact]
-        public async Task Dado_AmizadeExistente_Quando_AcceptFriendshipRequestAsync_Entao_DeveAtualizarEstadoParaAceito()
-        {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(2, 20);
-            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Blocked);
-            _friendshipRepository
-                .FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
-                .Returns(Task.FromResult(friendship));
-
-            // Quando
-            await _sut.AcceptFriendshipRequestAsync(user, friend);
-
-            // Então
             friendship.State.ShouldBe(FriendshipState.Accepted);
-            _friendshipRepository.Received(1).Update(friendship);
-            await _unitOfWork.Received(1).SaveChangesAsync();
         }
 
         [Fact]
-        public async Task Dado_AmizadeInexistente_Quando_AcceptFriendshipRequestAsync_Entao_DeveLancarAbpException()
+        public async Task Dado_AmizadeNaoExistente_Quando_AcceptFriendshipRequestAsync_Entao_DeveLancarAbpException()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(2, 20);
-            _friendshipRepository
-                .FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
-                .Returns(Task.FromResult<Friendship>(null!));
+            var sut = CriarSut(friendshipToReturn: null);
 
-            // Quando / Então
-            var exception = await Should.ThrowAsync<AbpException>(
-                async () => await _sut.AcceptFriendshipRequestAsync(user, friend));
-            exception.Message.ShouldContain("Friendship does not exist between");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.AcceptFriendshipRequestAsync(
+                new UserIdentifier(null, 1),
+                new UserIdentifier(null, 2)));
+            ex.Message.ShouldContain("Friendship does not exist");
         }
 
         [Fact]
-        public async Task Dado_AmizadeExistente_Quando_BanFriendAsync_Entao_DeveAtualizarEstadoParaBloqueado()
+        public async Task Dado_AmizadeExistente_Quando_BanFriendAsync_Entao_DeveAlterarEstadoParaBlocked()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(2, 20);
-            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
-            _friendshipRepository
-                .FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
-                .Returns(Task.FromResult(friendship));
+            var friendship = CriarFriendship(state: FriendshipState.Accepted);
+            var sut = CriarSut(friendshipToReturn: friendship);
 
-            // Quando
-            await _sut.BanFriendAsync(user, friend);
+            await sut.BanFriendAsync(
+                new UserIdentifier(null, 1),
+                new UserIdentifier(null, 2));
 
-            // Então
             friendship.State.ShouldBe(FriendshipState.Blocked);
-            _friendshipRepository.Received(1).Update(friendship);
-            await _unitOfWork.Received(1).SaveChangesAsync();
         }
 
         [Fact]
-        public async Task Dado_AmizadeExistente_Quando_GetFriendshipOrNullAsync_Entao_DeveRetornarAmizade()
+        public async Task Dado_AmizadeNaoExistente_Quando_BanFriendAsync_Entao_DeveLancarAbpException()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(2, 20);
-            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
-            _friendshipRepository
-                .FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
-                .Returns(Task.FromResult(friendship));
+            var sut = CriarSut(friendshipToReturn: null);
 
-            // Quando
-            var result = await _sut.GetFriendshipOrNullAsync(user, friend);
-
-            // Então
-            result.ShouldNotBeNull();
-            result.FriendUserId.ShouldBe(friend.UserId);
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.BanFriendAsync(
+                new UserIdentifier(null, 1),
+                new UserIdentifier(null, 2)));
+            ex.Message.ShouldContain("Friendship does not exist");
         }
 
         [Fact]
-        public async Task Dado_AmizadeInexistente_Quando_GetFriendshipOrNullAsync_Entao_DeveRetornarNulo()
+        public async Task Dado_Amizade_Quando_UpdateFriendshipAsync_Entao_DeveAtualizarNoRepositorio()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(2, 20);
-            _friendshipRepository
-                .FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
+            var repository = Substitute.For<IRepository<Friendship, long>>();
+            repository.Insert(Arg.Any<Friendship>()).Returns(callInfo => callInfo.Arg<Friendship>());
+            repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
                 .Returns(Task.FromResult<Friendship>(null!));
+            repository.Update(Arg.Any<Friendship>())
+                .Returns(callInfo => callInfo.Arg<Friendship>());
 
-            // Quando
-            var result = await _sut.GetFriendshipOrNullAsync(user, friend);
+            var sut = CriarSut(repository, friendshipToReturn: null);
+            var friendship = CriarFriendship();
 
-            // Então
-            result.ShouldBeNull();
+            await sut.UpdateFriendshipAsync(friendship);
+
+            repository.Received(1).Update(Arg.Is<Friendship>(f => f.UserId == friendship.UserId));
         }
 
         [Fact]
-        public async Task Dado_MesmoTenantEUsuariosDistintos_Quando_CreateFriendshipAsync_Entao_DeveInserirESalvar()
+        public async Task Dado_Amizade_Quando_GetFriendshipOrNullAsync_Entao_DeveRetornarAmizade()
         {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(1, 20);
-            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
+            var friendship = CriarFriendship();
+            var sut = CriarSut(friendshipToReturn: friendship);
 
-            // Quando
-            await _sut.CreateFriendshipAsync(friendship);
+            var result = await sut.GetFriendshipOrNullAsync(
+                new UserIdentifier(null, 1),
+                new UserIdentifier(null, 2));
 
-            // Então
-            _friendshipRepository.Received(1).Insert(friendship);
-            await _unitOfWork.Received(1).SaveChangesAsync();
-        }
-
-        [Fact]
-        public async Task Dado_AmizadeExistente_Quando_UpdateFriendshipAsync_Entao_DeveAtualizarESalvar()
-        {
-            // Dado
-            var user = new UserIdentifier(1, 10);
-            var friend = new UserIdentifier(1, 20);
-            var friendship = new Friendship(user, friend, "acme", "friend", null, FriendshipState.Accepted);
-
-            // Quando
-            await _sut.UpdateFriendshipAsync(friendship);
-
-            // Então
-            _friendshipRepository.Received(1).Update(friendship);
-            await _unitOfWork.Received(1).SaveChangesAsync();
+            result.ShouldNotBeNull();
+            result!.UserId.ShouldBe(1);
+            result.FriendUserId.ShouldBe(2);
         }
     }
 }

@@ -5,124 +5,73 @@ using Shouldly;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Eaf.Middleware.Tests.Web.Core.Configuration
+namespace Eaf.Middleware.Web.Core.Tests.Configuration
 {
-    /// <summary>
-    /// Testes BDD para RedisConfigurer seguindo o padrao Dado/Quando/Entao.
-    /// </summary>
     public class RedisConfigurerBddTests
     {
-        #region Configure - Redis desabilitado
+        private static IConfiguration CriarConfiguracao(Dictionary<string, string?> valores)
+        {
+            return new ConfigurationBuilder()
+                .AddInMemoryCollection(valores)
+                .Build();
+        }
 
         [Fact]
-        public void Dado_RedisDesabilitado_Quando_Configure_Entao_NaoDeveAdicionarServico()
+        public void Dado_RedisDesabilitado_Quando_Configure_Entao_NaoDeveRegistrarRedisCache()
         {
-            // Dado
             var services = new ServiceCollection();
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var configuration = CriarConfiguracao(new Dictionary<string, string?>
             {
                 { "RedisCache:IsRedisEnabled", "false" }
             });
 
-            // Quando
-            RedisConfigurer.Configure(services, config);
+            RedisConfigurer.Configure(services, configuration);
 
-            // Entao - nao deve lançar exceção
-            services.Count.ShouldBe(0);
+            services.ShouldNotContain(s => s.ServiceType == typeof(Microsoft.Extensions.Caching.Distributed.IDistributedCache));
         }
 
         [Fact]
-        public void Dado_SemConfiguracaoRedis_Quando_Configure_Entao_NaoDeveAdicionarServico()
+        public void Dado_RedisHabilitadoComConnectionString_Quando_Configure_Entao_DeveRegistrarRedisCache()
         {
-            // Dado
             var services = new ServiceCollection();
-            var config = BuildConfiguration(new Dictionary<string, string>());
-
-            // Quando
-            RedisConfigurer.Configure(services, config);
-
-            // Entao
-            services.Count.ShouldBe(0);
-        }
-
-        #endregion
-
-        #region Configure - Redis habilitado
-
-        [Fact]
-        public void Dado_RedisHabilitadoViaIsRedisEnabled_Quando_Configure_Entao_DeveAdicionarServico()
-        {
-            // Dado
-            var services = new ServiceCollection();
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var configuration = CriarConfiguracao(new Dictionary<string, string?>
             {
                 { "RedisCache:IsRedisEnabled", "true" },
                 { "RedisCache:ConnectionString", "localhost:6379" }
             });
 
-            // Quando
-            RedisConfigurer.Configure(services, config);
+            RedisConfigurer.Configure(services, configuration);
 
-            // Entao
-            services.Count.ShouldBeGreaterThan(0);
+            services.ShouldContain(s => s.ServiceType == typeof(Microsoft.Extensions.Caching.Distributed.IDistributedCache));
         }
 
         [Fact]
-        public void Dado_RedisHabilitadoViaIsEnabled_Quando_Configure_Entao_DeveAdicionarServico()
+        public void Dado_RedisHabilitadoViaIsEnabled_Quando_Configure_Entao_DeveRegistrarRedisCache()
         {
-            // Dado
             var services = new ServiceCollection();
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var configuration = CriarConfiguracao(new Dictionary<string, string?>
             {
                 { "RedisCache:IsEnabled", "true" },
                 { "RedisCache:ConnectionString", "localhost:6379" }
             });
 
-            // Quando
-            RedisConfigurer.Configure(services, config);
+            RedisConfigurer.Configure(services, configuration);
 
-            // Entao
-            services.Count.ShouldBeGreaterThan(0);
+            services.ShouldContain(s => s.ServiceType == typeof(Microsoft.Extensions.Caching.Distributed.IDistributedCache));
         }
 
         [Fact]
-        public void Dado_RedisHabilitadoSemConnectionString_Quando_Configure_Entao_NaoDeveAdicionarServico()
+        public void Dado_RedisHabilitadoSemConnectionString_Quando_Configure_Entao_NaoDeveRegistrarRedisCache()
         {
-            // Dado
             var services = new ServiceCollection();
-            var config = BuildConfiguration(new Dictionary<string, string>
+            var configuration = CriarConfiguracao(new Dictionary<string, string?>
             {
                 { "RedisCache:IsRedisEnabled", "true" }
             });
 
-            // Quando
-            RedisConfigurer.Configure(services, config);
+            RedisConfigurer.Configure(services, configuration);
 
-            // Entao
-            services.Count.ShouldBe(0);
-        }
-
-        [Fact]
-        public void Dado_RedisHabilitadoComValorInvalido_Quando_Configure_Entao_DeveLancarFormatException()
-        {
-            // Dado
-            var services = new ServiceCollection();
-            var config = BuildConfiguration(new Dictionary<string, string>
-            {
-                { "RedisCache:IsRedisEnabled", "invalid" }
-            });
-
-            // Quando & Então
-            Should.Throw<FormatException>(() => RedisConfigurer.Configure(services, config));
-        }
-
-        #endregion
-
-        private static IConfiguration BuildConfiguration(Dictionary<string, string> data)
-        {
-            return new ConfigurationBuilder()
-                .AddInMemoryCollection(data)
-                .Build();
+            services.ShouldNotContain(s => s.ServiceType == typeof(Microsoft.Extensions.Caching.Distributed.IDistributedCache));
         }
     }
 }

@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260711-priority39-coverage-audit`
-Baseline coverage (P38): Line 90.4%, Branch 71.2%, Method 96.9%.
-Current coverage (after P39): Line 90.8%, Branch 72%, Method 96.9%.
+Last session branch: `feature/devin-20260712-priority40-coverage-audit`
+Baseline coverage (P39): Line 90.8%, Branch 72%, Method 96.9%.
+Current coverage (after P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -31,6 +31,19 @@ Current coverage (after P39): Line 90.8%, Branch 72%, Method 96.9%.
 - `IocManager.Instance` has a non-public setter; use reflection to get/set the static property in tests that require isolation.
 - `OpenIdConnectAuthProviderApi.ValidateTokenInternal` is private; invoke it via reflection and await the resulting `Task` (not `Task<ExternalAuthUserInfo>`).
 
+## P40 gotchas
+- `LdapAuthenticationSource.SourceName` is `"LDAP"` (uppercase); `AzureActiveDirectoryAuthenticationSource.SourceName` is `"ActiveDirectory"`.
+- `Novell.Directory.Ldap.LdapConnection` `SearchAsync` throws `LdapException("CONNECTION_CLOSED", ...)` when not connected; use it to exercise the `TryAuthenticateAsync` exception branch.
+- `AzureActiveDirectoryAuthenticationSource` uses `CreateGraphServiceClient`, `CreateAzureApplication` and `CreateAzureConfidential` as protected virtual methods; create a `TestableAzureActiveDirectoryAuthenticationSource` subclass overriding them and return NSubstitute mocks for `IPublicClientApplication`/`IConfidentialClientApplication`.
+- `AcquireTokenByUsernamePassword` and `AcquireTokenForClient` return builder objects; to simulate failure, use `.Returns(callInfo => throw new MsalException(...))` instead of `Task.FromException<AuthenticationResult>`.
+- `WebContentDirectoryFinder` is `public static class` in `Eaf.Middleware.Web` namespace; `CalculateContentRootFolder` searches for `src/Eaf.Middleware.Web.Host` and throws `DirectoryNotFoundException` if not found.
+- `WebContentDirectoryFinder.DirectoryContains` is private static; exercise it via reflection with a directory that contains none of `Eaf.sln`, `Eaf.csproj`, `web.config`.
+- `EafHostBuilderExtensions` (Web) has two overloads for `IHostBuilder` and `IWebHostBuilder`, both with default and prefix variants; `UseAbpConfiguration()` with no arguments builds successfully using `HostBuilder`/`WebHostBuilder`.
+- `RedisConfigurer.Configure` uses `bool.Parse` on `RedisCache:IsRedisEnabled` or `RedisCache:IsEnabled`; use `ConfigurationBuilder` with `Dictionary<string, string?>` to cover enabled/disabled branches.
+- `FriendshipManager` methods use `IRepository<Friendship>` and `IUnitOfWorkManager`; return `Task.FromResult<Friendship>(null!)` to avoid nullability warnings.
+- `CultureHelper` has static fields `IsRtl` and `UsingLunarCalendar` based on `CultureInfo.CurrentUICulture`; tests must set `CurrentUICulture` (e.g., `ar-SA` for RTL, `zh-CN` for lunar calendar) and restore it.
+- `SimpleStringCipher` is in `Abp.Runtime.Security` namespace.
+
 ## P39 gotchas
 - `JwtSecurityTokenHandler.DefaultInboundClaimTypeMap` maps `unique_name` to `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name` by default; remove `unique_name` from the map before OIDC token validation and restore it in `finally`.
 - `OpenIdConnectAuthProviderApi.GetUserInfo` cannot mock `HttpDocumentRetriever` directly; replace the static `_defaultHttpClient` field's `HttpMessageHandler` via reflection and serve a fake JWKS with the same RSA key used to sign the JWT.
@@ -45,22 +58,29 @@ Current coverage (after P39): Line 90.8%, Branch 72%, Method 96.9%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P40)
-- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (2.8%)
-- `Eaf.Middleware.AzureActiveDirectory.Authentication.AzureActiveDirectoryAuthenticationSource<T1, T2>` (8.7%)
-- `Eaf.Middleware.Localization.CultureHelper` (78.5%)
+## Notable classes with remaining low coverage (target for P41)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (80.6%)
 - `Eaf.Middleware.Authorization.Impersonation.ImpersonationManager` (81.0%)
 - `Eaf.Middleware.Web.Controllers.TokenAuthController` (81.4%)
+- `Eaf.AspNetCore.SignalR.Chat.SignalRChatCommunicator` (81.5%)
 - `Eaf.Middleware.Worker.MiddlewareWorkerModule` (82.1%)
-- `Eaf.Middleware.Web.Configuration.EafHostBuilderExtensions` (83.3%)
-- `Eaf.Middleware.Web.WebContentDirectoryFinder` (83.3%)
-- `Eaf.Middleware.Web.Startup.RedisConfigurer` (84.6%)
-- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredAuditLogDeleterWorker` (85.0%)
+- `Eaf.Middleware.AzureActiveDirectory.Configuration.AzureActiveDirectorySettings` (82.3%)
+- `Eaf.KeyVault.OCIKeyVaultManager` (84.3%)
 - `Eaf.Middleware.DataExporting.Excel.EpPlus.EpPlusExcelExporterBase` (85.1%)
-- `Eaf.Middleware.Friendships.FriendshipManager` (85.9%)
 - `Eaf.Middleware.Web.Controllers.ProfileControllerBase` (86.7%)
 - `Eaf.Middleware.Authorization.Users.UserAppService` (86.9%)
+- `Eaf.Middleware.Friendships.Cache.UserFriendsCache` (87.2%)
+- `Eaf.Middleware.Web.Auditing.hangfire.ExpiredEntityLogDeleterWorker` (87.6%)
+- `Eaf.Middleware.Web.Controllers.ChatControllerBase` (88.2%)
+- `Eaf.Middleware.Web.Swagger.SwaggerEnumParameterFilter` (88.2%)
+- `Eaf.Middleware.Web.Swagger.SwaggerOperationFilter` (88.2%)
+- `Eaf.Middleware.Configuration.AppConfigurations` (88.4%)
+- `Eaf.Middleware.Web.Controllers.FileController` (89.1%)
+- `Eaf.Middleware.Serilog.SerilogEafHostBuilderExtensions` (89.2%)
+- `Eaf.Middleware.MiddlewareAppServiceBase` (89.4%)
+- `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (89.5%)
+- `Eaf.Middleware.Chat.ChatFeatureChecker` (90.2%)
+- `Eaf.Middleware.Localization.CultureHelper` (78.5%)
 
 ## P38 gotchas
 - `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.
