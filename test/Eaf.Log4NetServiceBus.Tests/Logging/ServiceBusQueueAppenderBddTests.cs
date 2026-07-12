@@ -1,8 +1,10 @@
 using Eaf.Log4NetServiceBus.Logging;
+using log4net.Layout;
 using Microsoft.Azure.ServiceBus;
 using Shouldly;
 using System;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -277,6 +279,74 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             Should.NotThrow(() => onCloseMethod?.Invoke(appender, null));
             await Task.Yield();
             connection.IsClosedOrClosing.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_AppenderComConexaoValidaETimeout_Quando_SendBufferComEvento_Entao_DeveCriarMensagemETentarEnviar()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+                QueueName = "log-queue",
+                StorageType = "Blob",
+                Layout = new PatternLayout("%message")
+            };
+
+            var connectionField = typeof(ServiceBusQueueAppender)
+                .GetField("_serviceBusConnection", BindingFlags.NonPublic | BindingFlags.Instance);
+            connectionField.ShouldNotBeNull();
+
+            var connection = new ServiceBusConnection(appender.ConnectionString)
+            {
+                OperationTimeout = TimeSpan.FromMilliseconds(1)
+            };
+            connectionField!.SetValue(appender, connection);
+
+            var sendBufferMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull();
+
+            var events = new[]
+            {
+                new log4net.Core.LoggingEvent(new log4net.Core.LoggingEventData
+                {
+                    Message = "INFO | server | event | message | json"
+                })
+            };
+
+            // Quando & Então
+            Should.NotThrow(() => sendBufferMethod!.Invoke(appender, new object[] { events }));
+        }
+
+        [Fact]
+        public void Dado_AppenderComConnectionStringInvalida_Quando_SendBufferComEvento_Entao_DeveCapturarExcecaoGenerica()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "invalid",
+                QueueName = "log-queue",
+                StorageType = "Blob",
+                Layout = new PatternLayout("%message")
+            };
+
+            var sendBufferMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull();
+
+            var events = new[]
+            {
+                new log4net.Core.LoggingEvent(new log4net.Core.LoggingEventData
+                {
+                    Message = "INFO | server | event | message | json"
+                })
+            };
+
+            // Quando & Então
+            Should.NotThrow(() => sendBufferMethod!.Invoke(appender, new object[] { events }));
         }
 
         #region OnClose

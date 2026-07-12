@@ -216,6 +216,70 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         }
 
         [Fact]
+        public async Task Dado_UserNameSemDominio_Quando_CreateLdapContext_Entao_DevePrefixarComDominio()
+        {
+            var sut = CriarSut(domain: "example");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameComBackslash_Quando_CreateLdapContext_Entao_NaoDevePrefixar()
+        {
+            var sut = CriarSut(domain: "example");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "domain\\user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_DominioComPonto_Quando_CreateLdapContext_Entao_NaoDevePrefixarUserName()
+        {
+            var sut = CriarSut(domain: "example.com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_DominioComDC_Quando_CreateLdapContext_Entao_NaoDevePrefixarUserName()
+        {
+            var sut = CriarSut(domain: "DC=example,DC=com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ContainerVazioComDominioComPonto_Quando_CreateLdapContext_Entao_DeveTransformarContainer()
+        {
+            var sut = CriarSut(domain: "example.com", container: string.Empty);
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ContainerComDC_Quando_CreateLdapContext_Entao_DeveManterContainer()
+        {
+            var sut = CriarSut(domain: "localhost", container: "DC=example,DC=com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameEPasswordVazios_Quando_CreateLdapContext_Entao_DeveUsarConfiguracoes()
+        {
+            var sut = CriarSut(userName: "admin", password: "secret");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, null, null));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameEPasswordFornecidos_Quando_CreateLdapContext_Entao_DeveUsarParametros()
+        {
+            var sut = CriarSut();
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(null, "admin", "secret"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
         public async Task Dado_SistemaLinux_Quando_CreatePrincipalContext_Entao_DeveLancarNotImplementedException()
         {
             var sut = CriarSut();
