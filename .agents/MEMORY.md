@@ -2,7 +2,7 @@
 
 Last session branch: `feature/devin-20260712-priority40-coverage-audit`
 Baseline coverage (P39): Line 90.8%, Branch 72%, Method 96.9%.
-Current coverage (after P40): Line 93.2%, Branch 77%, Method 98.1%.
+Current coverage (after P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.

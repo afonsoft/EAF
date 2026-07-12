@@ -18,11 +18,11 @@
 ## Resultado
 | Métrica | Valor |
 |---------|-------|
-| Line | 93.2% |
-| Branch | 77% |
+| Line | 93.1% |
+| Branch | 76.9% |
 | Method | 98.1% |
-| Covered Lines | 12753 / 13672 |
-| Covered Branches | 2260 / 2932 |
+| Covered Lines | 12740 / 13670 |
+| Covered Branches | 2255 / 2930 |
 | Covered Methods | 2062 / 2100 |
 
 ## Código de produção alterado
@@ -79,7 +79,7 @@ Nenhum. Apenas testes foram adicionados/ajustados nesta sessão.
   - `Dado_AmizadeInexistente_Quando_GetFriendshipOrNullAsync_Entao_DeveRetornarNull`
 
 ## READMEs atualizados
-- `README.md` e `README_pt.md` foram atualizados com as novas métricas de testes (Line 93.2%, Branch 77%, Method 98.1%, Total 4189, Passing 4188).
+- `README.md` e `README_pt.md` foram atualizados com as novas métricas de testes (Line 93.1%, Branch 76.9%, Method 98.1%, Total 4189, Passing 4188).
 
 ## Comandos executados
 ```bash
@@ -88,7 +88,7 @@ PATH=/home/ubuntu/.dotnet:/home/ubuntu/.dotnet/tools:$PATH DOTNET_ROOT=/home/ubu
 ```
 
 ## Observações
-- A cobertura geral subiu em relação ao baseline P39 (Line 90.8% -> 93.2%, Branch 72% -> 77%, Method 96.9% -> 98.1%).
+- A cobertura geral subiu em relação ao baseline P39 (Line 90.8% -> 93.1%, Branch 72% -> 76.9%, Method 96.9% -> 98.1%).
 - `LdapAuthenticationSource<T1, T2>` subiu de 2.8% para 50.1%.
 - `AzureActiveDirectoryAuthenticationSource<T1, T2>` subiu de 8.7% para 90.6%.
 - `WebContentDirectoryFinder` manteve 83.3% (caminho de sucesso e `DirectoryContains` cobertos).

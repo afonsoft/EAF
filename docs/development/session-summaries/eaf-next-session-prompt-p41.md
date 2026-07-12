@@ -5,7 +5,7 @@ Execute o P41 coverage audit para o repositório `afonsoft/EAF` e atualize o REA
 ## Contexto
 - Repositório: `afonsoft/EAF` (clone local `/home/ubuntu/repos/EAF`)
 - Branch atual: `feature/devin-20260712-priority40-coverage-audit` (ou a branch do P41 a partir da `main` atual)
-- Baseline P40: Line 93.2%, Branch 77%, Method 98.1% (12753 / 13672 linhas, 2260 / 2932 branches, 2062 / 2100 métodos)
+- Baseline P40: Line 93.1%, Branch 76.9%, Method 98.1% (12740 / 13670 linhas, 2255 / 2930 branches, 2062 / 2100 métodos)
 - Testes: 4189 total, 4188 passando, 1 ignorado, 0 falhas
 - Stack: xUnit + Shouldly + NSubstitute, BDD em português (`Dado/Quando/Então`)
 - Build: `dotnet build Eaf.sln --configuration Release`
@@ -37,7 +37,7 @@ Execute o P41 coverage audit para o repositório `afonsoft/EAF` e atualize o REA
    - `Eaf.Middleware.Web.Serilog.SerilogEafHostBuilderExtensions` (89.5%)
    - `Eaf.Middleware.Chat.ChatFeatureChecker` (90.2%)
    - `Eaf.Middleware.Localization.CultureHelper` (78.5%)
-2. Manter ou aumentar a cobertura: Line >= 93.2%, Branch >= 77%, Method >= 98.1%.
+2. Manter ou aumentar a cobertura: Line >= 93.1%, Branch >= 76.9%, Method >= 98.1%.
 3. Não modificar código de produção, salvo bugs bloqueantes documentados.
 4. Não modificar `.github/workflows/`.
 

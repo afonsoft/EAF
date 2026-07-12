@@ -4,8 +4,8 @@
 
 **[English](README.md)** | Português
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-93.2%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-77%25-brightgreen)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-93.1%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-76.9%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-98.1%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
 ![Total Tests](https://img.shields.io/badge/Total%20Tests-4189-blue)
