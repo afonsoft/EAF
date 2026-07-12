@@ -93,6 +93,42 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
         }
 
         [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafConfigurerComRedisIsRedisEnabled_Entao_DeveRegistrarRedisCache()
+        {
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new[]
+                {
+                    new KeyValuePair<string, string?>("RedisCache:IsRedisEnabled", "true"),
+                    new KeyValuePair<string, string?>("RedisCache:ConnectionString", "localhost:6379")
+                })
+                .Build();
+
+            services.AddEafConfigurer(configuration);
+
+            services.Any(s => s.ImplementationType != null && s.ImplementationType.Name.Contains("RedisCache")).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafConfigurerComSqlServerIsSqlEnabled_Entao_DeveRegistrarSqlServerCache()
+        {
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new[]
+                {
+                    new KeyValuePair<string, string?>("SqlServer:IsSqlEnabled", "true"),
+                    new KeyValuePair<string, string?>("SqlServerCache:ConnectionString", "Server=.;Database=Cache;"),
+                    new KeyValuePair<string, string?>("SqlServerCache:SchemaName", "dbo"),
+                    new KeyValuePair<string, string?>("SqlServerCache:TableName", "EafCache")
+                })
+                .Build();
+
+            services.AddEafConfigurer(configuration);
+
+            services.Any(s => s.ImplementationType != null && s.ImplementationType.Name == "SqlServerCache").ShouldBeTrue();
+        }
+
+        [Fact]
         public void Dado_ServiceCollection_Quando_AddEafConfigurerComSqlServerCache_Entao_DeveRegistrarSqlServerCache()
         {
             var services = new ServiceCollection();
@@ -138,6 +174,7 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
             var hubOptions = provider.GetRequiredService<IOptions<HubOptions>>().Value;
             var responseCompression = provider.GetRequiredService<IOptions<ResponseCompressionOptions>>().Value;
             var cookiePolicy = provider.GetRequiredService<IOptions<CookiePolicyOptions>>().Value;
+            var sessionOptions = provider.GetRequiredService<IOptions<SessionOptions>>().Value;
             var brCompression = provider.GetRequiredService<IOptions<BrotliCompressionProviderOptions>>().Value;
             var gzipCompression = provider.GetRequiredService<IOptions<GzipCompressionProviderOptions>>().Value;
             var jwtOptions = provider.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
@@ -145,6 +182,7 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
             hubOptions.ShouldNotBeNull();
             responseCompression.ShouldNotBeNull();
             cookiePolicy.ShouldNotBeNull();
+            sessionOptions.ShouldNotBeNull();
             brCompression.ShouldNotBeNull();
             gzipCompression.ShouldNotBeNull();
             jwtOptions.ShouldNotBeNull();

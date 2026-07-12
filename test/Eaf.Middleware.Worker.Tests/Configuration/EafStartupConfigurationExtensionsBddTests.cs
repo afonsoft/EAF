@@ -60,6 +60,40 @@ namespace Eaf.Middleware.Worker.Tests.Configuration
             configuration.DidNotReceive().Set(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>());
         }
 
+        [Fact]
+        public void Dado_SecaoComChaveDuplicada_Quando_SetConfiguration_Entao_DeveLancarAbpException()
+        {
+            var configuration = Substitute.For<IAbpStartupConfiguration>();
+            var section = Substitute.For<IConfigurationSection>();
+            section.Key.Returns("SectionDup");
+
+            var child1 = Substitute.For<IConfigurationSection>();
+            child1.Key.Returns("SectionDup:Key");
+            child1.GetChildren().Returns(Enumerable.Empty<IConfigurationSection>());
+
+            var child2 = Substitute.For<IConfigurationSection>();
+            child2.Key.Returns("SectionDup:Key");
+            child2.GetChildren().Returns(Enumerable.Empty<IConfigurationSection>());
+
+            section.GetChildren().Returns(new[] { child1, child2 });
+
+            Should.Throw<Abp.AbpException>(() => configuration.SetConfiguration(section));
+        }
+
+        [Fact]
+        public void Dado_SecaoAninhada_Quando_SetConfiguration_Entao_DeveChamarSetRecursivamente()
+        {
+            var configuration = Substitute.For<IAbpStartupConfiguration>();
+            var section = CriarSecao("Parent", new Dictionary<string, string>
+            {
+                { "Parent:Child:Key", "Value" }
+            });
+
+            configuration.SetConfiguration(section);
+
+            configuration.Received(1).Set("Parent", Arg.Any<Dictionary<string, object>>());
+        }
+
         private static IConfigurationSection CriarSecao(string key, Dictionary<string, string> values)
         {
             var valuesWithNullable = values.Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value));

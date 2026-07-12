@@ -83,5 +83,27 @@ namespace Eaf.MiddlewareCore.Tests.Net.Web
 
             result.ShouldBe(false);
         }
+
+        [Fact]
+        public void Dado_DiretorioComWebHostCsproj_Quando_DirectoryContains_Entao_DeveRetornarTrue()
+        {
+            var directoryContains = typeof(WebContentDirectoryFinder).GetMethod("DirectoryContains", BindingFlags.NonPublic | BindingFlags.Static);
+            directoryContains.ShouldNotBeNull();
+
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+            var filePath = Path.Combine(tempDirectory, "Web.Host.csproj");
+            File.WriteAllText(filePath, "<Project></Project>");
+
+            try
+            {
+                var result = directoryContains!.Invoke(null, new object[] { tempDirectory, "Web.Host.csproj" });
+                result.ShouldBe(true);
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, recursive: true); } catch { }
+            }
+        }
     }
 }
