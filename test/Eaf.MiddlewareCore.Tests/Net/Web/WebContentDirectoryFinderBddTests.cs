@@ -18,11 +18,29 @@ namespace Eaf.Middleware.Tests.Net.Web
         }
 
         [Fact]
-        public void Dado_AssemblyCore_Quando_CalculateContentRootFolder_Entao_DeveEncontrarEafSln()
+        public void Dado_WebHostExistente_Quando_CalculateContentRootFolder_Entao_DeveRetornarCaminhoWebHost()
         {
-            var exception = Assert.Throws<Exception>(() => WebContentDirectoryFinder.CalculateContentRootFolder());
+            var assemblyPath = Path.GetDirectoryName(typeof(MiddlewareCoreModule).Assembly.Location);
+            var directoryInfo = new DirectoryInfo(assemblyPath);
+            while (directoryInfo != null && !File.Exists(Path.Combine(directoryInfo.FullName, "Eaf.sln")))
+            {
+                directoryInfo = directoryInfo.Parent;
+            }
 
-            exception.Message.ShouldContain("Could not find root folder of the web project");
+            directoryInfo.ShouldNotBeNull();
+
+            var webHostFolder = Path.Combine(directoryInfo.FullName, $"src{Path.DirectorySeparatorChar}Eaf.Middleware.Web.Host");
+            Directory.CreateDirectory(webHostFolder);
+
+            try
+            {
+                var result = WebContentDirectoryFinder.CalculateContentRootFolder();
+                result.ShouldBe(webHostFolder);
+            }
+            finally
+            {
+                try { Directory.Delete(webHostFolder, true); } catch { }
+            }
         }
 
         [Fact]

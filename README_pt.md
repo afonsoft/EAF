@@ -4,13 +4,13 @@
 
 **[English](README.md)** | Português
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-90.4%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-71.2%25-brightgreen)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-90.8%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-72%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-96.9%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4104-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4104-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-68-yellow)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4128-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4127-brightgreen)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-6-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -383,22 +383,22 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excelente |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
 | **Eaf.Middleware.Application** | 1400 | 96.0% | ✅ Excelente |
-| **Eaf.Middleware.Core** | 1191 | 95.2% | ✅ Excelente |
-| **Eaf.Middleware.Web.Core** | 642 | 90.6% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1194 | 95.9% | ✅ Excelente |
+| **Eaf.Middleware.Web.Core** | 662 | 91.3% | ✅ Excelente |
 | **Eaf.Middleware.Worker** | 154 | 92.5% | ✅ Excelente |
 | **Eaf.SqliteCache** | 134 | 91.6% | ✅ Excelente |
 | **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excelente |
-| **Eaf.OpenTelemetry** | 61 | 93.6% | ✅ Excelente |
+| **Eaf.OpenTelemetry** | 61 | 98.7% | ✅ Excelente |
 | **Eaf.KeyVault** | 241 | 95.4% | ✅ Excelente |
 | **Eaf.Log4NetServiceBus** | 49 | 80.3% | ✅ Boa |
 | **Eaf.Middleware.AzureActiveDirectory** | 23 | 32.2% | ⚠️ Precisa melhorar |
 | **Eaf.Middleware.Ldap** | 34 | 20.1% | ❌ Baixa |
-| **TOTAL** | **4104** | **90.4%** | ✅ Em progresso |
+| **TOTAL** | **4128** | **90.8%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 90.4% linha, 71.2% branch, 96.9% método
-- **Testes Backend**: 4104 total, 4104 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Atual**: 90.8% linha, 72% branch, 96.9% método
+- **Testes Backend**: 4128 total, 4127 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
 - **Próximos passos**: Melhorar cobertura dos módulos Middleware.Ldap, AzureActiveDirectory e cobertura de branch geral
@@ -419,6 +419,11 @@ Este exemplo demonstra vários recursos do EAF:
   - **Eaf.Log4NetServiceBus**: +testes BDD para ServiceBusQueueAppender (SendBuffer, OnClose)
   - **Eaf.Middleware.Web.Core**: +testes BDD para EafWebHookReceiver (LocalizationSource)
   - **Eaf.OpenTelemetry**: +testes BDD para EafOpenTelemetryServiceCollectionExtensions (hosted services)
+- **Expansão de Testes (Julho 2026)**: P39 coverage audit — cobertura de linha subiu para 90.8% e branch para 72%
+  - **Eaf.Middleware.Web.Core**: +testes BDD para TokenAuthController (LogOut, TwoFactor, RegisterExternalUser, TeamsAuthenticate, helpers privados)
+  - **Eaf.Middleware.Web.Core**: +testes BDD para MiddlewareWebCoreModule (Hangfire Redis/SqlServer e ExpiredAuditLogDeleterWorker)
+  - **Eaf.MiddlewareCore**: +testes BDD para OpenIdConnectAuthProviderApi.GetUserInfo (JWT mockado com RSA e OIDC discovery)
+  - **Eaf.MiddlewareCore**: +testes BDD para WebContentDirectoryFinder.CalculateContentRootFolder
 - **Expansão de Testes (Junho 2026)**: +12 novos arquivos de testes implementados (PR #63)
   - **Eaf.Middleware.Web.Core**: +10 testes (Swagger filters, TokenAuth, Impersonation models)
   - **Eaf.MiddlewareCore**: +30 testes (Entities, DTOs, Extensions, Cache items)
