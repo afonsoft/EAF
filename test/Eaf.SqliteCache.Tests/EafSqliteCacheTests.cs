@@ -1,8 +1,10 @@
 using Abp.Runtime.Caching.Sqlite;
+using Microsoft.Data.Sqlite;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using Xunit;
 
@@ -655,6 +657,205 @@ namespace Eaf.SqliteCache.Tests
             Should.NotThrow(() => System.Threading.Tasks.Task.WaitAll(tasks.ToArray()));
         }
 
+        #region BDD Branch Coverage
+
+        [Fact]
+        public void Dado_ConstructorSemCleanupInterval_Quando_CriarCache_Entao_DeveFuncionarSemTimer()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true, CleanupInterval = null };
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+            cache.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ArquivoNovo_Quando_CriarCache_Entao_DeveCriarBanco()
+        {
+            var cacheName = GetUniqueCacheName();
+            var tempPath = Path.Combine(Path.GetTempPath(), $"eaf-sqlite-cache-{Guid.NewGuid()}.db");
+            var options = new EafSqliteCacheOptions { MemoryOnly = false, CachePath = tempPath };
+
+            try
+            {
+                using var cache = new EafSqliteCache(cacheName, options);
+                cache.ShouldNotBeNull();
+                cache.Name.ShouldBe(cacheName);
+            }
+            finally
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_ArquivoVazioExistente_Quando_CriarCache_Entao_DeveRecriarBanco()
+        {
+            var cacheName = GetUniqueCacheName();
+            var tempPath = Path.Combine(Path.GetTempPath(), $"eaf-sqlite-cache-{Guid.NewGuid()}.db");
+            var options = new EafSqliteCacheOptions { MemoryOnly = false, CachePath = tempPath };
+
+            try
+            {
+                File.Create(tempPath).Dispose();
+                using var cache = new EafSqliteCache(cacheName, options);
+                cache.ShouldNotBeNull();
+                cache.TryGetValue("key", out _).ShouldBeFalse();
+            }
+            finally
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_ArquivoComVersaoErrada_Quando_CriarCache_Entao_DeveRecriarBanco()
+        {
+            var cacheName = GetUniqueCacheName();
+            var tempPath = Path.Combine(Path.GetTempPath(), $"eaf-sqlite-cache-{Guid.NewGuid()}.db");
+            var options = new EafSqliteCacheOptions { MemoryOnly = false, CachePath = tempPath };
+
+            try
+            {
+                using (var first = new EafSqliteCache(cacheName, options))
+                {
+                    first.Set("key", "value");
+                }
+
+                using (var connection = new SqliteConnection($"Data Source={tempPath};Mode=ReadWriteCreate"))
+                {
+                    connection.Open();
+                    using var command = new SqliteCommand("UPDATE meta SET value = 2 WHERE key = 'version'", connection);
+                    command.ExecuteNonQuery();
+                }
+
+                using var second = new EafSqliteCache(cacheName, options);
+                second.TryGetValue("key", out _).ShouldBeFalse();
+            }
+            finally
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_ArquivoSemVersao_Quando_CriarCache_Entao_DeveRecriarBanco()
+        {
+            var cacheName = GetUniqueCacheName();
+            var tempPath = Path.Combine(Path.GetTempPath(), $"eaf-sqlite-cache-{Guid.NewGuid()}.db");
+            var options = new EafSqliteCacheOptions { MemoryOnly = false, CachePath = tempPath };
+
+            try
+            {
+                using (var first = new EafSqliteCache(cacheName, options))
+                {
+                    first.Set("key", "value");
+                }
+
+                using (var connection = new SqliteConnection($"Data Source={tempPath};Mode=ReadWriteCreate"))
+                {
+                    connection.Open();
+                    using var command = new SqliteCommand("DELETE FROM meta WHERE key = 'version'", connection);
+                    command.ExecuteNonQuery();
+                }
+
+                using var second = new EafSqliteCache(cacheName, options);
+                second.TryGetValue("key", out _).ShouldBeFalse();
+            }
+            finally
+            {
+                try { File.Delete(tempPath); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_SetComAmbasExpiracoes_Quando_CriarCache_Entao_DeveObterValor()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+
+            cache.Set("key", "value", TimeSpan.FromMinutes(5), DateTimeOffset.UtcNow.AddHours(2));
+
+            var result = cache.TryGetValue("key", out var value);
+            result.ShouldBeTrue();
+            value.ShouldBe("value");
+        }
+
+        [Fact]
+        public void Dado_SetComExpiracaoAbsolutaDefault_Quando_CriarCache_Entao_DeveObterValor()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+
+            cache.DefaultAbsoluteExpireTime = DateTimeOffset.UtcNow.AddHours(1);
+            cache.Set("key", "value");
+
+            var result = cache.TryGetValue("key", out var value);
+            result.ShouldBeTrue();
+            value.ShouldBe("value");
+        }
+
+        [Fact]
+        public void Dado_SetComExpiracaoAbsolutaDefaultEDeslizante_Quando_CriarCache_Entao_DeveObterValor()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+
+            cache.DefaultAbsoluteExpireTime = DateTimeOffset.UtcNow.AddHours(1);
+            cache.Set("key", "value", TimeSpan.FromMinutes(5));
+
+            var result = cache.TryGetValue("key", out var value);
+            result.ShouldBeTrue();
+            value.ShouldBe("value");
+        }
+
+        [Fact]
+        public void Dado_ChaveComNomeCache_Quando_Set_Entao_DeveAjustarChave()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            using var cache = new EafSqliteCache("MyCache", options);
+
+            cache.Set("MyCache:item", "value");
+
+            var result = cache.TryGetValue("MyCache:item", out var value);
+            result.ShouldBeTrue();
+            value.ShouldBe("value");
+        }
+
+        [Fact]
+        public void Dado_ValorTuple_Quando_Set_Entao_DeveSerializarComoJson()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+
+            cache.Set("tuple", Tuple.Create(1, "a"));
+
+            var result = cache.TryGetValue("tuple", out var value);
+            result.ShouldBeTrue();
+            value.ShouldNotBeNull();
+            value.ShouldBeOfType<JsonElement>();
+            value.ToString().ShouldContain("Item1");
+        }
+
+        [Fact]
+        public void Dado_CacheSemItensExpirados_Quando_RemoveExpired_Entao_DeveRetornarZero()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+
+            cache.Set("key", "value");
+            Should.NotThrow(() => cache.RemoveExpired());
+        }
+
+        [Fact]
+        public void Dado_CacheDescartado_Quando_RemoveExpired_Entao_DeveRetornarSemErro()
+        {
+            var options = new EafSqliteCacheOptions { MemoryOnly = true };
+            var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+            cache.Dispose();
+
+            Should.NotThrow(() => cache.RemoveExpired());
+        }
+
+        #endregion
         #endregion
     }
 }

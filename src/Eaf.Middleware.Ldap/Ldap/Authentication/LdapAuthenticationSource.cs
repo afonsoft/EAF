@@ -167,40 +167,44 @@ namespace Eaf.Middleware.Ldap.Authentication
 
                 var result1 = Task.Run(async () =>
                 {
-                    using (var principalContext = await CreateLdapContext(null))
+                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
                     {
+                        var ldapContext = (ILdapConnection)principalContext;
                         var filter1 = $"(&(objectClass=user)(samAccountName={userName}))";
-                        var searcher1 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
+                        var searcher1 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
                         return await FillUsersLdap(searcher1);
                     }
                 });
 
                 var result2 = Task.Run(async () =>
                 {
-                    using (var principalContext = await CreateLdapContext(null))
+                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
                     {
+                        var ldapContext = (ILdapConnection)principalContext;
                         var filter4 = $"(&(objectClass=user)(mail={userNameOrEmailAddress}))";
-                        var searcher4 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter4, attrib, false);
+                        var searcher4 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter4, attrib, false);
                         return await FillUsersLdap(searcher4);
                     }
                 });
 
                 var result3 = Task.Run(async () =>
                 {
-                    using (var principalContext = await CreateLdapContext(null))
+                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
                     {
+                        var ldapContext = (ILdapConnection)principalContext;
                         var filter2 = $"(&(objectClass=user)(displayName={userName}*))";
-                        var searcher2 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter2, attrib, false);
+                        var searcher2 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter2, attrib, false);
                         return await FillUsersLdap(searcher2);
                     }
                 });
 
                 var result4 = Task.Run(async () =>
                 {
-                    using (var principalContext = await CreateLdapContext(null))
+                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
                     {
+                        var ldapContext = (ILdapConnection)principalContext;
                         var filter3 = $"(&(objectClass=user)(userPrincipalName={userName}*))";
-                        var searcher3 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter3, attrib, false);
+                        var searcher3 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter3, attrib, false);
                         return await FillUsersLdap(searcher3);
                     }
                 });
@@ -417,12 +421,12 @@ namespace Eaf.Middleware.Ldap.Authentication
 
         #region NoWindows
 
-        protected virtual async Task<LdapConnection> CreateLdapContext(TTenant tenant)
+        protected virtual async Task<ILdapConnection> CreateLdapContext(TTenant tenant)
         {
             return await CreateLdapContext(tenant, null, null);
         }
 
-        protected virtual async Task<LdapConnection> CreateLdapContext(TTenant tenant, string userNameOrEmailAddress, string plainPassword)
+        protected virtual async Task<ILdapConnection> CreateLdapContext(TTenant tenant, string userNameOrEmailAddress, string plainPassword)
         {
             string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetContainer(tenant?.Id));
             if (container.IsNullOrEmpty() || !container.Contains("DC="))
@@ -483,7 +487,7 @@ namespace Eaf.Middleware.Ldap.Authentication
             ldapConn.Constraints = cons;
             ldapConn.ConnectionTimeout = 30000;
 
-            return ldapConn;
+            return (ILdapConnection)ldapConn;
         }
 
         protected virtual void UpdateUserFromLdap(TUser user, TUser userPrincipal)

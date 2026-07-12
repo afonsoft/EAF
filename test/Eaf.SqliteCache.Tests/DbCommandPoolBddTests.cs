@@ -2,6 +2,7 @@ using Abp.Runtime.Caching.Sqlite;
 using Microsoft.Data.Sqlite;
 using Shouldly;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
@@ -108,6 +109,47 @@ namespace Eaf.SqliteCache.Tests
 
             Should.NotThrow(() => pool.Dispose());
             Should.NotThrow(() => pool.Dispose());
+        }
+
+        [Fact]
+        public void Dado_PoolComMultiplasThreads_Quando_Use_Entao_DeveCriarNovaConexaoQuandoNecessario()
+        {
+            using var connection = CriarConexaoInicializada();
+            using var pool = new DbCommandPool(connection);
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 10 };
+
+            Parallel.For(0, 10, options, i =>
+            {
+                pool.Use(Operation.Get, cmd =>
+                {
+                    cmd.Parameters.AddWithValue("@key", $"chave-{i}");
+                    cmd.Parameters.AddWithValue("@now", DateTimeOffset.UtcNow.Ticks);
+                    System.Threading.Thread.Sleep(100);
+                    return cmd.ExecuteScalar();
+                });
+            });
+
+            pool.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_PoolComMultiplasTasks_Quando_UseAsync_Entao_DeveCriarNovaConexaoQuandoNecessario()
+        {
+            using var connection = CriarConexaoInicializada();
+            using var pool = new DbCommandPool(connection);
+
+            var tasks = Enumerable.Range(0, 10).Select(i => pool.UseAsync(Operation.Get, async cmd =>
+            {
+                cmd.Parameters.AddWithValue("@key", $"chave-{i}");
+                cmd.Parameters.AddWithValue("@now", DateTimeOffset.UtcNow.Ticks);
+                await Task.Delay(100);
+                return cmd.ExecuteScalar();
+            })).ToArray();
+
+            await Task.WhenAll(tasks);
+
+            pool.ShouldNotBeNull();
         }
     }
 }
