@@ -128,14 +128,12 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
                     throw new SecurityTokenException("Invalid Token");
                 }
             }
-            catch (SecurityTokenException ex)
+            catch (SecurityTokenException)
             {
-                LogHelper.Logger.DebugFormat(ex, "JwtSecurityTokenHandler : {0}", ex.Message.Split('.').FirstOrDefault());
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.Logger.DebugFormat(ex, "JwtSecurityTokenHandler : {0}", ex.Message);
                 throw;
             }
         }

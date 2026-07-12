@@ -159,5 +159,5 @@ Current coverage (after P39): Line 90.8%, Branch 72%, Method 96.9%.
 Branch: `feature/devin-20260712-fix-sonar-jwt`
 - `src/Eaf.Middleware.Web.Core/Authentication/JwtBearer/MiddlewareJwtSecurityTokenHandler.cs`:
   - S2583 (line 117): `tokenValidityValueInClaims` is never null, so remove the unreachable `?? user.SecurityStamp` fallback from the cache `Set` call.
-  - S6667 (line 133): pass the caught `SecurityTokenException` as the first argument to `LogHelper.Logger.DebugFormat`.
+  - S6667/S2139 (line 131-138): `catch` clauses in `ValidateToken` were logging the exception and rethrowing it, which violates both S6667 (pass exception to log) and S2139 (log or rethrow, not both). Removed the `DebugFormat` calls so the `catch` blocks simply rethrow.
 - Tests: `Eaf.Middleware.Web.Core.Tests` passed (662 tests).
