@@ -1,8 +1,8 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260712-priority40-coverage-audit`
-Baseline coverage (P39): Line 90.8%, Branch 72%, Method 96.9%.
-Current coverage (after P40): Line 93.1%, Branch 76.9%, Method 98.1%.
+Last session branch: `feature/devin-20260712-priority41-coverage-audit`
+Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
+Current coverage (after P41): Line 95%, Branch 80.1%, Method 98.5%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -30,6 +30,17 @@ Current coverage (after P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 - `AuthorizationExtensions.GetExternalTokenInformation` relies on `IocManager.Instance`; isolate it by swapping the static instance via reflection and restoring it after the test.
 - `IocManager.Instance` has a non-public setter; use reflection to get/set the static property in tests that require isolation.
 - `OpenIdConnectAuthProviderApi.ValidateTokenInternal` is private; invoke it via reflection and await the resulting `Task` (not `Task<ExternalAuthUserInfo>`).
+
+## P41 gotchas
+- `UserManager.UpdateWithValidateAsync` is public but not virtual; cannot be stubbed with `NSubstitute.Returns`. Use a real `UserManager` with a substitute `UserStore` and `IRepository<User, long>` to exercise the update branch.
+- `ILookupNormalizer` in .NET 10 exposes `NormalizeName` and `NormalizeEmail` (no `Normalize` method).
+- `AbpUserStore.FindByNameOrEmailAsync` overloads are `(string userNameOrEmailAddress)` and `(int? tenantId, string userNameOrEmailAddress)`, not `(string, CancellationToken)`.
+- `User.Identity.GetUserIdentifierOrNull()` uses `AbpClaimTypes.UserId` and `AbpClaimTypes.TenantId` claims, not `MiddlewareCoreConsts.UserIdentifier`.
+- `MiddlewareWebCoreModule` `SetAppFolders` uses `Eaf.Middleware.AppFolders` from `Eaf.Middleware.Core/Net/Folder/AppFolders.cs` and swallows `DirectoryNotFoundException` / `ArgumentException`.
+- `MiddlewareWebCoreModule.PostInitialize` configures `JobStorage.Current` with `RedisStorage` (when `RedisCache:IsRedisEnabled` true and `RedisCache:DatabaseId` is a valid integer) or `SqlServerStorage` (when `ConnectionStrings:DefaultNameOrConnectionString` is present and `Hangfire:SqlServer:UseJobsV2` is true).
+- `ExpiredAuditLogDeleterWorker` (Hangfire) has two `Delete` catch branches — exercise both above and below `MaxDeletionCount`.
+- `UserAppService.NotificationNewUser` is private; invoke via reflection and set `_notificationPublisher`/`_webhookPublisher` to simulate failures and cover the catch blocks.
+- `SwaggerOperationFilter` and `SwaggerEnumParameterFilter` are now 100% covered; `TokenAuthController` is at 90.1% and `MiddlewareWebCoreModule` is at 84.8%.
 
 ## P40 gotchas
 - `LdapAuthenticationSource.SourceName` is `"LDAP"` (uppercase); `AzureActiveDirectoryAuthenticationSource.SourceName` is `"ActiveDirectory"`.
