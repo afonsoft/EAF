@@ -502,6 +502,88 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             ex.InnerExceptions.ShouldNotBeEmpty();
         }
 
+        [Fact]
+        public async Task Dado_FillUsersLdapComAtributoMailAusente_Quando_Executar_Entao_DeveRetornarUsuarioComEmailVazio()
+        {
+            var sut = CriarSut();
+            var attributeSet = new LdapAttributeSet
+            {
+                new LdapAttribute("SamAccountName", "jdoe"),
+                new LdapAttribute("DisplayName", "John Doe")
+            };
+            var entry = new LdapEntry("CN=jdoe,DC=example,DC=com", attributeSet);
+            var search = CriarSearchResults(entry);
+
+            var result = await sut.InvokeFillUsersLdapAsync(search);
+
+            result.Item1.Count.ShouldBe(1);
+            result.Item1[0].UserName.ShouldBe("jdoe");
+            result.Item1[0].Name.ShouldBe("John");
+            result.Item1[0].EmailAddress.ShouldBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task Dado_LdapContextSearchNulo_Quando_UpdateUserAsync_Entao_DeveCapturarExcecaoELogar()
+        {
+            var sut = CriarSut();
+            var ldapContext = Substitute.For<ILdapConnection>();
+            ldapContext.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).ReturnsNull();
+            sut.LdapContextToReturn = ldapContext;
+
+            var user = new TestUser { UserName = "user", EmailAddress = "user@example.com" };
+            await Should.NotThrowAsync(async () => await sut.UpdateUserAsync(user, new TestTenant()));
+
+            user.UserName.ShouldBe("user");
+            user.EmailAddress.ShouldBe("user@example.com");
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioSemEmail_Quando_CreateUserAsync_Entao_DeveRetornarUsuarioBase()
+        {
+            var sut = CriarSut();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var user = await sut.CreateUserAsync("user", new TestTenant());
+
+            user.ShouldNotBeNull();
+            user.UserName.ShouldBe("user");
+        }
+
+        [Fact]
+        public async Task Dado_UserNameSemEmail_Quando_GetUsersAsync_Entao_DeveRetornarListaVazia()
+        {
+            var sut = CriarSut();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var result = await sut.GetUsersAsync("user");
+
+            result.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public async Task Dado_TenantNulo_Quando_TryAuthenticateAsync_Entao_DeveRetornarTrue()
+        {
+            var sut = CriarSut();
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.Connected.Returns(true);
+
+            var result = await sut.TryAuthenticateAsync("user", "pass", null!);
+
+            result.ShouldBeTrue();
+            sut.LastUserNameOrEmailAddress.ShouldBe("user");
+            sut.LastPassword.ShouldBe("pass");
+        }
+
+        [Fact]
+        public async Task Dado_TenantNulo_Quando_CheckIsEnabled_Entao_DeveUsarTenantIdNulo()
+        {
+            var sut = CriarSut();
+
+            await Should.NotThrowAsync(async () => await sut.CheckIsEnabledPublic(null!));
+        }
+
         private static ILdapSearchResults CriarSearchResultsComErro()
         {
             var search = Substitute.For<ILdapSearchResults>();

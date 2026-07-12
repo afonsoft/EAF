@@ -1,10 +1,11 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260712-priority44-coverage-audit`
+Last session branch: `feature/devin-20260712-priority45-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
 Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
+Current coverage (after P45): Line 96.2%, Branch 82.3%, Method 99.1%.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -52,6 +53,17 @@ Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
 |- `Substitute.For<ILdapConnection>()` `SearchAsync` returns `Task<ILdapSearchResults>`; use `.Returns(callInfo => CriarSearchResults())` instead of `.Returns(CriarSearchResults())` when `CriarSearchResults` configures other substitutes, so `NSubstitute` does not lose the last call context.
 |- `LdapAuthenticationSource.CreateUserAsync` delegates to `DefaultExternalAuthenticationSource.CreateUserAsync`, which sets `IsEmailConfirmed` and `IsActive` to `true`; do not assert these flags when testing the empty-search result branch.
 |- `MiddlewareWebCoreModule.PostInitialize` with `Hangfire:IsEnabled=true` and `Database:Provider=SqlServer` plus `ConnectionStrings:Default` sets `JobStorage.Current = new SqlServerStorage(...)`; set `Auditing.IsEnabled=true` and `EntityHistory.IsEnabled=true` to exercise `SetExpiredAuditWoker`/`SetExpiredHistoryEntityWoker` and `RecurringJob.AddOrUpdate`.
+
+## P45 gotchas
+- `LdapAuthenticationSource` `GetAttribute` returns `null` when the attribute is missing; the `mail` attribute fallback returns `String.Empty` and the `EmailAddress` is `null` because the `Name` is split by `StringSplitOptions.None` and joined with space.
+- `Substitute.For<ILdapConnection>().Connected` returns `false` by default; override `Connected` to `true` to test `TryAuthenticateAsync` success branches.
+- `WebContentDirectoryFinder.CalculateContentRootFolder` can be driven to the `coreAssemblyDirectoryPath == null` and `directoryInfo.Parent == null` branches by loading `Eaf.Middleware.Core.dll` into a custom `AssemblyLoadContext` with `LoadFromStream` (no `Location`) or a copy in a temporary directory without solution files.
+- `MiddlewareWebCoreModule` constructor calls `GetAppConfiguration` which sets `ASPNETCORE_ENVIRONMENT` before the fallback chain; to cover the `IsNullOrWhiteSpace` true branches, set `env.EnvironmentName` to `null` and clear all `ASPNETCORE_ENVIRONMENT`, `EAF_ENVIRONMENT`, `Hosting:Environment`, `ASPNET_ENV` and `DOTNET_ENVIRONMENT` variables.
+- `MiddlewareWebCoreModule.SetAppFolders` `contentRootPath` uses `Directory.GetCurrentDirectory()` when `ContentRootPath` is null; set `Directory.SetCurrentDirectory` to a temporary directory before calling `PostInitialize`.
+- `CompositeFileProvider` does not throw when constructed with a single `null` `IFileProvider`; the `SetAppFolders` catch for `CompositeFileProvider` is effectively unreachable without an `IEnumerable<IFileProvider>` overload.
+- `EafMiddlewareCoreSampleAppModule.PreInitialize` `AddDbContext` lambda is not executed by the `IAbpEfCoreConfiguration` substitute; use `efCore.When(...).Do(...)` to capture the `Action<AbpDbContextConfiguration<SampleAppDbContext>>` and invoke it with `new AbpDbContextConfiguration<SampleAppDbContext>(connectionString: "", existingConnection: null)`.
+- `AbpDbContextConfiguration<TDbContext>` constructor is `(string connectionString, DbConnection existingConnection)`; `DbContextOptions` property is created internally.
+- `EafMiddlewareTemplateDbContextConfigurer.Configure` calls `UseSqlServer(connectionString)` and does not throw for empty connection strings.
 
 ## P43 gotchas
 - `Novell.Directory.Ldap.LdapConnection` `SearchAsync`, `ConnectAsync`, `BindAsync` and `Connected` are `virtual` but `IsFinal` (sealed) in `Novell.Directory.Ldap.NETStandard` 4.0.0; `NSubstitute` cannot override them with `Returns`. Use `ILdapConnection` instead of `LdapConnection` in production code and `Substitute.For<ILdapConnection>()` in tests.
@@ -101,11 +113,9 @@ Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P45)
-- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (60.3%)
-- `Eaf.Middleware.Web.WebContentDirectoryFinder` (83.3%)
-- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (84.8%)
-- `Eaf.MiddlewareCore.SampleApp.EafMiddlewareCoreSampleAppModule` (92.3%)
+## Notable classes with remaining low coverage (target for P46)
+- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (61.3%)
+- `Eaf.Middleware.Web.MiddlewareWebCoreModule` (86.2%)
 
 ## P38 gotchas
 - `TokenAuthController` tests were split into `TokenAuthControllerBddTests` (partial base) and `TokenAuthControllerP38BddTests` (additional BDD methods); classes must be `partial` to share helpers.
