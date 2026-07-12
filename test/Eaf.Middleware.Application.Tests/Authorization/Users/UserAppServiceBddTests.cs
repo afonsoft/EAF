@@ -35,6 +35,7 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -459,6 +460,74 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
             // Então
             _sut.AbpSession.TenantId.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameVazioNaLista_Quando_CreateUsersByActiveDirectory_Entao_DeveIgnorarUserNameVazio()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            _sut.AbpSession.TenantId.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UserNameJaExistente_Quando_CreateUsersByActiveDirectory_Entao_DeveIgnorarUsuarioExistente()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>())
+                .Returns(new User { Id = 2, UserName = "existing", NormalizedUserName = "EXISTING" });
+            _sut.UserManager = userManager;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "existing" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            await userRepository.Received(1).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>());
+            await _appAzureActiveDirectoryAuthenticationSource.DidNotReceiveWithAnyArgs().GetUserAsync(Arg.Any<string>());
+        }
+
+        [Fact]
+        public async Task Dado_UserNameComDominioJaExistente_Quando_CreateUsersByActiveDirectory_Entao_DeveIgnorarUsuarioExistente()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>())
+                .Returns(new User { Id = 3, UserName = "existing", NormalizedUserName = "EXISTING" });
+            _sut.UserManager = userManager;
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "existing@tenant.com" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            await userRepository.Received(1).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>());
         }
 
         #endregion
