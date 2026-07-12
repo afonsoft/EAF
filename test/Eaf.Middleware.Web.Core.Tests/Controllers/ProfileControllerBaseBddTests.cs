@@ -6,6 +6,7 @@ using Eaf.Middleware.Web.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Abp;
 using Abp.Web.Models;
 using NSubstitute;
 using Shouldly;
@@ -41,7 +42,7 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
 
             public new FileResult GetDefaultProfilePicture()
             {
-                return GetDefaultProfilePictureInternal();
+                return base.GetDefaultProfilePicture();
             }
         }
 
@@ -175,26 +176,45 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         }
 
         [Fact]
-        public void Dado_ArquivoFormatoInvalido_Quando_UploadProfilePicture_Entao_DeveLancarUnknownImageFormatException()
+        public void Dado_ArquivoNuloNaLista_Quando_UploadProfilePicture_Entao_DeveRetornarErroJson()
         {
-            // Dado
             var sut = CreateController(_tempFileCacheManager, _profileAppService);
-            var file = new FormFile(
-                new MemoryStream(new byte[] { 0x01, 0x02, 0x03, 0x04 }),
-                0,
-                4,
-                "file",
-                "invalid.txt")
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "text/plain"
-            };
+            sut.Request.Form = new FormCollection(
+                new System.Collections.Generic.Dictionary<string, StringValues>(),
+                new FormFileCollection { null! });
+
+            var result = sut.UploadProfilePicture();
+
+            result.ShouldBeOfType<JsonResult>();
+            var jsonResult = (JsonResult)result;
+            var error = jsonResult.Value.GetType().GetProperty("Error")?.GetValue(jsonResult.Value);
+            error.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ArquivoFormatoInvalido_Quando_UploadProfilePicture_Entao_DeveLancarAbpException()
+        {
+            var sut = CreateController(_tempFileCacheManager, _profileAppService);
+            var file = CriarFormFileTiff("image.tiff");
             sut.Request.Form = new FormCollection(
                 new System.Collections.Generic.Dictionary<string, StringValues>(),
                 new FormFileCollection { file });
 
-            // Quando & Então
-            Should.Throw<SixLabors.ImageSharp.UnknownImageFormatException>(() => sut.UploadProfilePicture());
+            Should.Throw<AbpException>(() => sut.UploadProfilePicture());
+        }
+
+        private static IFormFile CriarFormFileTiff(string fileName)
+        {
+            using var image = new Image<Rgba32>(1, 1);
+            var stream = new MemoryStream();
+            image.SaveAsTiff(stream);
+            stream.Position = 0;
+
+            return new FormFile(stream, 0, stream.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/tiff"
+            };
         }
 
         private static IFormFile CriarFormFilePng(string fileName)

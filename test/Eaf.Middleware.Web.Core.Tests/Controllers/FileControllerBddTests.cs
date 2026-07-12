@@ -138,6 +138,18 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             fileResult.FileDownloadName.ShouldBe("foto.jpg");
         }
 
+        [Fact]
+        public async Task Dado_BinaryFileNaoEncontradoPorNome_Quando_DownloadBinaryFile_Entao_DeveRetornarNotFound()
+        {
+            var id = Guid.NewGuid();
+            _binaryObjectManager.GetOrNullAsync(id).Returns(Task.FromResult<BinaryObject>(null));
+            _binaryObjectManager.GetOrNullAsync("missing.jpg").Returns(Task.FromResult<BinaryObject>(null));
+
+            var resultado = await _sut.DownloadBinaryFile(id, null, "missing.jpg");
+
+            resultado.ShouldBeOfType<NotFoundObjectResult>();
+        }
+
         #endregion
 
         #region UploadTempFile
@@ -168,6 +180,18 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             ajaxResponse.Success.ShouldBeFalse();
         }
 
+        [Fact]
+        public void Dado_ArquivoNuloNaLista_Quando_UploadTempFile_Entao_DeveRetornarErro()
+        {
+            ConfigurarRequestComArquivo(null!);
+
+            var resultado = _sut.UploadTempFile();
+
+            var json = resultado.ShouldBeOfType<JsonResult>();
+            var ajaxResponse = json.Value.ShouldBeOfType<Abp.Web.Models.AjaxResponse>();
+            ajaxResponse.Success.ShouldBeFalse();
+        }
+
         #endregion
 
         #region UploadBinaryFile
@@ -186,6 +210,31 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             json.Value.ShouldNotBeNull();
         }
 
+        [Fact]
+        public async Task Dado_ArquivoNuloNaLista_Quando_UploadBinaryFile_Entao_DeveRetornarErro()
+        {
+            ConfigurarRequestComArquivo(null!);
+
+            var resultado = await _sut.UploadBinaryFile();
+
+            var json = resultado.ShouldBeOfType<JsonResult>();
+            var ajaxResponse = json.Value.ShouldBeOfType<Abp.Web.Models.AjaxResponse>();
+            ajaxResponse.Success.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task Dado_ArquivoMuitoGrande_Quando_UploadBinaryFile_Entao_DeveRetornarErro()
+        {
+            var file = CriarFormFile("grande.bin", "application/octet-stream", new byte[20000001]);
+            ConfigurarRequestComArquivo(file);
+
+            var resultado = await _sut.UploadBinaryFile();
+
+            var json = resultado.ShouldBeOfType<JsonResult>();
+            var ajaxResponse = json.Value.ShouldBeOfType<Abp.Web.Models.AjaxResponse>();
+            ajaxResponse.Success.ShouldBeFalse();
+        }
+
         #endregion
 
         #region Helpers
@@ -202,7 +251,7 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         private void ConfigurarRequestComArquivo(IFormFile file)
         {
             var httpContext = new DefaultHttpContext();
-            var formFiles = new FormFileCollection { file };
+            var formFiles = file != null ? new FormFileCollection { file } : new FormFileCollection { null! };
             var form = new FormCollection(new System.Collections.Generic.Dictionary<string, StringValues>(), formFiles);
             httpContext.Request.Form = form;
             _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
