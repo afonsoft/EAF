@@ -645,6 +645,28 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
             user.ProfilePictureId.ShouldNotBe(existingPictureId);
         }
 
+        [Fact]
+        public async Task Dado_ImagemMaiorQueLimite_Quando_UpdateProfilePicture_Entao_DeveLancarExcecaoDeTamanho()
+        {
+            // Dado
+            var fileToken = "token-limite";
+            var imageBytes = CreateBmp(1400, 1400);
+
+            _tempFileCacheManager.GetFile(fileToken).Returns(imageBytes);
+
+            var input = new UpdateProfilePictureInput
+            {
+                FileToken = fileToken,
+                X = 0,
+                Y = 0,
+                Width = 0,
+                Height = 0
+            };
+
+            // Quando & Então
+            await Should.ThrowAsync<UserFriendlyException>(() => _sut.UpdateProfilePicture(input));
+        }
+
         #endregion
 
         [Fact]
@@ -667,6 +689,71 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
         }
 
         [Fact]
+        public async Task Dado_UsuarioComFoto_Quando_GetProfilePicture_Entao_DeveRetornarBase64()
+        {
+            var profilePictureId = Guid.NewGuid();
+            var bytes = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 };
+            var user = new User { Id = 1, UserName = "admin", ProfilePictureId = profilePictureId };
+            var binaryObject = new BinaryObject(null, bytes, ".jpg", "picture.jpg");
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _binaryObjectManager.GetOrNullAsync(profilePictureId).Returns(binaryObject);
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(Arg.Any<int?>()).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+            _sut.UserManager = userManager;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.GetUserId().Returns(1L);
+            _sut.AbpSession = abpSession;
+
+            var result = await _sut.GetProfilePicture();
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(Convert.ToBase64String(bytes));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioInexistente_Quando_GetProfilePicture_Entao_DeveRetornarVazio()
+        {
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(Task.FromException<User>(new UserFriendlyException("User not found")));
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(1L);
+            abpSession.GetUserId().Returns(1L);
+            _sut.AbpSession = abpSession;
+            _sut.UserManager = userManager;
+
+            var result = await _sut.GetProfilePicture();
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComFotoNula_Quando_GetProfilePictureByUser_Entao_DeveRetornarVazio()
+        {
+            var user = new User { Id = 1, UserName = "admin", ProfilePictureId = null };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(1).Returns(user);
+
+            _sut.UserManager = userManager;
+
+            var result = await _sut.GetProfilePictureByUser(1);
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
+        [Fact]
         public async Task Dado_UsuarioInexistente_Quando_GetProfilePictureByUser_Entao_DeveRetornarVazio()
         {
             var userManager = ManagerTestHelper.CreateUserManager();
@@ -675,6 +762,21 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
             _sut.UserManager = userManager;
 
             var result = await _sut.GetProfilePictureByUser(99);
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComFotoNula_Quando_GetFriendProfilePicture_Entao_DeveRetornarVazio()
+        {
+            var user = new User { Id = 2, UserName = "friend", ProfilePictureId = null };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(2).Returns(user);
+
+            _sut.UserManager = userManager;
+
+            var result = await _sut.GetFriendProfilePicture(2, 1);
 
             result.ShouldNotBeNull();
             result.ProfilePicture.ShouldBe(string.Empty);
@@ -781,6 +883,35 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
             objectMapper.Map<CurrentUserProfileEditDto>(Arg.Any<object>()).Returns(new CurrentUserProfileEditDto { Name = "Admin" });
             objectMapper.Map<CurrentUserProfileEditDto, User>(Arg.Any<CurrentUserProfileEditDto>(), Arg.Any<User>()).Returns(user => user.Arg<User>());
             return objectMapper;
+        }
+
+        private static byte[] CreateBmp(int width, int height)
+        {
+            var rowSize = ((width * 3 + 3) / 4) * 4;
+            var pixelDataSize = rowSize * height;
+            var fileSize = 54 + pixelDataSize;
+            var bytes = new byte[fileSize];
+
+            // BMP header
+            bytes[0] = 0x42; bytes[1] = 0x4D;
+            BitConverter.GetBytes(fileSize).CopyTo(bytes, 2);
+            BitConverter.GetBytes(0).CopyTo(bytes, 6);
+            BitConverter.GetBytes(54).CopyTo(bytes, 10);
+
+            // DIB header
+            BitConverter.GetBytes(40).CopyTo(bytes, 14);
+            BitConverter.GetBytes(width).CopyTo(bytes, 18);
+            BitConverter.GetBytes(height).CopyTo(bytes, 22);
+            bytes[26] = 1; bytes[27] = 0;
+            bytes[28] = 24; bytes[29] = 0;
+            BitConverter.GetBytes(0).CopyTo(bytes, 30);
+            BitConverter.GetBytes(pixelDataSize).CopyTo(bytes, 34);
+            BitConverter.GetBytes(0).CopyTo(bytes, 38);
+            BitConverter.GetBytes(0).CopyTo(bytes, 42);
+            BitConverter.GetBytes(0).CopyTo(bytes, 46);
+            BitConverter.GetBytes(0).CopyTo(bytes, 50);
+
+            return bytes;
         }
     }
 }

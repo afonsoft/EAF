@@ -71,5 +71,22 @@ namespace Eaf.KeyVault.Tests
             // Act & Assert - Should not throw
             Should.NotThrow(() => provider.Load());
         }
+
+        [Fact]
+        public void Load_WithUnknownProvider_ShouldLoadEmptyDictionary()
+        {
+            // Arrange
+            var unknownOptions = new EafKeyVaultOptions
+            {
+                Provider = (EnumKeyVault)99
+            };
+            var provider = new EafKeyVaultConfigurationProvider(unknownOptions);
+
+            // Act
+            Should.NotThrow(() => provider.Load());
+
+            // Assert
+            provider.TryGet("any-key", out var value).ShouldBeFalse();
+        }
     }
 }
