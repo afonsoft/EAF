@@ -100,6 +100,7 @@
                        #userNameOrEmailAddressInput="ngModel"
                        autofocus
                        class="form-control m-input"
+                       id="userNameOrEmailAddress"
                        name="userNameOrEmailAddress"
                        required
                        type="text" />
@@ -112,6 +113,7 @@
                 <input [(ngModel)]="loginService.authenticateModel.password"
                        #passwordInput="ngModel"
                        class="form-control m-input"
+                       id="Password"
                        maxlength="32"
                        name="password"
                        required

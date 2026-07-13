@@ -3,7 +3,7 @@
   #modal="bs-modal"
   class="modal fade"
   tabindex="-1"
-  role="dialog"
+ 
   aria-labelledby="modal"
   (onShown)="shown()"
   aria-hidden="true"
@@ -25,9 +25,11 @@
             <input
               autoFocus
               [(ngModel)]="filterText"
+              id="filterText"
               name="filterText"
               class="form-control"
               placeholder="{{ 'SearchWithThreeDot' | localize }}"
+              aria-label="{{ 'SearchWithThreeDot' | localize }}"
               type="text"
             />
             <div class="input-group-append">

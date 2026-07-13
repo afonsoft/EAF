@@ -2,7 +2,7 @@
   <label for="KeyValueListManagerKey">{{ header }}</label>
   <div class="input-group">
     <input id="KeyValueListManagerKey" type="text" class="form-control" [(ngModel)]="addOrEditKey" placeholder="{{ keyPlaceHolder }}" (change)="onKeyChange()" />
-    <input type="text" class="form-control" [(ngModel)]="addOrEditValue" placeholder="{{ valuePlaceHolder }}" />
+    <input type="text" id="KeyValueListManagerValue" class="form-control" [(ngModel)]="addOrEditValue" placeholder="{{ valuePlaceHolder }}" aria-label="{{ valuePlaceHolder }}" />
     <div class="input-group-append">
       <button class="btn btn-primary" (click)="addOrEdit()" type="button">
         <span *ngIf="!isEdit">{{ 'Add' | localize }}</span>

@@ -3,7 +3,7 @@
   #createOrEditModal="bs-modal"
   class="modal fade"
   tabindex="-1"
-  role="dialog"
+ 
   aria-labelledby="createOrEditModal"
   aria-hidden="true"
   [config]="{ backdrop: 'static' }"
@@ -22,14 +22,14 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <select #languageCombobox name="languageName" class="form-control" [(ngModel)]="language.name" required>
+            <select #languageCombobox id="languageName" name="languageName" class="form-control" aria-label="{{ 'LanguageName' | localize }}" [(ngModel)]="language.name" required>
               <option value="">{{ 'emptyText' | localize }}</option>
               <option *ngFor="let languageName of languageNames" [value]="languageName.value">{{ languageName.displayText }}</option>
             </select>
             <validation-messages [formCtrl]="languageCombobox"></validation-messages>
           </div>
           <div class="form-group">
-            <select #iconCombobox name="languageIcon" class="form-control" [(ngModel)]="language.icon">
+            <select #iconCombobox id="languageIcon" name="languageIcon" class="form-control" aria-label="{{ 'LanguageIcon' | localize }}" [(ngModel)]="language.icon">
               <option value="">{{ 'emptyText' | localize }}</option>
               <option *ngFor="let flag of flags" [value]="flag.value" [attr.data-icon]="flag.value">{{ flag.displayText }}</option>
             </select>

@@ -10,7 +10,7 @@
                 {{"SendEmailActivationLink_Information" | localize}}
             </p>
             <div class="form-group m-form__group">
-                <input #emailAddressInput="ngModel" [(ngModel)]="model.emailAddress" class="form-control form-control-solid placeholder-no-fix input-ltr" type="email"  placeholder="{{'EmailAddress' | localize}} *" name="emailAddress" required maxlength="256" email />
+                <input #emailAddressInput="ngModel" id="emailAddress" [(ngModel)]="model.emailAddress" class="form-control form-control-solid placeholder-no-fix input-ltr" type="email"  placeholder="{{'EmailAddress' | localize}} *" aria-label="{{'EmailAddress' | localize}}" name="emailAddress" required maxlength="256" email />
             </div>
 
             <div class="m-login__form-action">
