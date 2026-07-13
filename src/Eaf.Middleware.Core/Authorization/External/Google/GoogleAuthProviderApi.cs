@@ -3,7 +3,6 @@ using Castle.Core.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Abp.Dependency;
 
@@ -40,21 +39,9 @@ namespace Eaf.Middleware.Core.Authentication.External.Google
             if (string.IsNullOrEmpty(additionalParam))
                 throw new AbpException("Authentication:Google:UserInfoEndpoint configuration is required.");
 
-            ExternalAuthUserInfo externalAuthUserInfo;
-            using var client = _httpClientFactory.CreateClient("ExternalAuth");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
-            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            client.Timeout = TimeSpan.FromSeconds(30.0);
-            client.MaxResponseContentBufferSize = 10485760L;
-
-            HttpResponseMessage httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, additionalParam)
-            {
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
-            });
-
-            httpResponseMessage.EnsureSuccessStatusCode();
-            JObject user = JObject.Parse(await httpResponseMessage.Content.ReadAsStringAsync());
-            externalAuthUserInfo = new ExternalAuthUserInfo()
+            using var client = CreateExternalAuthClient(_httpClientFactory);
+            JObject user = await GetUserInfoAsync(client, additionalParam, accessCode);
+            var externalAuthUserInfo = new ExternalAuthUserInfo()
             {
                 Name = GoogleHelper.GetName(user),
                 EmailAddress = GoogleHelper.GetEmail(user),

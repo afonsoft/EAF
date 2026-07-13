@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Abp.Dependency;
 
@@ -36,21 +35,9 @@ namespace Eaf.Middleware.Core.Authentication.External.Microsoft
         /// <returns>Resultado da operação.</returns>
         public override async Task<ExternalAuthUserInfo> GetUserInfo(string accessCode)
         {
-            ExternalAuthUserInfo externalAuthUserInfo;
-            using var client = _httpClientFactory.CreateClient("ExternalAuth");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
-            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            client.Timeout = TimeSpan.FromSeconds(30.0);
-            client.MaxResponseContentBufferSize = 10485760L;
-
-            HttpResponseMessage httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, MicrosoftAccountDefaults.UserInformationEndpoint)
-            {
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
-            });
-
-            httpResponseMessage.EnsureSuccessStatusCode();
-            JObject user = JObject.Parse(await httpResponseMessage.Content.ReadAsStringAsync());
-            externalAuthUserInfo = new ExternalAuthUserInfo()
+            using var client = CreateExternalAuthClient(_httpClientFactory);
+            JObject user = await GetUserInfoAsync(client, MicrosoftAccountDefaults.UserInformationEndpoint, accessCode);
+            var externalAuthUserInfo = new ExternalAuthUserInfo()
             {
                 Name = MicrosoftAccountHelper.GetDisplayName(user),
                 EmailAddress = MicrosoftAccountHelper.GetEmail(user),
@@ -63,17 +50,8 @@ namespace Eaf.Middleware.Core.Authentication.External.Microsoft
 
             try
             {
-                httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, MicrosoftAccountDefaults.UserInformationEndpoint + "/photo/$value")
-                {
-                    Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
-                });
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
-                    byte[] bytes = new byte[stream.Length];
-                    int bytesRead = await stream.ReadAsync(bytes, 0, bytes.Length);
-                    externalAuthUserInfo.Picture = Convert.ToBase64String(bytes, 0, bytesRead);
-                }
+                var bytes = await GetUserBytesAsync(client, MicrosoftAccountDefaults.UserInformationEndpoint + "/photo/$value", accessCode);
+                externalAuthUserInfo.Picture = Convert.ToBase64String(bytes);
             }
             catch (Exception ex)
             {

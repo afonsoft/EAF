@@ -4,10 +4,8 @@ using Castle.Core.Logging;
 using Eaf.Middleware.Authorization.External.AuthZero;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Core.Authentication.External.AuthZero
@@ -49,21 +47,9 @@ namespace Eaf.Middleware.Core.Authentication.External.AuthZero
 
             domain = domain.RemovePostFix("/");
 
-            ExternalAuthUserInfo externalAuthUserInfo;
-            using var client = _httpClientFactory.CreateClient("ExternalAuth");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
-            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            client.Timeout = TimeSpan.FromSeconds(30.0);
-            client.MaxResponseContentBufferSize = 10485760L;
-
-            HttpResponseMessage httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, domain + "/userinfo")
-            {
-                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
-            });
-
-            httpResponseMessage.EnsureSuccessStatusCode();
-            JObject user = JObject.Parse(await httpResponseMessage.Content.ReadAsStringAsync());
-            externalAuthUserInfo = new ExternalAuthUserInfo()
+            using var client = CreateExternalAuthClient(_httpClientFactory);
+            JObject user = await GetUserInfoAsync(client, domain + "/userinfo", accessCode);
+            var externalAuthUserInfo = new ExternalAuthUserInfo()
             {
                 Name = AuthZeroAccountHelper.GetDisplayName(user),
                 EmailAddress = AuthZeroAccountHelper.GetEmail(user),
@@ -79,7 +65,7 @@ namespace Eaf.Middleware.Core.Authentication.External.AuthZero
             {
                 if (!externalAuthUserInfo.Picture.IsNullOrEmpty())
                 {
-                    var bytes = await client.GetByteArrayAsync(externalAuthUserInfo.Picture);
+                    var bytes = await GetUserBytesAsync(client, externalAuthUserInfo.Picture);
                     if (bytes != null && bytes.Any())
                         externalAuthUserInfo.Picture = Convert.ToBase64String(bytes);
                 }
