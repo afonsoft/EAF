@@ -21,6 +21,8 @@ namespace Eaf.AspNetCore.SignalR.Chat
     /// </summary>
     public class ChatHub : OnlineClientHubBase
     {
+        private const string InternalServerErrorKey = "InternalServerError";
+
         private readonly IChatMessageManager _chatMessageManager;
         private readonly ILocalizationManager _localizationManager;
         private readonly IWindsorContainer _windsorContainer;
@@ -85,10 +87,10 @@ namespace Eaf.AspNetCore.SignalR.Chat
             {
                 Logger.WarnFormat("Could not delete chat message {0} to user: {1}", id, sender);
                 Logger.Error(ex.ToString(), ex);
-                return _localizationManager.GetSource("Eaf").GetString("InternalServerError");
+                return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
             }
 
-            return _localizationManager.GetSource("Eaf").GetString("InternalServerError");
+            return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
         }
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace Eaf.AspNetCore.SignalR.Chat
                 {
                     Logger.WarnFormat("Could not send chat message to user: {0}", receiver);
                     Logger.Warn(ex.ToString(), ex);
-                    return _localizationManager.GetSource("Eaf").GetString("InternalServerError");
+                    return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
                 }
             }
             else if (input.GroupId.HasValue && input.GroupId.Value > 0)
@@ -145,11 +147,11 @@ namespace Eaf.AspNetCore.SignalR.Chat
                 {
                     Logger.WarnFormat("Could not send chat message to group: {0}", receiver);
                     Logger.Warn(ex.ToString(), ex);
-                    return _localizationManager.GetSource("Eaf").GetString("InternalServerError");
+                    return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
                 }
             }
 
-            return _localizationManager.GetSource("Eaf").GetString("InternalServerError");
+            return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
         }
 
         protected override void Dispose(bool disposing)

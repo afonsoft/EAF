@@ -13,6 +13,11 @@ namespace Eaf.Middleware.Configuration
     /// </summary>
     public class AppSettingProvider : SettingProvider
     {
+        private const string FalseString = "false";
+        private const string DefaultThemeName = "default";
+        private const string DefaultLightSkin = "light";
+        private const string DefaultFluidLayout = "fluid";
+
         private readonly IConfigurationRoot _appConfiguration;
 
         /// <summary>
@@ -45,22 +50,22 @@ namespace Eaf.Middleware.Configuration
 
         private IEnumerable<SettingDefinition> GetDefaultThemeSettings()
         {
-            var themeName = "default";
+            var themeName = DefaultThemeName;
 
             return new[]
             {
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, "fluid"), isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, DefaultFluidLayout), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.DesktopFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.DesktopFixedHeader, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, "light"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, DefaultLightSkin),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.FixedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.FixedAside, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, "default"), isVisibleToClients: true, scopes: SettingScopes.All)
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, DefaultThemeName), isVisibleToClients: true, scopes: SettingScopes.All)
             };
         }
 
@@ -106,7 +111,7 @@ namespace Eaf.Middleware.Configuration
                 ),
                 new SettingDefinition(
                     AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled,
-                    "false",
+                    FalseString,
                     isVisibleToClients: true,
                     scopes: SettingScopes.Tenant | SettingScopes.Application
                 ),
@@ -144,7 +149,7 @@ namespace Eaf.Middleware.Configuration
                 ),
                 new SettingDefinition(
                     AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled,
-                    "false",
+                    FalseString,
                     isVisibleToClients: true,
                     scopes: SettingScopes.Tenant | SettingScopes.Application
                 ),
@@ -161,7 +166,7 @@ namespace Eaf.Middleware.Configuration
         private IEnumerable<SettingDefinition> GetHostSettings()
         {
             return new[] {
-                new SettingDefinition(AppSettings.UiManagement.Theme, GetFromAppSettings(AppSettings.UiManagement.Theme, "default"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.UiManagement.Theme, GetFromAppSettings(AppSettings.UiManagement.Theme, DefaultThemeName), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims, "", isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Host.Google, "", isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Host.Microsoft, "", isVisibleToClients: true, scopes: SettingScopes.All),
@@ -192,7 +197,7 @@ namespace Eaf.Middleware.Configuration
                 ),
                 new SettingDefinition(
                     AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled,
-                    "false",
+                    FalseString,
                     isVisibleToClients: true,
                     scopes: SettingScopes.Tenant | SettingScopes.Application
                 ),
@@ -237,7 +242,7 @@ namespace Eaf.Middleware.Configuration
                 ),
                 new SettingDefinition(
                     AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled,
-                    "false",
+                    FalseString,
                     isVisibleToClients: true,
                     scopes: SettingScopes.Tenant | SettingScopes.Application
                 ),
@@ -261,22 +266,22 @@ namespace Eaf.Middleware.Configuration
         {
             return new[]
             {
-                new SettingDefinition(AppSettings.UserManagement.IsCookieConsentEnabled, GetFromAppSettings(AppSettings.UserManagement.IsCookieConsentEnabled, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.UserManagement.IsCookieConsentEnabled, GetFromAppSettings(AppSettings.UserManagement.IsCookieConsentEnabled, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UserManagement.StoreExternalTokenInformation, GetFromAppSettings(AppSettings.UserManagement.StoreExternalTokenInformation, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UserManagement.TokenExpiration, GetFromAppSettings(AppSettings.UserManagement.TokenExpiration, "8640"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AppSettings.UserManagement.UseCaptchaOnLogin, GetFromAppSettings(AppSettings.UserManagement.UseCaptchaOnLogin, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AppSettings.UserManagement.IsEmailConfirmationRequiredForLogin, GetFromAppSettings(AppSettings.UserManagement.IsEmailConfirmationRequiredForLogin, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AppSettings.UserManagement.AllowOneConcurrentLoginPerUser, GetFromAppSettings(AppSettings.UserManagement.AllowOneConcurrentLoginPerUser, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AppSettings.UserManagement.TwoFactorLogin.IsEnabled, GetFromAppSettings(AppSettings.UserManagement.TwoFactorLogin.IsEnabled, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.UserManagement.UseCaptchaOnLogin, GetFromAppSettings(AppSettings.UserManagement.UseCaptchaOnLogin, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.UserManagement.IsEmailConfirmationRequiredForLogin, GetFromAppSettings(AppSettings.UserManagement.IsEmailConfirmationRequiredForLogin, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.UserManagement.AllowOneConcurrentLoginPerUser, GetFromAppSettings(AppSettings.UserManagement.AllowOneConcurrentLoginPerUser, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.UserManagement.TwoFactorLogin.IsEnabled, GetFromAppSettings(AppSettings.UserManagement.TwoFactorLogin.IsEnabled, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UserManagement.TwoFactorLogin.IsEmailProviderEnabled, GetFromAppSettings(AppSettings.UserManagement.TwoFactorLogin.IsEmailProviderEnabled, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AppSettings.UserManagement.TwoFactorLogin.IsSmsProviderEnabled, GetFromAppSettings(AppSettings.UserManagement.TwoFactorLogin.IsSmsProviderEnabled, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.UserManagement.TwoFactorLogin.IsSmsProviderEnabled, GetFromAppSettings(AppSettings.UserManagement.TwoFactorLogin.IsSmsProviderEnabled, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled, GetFromAppSettings(AppSettings.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireDigit, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireDigit, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireLowercase, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireLowercase, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireNonAlphanumeric, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireNonAlphanumeric, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireUppercase, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireUppercase, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireDigit, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireDigit, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireLowercase, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireLowercase, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireNonAlphanumeric, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireNonAlphanumeric, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireUppercase, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireUppercase, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequiredLength, GetFromAppSettings(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequiredLength, "6"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
-                new SettingDefinition(EafMiddlewareSettingNames.UserManagement.IsRegisterRequiredForLogin, GetFromAppSettings(EafMiddlewareSettingNames.UserManagement.IsRegisterRequiredForLogin, "false"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(EafMiddlewareSettingNames.UserManagement.IsRegisterRequiredForLogin, GetFromAppSettings(EafMiddlewareSettingNames.UserManagement.IsRegisterRequiredForLogin, FalseString), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(EafMiddlewareSettingNames.LoginImpersonator.IsEnabled, GetFromAppSettings(EafMiddlewareSettingNames.LoginImpersonator.IsEnabled, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(EafMiddlewareSettingNames.LogDeleter.IsEnabled, GetFromAppSettings(EafMiddlewareSettingNames.LogDeleter.IsEnabled, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(EafMiddlewareSettingNames.LogDeleter.ExpiredDays, GetFromAppSettings(EafMiddlewareSettingNames.LogDeleter.ExpiredDays, "180"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
@@ -287,12 +292,12 @@ namespace Eaf.Middleware.Configuration
         private static IEnumerable<SettingDefinition> GetTenantSettings()
         {
             return new[] {
-                new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled, "false", isVisibleToClients: true, scopes: SettingScopes.Tenant),
+                new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled, FalseString, isVisibleToClients: true, scopes: SettingScopes.Tenant),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Google, "", isVisibleToClients: true, scopes: SettingScopes.Tenant),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Microsoft, "", isVisibleToClients: true, scopes: SettingScopes.Tenant),
-                new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled, "false", isVisibleToClients: true, scopes: SettingScopes.Tenant),
+                new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled, FalseString, isVisibleToClients: true, scopes: SettingScopes.Tenant),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect, "", isVisibleToClients: true, scopes: SettingScopes.Tenant),
-                new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled, "false", isVisibleToClients: true, scopes: SettingScopes.Tenant)
+                new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled, FalseString, isVisibleToClients: true, scopes: SettingScopes.Tenant)
             };
         }
 
@@ -302,18 +307,18 @@ namespace Eaf.Middleware.Configuration
 
             return new[]
             {
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, "fluid"), isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, DefaultFluidLayout), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.DesktopFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.DesktopFixedHeader, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, "light"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, DefaultLightSkin),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.FixedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.FixedAside, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, "default"), isVisibleToClients: true, scopes: SettingScopes.All)
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, DefaultThemeName), isVisibleToClients: true, scopes: SettingScopes.All)
             };
         }
 
@@ -323,18 +328,18 @@ namespace Eaf.Middleware.Configuration
 
             return new[]
             {
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, "fluid"), isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, DefaultFluidLayout), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.DesktopFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.DesktopFixedHeader, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, "light"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, DefaultLightSkin),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.FixedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.FixedAside, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, "default"), isVisibleToClients: true, scopes: SettingScopes.All)
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, DefaultThemeName), isVisibleToClients: true, scopes: SettingScopes.All)
             };
         }
 
@@ -344,18 +349,18 @@ namespace Eaf.Middleware.Configuration
 
             return new[]
             {
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, "fluid"), isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LayoutType, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LayoutType, DefaultFluidLayout), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ContentSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ContentSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.DesktopFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.DesktopFixedHeader, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, "light"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, "light"), isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.MobileFixedHeader, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.MobileFixedHeader, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.Header.Skin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.Header.Skin, DefaultLightSkin),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AsideSkin, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AsideSkin, DefaultLightSkin), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.FixedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.FixedAside, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideMinimizing, "true"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
-                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, "default"), isVisibleToClients: true, scopes: SettingScopes.All)
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultMinimizedAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.AllowAsideHiding, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.AllowAsideHiding, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.LeftAside.DefaultHiddenAside, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.LeftAside.DefaultHiddenAside, FalseString),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(themeName + "." + AppSettings.UiManagement.ThemeColor, GetFromAppSettings(themeName + "." +AppSettings.UiManagement.ThemeColor, DefaultThemeName), isVisibleToClients: true, scopes: SettingScopes.All)
             };
         }
     }

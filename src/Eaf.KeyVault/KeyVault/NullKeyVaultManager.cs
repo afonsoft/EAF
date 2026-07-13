@@ -6,6 +6,8 @@ namespace Eaf.KeyVault
 {
     internal class NullKeyVaultManager : IKeyVaultManager
     {
+        private const string NotImplementedLogMessage = "NullKeyVaultManager : NotImplementedException";
+
         private readonly EafKeyVaultOptions options;
         private readonly ILogger logger;
 
@@ -27,7 +29,7 @@ namespace Eaf.KeyVault
         /// <returns>Resultado da operação.</returns>
         public IDictionary<string, string> GetKeyValues()
         {
-            logger.Debug("NullKeyVaultManager : NotImplementedException");
+            logger.Debug(NotImplementedLogMessage);
             return new Dictionary<string, string>();
         }
 
@@ -37,7 +39,7 @@ namespace Eaf.KeyVault
         /// <returns>Resultado da operação.</returns>
         public Task<IDictionary<string, string>> GetKeyValuesAsync()
         {
-            logger.Debug("NullKeyVaultManager : NotImplementedException");
+            logger.Debug(NotImplementedLogMessage);
             return Task.FromResult(GetKeyValues());
         }
 
@@ -48,7 +50,7 @@ namespace Eaf.KeyVault
         /// <returns>Resultado da operação.</returns>
         public string GetValue(string key)
         {
-            logger.Debug("NullKeyVaultManager : NotImplementedException");
+            logger.Debug(NotImplementedLogMessage);
             return null;
         }
 
@@ -59,7 +61,7 @@ namespace Eaf.KeyVault
         /// <returns>Resultado da operação.</returns>
         public Task<string> GetValueAsync(string key)
         {
-            logger.Debug("NullKeyVaultManager : NotImplementedException");
+            logger.Debug(NotImplementedLogMessage);
             return Task.FromResult(GetValue(key));
         }
 
@@ -70,7 +72,7 @@ namespace Eaf.KeyVault
         /// <param name="value">Parâmetro value.</param>
         public void SetValue(string key, string value)
         {
-            logger.Debug("NullKeyVaultManager : NotImplementedException");
+            logger.Debug(NotImplementedLogMessage);
             //null
         }
 
@@ -81,7 +83,7 @@ namespace Eaf.KeyVault
         /// <param name="value">Parâmetro value.</param>
         public Task SetValueAsync(string key, string value)
         {
-            logger.Debug("NullKeyVaultManager : NotImplementedException");
+            logger.Debug(NotImplementedLogMessage);
             SetValue(key, value);
             return Task.CompletedTask;
         }

@@ -52,6 +52,8 @@ namespace Eaf.Middleware.Web
     /// </summary>
     public class MiddlewareWebCoreModule : AbpModule
     {
+        private const string HangfireIsEnabledKey = "Hangfire:IsEnabled";
+
         private readonly IConfigurationRoot _appConfiguration;
         private readonly IHostEnvironment _env;
 
@@ -103,9 +105,9 @@ namespace Eaf.Middleware.Web
 
             if (Configuration.BackgroundJobs.IsJobExecutionEnabled)
             {
-                bool.TryParse(_appConfiguration["Hangfire:IsEnabled"], out bool IsEnabled);
+                bool.TryParse(_appConfiguration[HangfireIsEnabledKey], out bool IsEnabled);
 
-                if (_appConfiguration["Hangfire:IsEnabled"] == null || !IsEnabled)
+                if (_appConfiguration[HangfireIsEnabledKey] == null || !IsEnabled)
                 {
                     //Expired Audit Log Deleter Worker
                     var workManager = IocManager.Resolve<IBackgroundWorkerManager>();
@@ -207,7 +209,7 @@ namespace Eaf.Middleware.Web
             //App configurations
             Configuration.Modules.AbpWebCommon().MultiTenancy.DomainFormat = _appConfiguration["App:ServerRootAddress"];
 
-            if (Configuration.BackgroundJobs.IsJobExecutionEnabled && _appConfiguration["Hangfire:IsEnabled"] != null && bool.Parse(_appConfiguration["Hangfire:IsEnabled"]))
+            if (Configuration.BackgroundJobs.IsJobExecutionEnabled && _appConfiguration[HangfireIsEnabledKey] != null && bool.Parse(_appConfiguration[HangfireIsEnabledKey]))
             {
                 //hangfire
                 Configuration.BackgroundJobs.UseHangfire();

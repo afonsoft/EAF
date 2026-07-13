@@ -32,6 +32,8 @@ namespace Eaf.Middleware.Ldap.Authentication
         where TTenant : AbpTenant<TUser>
         where TUser : AbpUserBase, new()
     {
+        private const string DomainComponentSeparator = ", DC=";
+
         /// <summary>
         /// LDAP
         /// </summary>
@@ -83,7 +85,7 @@ namespace Eaf.Middleware.Ldap.Authentication
                 var principalContext = await CreateLdapContext(tenant);
                 string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
                 if (container.Contains(".") && !container.Contains("DC="))
-                    container = "DC=" + string.Join(", DC=", container.Split("."));
+                    container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
                 string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
                 var filter1 = $"(&(objectClass=user)(SAMAccountName={userNameOrEmailAddress}))";
@@ -157,7 +159,7 @@ namespace Eaf.Middleware.Ldap.Authentication
 
                 string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(null));
                 if (container.Contains(".") && !container.Contains("DC="))
-                    container = "DC=" + string.Join(", DC=", container.Split("."));
+                    container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
                 string userName = userNameOrEmailAddress;
                 if (userNameOrEmailAddress.IndexOf("@") != -1)
@@ -376,7 +378,7 @@ namespace Eaf.Middleware.Ldap.Authentication
                     var principalContext = await CreateLdapContext(tenant);
                     string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
                     if (container.Contains(".") && !container.Contains("DC="))
-                        container = "DC=" + string.Join(", DC=", container.Split("."));
+                        container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
                     string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
                     var filter1 = $"(&(objectClass=user)(SAMAccountName={user.UserName}))";
@@ -432,7 +434,7 @@ namespace Eaf.Middleware.Ldap.Authentication
             if (container.IsNullOrEmpty() || !container.Contains("DC="))
                 container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
             if (!container.IsNullOrEmpty() && container.Contains(".") && !container.Contains("DC="))
-                container = "DC=" + string.Join(", DC=", container.Split("."));
+                container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
             string domain = await _settings.GetDomain(tenant?.Id);
 
@@ -528,7 +530,7 @@ namespace Eaf.Middleware.Ldap.Authentication
             if (container.IsNullOrEmpty() || !container.Contains("DC="))
                 container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(tenant?.Id));
             if (!container.IsNullOrEmpty() && container.Contains(".") && !container.Contains("DC="))
-                container = "DC=" + string.Join(", DC=", container.Split("."));
+                container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
             var contextType = await _settings.GetContextType(tenant?.Id);
             contextType ??= ContextType.Domain;

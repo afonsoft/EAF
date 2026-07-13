@@ -11,6 +11,8 @@ namespace Eaf.Middleware.Web.Configuration
     /// </summary>
     public static class EafHostBuilderExtensions
     {
+        private const string AppSettingsJsonFileName = "appsettings.json";
+
         /// <summary>
         /// AddEnvironmentVariables and EAF_ AddInMemoryCollection SetBasePath AddJsonFile
         /// appsettings.json and appsettings.{EnvironmentName}.json
@@ -26,7 +28,7 @@ namespace Eaf.Middleware.Web.Configuration
                     config.SetBasePath(Directory.GetCurrentDirectory());
                     config.AddInMemoryCollection();
                     config.AddEnvironmentVariables();
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                    config.AddJsonFile(AppSettingsJsonFileName, optional: true, reloadOnChange: true);
                     config.AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
 
                     if (!string.IsNullOrEmpty(prefix))
@@ -50,7 +52,7 @@ namespace Eaf.Middleware.Web.Configuration
                 config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddInMemoryCollection();
                 config.AddEnvironmentVariables();
-                config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                config.AddJsonFile(AppSettingsJsonFileName, optional: true, reloadOnChange: true);
                 config.AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
 
                 if (!string.IsNullOrEmpty(prefix))
@@ -73,7 +75,7 @@ namespace Eaf.Middleware.Web.Configuration
                     config.SetBasePath(Directory.GetCurrentDirectory());
                     config.AddInMemoryCollection();
                     config.AddEnvironmentVariables();
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                    config.AddJsonFile(AppSettingsJsonFileName, optional: true, reloadOnChange: true);
                     config.AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
 
                     if (!string.IsNullOrEmpty(prefix))
@@ -97,7 +99,7 @@ namespace Eaf.Middleware.Web.Configuration
                 config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddInMemoryCollection();
                 config.AddEnvironmentVariables();
-                config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                config.AddJsonFile(AppSettingsJsonFileName, optional: true, reloadOnChange: true);
                 config.AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
 
                 if (!string.IsNullOrEmpty(prefix))

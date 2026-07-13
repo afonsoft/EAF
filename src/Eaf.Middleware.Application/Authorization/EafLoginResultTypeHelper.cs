@@ -13,6 +13,8 @@ namespace Eaf.Middleware.Authorization
     /// </summary>
     public class AbpLoginResultTypeHelper : DomainService, ITransientDependency
     {
+        private const string LoginFailedKey = "LoginFailed";
+
         /// <summary>
         /// Inicializa uma nova instância da classe AbpLoginResultTypeHelper.
         /// </summary>
@@ -61,29 +63,29 @@ namespace Eaf.Middleware.Authorization
                     return new UserFriendlyException("Don't call this method with a success result!");
 
                 case AbpLoginResultType.InvalidUserNameOrEmailAddress:
-                    return new UserFriendlyException(AbpLoginResultType.InvalidUserNameOrEmailAddress.GetHashCode(), L("LoginFailed"), L("InvalidUserNameOrPassword"));
+                    return new UserFriendlyException(AbpLoginResultType.InvalidUserNameOrEmailAddress.GetHashCode(), L(LoginFailedKey), L("InvalidUserNameOrPassword"));
 
                 case AbpLoginResultType.InvalidPassword:
-                    return new UserFriendlyException(AbpLoginResultType.InvalidPassword.GetHashCode(), L("LoginFailed"), L("InvalidUserNameOrPassword"));
+                    return new UserFriendlyException(AbpLoginResultType.InvalidPassword.GetHashCode(), L(LoginFailedKey), L("InvalidUserNameOrPassword"));
 
                 case AbpLoginResultType.InvalidTenancyName:
-                    return new UserFriendlyException(AbpLoginResultType.InvalidTenancyName.GetHashCode(), L("LoginFailed"), L("ThereIsNoTenantDefinedWithName{0}", tenancyName));
+                    return new UserFriendlyException(AbpLoginResultType.InvalidTenancyName.GetHashCode(), L(LoginFailedKey), L("ThereIsNoTenantDefinedWithName{0}", tenancyName));
 
                 case AbpLoginResultType.TenantIsNotActive:
-                    return new UserFriendlyException(AbpLoginResultType.TenantIsNotActive.GetHashCode(), L("LoginFailed"), L("TenantIsNotActive", tenancyName));
+                    return new UserFriendlyException(AbpLoginResultType.TenantIsNotActive.GetHashCode(), L(LoginFailedKey), L("TenantIsNotActive", tenancyName));
 
                 case AbpLoginResultType.UserIsNotActive:
-                    return new UserFriendlyException(AbpLoginResultType.UserIsNotActive.GetHashCode(), L("LoginFailed"), L("UserIsNotActiveAndCanNotLogin", usernameOrEmailAddress));
+                    return new UserFriendlyException(AbpLoginResultType.UserIsNotActive.GetHashCode(), L(LoginFailedKey), L("UserIsNotActiveAndCanNotLogin", usernameOrEmailAddress));
 
                 case AbpLoginResultType.UserEmailIsNotConfirmed:
-                    return new UserFriendlyException(AbpLoginResultType.UserEmailIsNotConfirmed.GetHashCode(), L("LoginFailed"), L("UserEmailIsNotConfirmedAndCanNotLogin"));
+                    return new UserFriendlyException(AbpLoginResultType.UserEmailIsNotConfirmed.GetHashCode(), L(LoginFailedKey), L("UserEmailIsNotConfirmedAndCanNotLogin"));
 
                 case AbpLoginResultType.LockedOut:
-                    return new UserFriendlyException(AbpLoginResultType.LockedOut.GetHashCode(), L("LoginFailed"), L("UserLockedOutMessage"));
+                    return new UserFriendlyException(AbpLoginResultType.LockedOut.GetHashCode(), L(LoginFailedKey), L("UserLockedOutMessage"));
 
                 default: //Can not fall to default actually. But other result types can be added in the future and we may forget to handle it
                     Logger.WarnFormat("Unhandled login fail reason: {0}", result);
-                    return new UserFriendlyException(L("LoginFailed"));
+                    return new UserFriendlyException(L(LoginFailedKey));
             }
         }
 
@@ -129,7 +131,7 @@ namespace Eaf.Middleware.Authorization
 
                 default: //Can not fall to default actually. But other result types can be added in the future and we may forget to handle it
                     Logger.WarnFormat("Unhandled login fail reason: {0}", result);
-                    return L("LoginFailed");
+                    return L(LoginFailedKey);
             }
         }
     }

@@ -22,6 +22,8 @@ namespace Eaf.AspNetCore.Hangfire
     /// </summary>
     public class EafHangfireAuthorizationFilter : IDashboardAuthorizationFilter
     {
+        private const string AuthTokenCookieName = "Eaf.AuthToken";
+
         private readonly string[] _requiredPermissionName;
         private const string TokenValidityKey = "HangFireCache";
 
@@ -145,11 +147,11 @@ namespace Eaf.AspNetCore.Hangfire
 
             jwtToken = request.Query.FirstOrDefault(x => auths.Contains(x.Key.ToLower())).Value;
 
-            if (string.IsNullOrEmpty(jwtToken) && !string.IsNullOrEmpty(request.Cookies["Eaf.AuthToken"]))
-                jwtToken = request.Cookies["Eaf.AuthToken"];
+            if (string.IsNullOrEmpty(jwtToken) && !string.IsNullOrEmpty(request.Cookies[AuthTokenCookieName]))
+                jwtToken = request.Cookies[AuthTokenCookieName];
 
-            if (string.IsNullOrEmpty(jwtToken) && !string.IsNullOrEmpty(request.Headers["Eaf.AuthToken"]))
-                jwtToken = request.Headers["Eaf.AuthToken"];
+            if (string.IsNullOrEmpty(jwtToken) && !string.IsNullOrEmpty(request.Headers[AuthTokenCookieName]))
+                jwtToken = request.Headers[AuthTokenCookieName];
 
             var cacheManager = context.GetHttpContext().RequestServices.GetRequiredService<ICacheManager>();
             var remoteIpAddress = context.Request?.RemoteIpAddress ?? context.GetHttpContext()?.Connection?.RemoteIpAddress?.ToString();
@@ -175,7 +177,7 @@ namespace Eaf.AspNetCore.Hangfire
                     .Set(remoteIpAddress, jwtToken, TimeSpan.FromHours(1));
                 }
 
-                context.GetHttpContext().Response.Cookies.Append("Eaf.AuthToken",
+                context.GetHttpContext().Response.Cookies.Append(AuthTokenCookieName,
                     jwtToken,
 
                     new CookieOptions()
@@ -189,7 +191,7 @@ namespace Eaf.AspNetCore.Hangfire
                     });
 
                 var setCookieHeaderValue = new SetCookieHeaderValue(
-                    Uri.EscapeDataString("Eaf.AuthToken"),
+                    Uri.EscapeDataString(AuthTokenCookieName),
                     Uri.EscapeDataString(jwtToken))
                 {
                     Path = "/",

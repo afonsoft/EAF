@@ -16,6 +16,10 @@ namespace Eaf.Middleware.Serilog
     /// </summary>
     public static class SerilogEafHostBuilderExtensions
     {
+        private const string ElasticSearchUrlKey = "ElasticSearch:Url";
+        private const string SeqUrlKey = "Seq:Url";
+        private const string SeqApiKeyKey = "Seq:ApiKey";
+
         private static readonly ConfigurationReaderOptions options = new ConfigurationReaderOptions(typeof(ConsoleLoggerConfigurationExtensions).Assembly);
 
         /// <summary>
@@ -47,9 +51,9 @@ namespace Eaf.Middleware.Serilog
                .WriteTo.File(pathToLog, restrictedToMinimumLevel: level, rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, fileSizeLimitBytes: 41943040, shared: true, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}][{ThreadId}] {Message:lj} {Properties:j} {Exception} {NewLine}")
                .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}][{ThreadId}] {Message:lj} {Exception} {NewLine}");
 
-                if (!string.IsNullOrEmpty(ctx.Configuration["ElasticSearch:Url"]))
+                if (!string.IsNullOrEmpty(ctx.Configuration[ElasticSearchUrlKey]))
                 {
-                    config.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(ctx.Configuration["ElasticSearch:Url"]))
+                    config.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(ctx.Configuration[ElasticSearchUrlKey]))
                     {
                         AutoRegisterTemplate = true,
                         AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
@@ -57,12 +61,12 @@ namespace Eaf.Middleware.Serilog
                     });
                 }
 
-                if (!string.IsNullOrEmpty(ctx.Configuration["Seq:Url"]))
+                if (!string.IsNullOrEmpty(ctx.Configuration[SeqUrlKey]))
                 {
-                    if (!string.IsNullOrEmpty(ctx.Configuration["Seq:ApiKey"]))
-                        config.WriteTo.Seq(ctx.Configuration["Seq:Url"], apiKey: ctx.Configuration["Seq:ApiKey"], restrictedToMinimumLevel: level);
+                    if (!string.IsNullOrEmpty(ctx.Configuration[SeqApiKeyKey]))
+                        config.WriteTo.Seq(ctx.Configuration[SeqUrlKey], apiKey: ctx.Configuration[SeqApiKeyKey], restrictedToMinimumLevel: level);
                     else
-                        config.WriteTo.Seq(ctx.Configuration["Seq:Url"], restrictedToMinimumLevel: level);
+                        config.WriteTo.Seq(ctx.Configuration[SeqUrlKey], restrictedToMinimumLevel: level);
                 }
             }
 
@@ -100,9 +104,9 @@ namespace Eaf.Middleware.Serilog
                    .WriteTo.File(pathToLog, restrictedToMinimumLevel: LogEventLevel.Error, rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, fileSizeLimitBytes: 41943040, shared: true, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}][{ThreadId}] {Message:lj} {Properties:j} {Exception} {NewLine}")
                    .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}][{ThreadId}] {Message:lj} {Exception} {NewLine}");
 
-                    if (!string.IsNullOrEmpty(ctx.Configuration["ElasticSearch:Url"]))
+                    if (!string.IsNullOrEmpty(ctx.Configuration[ElasticSearchUrlKey]))
                     {
-                        config.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(ctx.Configuration["ElasticSearch:Url"]))
+                        config.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(ctx.Configuration[ElasticSearchUrlKey]))
                         {
                             AutoRegisterTemplate = true,
                             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
@@ -110,12 +114,12 @@ namespace Eaf.Middleware.Serilog
                         });
                     }
 
-                    if (!string.IsNullOrEmpty(ctx.Configuration["Seq:Url"]))
+                    if (!string.IsNullOrEmpty(ctx.Configuration[SeqUrlKey]))
                     {
-                        if (!string.IsNullOrEmpty(ctx.Configuration["Seq:ApiKey"]))
-                            config.WriteTo.Seq(ctx.Configuration["Seq:Url"], apiKey: ctx.Configuration["Seq:ApiKey"]);
+                        if (!string.IsNullOrEmpty(ctx.Configuration[SeqApiKeyKey]))
+                            config.WriteTo.Seq(ctx.Configuration[SeqUrlKey], apiKey: ctx.Configuration[SeqApiKeyKey]);
                         else
-                            config.WriteTo.Seq(ctx.Configuration["Seq:Url"]);
+                            config.WriteTo.Seq(ctx.Configuration[SeqUrlKey]);
                     }
                 };
             }

@@ -11,6 +11,11 @@ namespace Eaf.AspNetCore.Configuration
     /// </summary>
     public class EafOpenTelemetryOptions : IOptions<EafOpenTelemetryOptions>
     {
+        private const string OtelExporterOtlpEndpointKey = "OTEL_EXPORTER_OTLP_ENDPOINT";
+        private const string OtelExporterOtlpProtocolKey = "OTEL_EXPORTER_OTLP_PROTOCOL";
+        private const string OtelExporterOtlpHeadersKey = "OTEL_EXPORTER_OTLP_HEADERS";
+        private const string OtelServiceNameKey = "OTEL_SERVICE_NAME";
+
         public EafOpenTelemetryOptions Value => this;
         private readonly Dictionary<string, string> otlpVariables;
 
@@ -22,9 +27,9 @@ namespace Eaf.AspNetCore.Configuration
         {
             otlpVariables = new Dictionary<string, string>
             {
-                { "OTEL_EXPORTER_OTLP_ENDPOINT", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") },
-                { "OTEL_EXPORTER_OTLP_PROTOCOL", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL") ?? "http/protobuf" },
-                { "OTEL_EXPORTER_OTLP_HEADERS", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_HEADERS") },
+                { OtelExporterOtlpEndpointKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpEndpointKey) },
+                { OtelExporterOtlpProtocolKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpProtocolKey) ?? "http/protobuf" },
+                { OtelExporterOtlpHeadersKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpHeadersKey) },
                 { "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT", System.Environment.GetEnvironmentVariable("OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT") ?? "4095" },
                 { "OTEL_EXPOTEL_ATTRIBUTE_COUNT_LIMITORTER_OTLP_ENDPOINT", System.Environment.GetEnvironmentVariable("OTEL_ATTRIBUTE_COUNT_LIMIT") ?? "64" },
                 { "OTEL_EXPORTER_OTLP_COMPRESSION", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_COMPRESSION") ?? "gzip" },
@@ -32,7 +37,7 @@ namespace Eaf.AspNetCore.Configuration
                 { "OTEL_EXPORTER_OTLP_INSECURE", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_INSECURE") ?? "false" },
                 { "OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE") ?? "delta" },
                 { "OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION", System.Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION") ?? "base2_exponential_bucket_histogram" },
-                { "OTEL_SERVICE_NAME", System.Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") }
+                { OtelServiceNameKey, System.Environment.GetEnvironmentVariable(OtelServiceNameKey) }
             };
         }
 
@@ -46,13 +51,13 @@ namespace Eaf.AspNetCore.Configuration
             get
             {
                 if (string.IsNullOrEmpty(_serviceName))
-                    _serviceName = otlpVariables["OTEL_SERVICE_NAME"];
+                    _serviceName = otlpVariables[OtelServiceNameKey];
                 return _serviceName;
             }
             set
             {
                 _serviceName = value;
-                otlpVariables["OTEL_SERVICE_NAME"] = value;
+                otlpVariables[OtelServiceNameKey] = value;
             }
         }
 
@@ -94,13 +99,13 @@ namespace Eaf.AspNetCore.Configuration
             get
             {
                 if (string.IsNullOrEmpty(_otlpEndpoint))
-                    _otlpEndpoint = otlpVariables["OTEL_EXPORTER_OTLP_ENDPOINT"];
+                    _otlpEndpoint = otlpVariables[OtelExporterOtlpEndpointKey];
                 return _otlpEndpoint;
             }
             set
             {
                 _otlpEndpoint = value;
-                otlpVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = value;
+                otlpVariables[OtelExporterOtlpEndpointKey] = value;
             }
         }
 
@@ -110,13 +115,13 @@ namespace Eaf.AspNetCore.Configuration
             get
             {
                 if (string.IsNullOrEmpty(_otlpHeaders))
-                    _otlpHeaders = otlpVariables["OTEL_EXPORTER_OTLP_HEADERS"];
+                    _otlpHeaders = otlpVariables[OtelExporterOtlpHeadersKey];
                 return _otlpHeaders;
             }
             set
             {
                 _otlpHeaders = value;
-                otlpVariables["OTEL_EXPORTER_OTLP_HEADERS"] = value;
+                otlpVariables[OtelExporterOtlpHeadersKey] = value;
             }
         }
 
@@ -138,9 +143,9 @@ namespace Eaf.AspNetCore.Configuration
         {
             get
             {
-                if (otlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] == "http/protobuf")
+                if (otlpVariables[OtelExporterOtlpProtocolKey] == "http/protobuf")
                     _otlpProtocol = OtlpExportProtocol.HttpProtobuf;
-                if (otlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] == "grpc")
+                if (otlpVariables[OtelExporterOtlpProtocolKey] == "grpc")
                     _otlpProtocol = OtlpExportProtocol.Grpc;
                 return _otlpProtocol;
             }
@@ -148,11 +153,11 @@ namespace Eaf.AspNetCore.Configuration
             {
                 _otlpProtocol = value;
                 if (value == OtlpExportProtocol.HttpProtobuf)
-                    otlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf";
+                    otlpVariables[OtelExporterOtlpProtocolKey] = "http/protobuf";
                 else if (value == OtlpExportProtocol.Grpc)
-                    otlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "grpc";
+                    otlpVariables[OtelExporterOtlpProtocolKey] = "grpc";
                 else
-                    otlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/json";
+                    otlpVariables[OtelExporterOtlpProtocolKey] = "http/json";
             }
         }
 
