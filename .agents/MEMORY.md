@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority49-coverage-audit`
+Last session branch: `feature/devin-20260713-priority50-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -10,6 +10,13 @@ Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1%.
 Current coverage (after P47): Line 96.2%, Branch 82.8%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
 Current coverage (after P48): Line 96.3%, Branch 83.0%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
 Current coverage (after P49): Line 96.3%, Branch 82.9%, Method 99.2% (4393 tests, 4392 passing, 1 skipped). Build warnings: 140.
+Current coverage (after P50): Line 96.4%, Branch 83.0%, Method 99.4% (4397 tests, 4396 passing, 1 skipped). Build warnings: 142.
+
+## P50 gotchas
+- `NamespaceStripper.StripGenericNamespace` has a final `for` loop that appends `>` for unclosed `openBracketCount`. A generic name like `System.Collections.Generic.List`1[[Foo]]` (no comma in the type argument) leaves `openBracketCount` > 0 and covers the loop.
+- `EafWebHookReceiver` uncovered members were `ReceiverName`, `context`, `CurrentUnitOfWork`, and `L(string, params object[])`. They are reachable via public properties and a `TestWebhookReceiver` subclass that exposes the protected `L` overload and `CurrentUnitOfWork`.
+- `DbCommandPool` reached 100% line coverage from existing tests; no new tests needed in P50.
+- `UserAppService`, `TokenAuthController`, `MiddlewareWorkerModule` and `WorkerContentFileProvider` still have accessible branches but require more complex mock setup; these remain the main focus for P51.
 
 ## P49 gotchas
 - The `main` branch advanced after P48 with commit `c4450a3` (Sonar fixes), adding `SanitizeForLog` in `AbpLoginResultTypeHelper` and `Equals`/`GetHashCode` in `PasswordComplexitySetting`. This temporarily lowered the P49 baseline before new BDD tests recovered the metrics.
