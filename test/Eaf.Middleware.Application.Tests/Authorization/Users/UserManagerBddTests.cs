@@ -6,6 +6,10 @@ using Eaf.Middleware.Authorization;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
+using Moq.Protected;
 using NSubstitute;
 using Shouldly;
 using System.Collections.Generic;
@@ -15,7 +19,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Authorization.Users;
+using Abp.Runtime.Caching;
+using Abp.Configuration;
+using Abp.Localization;
+using Abp.Organizations;
 
 namespace Eaf.Middleware.Tests.Application.Authorization.Users
 {
@@ -72,6 +81,46 @@ namespace Eaf.Middleware.Tests.Application.Authorization.Users
             );
 
             exception.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComum_Quando_SetGrantedPermissionsAsync_Entao_DeveAtualizarPermissoes()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            var user = new User { UserName = "user", Name = "user" };
+            var permissions = new List<Permission>
+            {
+                new Permission(MiddlewarePermissions.Pages_Administration_Users_ChangePermissions, displayName: null)
+            };
+
+            userManager.When(x => x.SetGrantedPermissionsAsync(Arg.Any<User>(), Arg.Any<IEnumerable<Permission>>())).CallBase();
+            userManager.GetGrantedPermissionsAsync(user).Returns(new List<Permission>().AsReadOnly());
+            userManager.GrantPermissionAsync(user, Arg.Any<Permission>()).Returns(Task.CompletedTask);
+
+            // Quando
+            await userManager.SetGrantedPermissionsAsync(user, permissions);
+
+            // Então
+            await userManager.Received(1).GrantPermissionAsync(user, Arg.Any<Permission>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComum_Quando_SetRolesAsync_Entao_DeveAtualizarRoles()
+        {
+            // Dado
+            var userManager = ManagerTestHelper.CreateUserManager();
+            var user = new User { UserName = "user", Name = "user", Roles = new List<UserRole>() };
+
+            userManager.When(x => x.SetRolesAsync(Arg.Any<User>(), Arg.Any<string[]>())).CallBase();
+            userManager.AddToRoleAsync(user, Arg.Any<string>()).Returns(IdentityResult.Success);
+
+            // Quando
+            var result = await userManager.SetRolesAsync(user, new[] { StaticRoleNames.Host.Admin });
+
+            // Então
+            result.Succeeded.ShouldBeTrue();
+            await userManager.Received(1).AddToRoleAsync(user, StaticRoleNames.Host.Admin);
         }
 
         [Fact]
@@ -214,6 +263,77 @@ namespace Eaf.Middleware.Tests.Application.Authorization.Users
 
             // Então
             result.Succeeded.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComUsernameDuplicado_Quando_UpdateWithValidateAsync_Entao_DeveRetornarFalha()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "user", EmailAddress = "user@example.com" };
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CheckDuplicateUsernameOrEmailAddressAsync(
+                Arg.Any<long?>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()).Returns(IdentityResult.Failed(new IdentityError { Code = "1", Description = "Duplicate" }));
+
+            // Quando
+            var result = await userManager.UpdateWithValidateAsync(user);
+
+            // Então
+            result.Succeeded.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioRenomeandoAdmin_Quando_UpdateWithValidateAsync_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var user = new User { Id = 1, UserName = "newuser", EmailAddress = "newuser@example.com" };
+            var userManager = CreateUserManagerWithCallBase(out var userStore);
+            userStore.GetUserNameFromDatabaseAsync(1).Returns("admin");
+
+            // Quando / Então
+            var exception = await Should.ThrowAsync<UserFriendlyException>(
+                async () => await userManager.UpdateWithValidateAsync(user));
+            exception.ShouldNotBeNull();
+        }
+
+        private static UserManager CreateUserManagerWithCallBase(out UserStore userStore)
+        {
+            userStore = Substitute.For<UserStore>(new object[10]);
+            userStore.UpdateAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns(IdentityResult.Success);
+
+            var userRepository = Substitute.For<IRepository<User, long>, ISupportsExplicitLoading<User, long>>();
+            var optionsAccessor = Options.Create(new IdentityOptions());
+            var passwordHasher = Substitute.For<IPasswordHasher<User>>();
+            var keyNormalizer = Substitute.For<ILookupNormalizer>();
+            var errors = Substitute.For<IdentityErrorDescriber>();
+            var services = Substitute.For<IServiceProvider>();
+            var logger = Substitute.For<ILogger<UserManager>>();
+            var roleManager = ManagerTestHelper.CreateRoleManager();
+            var permissionManager = Substitute.For<IPermissionManager>();
+            var unitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
+            var cacheManager = Substitute.For<ICacheManager>();
+            var settingManager = Substitute.For<ISettingManager>();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var organizationUnitRepository = Substitute.For<IRepository<OrganizationUnit, long>>();
+            var userOrganizationUnitRepository = Substitute.For<IRepository<UserOrganizationUnit, long>>();
+            var organizationUnitSettings = Substitute.For<IOrganizationUnitSettings>();
+            var userLoginRepository = Substitute.For<IRepository<UserLogin, long>>();
+
+            var mock = new Mock<UserManager>(userStore, userRepository, optionsAccessor, passwordHasher,
+                Array.Empty<IUserValidator<User>>(), Array.Empty<IPasswordValidator<User>>(), keyNormalizer, errors,
+                services, logger, roleManager, permissionManager, unitOfWorkManager, cacheManager, settingManager,
+                localizationManager, organizationUnitRepository, userOrganizationUnitRepository, organizationUnitSettings,
+                userLoginRepository)
+            { CallBase = true };
+
+            mock.Setup(m => m.CheckDuplicateUsernameOrEmailAddressAsync(
+                    It.IsAny<long?>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+            mock.Protected().Setup<Task<string>>("GetOldUserNameAsync", 1L).ReturnsAsync("admin");
+
+            return mock.Object;
         }
 
         [Fact]

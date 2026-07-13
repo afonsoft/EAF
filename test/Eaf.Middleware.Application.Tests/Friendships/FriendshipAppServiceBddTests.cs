@@ -1,9 +1,11 @@
 using Abp;
 using Abp.Domain.Uow;
+using Abp.Localization;
 using Abp.MultiTenancy;
 using Abp.ObjectMapping;
 using Abp.RealTime;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
@@ -142,6 +144,28 @@ namespace Eaf.Middleware.Application.Tests.Friendships
                 );
         }
 
+        [Fact]
+        public async Task Dado_AmizadeComClientesOnline_Quando_BlockUser_Entao_DeveNotificarClientes()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var clients = new List<IOnlineClient> { Substitute.For<IOnlineClient>() };
+            _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(clients);
+
+            var input = new BlockUserInput { TenantId = 1, UserId = 100 };
+
+            // Quando
+            await _sut.BlockUser(input);
+
+            // Então
+            await _chatCommunicator.Received(1)
+                .SendUserStateChangeToClients(clients, Arg.Is<UserIdentifier>(u => u.UserId == 100), FriendshipState.Blocked);
+        }
+
         #endregion
 
         #region UnblockUser
@@ -170,6 +194,28 @@ namespace Eaf.Middleware.Application.Tests.Friendships
                     Arg.Is<UserIdentifier>(u => u.UserId == 42),
                     Arg.Is<UserIdentifier>(u => u.UserId == 100)
                 );
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioBloqueadoComClientesOnline_Quando_UnblockUser_Entao_DeveNotificarClientes()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var clients = new List<IOnlineClient> { Substitute.For<IOnlineClient>() };
+            _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(clients);
+
+            var input = new UnblockUserInput { TenantId = 1, UserId = 100 };
+
+            // Quando
+            await _sut.UnblockUser(input);
+
+            // Então
+            await _chatCommunicator.Received(1)
+                .SendUserStateChangeToClients(clients, Arg.Is<UserIdentifier>(u => u.UserId == 100), FriendshipState.Accepted);
         }
 
         #endregion
@@ -397,6 +443,67 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             result.ShouldNotBeNull();
             result.FriendUserId.ShouldBe(friendId);
             await _friendshipManager.Received(2).CreateFriendshipAsync(Arg.Any<Friendship>());
+        }
+
+        [Fact]
+        public async Task Dado_TenancyInexistente_Quando_CreateFriendshipRequestByUserName_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.FindByTenancyNameAsync("missing").Returns((Tenant)null);
+            _sut.TenantManager = tenantManager;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            _sut.LocalizationManager = localizationManager;
+
+            var input = new CreateFriendshipRequestByUserNameInput { TenancyName = "missing", UserName = "user100" };
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(() => _sut.CreateFriendshipRequestByUserName(input));
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioInexistenteNoTenant_Quando_CreateFriendshipRequestByUserName_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var tenant = new Tenant("acme", "Acme") { Id = 1 };
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.FindByTenancyNameAsync("acme").Returns(tenant);
+            _sut.TenantManager = tenantManager;
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.FindByNameOrEmailAsync("missing").Returns((User)null);
+            _sut.UserManager = userManager;
+
+            var currentUow = Substitute.For<IActiveUnitOfWork>();
+            currentUow.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(currentUow);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            _sut.LocalizationManager = localizationManager;
+
+            var input = new CreateFriendshipRequestByUserNameInput { TenancyName = "acme", UserName = "missing" };
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(() => _sut.CreateFriendshipRequestByUserName(input));
         }
 
         #endregion

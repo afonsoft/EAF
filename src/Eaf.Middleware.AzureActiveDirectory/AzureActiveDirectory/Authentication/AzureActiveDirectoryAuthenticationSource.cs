@@ -88,7 +88,7 @@ namespace Eaf.Middleware.AzureActiveDirectory.Authentication
         /// </summary>
         /// <param name="userNameOrEmailAddress">Nome de usuário ou endereço de email</param>
         /// <returns>Instância do usuário encontrado ou null se não encontrado</returns>
-        public async Task<TUser> GetUserAsync(string userNameOrEmailAddress)
+        public virtual async Task<TUser> GetUserAsync(string userNameOrEmailAddress)
         {
             if (string.IsNullOrEmpty(userNameOrEmailAddress))
                 return null;
@@ -136,7 +136,7 @@ namespace Eaf.Middleware.AzureActiveDirectory.Authentication
         /// </summary>
         /// <param name="userNameOrEmailAddress">Parâmetro userNameOrEmailAddress.</param>
         /// <returns>Resultado da operação.</returns>
-        public async Task<List<TUser>> GetUsersAsync(string userNameOrEmailAddress)
+        public virtual async Task<List<TUser>> GetUsersAsync(string userNameOrEmailAddress)
         {
             List<TUser> users = new List<TUser>();
 
