@@ -123,6 +123,40 @@ namespace Eaf.Middleware.Tests.Authorization.External
         }
 
         [Fact]
+        public async Task Dado_AuthZeroProviderSemEndpoint_Quando_GetUserInfo_Entao_DeveLancarExcecao()
+        {
+            var factory = CriarHttpClientFactory(new TestHttpMessageHandler());
+            var api = new AuthZeroAuthProviderApi(NullLogger.Instance, factory);
+            api.ProviderInfo = CriarProviderInfo("AuthZero", typeof(AuthZeroAuthProviderApi), new Dictionary<string, string>
+            {
+                { "Endpoint", string.Empty }
+            });
+
+            await Assert.ThrowsAsync<AbpException>(() => api.GetUserInfo("access-token"));
+        }
+
+        [Fact]
+        public async Task Dado_AuthZeroProviderComFoto_Quando_GetUserInfo_Entao_DevePreencherPictureBase64()
+        {
+            var handler = CriarHandler(
+                "https://authzero.example.com/userinfo",
+                "{\"sub\":\"def\",\"name\":\"Eve\",\"email\":\"eve@example.com\",\"picture\":\"https://authzero.example.com/photo.png\"}",
+                ("https://authzero.example.com/photo.png", HttpStatusCode.OK, "fake-image"));
+            var factory = CriarHttpClientFactory(handler);
+            var api = new AuthZeroAuthProviderApi(NullLogger.Instance, factory);
+            api.ProviderInfo = CriarProviderInfo("AuthZero", typeof(AuthZeroAuthProviderApi), new Dictionary<string, string>
+            {
+                { "Endpoint", "authzero.example.com" }
+            });
+
+            var result = await api.GetUserInfo("access-token");
+
+            result.Provider.ShouldBe("AuthZero");
+            result.Picture.ShouldNotBeNullOrEmpty();
+            result.Picture.ShouldBe("ZmFrZS1pbWFnZQ==");
+        }
+
+        [Fact]
         public async Task Dado_OpenIdConnectSemAuthority_Quando_GetUserInfo_Entao_DeveLancarExcecao()
         {
             var api = new OpenIdConnectAuthProviderApi(NullLogger.Instance);

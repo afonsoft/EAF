@@ -297,5 +297,35 @@ namespace Eaf.Middleware.Worker.Tests.Middleware
             cache.DefaultSlidingExpireTime.ShouldBe(TimeSpan.FromMinutes(10));
         }
 
+        [Fact]
+        public void Dado_PreInitialize_Quando_ExecutarReplaceActionDeEmail_Entao_DeveRegistrarMiddlewareSmtpEmailSenderConfiguration()
+        {
+            var iocManager = new IocManager();
+            using var bootstrapper = AbpBootstrapper.Create<WorkerModuleTestDependenciesModule>(options => options.IocManager = iocManager);
+            bootstrapper.Initialize();
+
+            var configuration = iocManager.Resolve<IAbpStartupConfiguration>();
+
+            var tempDir = Path.GetTempPath();
+            var hostEnvironment = Substitute.For<IHostEnvironment>();
+            hostEnvironment.ContentRootPath.Returns(tempDir);
+            hostEnvironment.EnvironmentName.Returns("Development");
+
+            var module = new MiddlewareWorkerModule(hostEnvironment);
+            var moduleType = typeof(AbpModule);
+            moduleType.GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)!.SetValue(module, iocManager);
+            moduleType.GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)!.SetValue(module, configuration);
+
+            module.PreInitialize();
+
+            var serviceReplaceActions = configuration.GetType().GetProperty("ServiceReplaceActions")!.GetValue(configuration) as System.Collections.Generic.Dictionary<Type, System.Action>;
+            serviceReplaceActions.ShouldNotBeNull();
+            serviceReplaceActions.ContainsKey(typeof(Abp.Net.Mail.IEmailSenderConfiguration)).ShouldBeTrue();
+
+            Should.NotThrow(() => serviceReplaceActions[typeof(Abp.Net.Mail.IEmailSenderConfiguration)].Invoke());
+
+            iocManager.IocContainer.Kernel.HasComponent(typeof(Abp.Net.Mail.IEmailSenderConfiguration)).ShouldBeTrue();
+        }
+
     }
 }
