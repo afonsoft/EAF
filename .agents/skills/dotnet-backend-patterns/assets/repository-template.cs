@@ -5,7 +5,6 @@ using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace YourNamespace.Infrastructure.Data;
 
@@ -29,14 +28,11 @@ public interface IProductRepository
 public class DapperProductRepository : IProductRepository
 {
     private readonly IDbConnection _connection;
-    private readonly ILogger<DapperProductRepository> _logger;
 
     public DapperProductRepository(
-        IDbConnection connection,
-        ILogger<DapperProductRepository> logger)
+        IDbConnection connection)
     {
         _connection = connection;
-        _logger = logger;
     }
 
     public async Task<Product?> GetByIdAsync(string id, CancellationToken ct = default)
@@ -199,14 +195,11 @@ public class DapperProductRepository : IProductRepository
 public class EfCoreProductRepository : IProductRepository
 {
     private readonly AppDbContext _context;
-    private readonly ILogger<EfCoreProductRepository> _logger;
 
     public EfCoreProductRepository(
-        AppDbContext context,
-        ILogger<EfCoreProductRepository> logger)
+        AppDbContext context)
     {
         _context = context;
-        _logger = logger;
     }
 
     public async Task<Product?> GetByIdAsync(string id, CancellationToken ct = default)
@@ -311,10 +304,10 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<Product> Products => Set<Product>();
-    public DbSet<Category> Categories => Set<Category>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -328,7 +321,7 @@ public class AppDbContext : DbContext
 
 public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
-    public void Configure(EntityTypeBuilder<Product> builder)
+    public void Configure(EntityTypeBuilder<Product> builder) // NOSONAR
     {
         builder.ToTable("Products");
 

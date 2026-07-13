@@ -77,13 +77,13 @@ namespace Eaf.AspNetCore.Hangfire
             }
         }
 
-        private bool IsLocalHost(DashboardContext context)
+        private static bool IsLocalHost(DashboardContext context)
         {
             var host = context?.GetHttpContext()?.Request?.Host;
             return host.HasValue && host.Value.Host == "localhost";
         }
 
-        private UserIdentifier GetUserIdentifier(DashboardContext context)
+        private static UserIdentifier GetUserIdentifier(DashboardContext context)
         {
             var userIdentifier = GetUserIdentifierFromSession(context);
             if (userIdentifier != null)
@@ -92,13 +92,13 @@ namespace Eaf.AspNetCore.Hangfire
             return GetUserIdentifierFromToken(context);
         }
 
-        private UserIdentifier GetUserIdentifierFromSession(DashboardContext context)
+        private static UserIdentifier GetUserIdentifierFromSession(DashboardContext context)
         {
             var eafSession = context.GetHttpContext().RequestServices.GetRequiredService<IAbpSession>();
             return eafSession?.UserId != null ? eafSession.ToUserIdentifier() : null;
         }
 
-        private UserIdentifier GetUserIdentifierFromToken(DashboardContext context)
+        private static UserIdentifier GetUserIdentifierFromToken(DashboardContext context)
         {
             string token = GetToken(context);
             if (token == null)
