@@ -22,6 +22,7 @@
                 class="form-control input-sm"
                 id="ChatUserSearchUserName"
                 placeholder="{{ 'FilterOrAddUser' | localize }}"
+                aria-label="{{ 'FilterOrAddUser' | localize }}"
                 type="text"
               />
             </div>
@@ -251,10 +252,7 @@
                   <div class="progress" id="chatFileUploadProgress">
                     <div
                       [ngStyle]="{ width: progress }"
-                      aria-valuemax="100"
-                      aria-valuemin="0"
                       class="progress-bar progress-bar-success progress-bar-striped"
-                      role="progressbar"
                     ></div>
                   </div>
                 </div>
@@ -269,6 +267,7 @@
                     maxlength="4096"
                     name="message"
                     placeholder="{{ 'TypeAMessageHere' | localize }}"
+                    aria-label="{{ 'TypeAMessageHere' | localize }}"
                     required
                     rows="2"
                   >
@@ -277,7 +276,7 @@
                 <div class="d-flex align-items-end justify-content-between mt-1 row" style="padding-top: 5px">
                   <div class="col-8 align-items-start ustify-content-between" style="text-align: start; padding-left: 30px">
                     <!--begin::anexo-->
-                    <div aria-label="Basic example" class="btn-group btn-group-sm" role="group">
+                    <fieldset aria-label="Basic example" class="btn-group btn-group-sm">
                       <button
                         (click)="shareFile()"
                         class="btn btn-light"
@@ -308,7 +307,7 @@
                       >
                         <i class="fas fa-share-alt"></i>
                       </button>
-                    </div>
+                    </fieldset>
                     <!--end::anexo-->
                   </div>
                   <div class="col-4 align-items-end justify-content-between" style="text-align: end">

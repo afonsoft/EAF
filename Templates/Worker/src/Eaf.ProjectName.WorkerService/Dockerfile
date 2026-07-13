@@ -25,4 +25,6 @@ RUN apt-get update && \
     ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata
 
+USER app
+
 ENTRYPOINT ["dotnet", "Eaf.ProjectName.WorkerService.dll"]

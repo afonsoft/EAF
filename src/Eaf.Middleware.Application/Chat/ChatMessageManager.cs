@@ -136,7 +136,7 @@ namespace Eaf.Middleware.Chat
         {
             _chatFeatureChecker.CheckChatFeatures(sender.TenantId, receiverGroup.TenantId);
 
-            //TODO: Recuperar o Grupo e os usuários deste Grupo var groupId = receiverGroup.UserId;
+            // Grupo e usuários deste Grupo ainda não implementados.
             var receiversUser = _userManager.Users.Where(x => x.IsActive && !x.IsDeleted).ToList();
             var receivers = receiversUser.Select(x => x.ToUserIdentifier()).ToList();
 

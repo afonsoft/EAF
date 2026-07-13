@@ -54,7 +54,7 @@ namespace Eaf.Middleware.Authorization
         /// <returns>Resultado da operação.</returns>
         public UserFriendlyException CreateExceptionForFailedLoginAttempt(AbpLoginResultType result, string usernameOrEmailAddress, string tenancyName)
         {
-            Logger.ErrorFormat("CreateExceptionForFailedLoginAttempt {0}-{1}-{2}", result, usernameOrEmailAddress, tenancyName);
+            Logger.ErrorFormat("CreateExceptionForFailedLoginAttempt {0}-{1}-{2}", result, SanitizeForLog(usernameOrEmailAddress), SanitizeForLog(tenancyName));
             switch (result)
             {
                 case AbpLoginResultType.Success:
@@ -85,6 +85,14 @@ namespace Eaf.Middleware.Authorization
                     Logger.WarnFormat("Unhandled login fail reason: {0}", result);
                     return new UserFriendlyException(L("LoginFailed"));
             }
+        }
+
+        private static string SanitizeForLog(string? input)
+        {
+            if (input == null)
+                return string.Empty;
+
+            return input.Replace("\r", " ").Replace("\n", " ");
         }
 
         /// <summary>

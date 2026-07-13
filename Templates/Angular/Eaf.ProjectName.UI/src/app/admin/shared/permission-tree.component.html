@@ -1,10 +1,12 @@
 ﻿<div class="form-group">
   <input
     type="text"
+    id="permissionFilter"
     (input)="filterPermissions($event)"
     [(ngModel)]="filter"
     class="form-control"
     placeholder="{{ 'SearchWithThreeDot' | localize }}"
+    aria-label="{{ 'SearchWithThreeDot' | localize }}"
   />
 </div>
 <p-tree

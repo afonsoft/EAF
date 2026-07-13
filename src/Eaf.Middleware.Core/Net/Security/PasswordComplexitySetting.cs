@@ -1,9 +1,11 @@
+using System;
+
 namespace Eaf.Middleware.Security
 {
     /// <summary>
     /// Representa a classe PasswordComplexitySetting.
     /// </summary>
-    public class PasswordComplexitySetting
+    public sealed class PasswordComplexitySetting : IEquatable<PasswordComplexitySetting>
     {
         /// <summary>
         /// Obtém ou define RequireDigit.

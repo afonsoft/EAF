@@ -23,7 +23,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
             return UseExtensions.Use(app, (Func<HttpContext, Func<Task>, Task>)(async (ctx, next) =>
             {
                 IIdentity identity = ctx.User?.Identity;
-                if ((identity != null ? (!identity.IsAuthenticated ? 1 : 0) : 1) != 0)
+                if (identity == null || !identity.IsAuthenticated)
                 {
                     AuthenticateResult authenticateResult = await AuthenticationHttpContextExtensions.AuthenticateAsync(ctx, schema);
                     if (authenticateResult.Succeeded && authenticateResult.Principal != null)

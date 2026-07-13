@@ -312,12 +312,14 @@ namespace Abp.Runtime.Caching.Sqlite
                 }
 
                 using (var cmd = new DbCommand(
-                           $"INSERT OR IGNORE INTO meta (key, value) " +
-                           $"VALUES " +
-                           $@"('version', {SchemaVersion}), " +
-                           $@"('created', {DateTimeOffset.UtcNow.Ticks})", db))
+                           "INSERT OR IGNORE INTO meta (key, value) " +
+                           "VALUES (@versionKey, @versionValue), (@createdKey, @createdValue)", db))
                 {
                     cmd.Transaction = transaction;
+                    cmd.Parameters.AddWithValue("@versionKey", "version");
+                    cmd.Parameters.AddWithValue("@versionValue", SchemaVersion);
+                    cmd.Parameters.AddWithValue("@createdKey", "created");
+                    cmd.Parameters.AddWithValue("@createdValue", DateTimeOffset.UtcNow.Ticks);
                     cmd.ExecuteNonQuery();
                 }
 

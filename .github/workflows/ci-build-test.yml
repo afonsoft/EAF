@@ -205,10 +205,11 @@ jobs:
         id: npm-install
         run: |
           echo "📦 Installing npm dependencies"
-          if ! npm install --prefer-offline --no-audit --no-fund --legacy-peer-deps 2>&1 | tee npm-install.log; then
+          if ! npm ci --no-audit --no-fund --legacy-peer-deps --ignore-scripts 2>&1 | tee npm-install.log; then
             echo "install_failed=true" >> $GITHUB_OUTPUT
             echo "::error::Falha no npm install"
           fi
+          node scripts/patch-devtools-ignore-plugin.js
 
       - name: 🔍 Lint Code
         id: lint-frontend

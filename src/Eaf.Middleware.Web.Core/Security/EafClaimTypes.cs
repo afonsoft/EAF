@@ -8,13 +8,13 @@ namespace Eaf.Security
         /// <summary>
         /// Obtém ou define UserIdentifierClaimType.
         /// </summary>
-        public static string UserIdentifierClaimType { get; set; } = "http://aspnetzero.com/claims/useridentifier";
+        public static string UserIdentifierClaimType { get; set; } = "https://aspnetzero.com/claims/useridentifier";
 
         /// <summary>
         /// User ExternalAuthProviderformation.
-        /// Default: http://www.aspnetboilerplate.com/identity/claims/externalAuthProviderformation
+        /// Default: https://www.aspnetboilerplate.com/identity/claims/externalAuthProviderformation
         /// </summary>
-        public static string ExternalAuthProviderformation { get; set; } = "http://www.aspnetboilerplate.com/identity/claims/externalAuthProviderformation";
+        public static string ExternalAuthProviderformation { get; set; } = "https://www.aspnetboilerplate.com/identity/claims/externalAuthProviderformation";
 
     }
 }

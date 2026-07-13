@@ -41,7 +41,7 @@ namespace Eaf.ProjectName.ConsoleApiClient
             var disco = await client.GetDiscoveryDocumentAsync(ServerUrlBase);
             if (disco.IsError)
             {
-                throw new Exception(disco.Error);
+                throw new InvalidOperationException(disco.Error);
             }
 
             client.DefaultRequestHeaders.Add("Eaf.TenantId", "1");  //Set TenantId
@@ -50,12 +50,12 @@ namespace Eaf.ProjectName.ConsoleApiClient
                 Address = disco.TokenEndpoint,
 
                 ClientId = "client",
-                ClientSecret = "def2edf7-5d42-4edc-a84a-30136c340e13",
+                ClientSecret = GetRequiredEnvironmentVariable("ConsoleApiClient_ClientSecret"),
 
                 Scope = "default-api",
 
                 UserName = "admin",
-                Password = "123qwe"
+                Password = GetRequiredEnvironmentVariable("ConsoleApiClient_Password")
             });
 
             if (tokenResponse.IsError)
@@ -86,7 +86,7 @@ namespace Eaf.ProjectName.ConsoleApiClient
                 var ajaxResponse = JsonConvert.DeserializeObject<AjaxResponse<PagedResultDto<UserListDto>>>(content);
                 if (!ajaxResponse.Success)
                 {
-                    throw new Exception(ajaxResponse.Error?.Message ?? "Remote service throws exception!");
+                    throw new InvalidOperationException(ajaxResponse.Error?.Message ?? "Remote service throws exception!");
                 }
 
                 Console.WriteLine();
@@ -99,6 +99,14 @@ namespace Eaf.ProjectName.ConsoleApiClient
                     Console.WriteLine(user.ToJsonString(indented: true));
                 }
             }
+        }
+
+        private static string GetRequiredEnvironmentVariable(string name)
+        {
+            var value = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrEmpty(value))
+                throw new InvalidOperationException($"Environment variable '{name}' is required.");
+            return value;
         }
     }
 }

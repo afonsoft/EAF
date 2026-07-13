@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 
 namespace EafRenamerCli
@@ -12,10 +13,12 @@ namespace EafRenamerCli
         {
             Parameters = new StringDictionary();
             Regex Spliter = new Regex(@"^-{1,2}|^/|=|:",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                TimeSpan.FromMilliseconds(100));
 
             Regex Remover = new Regex(@"^['""]?(.*?)['""]?$",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                TimeSpan.FromMilliseconds(100));
 
             string Parameter = null;
             string[] Parts;

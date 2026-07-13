@@ -281,7 +281,7 @@ namespace EafRenamerCli
 
             if (process == null)
             {
-                throw new Exception("Process should not be null.");
+                throw new InvalidOperationException("Process should not be null.");
             }
 
             process.StandardInput.WriteLine($"{commandToRun} & exit");

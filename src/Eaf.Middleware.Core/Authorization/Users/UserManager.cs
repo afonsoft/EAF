@@ -105,7 +105,7 @@ namespace Eaf.Middleware.Authorization.Users
         {
             var user = await GetUserOrNullAsync(userIdentifier);
             if (user == null)
-                throw new Exception("There is no user: " + userIdentifier);
+                throw new InvalidOperationException("There is no user: " + userIdentifier);
 
             return user;
         }

@@ -141,7 +141,6 @@ namespace Eaf.Middleware.Web
                             });
                             break;
 
-                        case HangfireStorageType.InMemory:
                         default:
                             JobStorage.Current = new InMemoryStorage();
                             break;

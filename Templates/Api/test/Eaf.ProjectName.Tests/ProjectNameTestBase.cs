@@ -159,7 +159,7 @@ namespace Eaf.ProjectName.Tests
                         context.Users.FirstOrDefault(u => u.TenantId == AbpSession.TenantId && u.UserName == userName));
             if (user == null)
             {
-                throw new Exception("There is no user: " + userName + " for host.");
+                throw new InvalidOperationException("There is no user: " + userName + " for host.");
             }
 
             AbpSession.UserId = user.Id;
@@ -170,7 +170,7 @@ namespace Eaf.ProjectName.Tests
             var tenant = UsingDbContext(context => context.Tenants.FirstOrDefault(t => t.TenancyName == tenancyName));
             if (tenant == null)
             {
-                throw new Exception("There is no tenant: " + tenancyName);
+                throw new InvalidOperationException("There is no tenant: " + tenancyName);
             }
 
             AbpSession.TenantId = tenant.Id;
@@ -181,7 +181,7 @@ namespace Eaf.ProjectName.Tests
                         context.Users.FirstOrDefault(u => u.TenantId == AbpSession.TenantId && u.UserName == userName));
             if (user == null)
             {
-                throw new Exception("There is no user: " + userName + " for tenant: " + tenancyName);
+                throw new InvalidOperationException("There is no user: " + userName + " for tenant: " + tenancyName);
             }
 
             AbpSession.UserId = user.Id;

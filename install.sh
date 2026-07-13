@@ -98,7 +98,7 @@ install_dotnet_sdk() {
             echo "⏳ Adicionando repositório dotnet/backports..."
             gpg --keyserver keyserver.ubuntu.com --recv-keys A6A19B38D3D831EF
             gpg --export --armor A6A19B38D3D831EF | tee /usr/share/keyrings/dotnet-backports.gpg > /dev/null
-            echo "deb [signed-by=/usr/share/keyrings/dotnet-backports.gpg] http://ppa.launchpad.net/dotnet/backports/ubuntu jammy main" > /etc/apt/sources.list.d/dotnet-backports.list
+            echo "deb [signed-by=/usr/share/keyrings/dotnet-backports.gpg] https://ppa.launchpad.net/dotnet/backports/ubuntu jammy main" > /etc/apt/sources.list.d/dotnet-backports.list
             apt-get update
         fi
         apt-get install -y "dotnet-sdk-${version}"

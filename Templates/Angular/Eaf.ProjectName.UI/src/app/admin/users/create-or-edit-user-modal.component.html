@@ -4,7 +4,7 @@
   (onShown)="onShown()"
   class="modal fade"
   tabindex="-1"
-  role="dialog"
+ 
   aria-labelledby="createOrEditModal"
   aria-hidden="true"
   [config]="{ backdrop: 'static' }"
@@ -249,10 +249,12 @@
                 <div class="input-group margin-bottom-10">
                   <input
                     #activeDirectoryFilterInput
+                    id="activeDirectoryFilterText"
                     [(ngModel)]="filters.filterTextActiveDirectory"
                     name="activeDirectoryFilterText"
                     class="form-control"
                     placeholder="{{ l('SearchWithThreeDot') }}"
+                    aria-label="{{ l('SearchWithThreeDot') }}"
                     type="text"
                   />
                   <span class="input-group-btn">
@@ -347,10 +349,12 @@
                 <div class="input-group margin-bottom-10">
                   <input
                     #ldapFilterInput
+                    id="ldapFilterText"
                     [(ngModel)]="filters.filterTextLdap"
                     name="ldapFilterText"
                     class="form-control"
                     placeholder="{{ l('SearchWithThreeDot') }}"
+                    aria-label="{{ l('SearchWithThreeDot') }}"
                     type="text"
                   />
                   <span class="input-group-btn">

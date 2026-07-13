@@ -20,7 +20,7 @@ namespace Eaf.Middleware.Web
             var coreAssemblyDirectoryPath = Path.GetDirectoryName(typeof(MiddlewareCoreModule).GetAssembly().Location);
             if (coreAssemblyDirectoryPath == null)
             {
-                throw new Exception("Could not find location of Eaf.Middleware.Core assembly!");
+                throw new InvalidOperationException("Could not find location of Eaf.Middleware.Core assembly!");
             }
 
             var directoryInfo = new DirectoryInfo(coreAssemblyDirectoryPath);
@@ -30,7 +30,7 @@ namespace Eaf.Middleware.Web
             {
                 if (directoryInfo.Parent == null)
                 {
-                    throw new Exception("Could not find content root folder!");
+                    throw new InvalidOperationException("Could not find content root folder!");
                 }
 
                 directoryInfo = directoryInfo.Parent;
@@ -42,7 +42,7 @@ namespace Eaf.Middleware.Web
                 return webHostFolder;
             }
 
-            throw new Exception("Could not find root folder of the web project!");
+            throw new InvalidOperationException("Could not find root folder of the web project!");
         }
 
         private static bool DirectoryContains(string directory, string fileName)

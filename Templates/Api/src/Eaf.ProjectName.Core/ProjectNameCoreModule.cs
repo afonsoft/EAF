@@ -38,8 +38,7 @@ namespace Eaf.ProjectName
             //https://aspnetboilerplate.com/Pages/Documents/Multi-Tenancy
             //Enable this line to create a multi-tenant application.
             Configuration.MultiTenancy.IsEnabled = ProjectNameConsts.MultiTenancyEnabled;
-            Configuration.MultiTenancy.IgnoreFeatureCheckForHostUsers = true; 
-            //Configuration.Modules.AbpWebCommon().MultiTenancy.DomainFormat = "{0}.afonsoft.com.br;demo-eaf.afonsoft.com.br/{0}";
+            Configuration.MultiTenancy.IgnoreFeatureCheckForHostUsers = true;
 
             if (ProjectNameDebugHelper.IsDebug)
             {

@@ -3,7 +3,7 @@
   #changeProfilePictureModal="bs-modal"
   class="modal fade"
   tabindex="-1"
-  role="dialog"
+ 
   aria-labelledby="myLargeModalLabel"
   aria-hidden="true"
   [config]="{ backdrop: 'static' }"
@@ -21,7 +21,7 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <input type="file" (change)="fileChangeEvent($event)" />
+            <input id="profilePictureFile" type="file" (change)="fileChangeEvent($event)" aria-label="{{ 'ChangeProfilePicture' | localize }}" />
             <span class="help-block m-b-none">{{ 'ProfilePicture_Change_Info' | localize: maxProfilPictureBytesUserFriendlyValue }}</span>
           </div>
         </div>

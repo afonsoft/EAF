@@ -133,7 +133,7 @@
             <div class="m-dropdown__body">
               <nav class="m-dropdown__content" [attr.aria-label]="l('UserAccount')">
                 <ul class="m-nav m-nav--skin-light" [attr.aria-label]="l('UserAccount')" role="menu">
-                  <li *ngIf="isImpersonatedLogin" class="m-nav__item" role="presentation">
+                  <li *ngIf="isImpersonatedLogin" class="m-nav__item">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -156,10 +156,10 @@
                       </span>
                     </a>
                   </li>
-                  <li *ngIf="isImpersonatedLogin" class="m-nav__separator m-nav__separator--fit" role="presentation"></li>
+                  <li *ngIf="isImpersonatedLogin" class="m-nav__separator m-nav__separator--fit"></li>
 
-                  <li class="m-nav__separator m-nav__separator--fit" role="presentation"></li>
-                  <li class="m-nav__item" role="presentation" *ngIf="isSystemUser">
+                  <li class="m-nav__separator m-nav__separator--fit"></li>
+                  <li class="m-nav__item" *ngIf="isSystemUser">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -179,7 +179,7 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__item" role="presentation">
+                  <li class="m-nav__item">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -199,7 +199,7 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__item" role="presentation">
+                  <li class="m-nav__item">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -219,7 +219,7 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__item" role="presentation">
+                  <li class="m-nav__item">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
@@ -239,8 +239,8 @@
                       </span>
                     </a>
                   </li>
-                  <li class="m-nav__separator m-nav__separator--fit" role="presentation"></li>
-                  <li class="m-nav__item" role="presentation">
+                  <li class="m-nav__separator m-nav__separator--fit"></li>
+                  <li class="m-nav__item">
                     <a
                       href="javascript:;"
                       (click)="logout()"
