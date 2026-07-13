@@ -5,12 +5,12 @@
 English | **[Português](README_pt.md)**
 
 ![Line Coverage](https://img.shields.io/badge/Line%20Coverage-96.2%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-82.6%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-82.8%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.1%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4377-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4376-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-121-yellow)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4388-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4387-brightgreen)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-141-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -380,10 +380,10 @@ This example demonstrates several EAF features:
 | Metric | Value |
 |---|---|
 | **Line coverage** | 96.2% |
-| **Branch coverage** | 82.6% |
+| **Branch coverage** | 82.8% |
 | **Method coverage** | 99.1% |
-| **Total tests** | 4377 |
-| **Passed** | 4376 |
+| **Total tests** | 4388 |
+| **Passed** | 4387 |
 | **Skipped** | 1 |
 | **Failed** | 0 |
 

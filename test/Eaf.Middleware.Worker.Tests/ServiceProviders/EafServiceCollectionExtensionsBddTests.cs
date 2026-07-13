@@ -76,5 +76,13 @@ namespace Eaf.Middleware.Worker.Tests.ServiceProviders
 
             serviceProvider.ShouldNotBeNull();
         }
+
+        [Fact]
+        public void Dado_ColecoesDeServicos_Quando_AdicionarEafSemRetornarServiceProviderSemRemoveConventionalInterceptors_Entao_DeveManterInterceptors()
+        {
+            var services = CreateServices();
+
+            Should.NotThrow(() => services.AddEafWithoutCreatingServiceProvider<WorkerModuleTestDependenciesModule>(BootstrapperOptions, removeConventionalInterceptors: false));
+        }
     }
 }

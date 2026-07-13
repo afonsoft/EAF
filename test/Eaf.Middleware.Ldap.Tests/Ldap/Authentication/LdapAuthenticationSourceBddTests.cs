@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -373,6 +374,17 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             var sut = CriarSut();
             var result = sut.ValidateCredentialsPublic(null!, "user", "pass");
             result.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_PlataformaNaoWindows_Quando_SearchWithLimit_Entao_DeveLancarExcecaoDePlataforma()
+        {
+            var sut = CriarSut();
+            var searcher = (PrincipalSearcher)FormatterServices.GetUninitializedObject(typeof(PrincipalSearcher));
+
+            var ex = Should.Throw<PlatformNotSupportedException>(() => sut.SearchWithLimitPublic(searcher, 10));
+
+            ex.ShouldNotBeNull();
         }
 
         [Theory]
@@ -755,6 +767,19 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             public static string? ConvertToNullIfEmptyPublic(string? str)
             {
                 return ConvertToNullIfEmpty(str!);
+            }
+
+            public object? SearchWithLimitPublic(object? searcher, int sizeLimit)
+            {
+                var method = typeof(LdapAuthenticationSource<TestTenant, TestUser>).GetMethod("SearchWithLimit", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(PrincipalSearcher), typeof(int) }, null);
+                try
+                {
+                    return method?.Invoke(null, new object?[] { searcher, sizeLimit });
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException != null)
+                {
+                    throw ex.InnerException;
+                }
             }
 
             public async Task<Tuple<List<TestUser>, List<Exception>>> InvokeFillUsersLdapAsync(ILdapSearchResults search)
