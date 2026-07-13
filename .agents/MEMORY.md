@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority47-coverage-audit`
+Last session branch: `feature/devin-20260713-priority48-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -8,6 +8,7 @@ Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
 Current coverage (after P45): Line 96.2%, Branch 82.3%, Method 99.1%.
 Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1%.
 Current coverage (after P47): Line 96.2%, Branch 82.8%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
+Current coverage (after P48): Line 96.3%, Branch 83.0%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -133,8 +134,15 @@ Current coverage (after P47): Line 96.2%, Branch 82.8%, Method 99.1% (4388 tests
 - `bash run-tests-with-coverage.sh` requires `PATH=/home/ubuntu/.dotnet:$PATH DOTNET_ROOT=/home/ubuntu/.dotnet` because the script does not export `DOTNET_ROOT`.
 - `reportgenerator` (global tool) is required to consolidate the `coverage.cobertura.xml` files. If missing, install with `dotnet tool install -g dotnet-reportgenerator-globaltool`.
 
-## Notable classes with remaining low coverage (target for P46)
-- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (61.3%)
+## P48 gotchas
+- `MiddlewareWebCoreModule` constructor calls `AppConfigurations.Get` before its fallback chain; `ASPNETCORE_ENVIRONMENT` is always set to a non-null value, so the `??` left-null branches in lines 68, 70 and 72 are unreachable.
+- `MiddlewareWebCoreModule.PostInitialize` `RedisConnectionString` null branch (`?? "localhost"`) remains unreachable on Linux because `new RedisStorage("localhost")` throws `RedisConnectionException` before `GetConnection`.
+- `MiddlewareWebCoreModule.PostInitialize` `recurringJobs`/`failedJobs` loops remain unreachable because `JobStorage.Current` is always reassigned to a fresh `InMemoryStorage`/`SqlServerStorage`/`RedisStorage` and returns empty collections.
+- `LdapAuthenticationSource` `CreateLdapContext` `Connected`/`BindAsync`/`SearchConstraints` branches remain unreachable without a real LDAP server or a mockable `ILdapConnection` factory.
+- `LdapAuthenticationSource` Windows-only methods (`CreatePrincipalContext`, `UpdateUserFromPrincipal`, `ValidateCredentials`, `SearchWithLimit`) are covered on Linux by asserting `PlatformNotSupportedException`/`NotImplementedException`.
+
+## Notable classes with remaining low coverage (target for P49)
+- `Eaf.Middleware.Ldap.Authentication.LdapAuthenticationSource<T1, T2>` (61.8%)
 - `Eaf.Middleware.Web.MiddlewareWebCoreModule` (86.2%)
 
 ## P38 gotchas
