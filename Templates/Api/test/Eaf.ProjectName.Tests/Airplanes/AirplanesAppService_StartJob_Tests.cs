@@ -18,7 +18,7 @@ namespace Eaf.ProjectName.Tests.Airplanes
         [Fact]
         public async Task Dado_AirplanesAppService_Quando_IniciarJob_Entao_DeveExecutarSemExcecao()
         {
-            await _airplanesAppService.StartJob();
+            await Should.NotThrowAsync(async () => await _airplanesAppService.StartJob());
         }
     }
 }

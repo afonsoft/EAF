@@ -30,48 +30,48 @@ namespace Eaf.Middleware.Tests.Chat
                 Guid.NewGuid(),
                 ChatMessageReadState.Unread);
 
-            await _communicator.SendMessageToClient(_emptyClients, message);
+            await Should.NotThrowAsync(async () => await _communicator.SendMessageToClient(_emptyClients, message));
         }
 
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendMessageToAll_Entao_NaoDeveLancarExcecao()
         {
-            await _communicator.SendMessageToAll("Broadcast message");
+            await Should.NotThrowAsync(async () => await _communicator.SendMessageToAll("Broadcast message"));
         }
 
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendFriendshipRequest_Entao_NaoDeveLancarExcecao()
         {
             var friend = new Friendship(new UserIdentifier(1, 100), new UserIdentifier(2, 200), "acme", "test-friend", null, FriendshipState.Accepted);
-            await _communicator.SendFriendshipRequestToClient(_emptyClients, friend, true, false);
+            await Should.NotThrowAsync(async () => await _communicator.SendFriendshipRequestToClient(_emptyClients, friend, true, false));
         }
 
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendUserStateChange_Entao_NaoDeveLancarExcecao()
         {
             var user = new UserIdentifier(1, 42);
-            await _communicator.SendUserStateChangeToClients(_emptyClients, user, FriendshipState.Blocked);
+            await Should.NotThrowAsync(async () => await _communicator.SendUserStateChangeToClients(_emptyClients, user, FriendshipState.Blocked));
         }
 
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendUserConnectionChange_Entao_NaoDeveLancarExcecao()
         {
             var user = new UserIdentifier(1, 42);
-            await _communicator.SendUserConnectionChangeToClients(_emptyClients, user, true);
+            await Should.NotThrowAsync(async () => await _communicator.SendUserConnectionChangeToClients(_emptyClients, user, true));
         }
 
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendReadStateChange_Entao_NaoDeveLancarExcecao()
         {
             var user = new UserIdentifier(1, 42);
-            await _communicator.SendReadStateChangeToClients(_emptyClients, user);
+            await Should.NotThrowAsync(async () => await _communicator.SendReadStateChangeToClients(_emptyClients, user));
         }
 
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendAllUnreadMessages_Entao_NaoDeveLancarExcecao()
         {
             var user = new UserIdentifier(1, 42);
-            await _communicator.SendAllUnreadMessagesOfUserReadToClients(_emptyClients, user);
+            await Should.NotThrowAsync(async () => await _communicator.SendAllUnreadMessagesOfUserReadToClients(_emptyClients, user));
         }
     }
 }

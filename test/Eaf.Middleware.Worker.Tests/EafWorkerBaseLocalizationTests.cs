@@ -164,10 +164,10 @@ namespace Eaf.Middleware.Worker.Tests
             using var cts = new CancellationTokenSource();
 
             // Quando
-            await worker.StartAsync(cts.Token);
+            await Should.NotThrowAsync(async () => await worker.StartAsync(cts.Token));
 
             // Então — lifecycle completo: Start + Stop
-            await worker.StopAsync(CancellationToken.None);
+            await Should.NotThrowAsync(async () => await worker.StopAsync(CancellationToken.None));
         }
 
         #endregion

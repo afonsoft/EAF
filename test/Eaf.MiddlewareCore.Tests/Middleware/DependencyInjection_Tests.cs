@@ -19,12 +19,14 @@ namespace Eaf.Middleware
             LocalIocManager.Resolve<IFeatureValueStore>();
             LocalIocManager.Resolve<AbpFeatureValueStore<Tenant, User>>();
             LocalIocManager.Resolve<FeatureValueStore>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
         public void Should_Resolve_LazyRoleStore()
         {
             LocalIocManager.Resolve<Lazy<RoleStore>>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -32,6 +34,7 @@ namespace Eaf.Middleware
         {
             LocalIocManager.Resolve<AbpLogInManager<Tenant, Role, User>>();
             LocalIocManager.Resolve<LogInManager>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -39,6 +42,7 @@ namespace Eaf.Middleware
         {
             LocalIocManager.Resolve<IPermissionChecker>();
             LocalIocManager.Resolve<PermissionChecker<Role, User>>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -47,6 +51,7 @@ namespace Eaf.Middleware
             LocalIocManager.Resolve<RoleManager<Role>>();
             LocalIocManager.Resolve<AbpRoleManager<Role, User>>();
             LocalIocManager.Resolve<RoleManager>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -55,6 +60,7 @@ namespace Eaf.Middleware
             LocalIocManager.Resolve<IRoleStore<Role>>();
             LocalIocManager.Resolve<AbpRoleStore<Role, User>>();
             LocalIocManager.Resolve<RoleStore>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -62,6 +68,7 @@ namespace Eaf.Middleware
         {
             LocalIocManager.Resolve<AbpSecurityStampValidator<Tenant, Role, User>>();
             LocalIocManager.Resolve<SecurityStampValidator<User>>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -69,6 +76,7 @@ namespace Eaf.Middleware
         {
             LocalIocManager.Resolve<SignInManager<User>>();
             LocalIocManager.Resolve<AbpSignInManager<Tenant, Role, User>>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -76,6 +84,7 @@ namespace Eaf.Middleware
         {
             LocalIocManager.Resolve<AbpTenantManager<Tenant, User>>();
             LocalIocManager.Resolve<TenantManager>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -85,6 +94,7 @@ namespace Eaf.Middleware
             LocalIocManager.Resolve<AbpUserClaimsPrincipalFactory<User, Role>>();
             LocalIocManager.Resolve<IUserClaimsPrincipalFactory<User>>();
             LocalIocManager.Resolve<UserClaimsPrincipalFactory>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -93,6 +103,7 @@ namespace Eaf.Middleware
             LocalIocManager.Resolve<UserManager<User>>();
             LocalIocManager.Resolve<AbpUserManager<Role, User>>();
             LocalIocManager.Resolve<UserManager>();
+            Assert.NotNull(LocalIocManager);
         }
 
         [Fact]
@@ -101,6 +112,7 @@ namespace Eaf.Middleware
             LocalIocManager.Resolve<IUserStore<User>>();
             LocalIocManager.Resolve<AbpUserStore<Role, User>>();
             LocalIocManager.Resolve<UserStore>();
+            Assert.NotNull(LocalIocManager);
         }
     }
 }

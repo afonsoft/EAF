@@ -355,7 +355,7 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
             _sut.UserManager = userManager;
             _sut.UnitOfWorkManager = unitOfWorkManager;
 
-            await _sut.UnlockTenantAdmin(new EntityDto(1));
+            await Should.NotThrowAsync(async () => await _sut.UnlockTenantAdmin(new EntityDto(1)));
         }
 
         #endregion

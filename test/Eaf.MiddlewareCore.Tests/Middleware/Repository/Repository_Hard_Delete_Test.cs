@@ -45,7 +45,7 @@ namespace Eaf.Middleware.Repository
                     context.Categories.Remove(category);
                 });
 
-                await uow.CompleteAsync();
+                await Should.NotThrowAsync(async () => await uow.CompleteAsync());
             }
         }
 
