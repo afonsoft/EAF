@@ -3,6 +3,7 @@ using Abp.Authorization;
 using Abp.UI;
 using Eaf.Middleware.Authorization;
 using Shouldly;
+using System.Globalization;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.Application.Authorization
@@ -10,6 +11,14 @@ namespace Eaf.Middleware.Tests.Application.Authorization
     public class AbpLoginResultTypeHelperBddTests
     {
         private readonly AbpLoginResultTypeHelper _sut = new();
+
+        private class TestableAbpLoginResultTypeHelper : AbpLoginResultTypeHelper
+        {
+            public string Localize(string name, CultureInfo culture)
+            {
+                return L(name, culture);
+            }
+        }
 
         [Fact]
         public void Dado_NovaInstancia_Quando_Criar_Entao_DeveInicializarCorretamente()
@@ -86,6 +95,32 @@ namespace Eaf.Middleware.Tests.Application.Authorization
             var message = _sut.CreateLocalizedMessageForFailedLoginAttempt(unknownResult, "john", "acme");
 
             message.ShouldBe("LoginFailed");
+        }
+
+        [Fact]
+        public void Dado_EntradaNula_Quando_SanitizarParaLog_Entao_DeveRetornarStringVazia()
+        {
+            var exception = _sut.CreateExceptionForFailedLoginAttempt(AbpLoginResultType.InvalidPassword, null, null);
+
+            exception.ShouldNotBeNull();
+            exception.Message.ShouldBe("LoginFailed");
+        }
+
+        [Fact]
+        public void Dado_EntradaComQuebrasDeLinha_Quando_SanitizarParaLog_Entao_DeveSubstituirPorEspacos()
+        {
+            var exception = _sut.CreateExceptionForFailedLoginAttempt(AbpLoginResultType.InvalidPassword, "user\r\nname", "acme\ntenant");
+
+            exception.ShouldNotBeNull();
+            exception.Message.ShouldBe("LoginFailed");
+        }
+
+        [Fact]
+        public void Dado_ChaveComCultura_Quando_Localizar_Entao_DeveRetornarTexto()
+        {
+            var sut = new TestableAbpLoginResultTypeHelper();
+            var result = sut.Localize("LoginFailed", CultureInfo.InvariantCulture);
+            result.ShouldBe("LoginFailed");
         }
     }
 }
