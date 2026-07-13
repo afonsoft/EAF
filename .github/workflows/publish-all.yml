@@ -337,7 +337,7 @@ jobs:
 
       - name: 📦 Install Dependencies
         working-directory: Templates/Angular/Eaf.ProjectName.UI
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps --ignore-scripts
 
       - name: 🔧 Patch devtools-ignore-plugin (BOM fix)
         working-directory: Templates/Angular/Eaf.ProjectName.UI

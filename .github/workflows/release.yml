@@ -38,7 +38,8 @@ jobs:
         run: |
           dotnet restore Templates/Api/Eaf.ApiWithSrc.sln
           cd Templates/Angular/Eaf.ProjectName.UI
-          npm install --prefer-offline --no-audit --no-fund --legacy-peer-deps --force
+          npm ci --no-audit --no-fund --legacy-peer-deps --ignore-scripts
+          node scripts/patch-devtools-ignore-plugin.js
 
       - name: 🏗️ Build Backend
         run: |

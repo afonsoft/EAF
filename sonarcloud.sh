@@ -24,12 +24,13 @@ dotnet restore Eaf.sln --ignore-failed-sources
 # Begin SonarCloud analysis
 echo "🚀 Starting SonarCloud analysis..."
 dotnet-sonarscanner begin \
-    /o:"afonsoft-github" \
-    /k:"EAF" \
+    /o:"afonsoft" \
+    /k:"afonsoft_EAF2" \
     /d:sonar.host.url="https://sonarcloud.io" \
-    /d:sonar.login="22744be1b428aa6d018d32d5a78099e00d17ea3d" \
+    /d:sonar.login="${SONAR_TOKEN}" \
     /d:sonar.scm.provider="git" \
     /d:sonar.coverage.exclusions="**Test*.cs" \
+    /d:sonar.exclusions="Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/metronic/assets/vendors/base/scripts.bundle.js,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/mdbootstrap/mdb.min.js,**/*.Designer.cs,**/service-proxies.ts,**/node_modules/**,**/dist/**,**/bin/**,**/obj/**,**/*.min.js,**/*.bundle.js" \
     /d:sonar.cs.vstest.reportsPaths="resultTest/*.trx" \
     /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml"
 
@@ -93,8 +94,8 @@ fi
 # End SonarCloud analysis
 echo ""
 echo "🏁 Ending SonarCloud analysis..."
-dotnet-sonarscanner end /d:sonar.login="22744be1b428aa6d018d32d5a78099e00d17ea3d"
+dotnet-sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
 
 echo ""
 echo "✅ SonarCloud scan completed!"
-echo "📊 Check results at: https://sonarcloud.io/dashboard?id=afonsoft-github_EAF"
+echo "📊 Check results at: https://sonarcloud.io/dashboard?id=afonsoft_EAF2"
