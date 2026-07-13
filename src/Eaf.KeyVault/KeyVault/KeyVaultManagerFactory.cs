@@ -30,7 +30,7 @@ namespace Eaf.KeyVault
             {
                 EnumKeyVault.Azure => new AzureKeyVaultManager(options, _logger),
                 EnumKeyVault.OCI => new OCIKeyVaultManager(options, _logger),
-                _ => new NullKeyVaultManager(options, _logger)
+                _ => new NullKeyVaultManager(_logger)
             };
         }
     }

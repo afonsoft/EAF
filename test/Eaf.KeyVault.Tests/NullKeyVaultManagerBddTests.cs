@@ -14,12 +14,10 @@ namespace Eaf.KeyVault.Tests
     /// </summary>
     public class NullKeyVaultManagerBddTests
     {
-        private readonly EafKeyVaultOptions _options;
         private readonly ILogger _mockLogger;
 
         public NullKeyVaultManagerBddTests()
         {
-            _options = new EafKeyVaultOptions { Provider = EnumKeyVault.None };
             _mockLogger = Substitute.For<ILogger>();
         }
 
@@ -29,11 +27,10 @@ namespace Eaf.KeyVault.Tests
         public void Dado_OpcoesELoggerValidos_Quando_CriarNullKeyVaultManager_Entao_DeveInicializarCorretamente()
         {
             // Dado
-            var options = new EafKeyVaultOptions();
             var logger = Substitute.For<ILogger>();
 
             // Quando
-            var manager = new NullKeyVaultManager(options, logger);
+            var manager = new NullKeyVaultManager(logger);
 
             // Então
             manager.ShouldNotBeNull();
@@ -43,22 +40,20 @@ namespace Eaf.KeyVault.Tests
         public void Dado_OpcoesNulas_Quando_CriarNullKeyVaultManager_Entao_DeveAceitarOpcoesNulas()
         {
             // Dado
-            EafKeyVaultOptions options = null!;
             var logger = Substitute.For<ILogger>();
 
             // Quando & Então
-            Should.NotThrow(() => new NullKeyVaultManager(options, logger));
+            Should.NotThrow(() => new NullKeyVaultManager(logger));
         }
 
         [Fact]
         public void Dado_LoggerNulo_Quando_CriarNullKeyVaultManager_Entao_DeveAceitarLoggerNulo()
         {
             // Dado
-            var options = new EafKeyVaultOptions();
             ILogger logger = null!;
 
             // Quando & Então
-            Should.NotThrow(() => new NullKeyVaultManager(options, logger));
+            Should.NotThrow(() => new NullKeyVaultManager(logger));
         }
 
         #endregion
@@ -69,7 +64,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_NullKeyVaultManager_Quando_ChamarGetKeyValues_Entao_DeveRetornarDicionarioVazio()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             var resultado = manager.GetKeyValues();
@@ -84,7 +79,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_NullKeyVaultManager_Quando_ChamarGetKeyValuesAsync_Entao_DeveRetornarDicionarioVazio()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             var resultado = await manager.GetKeyValuesAsync();
@@ -99,7 +94,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_NullKeyVaultManager_Quando_ChamarGetKeyValues_Entao_DeveRegistrarLogDebug()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.GetKeyValues();
@@ -113,7 +108,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_NullKeyVaultManager_Quando_ChamarGetKeyValuesAsync_Entao_DeveRegistrarLogDebug()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             await manager.GetKeyValuesAsync();
@@ -135,7 +130,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_ChaveQualquer_Quando_ChamarGetValue_Entao_DeveRetornarNull(string chave)
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             var resultado = manager.GetValue(chave);
@@ -152,7 +147,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_ChaveQualquer_Quando_ChamarGetValueAsync_Entao_DeveRetornarNull(string chave)
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             var resultado = await manager.GetValueAsync(chave);
@@ -165,7 +160,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_ChaveNula_Quando_ChamarGetValue_Entao_DeveRetornarNull()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             string chave = null!;
 
             // Quando
@@ -179,7 +174,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_ChaveNula_Quando_ChamarGetValueAsync_Entao_DeveRetornarNull()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             string chave = null!;
 
             // Quando
@@ -193,7 +188,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_NullKeyVaultManager_Quando_ChamarGetValue_Entao_DeveRegistrarLogDebug()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.GetValue("teste");
@@ -207,7 +202,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_NullKeyVaultManager_Quando_ChamarGetValueAsync_Entao_DeveRegistrarLogDebug()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             await manager.GetValueAsync("teste");
@@ -229,7 +224,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_ChaveEValorValidos_Quando_ChamarSetValue_Entao_NaoDeveLancarExcecao(string chave, string valor)
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando & Então
             Should.NotThrow(() => manager.SetValue(chave, valor));
@@ -243,7 +238,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_ChaveEValorValidos_Quando_ChamarSetValueAsync_Entao_NaoDeveLancarExcecao(string chave, string valor)
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando & Então
             await Should.NotThrowAsync(async () => await manager.SetValueAsync(chave, valor));
@@ -253,7 +248,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_ChaveNula_Quando_ChamarSetValue_Entao_NaoDeveLancarExcecao()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             string chave = null!;
             string valor = "valor-teste";
 
@@ -265,7 +260,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_ChaveNula_Quando_ChamarSetValueAsync_Entao_NaoDeveLancarExcecao()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             string chave = null!;
             string valor = "valor-teste";
 
@@ -277,7 +272,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_ValorNulo_Quando_ChamarSetValue_Entao_NaoDeveLancarExcecao()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             string chave = "chave-teste";
             string valor = null!;
 
@@ -289,7 +284,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_ValorNulo_Quando_ChamarSetValueAsync_Entao_NaoDeveLancarExcecao()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             string chave = "chave-teste";
             string valor = null!;
 
@@ -301,7 +296,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_NullKeyVaultManager_Quando_ChamarSetValue_Entao_DeveRegistrarLogDebug()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.SetValue("teste", "valor");
@@ -315,7 +310,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_NullKeyVaultManager_Quando_ChamarSetValueAsync_Entao_DeveRegistrarLogDebug()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             await manager.SetValueAsync("teste", "valor");
@@ -333,7 +328,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_MultiplasChaves_Quando_ChamarGetValue_Entao_DeveSempreRetornarNull()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             var chaves = new[] { "chave1", "chave2", "chave3", "", null, "chave-especial-!@#" };
 
             // Quando & Então
@@ -348,7 +343,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_MultiplasChaves_Quando_ChamarGetValueAsync_Entao_DeveSempreRetornarNull()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             var chaves = new[] { "chave1", "chave2", "chave3", "", null, "chave-especial-!@#" };
 
             // Quando & Então
@@ -363,7 +358,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_SequenciaDeOperacoes_Quando_ExecutarSetEGet_Entao_DeveManterComportamentoConsistente()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.SetValue("chave", "valor");
@@ -382,7 +377,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_SequenciaDeOperacoesAsync_Quando_ExecutarSetEGet_Entao_DeveManterComportamentoConsistente()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             await manager.SetValueAsync("chave", "valor");
@@ -405,7 +400,7 @@ namespace Eaf.KeyVault.Tests
         public async Task Dado_MultiplasOperacoesSimultaneas_Quando_ExecutarConcorrentemente_Entao_DeveManterConsistencia()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             var tasks = new List<Task>();
 
             // Quando
@@ -432,7 +427,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_OperacoesSequenciaisRapidas_Quando_ExecutarEmLoop_Entao_DeveManterPerformance()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando & Então
             Should.NotThrow(() =>
@@ -457,7 +452,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_NullKeyVaultManager_Quando_VerificarTipos_Entao_DeveImplementarInterfaceCorreta()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando & Então
             manager.ShouldBeAssignableTo<IKeyVaultManager>();
@@ -467,7 +462,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_NullKeyVaultManager_Quando_VerificarMetodos_Entao_DeveTerTodosMetodosPublicos()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
             var tipo = manager.GetType();
 
             // Quando
@@ -490,7 +485,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_MultiplasChamadasParaGetValue_Quando_Executar_Entao_DeveRegistrarLogParaCadaChamada()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.GetValue("chave1");
@@ -506,7 +501,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_MultiplasChamadasParaSetValue_Quando_Executar_Entao_DeveRegistrarLogParaCadaChamada()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.SetValue("chave1", "valor1");
@@ -522,7 +517,7 @@ namespace Eaf.KeyVault.Tests
         public void Dado_MixDeOperacoes_Quando_Executar_Entao_DeveRegistrarLogParaTodasOperacoes()
         {
             // Dado
-            var manager = new NullKeyVaultManager(_options, _mockLogger);
+            var manager = new NullKeyVaultManager(_mockLogger);
 
             // Quando
             manager.GetKeyValues();      // 1 log

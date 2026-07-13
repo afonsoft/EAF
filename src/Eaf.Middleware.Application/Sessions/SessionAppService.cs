@@ -41,7 +41,7 @@ namespace Eaf.Middleware.Sessions
                     Version = AppVersionHelper.Version,
                     ReleaseDate = AppVersionHelper.ReleaseDate,
                     Features = new Dictionary<string, bool>(),
-                    Currency = "BRL", //TODO : Recuperar esse dados do usu�rio logado no futuro
+                    Currency = "BRL",
                     CurrencySign = "R$",
                     TwoFactorCodeExpireSeconds = TwoFactorCodeCacheItem.DefaultSlidingExpireTime.TotalSeconds
                 }

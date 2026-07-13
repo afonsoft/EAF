@@ -5,6 +5,7 @@
 		<text name="Roles">Roles</text>
 		<text name="Users">Users</text>
 		<text name="InvalidUserNameOrPassword">Invalid user name or password</text>
+		<text name="InvalidRequest">Invalid request</text>
 		<text name="ThereIsNoTenantDefinedWithName{0}">There is no tenant defined with name {0}</text>
 		<text name="TenantIsNotActive">Tenant {0} is not active.</text>
 		<text name="UserIsNotActiveAndCanNotLogin">User {0} is not active and can not log in.</text>

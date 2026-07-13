@@ -2,6 +2,7 @@ using Abp;
 using Abp.Auditing;
 using Abp.Authorization;
 using Abp.Runtime.Security;
+using Abp.UI;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Storage;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,9 @@ namespace Eaf.Middleware.Web.Controllers
         [HttpGet]
         public async Task<FileContentResult> GetUploadedObject(Guid fileId, string fileName, string contentType, string enc_auth_token)
         {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
             var jwtToken = SimpleStringCipher.Instance.Decrypt(enc_auth_token, MiddlewareCoreConsts.DefaultPassPhrase);
             if (string.IsNullOrEmpty(jwtToken))
                 throw new AbpException(L("NotFound"));

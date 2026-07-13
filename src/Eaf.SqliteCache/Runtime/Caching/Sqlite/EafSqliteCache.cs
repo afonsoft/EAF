@@ -157,17 +157,17 @@ namespace Abp.Runtime.Caching.Sqlite
 
         public const int SchemaVersion = 1;
 
-        public const string TableInitCommand = "CREATE TABLE IF NOT EXISTS \"cache\" (	" +
-                                               "  \"key\"	varchar NOT NULL," +
-                                               "  \"value\"	BLOB," +
-                                               "  \"expiry\"	INTEGER," +
-                                               "  \"renewal\"	INTEGER," +
+        public const string TableInitCommand = "CREATE TABLE IF NOT EXISTS \"cache\" (\t" +
+                                               "  \"key\"\tvarchar NOT NULL," +
+                                               "  \"value\"\tBLOB," +
+                                               "  \"expiry\"\tINTEGER," +
+                                               "  \"renewal\"\tINTEGER," +
                                                "  PRIMARY KEY(\"key\")" +
                                                " ) WITHOUT ROWID;" +
                                                "" +
                                                " CREATE TABLE IF NOT EXISTS \"meta\" (" +
-                                               "  \"key\"	TEXT NOT NULL," +
-                                               "  \"value\"	INTEGER," +
+                                               "  \"key\"\tTEXT NOT NULL," +
+                                               "  \"value\"\tINTEGER," +
                                                "  PRIMARY KEY(\"key\")" +
                                                " ) WITHOUT ROWID;" +
                                                "" +

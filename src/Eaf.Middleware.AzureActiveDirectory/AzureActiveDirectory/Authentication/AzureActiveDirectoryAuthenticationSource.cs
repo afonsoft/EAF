@@ -38,7 +38,6 @@ namespace Eaf.Middleware.AzureActiveDirectory.Authentication
 
         private readonly IEafMiddlewareAzureActiveDirectoryModuleConfig _AzureActiveDirectoryModuleConfig;
         private readonly IAzureActiveDirectorySettings _settings;
-        private string _signInToken;
 
         /// <summary>
         /// Inicializa uma nova instância da classe AzureActiveDirectoryAuthenticationSource.
@@ -216,7 +215,6 @@ namespace Eaf.Middleware.AzureActiveDirectory.Authentication
                 var result = await app.AcquireTokenByUsernamePassword(scopes, userNameOrEmailAddress, securePassword).ExecuteAsync();
                 if (result?.Account != null)
                 {
-                    _signInToken = result.AccessToken;
                     return true;
                 }
                 else

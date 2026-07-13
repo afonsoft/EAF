@@ -290,9 +290,7 @@ namespace Eaf.Middleware.Tests.Authorization
             var principalFactory = CoreManagerTestHelper.CreateUserClaimsPrincipalFactory(userManager, roleManager);
             var cacheManager = Substitute.For<ICacheManager>();
             cacheManager.GetCache("AppImpersonationCache").Returns(new AbpMemoryCache("AppImpersonationCache"));
-            var settingManager = Substitute.For<ISettingManager>();
-
-            var sut = new ImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository, settingManager);
+            var sut = new ImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository);
             sut.AbpSession = abpSession;
             return sut;
         }
@@ -311,9 +309,7 @@ namespace Eaf.Middleware.Tests.Authorization
             var cacheManager = Substitute.For<ICacheManager>();
             cacheManager.GetCache("AppImpersonationCache").Returns(new AbpMemoryCache("AppImpersonationCache"));
 
-            var settingManager = Substitute.For<ISettingManager>();
-
-            var sut = new ImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository, settingManager);
+            var sut = new ImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository);
             sut.AbpSession = abpSession;
             return sut;
         }
@@ -325,17 +321,15 @@ namespace Eaf.Middleware.Tests.Authorization
             var principalFactory = CoreManagerTestHelper.CreateUserClaimsPrincipalFactory(userManager, roleManager);
             var cacheManager = Substitute.For<ICacheManager>();
             var userTokenRepository = Substitute.For<IRepository<UserToken, long>>();
-            var settingManager = Substitute.For<ISettingManager>();
-
-            var sut = new TestableImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository, settingManager);
+            var sut = new TestableImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository);
             sut.LocalizationManager = localizationManager;
             return sut;
         }
 
         private class TestableImpersonationManager : ImpersonationManager
         {
-            public TestableImpersonationManager(ICacheManager cacheManager, UserManager userManager, UserClaimsPrincipalFactory principalFactory, IRepository<UserToken, long> userTokenRepository, ISettingManager settingManager)
-                : base(cacheManager, userManager, principalFactory, userTokenRepository, settingManager)
+            public TestableImpersonationManager(ICacheManager cacheManager, UserManager userManager, UserClaimsPrincipalFactory principalFactory, IRepository<UserToken, long> userTokenRepository)
+                : base(cacheManager, userManager, principalFactory, userTokenRepository)
             {
             }
 

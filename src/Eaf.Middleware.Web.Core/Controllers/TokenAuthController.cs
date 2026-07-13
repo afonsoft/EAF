@@ -146,6 +146,9 @@ namespace Eaf.Middleware.Web.Controllers
         [HttpPost]
         public async Task<AuthenticateResultModel> Authenticate([FromBody] AuthenticateModel model)
         {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
             try
             {
                 if (UseCaptchaOnLogin())
@@ -251,6 +254,9 @@ namespace Eaf.Middleware.Web.Controllers
         public async Task<ExternalAuthenticateResultModel> ExternalAuthenticate(
             [FromBody] ExternalAuthenticateModel model)
         {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
             try
             {
                 var externalUser = await GetExternalUserInfo(model);
@@ -598,6 +604,9 @@ namespace Eaf.Middleware.Web.Controllers
         [HttpPost]
         public async Task SendTwoFactorAuthCode([FromBody] SendTwoFactorAuthCodeModel model)
         {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
             var cacheKey = new UserIdentifier(AbpSession.TenantId, model.UserId).ToString();
 
             var cacheItem = await _cacheManager

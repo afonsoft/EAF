@@ -202,9 +202,8 @@ namespace Eaf.Middleware.Tests.Helpers
             var principalFactory = CreateUserClaimsPrincipalFactory(userManager, CreateRoleManager());
             var userTokenRepository = Substitute.For<IRepository<UserToken, long>>();
             userTokenRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<UserToken, bool>>>()).Returns((UserToken)null);
-            var settingManager = Substitute.For<ISettingManager>();
 
-            var sut = new ImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository, settingManager);
+            var sut = new ImpersonationManager(cacheManager, userManager, principalFactory, userTokenRepository);
             sut.AbpSession = abpSession ?? Substitute.For<IAbpSession>();
             return sut;
         }

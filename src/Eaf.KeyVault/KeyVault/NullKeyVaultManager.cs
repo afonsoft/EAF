@@ -8,18 +8,15 @@ namespace Eaf.KeyVault
     {
         private const string NotImplementedLogMessage = "NullKeyVaultManager : NotImplementedException";
 
-        private readonly EafKeyVaultOptions options;
         private readonly ILogger logger;
 
         /// <summary>
         /// NullKeyVaultManager.
         /// </summary>
-        /// <param name="options">Parâmetro options.</param>
         /// <param name="logger">Parâmetro logger.</param>
         /// <returns>Resultado da operação.</returns>
-        public NullKeyVaultManager(EafKeyVaultOptions options, ILogger logger)
+        public NullKeyVaultManager(ILogger logger)
         {
-            this.options = options;
             this.logger = logger;
         }
 

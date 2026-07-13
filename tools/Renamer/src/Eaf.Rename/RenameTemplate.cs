@@ -155,7 +155,7 @@ namespace Eaf.Renamer.Lib
             }
         }
 
-        private void RenameDirectoryIfNeeded(BackgroundWorker worker, Arguments arguments, string path, int percentProgress)
+        private static void RenameDirectoryIfNeeded(BackgroundWorker worker, Arguments arguments, string path, int percentProgress)
         {
             DirectoryInfo directoryInfo = new(path);
             if (!ShouldRenameDirectoryName(directoryInfo.Name, arguments))
@@ -240,7 +240,7 @@ namespace Eaf.Renamer.Lib
                 PathFileUiApi["API"] = fullName;
         }
 
-        private void RenameFileContentAndName(BackgroundWorker worker, Arguments arguments, FileInfo fileInfo, int percentProgress)
+        private static void RenameFileContentAndName(BackgroundWorker worker, Arguments arguments, FileInfo fileInfo, int percentProgress)
         {
             string contents = GetRenamedFileContents(fileInfo.FullName, arguments);
             if (ShouldRenameFileName(fileInfo.Name, arguments))
