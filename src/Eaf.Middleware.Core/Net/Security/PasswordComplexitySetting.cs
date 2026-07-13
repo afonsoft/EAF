@@ -51,5 +51,24 @@ namespace Eaf.Middleware.Security
                 RequireUppercase == other.RequireUppercase &&
                 RequiredLength == other.RequiredLength;
         }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current object.
+        /// </summary>
+        /// <param name="obj">Parâmetro obj.</param>
+        /// <returns>Resultado da operação.</returns>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PasswordComplexitySetting);
+        }
+
+        /// <summary>
+        /// Serves as the default hash function.
+        /// </summary>
+        /// <returns>Resultado da operação.</returns>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(RequireDigit, RequireLowercase, RequireNonAlphanumeric, RequireUppercase, RequiredLength);
+        }
     }
 }
