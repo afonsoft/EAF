@@ -95,7 +95,7 @@ namespace Eaf.Middleware.Tests.IO
             try
             {
                 // Quando/Então
-                AppFileHelper.DeleteFilesInFolderIfExists(tempDir, "nonexistent");
+                Should.NotThrow(() => AppFileHelper.DeleteFilesInFolderIfExists(tempDir, "nonexistent"));
             }
             finally
             {

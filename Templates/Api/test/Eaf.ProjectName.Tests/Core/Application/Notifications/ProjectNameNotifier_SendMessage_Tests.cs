@@ -22,7 +22,7 @@ namespace Eaf.ProjectName.Tests.Core.Application.Notifications
         {
             var user = new UserIdentifier(AbpSession.TenantId, AbpSession.UserId.Value);
 
-            await _notifier.SendMessageAsync(user, "Mensagem de teste");
+            await Should.NotThrowAsync(async () => await _notifier.SendMessageAsync(user, "Mensagem de teste"));
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace Eaf.ProjectName.Tests.Core.Application.Notifications
         {
             var user = new UserIdentifier(AbpSession.TenantId, AbpSession.UserId.Value);
 
-            await _notifier.SendMessageAsync(user, "Mensagem crítica", NotificationSeverity.Error);
+            await Should.NotThrowAsync(async () => await _notifier.SendMessageAsync(user, "Mensagem crítica", NotificationSeverity.Error));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Eaf.ProjectName.Tests.Core.Application.Notifications
         {
             var user = new UserIdentifier(AbpSession.TenantId, AbpSession.UserId.Value);
 
-            await _notifier.SendMessageAsync(user, "Aviso importante", NotificationSeverity.Warn);
+            await Should.NotThrowAsync(async () => await _notifier.SendMessageAsync(user, "Aviso importante", NotificationSeverity.Warn));
         }
     }
 }

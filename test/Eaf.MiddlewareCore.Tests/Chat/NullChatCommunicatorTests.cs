@@ -21,7 +21,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
         [Fact]
         public async Task Dado_NullChatCommunicator_Quando_SendMessageToAll_Entao_NaoDeveLancarExcecao()
         {
-            await _communicator.SendMessageToAll("test message");
+            await Should.NotThrowAsync(async () => await _communicator.SendMessageToAll("test message"));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
             var message = new ChatMessage(user, target, ChatSide.Sender, "teste",
                 ChatMessageReadState.Unread, System.Guid.NewGuid(), ChatMessageReadState.Unread);
 
-            await _communicator.SendMessageToClient(clients, message);
+            await Should.NotThrowAsync(async () => await _communicator.SendMessageToClient(clients, message));
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
             var clients = new List<IOnlineClient>();
             var user = new UserIdentifier(1, 100);
 
-            await _communicator.SendAllUnreadMessagesOfUserReadToClients(clients, user);
+            await Should.NotThrowAsync(async () => await _communicator.SendAllUnreadMessagesOfUserReadToClients(clients, user));
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
             var friend = new UserIdentifier(2, 200);
             var friendship = new Friendship(user, friend, "tenant", "user", null, FriendshipState.Accepted);
 
-            await _communicator.SendFriendshipRequestToClient(clients, friendship, true, false);
+            await Should.NotThrowAsync(async () => await _communicator.SendFriendshipRequestToClient(clients, friendship, true, false));
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
             var clients = new List<IOnlineClient>();
             var user = new UserIdentifier(1, 100);
 
-            await _communicator.SendReadStateChangeToClients(clients, user);
+            await Should.NotThrowAsync(async () => await _communicator.SendReadStateChangeToClients(clients, user));
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
             var clients = new List<IOnlineClient>();
             var user = new UserIdentifier(1, 100);
 
-            await _communicator.SendUserConnectionChangeToClients(clients, user, true);
+            await Should.NotThrowAsync(async () => await _communicator.SendUserConnectionChangeToClients(clients, user, true));
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Eaf.MiddlewareCore.Tests.Chat
             var clients = new List<IOnlineClient>();
             var user = new UserIdentifier(1, 100);
 
-            await _communicator.SendUserStateChangeToClients(clients, user, FriendshipState.Blocked);
+            await Should.NotThrowAsync(async () => await _communicator.SendUserStateChangeToClients(clients, user, FriendshipState.Blocked));
         }
     }
 }

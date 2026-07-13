@@ -158,7 +158,7 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
         {
             var receiver = new TestWebhookReceiver();
 
-            await receiver.ProcessRequest("{}");
+            await Should.NotThrowAsync(async () => await receiver.ProcessRequest("{}"));
         }
 
         [Fact]

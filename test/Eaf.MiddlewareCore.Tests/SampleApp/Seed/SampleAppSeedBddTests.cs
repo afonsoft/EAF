@@ -17,6 +17,7 @@ namespace Eaf.MiddlewareCore.Tests.SampleApp.Seed
                 var creator = new DefaultSettingsCreator(context);
                 creator.Create();
                 creator.Create();
+                creator.ShouldNotBeNull();
             });
         }
 
@@ -28,6 +29,7 @@ namespace Eaf.MiddlewareCore.Tests.SampleApp.Seed
                 var builder = new DefaultTenantBuilder(context);
                 builder.Create();
                 builder.Create();
+                builder.ShouldNotBeNull();
             });
         }
     }

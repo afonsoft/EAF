@@ -196,9 +196,9 @@ namespace Eaf.Middleware.Web.Controllers
                     if (model.TwoFactorVerificationCode.IsNullOrEmpty())
                     {
                         //Add a cache item which will be checked in SendTwoFactorAuthCode to prevent sending unwanted two factor code to users.
-                        _cacheManager
+                        await _cacheManager
                             .GetTwoFactorCodeCache()
-                            .Set(
+                            .SetAsync(
                                 loginResult.User.ToUserIdentifier().ToString(),
                                 new TwoFactorCodeCacheItem()
                             );
@@ -282,9 +282,9 @@ namespace Eaf.Middleware.Web.Controllers
                                     loginResult.User.Id, loginResult.User.TenantId);
                             }
 
-                            _cacheManager
+                            await _cacheManager
                                   .GetCache(ExternalTokenInformationCacheName)
-                                  .Set(loginResult.User.ToUserIdentifier().ToString(),
+                                  .SetAsync(loginResult.User.ToUserIdentifier().ToString(),
                                       model.ProviderAccessCode,
                                       slidingExpireTime: TimeSpan.FromDays(1));
 
@@ -330,9 +330,9 @@ namespace Eaf.Middleware.Web.Controllers
                                 }
                             }
 
-                            _cacheManager
+                            await _cacheManager
                                 .GetCache(ExternalTokenInformationCacheName)
-                                .Set(loginResult.User.ToUserIdentifier().ToString(),
+                                .SetAsync(loginResult.User.ToUserIdentifier().ToString(),
                                     model.ProviderAccessCode,
                                     slidingExpireTime: TimeSpan.FromDays(1));
 
@@ -512,12 +512,7 @@ namespace Eaf.Middleware.Web.Controllers
         {
             try
             {
-                if (AbpSession?.UserId != null)
-                {
-                    var user = _userManager.GetUser(AbpSession.ToUserIdentifier());
-                    _cacheManager.GetCache(ExternalTokenInformationCacheName).Remove(user.ToUserIdentifier().ToString());
-                    await _userManager.UpdateSecurityStampAsync(user);
-                }
+                await RemoveEafSessionCacheAsync();
             }
             catch (Exception ex)
             {
@@ -526,24 +521,7 @@ namespace Eaf.Middleware.Web.Controllers
 
             try
             {
-                var claims = _principalAccessor?.Principal;
-                if (claims != null)
-                {
-                    var tokenValidityKeyInClaims = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
-                    var userIdentifierString = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.UserIdentifier)?.Value ?? "";
-                    if (!string.IsNullOrEmpty(tokenValidityKeyInClaims))
-                    {
-                        _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).Remove(tokenValidityKeyInClaims);
-                        if (!string.IsNullOrEmpty(userIdentifierString))
-                            await _userManager.RemoveTokenValidityKeyAsync(_userManager.GetUser(UserIdentifier.Parse(userIdentifierString)), tokenValidityKeyInClaims);
-                    }
-                    if (!string.IsNullOrEmpty(userIdentifierString))
-                    {
-                        _cacheManager.GetCache(ExternalTokenInformationCacheName).Remove(UserIdentifier.Parse(userIdentifierString).ToString());
-                        var user = _userManager.GetUser(UserIdentifier.Parse(userIdentifierString));
-                        await _userManager.UpdateSecurityStampAsync(user);
-                    }
-                }
+                await RemovePrincipalAccessorCacheAsync();
             }
             catch (Exception ex)
             {
@@ -552,27 +530,68 @@ namespace Eaf.Middleware.Web.Controllers
 
             try
             {
-                if (User?.Claims != null && User.Claims.Any())
-                {
-                    var userIdentifier = User.Identity.GetUserIdentifierOrNull();
-                    var tokenValidityKeyInClaims = User.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
-                    if (!string.IsNullOrEmpty(tokenValidityKeyInClaims))
-                    {
-                        _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).Remove(tokenValidityKeyInClaims);
-                        if (userIdentifier != null)
-                            await _userManager.RemoveTokenValidityKeyAsync(_userManager.GetUser(userIdentifier), tokenValidityKeyInClaims);
-                    }
-                    if (userIdentifier != null)
-                    {
-                        _cacheManager.GetCache(ExternalTokenInformationCacheName).Remove(userIdentifier.ToString());
-                        var user = _userManager.GetUser(userIdentifier);
-                        await _userManager.UpdateSecurityStampAsync(user);
-                    }
-                }
+                await RemoveIdentityCacheAsync();
             }
             catch (Exception ex)
             {
                 Logger.DebugFormat(ex, "Logout (Identity): {0}", ex.Message);
+            }
+        }
+
+        private async Task RemoveEafSessionCacheAsync()
+        {
+            if (AbpSession?.UserId == null)
+                return;
+
+            var user = await _userManager.GetUserAsync(AbpSession.ToUserIdentifier());
+            await _cacheManager.GetCache(ExternalTokenInformationCacheName).RemoveAsync(user.ToUserIdentifier().ToString());
+            await _userManager.UpdateSecurityStampAsync(user);
+        }
+
+        private async Task RemovePrincipalAccessorCacheAsync()
+        {
+            var claims = _principalAccessor?.Principal;
+            if (claims == null)
+                return;
+
+            var tokenValidityKeyInClaims = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
+            var userIdentifierString = claims.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.UserIdentifier)?.Value ?? "";
+
+            if (!string.IsNullOrEmpty(tokenValidityKeyInClaims))
+            {
+                await _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).RemoveAsync(tokenValidityKeyInClaims);
+                if (!string.IsNullOrEmpty(userIdentifierString))
+                    await _userManager.RemoveTokenValidityKeyAsync(await _userManager.GetUserAsync(UserIdentifier.Parse(userIdentifierString)), tokenValidityKeyInClaims);
+            }
+
+            if (!string.IsNullOrEmpty(userIdentifierString))
+            {
+                await _cacheManager.GetCache(ExternalTokenInformationCacheName).RemoveAsync(UserIdentifier.Parse(userIdentifierString).ToString());
+                var user = await _userManager.GetUserAsync(UserIdentifier.Parse(userIdentifierString));
+                await _userManager.UpdateSecurityStampAsync(user);
+            }
+        }
+
+        private async Task RemoveIdentityCacheAsync()
+        {
+            if (User?.Claims == null || !User.Claims.Any())
+                return;
+
+            var userIdentifier = User.Identity.GetUserIdentifierOrNull();
+            var tokenValidityKeyInClaims = User.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
+
+            if (!string.IsNullOrEmpty(tokenValidityKeyInClaims))
+            {
+                await _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey).RemoveAsync(tokenValidityKeyInClaims);
+                if (userIdentifier != null)
+                    await _userManager.RemoveTokenValidityKeyAsync(await _userManager.GetUserAsync(userIdentifier), tokenValidityKeyInClaims);
+            }
+
+            if (userIdentifier != null)
+            {
+                await _cacheManager.GetCache(ExternalTokenInformationCacheName).RemoveAsync(userIdentifier.ToString());
+                var user = await _userManager.GetUserAsync(userIdentifier);
+                await _userManager.UpdateSecurityStampAsync(user);
             }
         }
 
@@ -715,9 +734,9 @@ namespace Eaf.Middleware.Web.Controllers
             await _userManager.AddTokenValidityKeyAsync(user, tokenValidityKey, DateTime.UtcNow.Add(expiration).AddSeconds(10));
             await CurrentUnitOfWork.SaveChangesAsync();
 
-            _cacheManager
+            await _cacheManager
               .GetCache(MiddlewareCoreConsts.TokenValidityKey)
-              .Set(tokenValidityKey, user.SecurityStamp,
+              .SetAsync(tokenValidityKey, user.SecurityStamp,
               slidingExpireTime: expiration,
               absoluteExpireTime: DateTimeOffset.UtcNow.Add(expiration).AddHours(1));
 
@@ -815,6 +834,12 @@ namespace Eaf.Middleware.Web.Controllers
         [UnitOfWork]
         private async Task UpdateExternalUserAsync(User user, ExternalAuthUserInfo externalLoginInfo)
         {
+            await UpdateExternalProfileAsync(user, externalLoginInfo);
+            await UpdateExternalProfilePictureAsync(user, externalLoginInfo);
+        }
+
+        private async Task UpdateExternalProfileAsync(User user, ExternalAuthUserInfo externalLoginInfo)
+        {
             string name = externalLoginInfo.Name.Split(' ')[0];
             string surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
 
@@ -836,45 +861,48 @@ namespace Eaf.Middleware.Web.Controllers
             {
                 Logger.ErrorFormat(ex, "Error on Update External Profile from user {0}", user.FullName);
             }
+        }
+
+        private async Task UpdateExternalProfilePictureAsync(User user, ExternalAuthUserInfo externalLoginInfo)
+        {
+            if (externalLoginInfo.Picture.IsNullOrEmpty())
+                return;
 
             try
             {
-                if (!externalLoginInfo.Picture.IsNullOrEmpty())
+                var contentType = ".bmp";
+                var fileName = $"{Guid.NewGuid()}.bmp";
+                BinaryObject storedFile = null;
+
+                var byteArray = Convert.FromBase64String(externalLoginInfo.Picture);
+
+                using (CurrentUnitOfWork.SetTenantId(null))
                 {
-                    var contentType = ".bmp";
-                    var fileName = $"{Guid.NewGuid()}.bmp";
-                    BinaryObject storedFile = null;
-
-                    var byteArray = Convert.FromBase64String(externalLoginInfo.Picture);
-
-                    using (CurrentUnitOfWork.SetTenantId(null))
+                    bool savePicture = false;
+                    if (user.ProfilePictureId.HasValue)
                     {
-                        bool savePicture = false;
-                        if (user.ProfilePictureId.HasValue)
+                        var profilePictureBinary = await _binaryObjectManager.GetOrNullAsync(user.ProfilePictureId.Value);
+                        if (profilePictureBinary != null && !ByteArrayCompare(profilePictureBinary.Bytes, byteArray))
                         {
-                            var profilePictureBinary = await _binaryObjectManager.GetOrNullAsync(user.ProfilePictureId.Value);
-                            if (profilePictureBinary != null && !ByteArrayCompare(profilePictureBinary.Bytes, byteArray))
-                            {
-                                await _binaryObjectManager.DeleteAsync(user.ProfilePictureId.Value);
-                                savePicture = true;
-                            }
-                        }
-                        else
+                            await _binaryObjectManager.DeleteAsync(user.ProfilePictureId.Value);
                             savePicture = true;
-
-                        if (savePicture)
-                        {
-                            storedFile = new BinaryObject(null, byteArray, contentType, fileName);
-                            await _binaryObjectManager.SaveAsync(storedFile);
-                            await CurrentUnitOfWork.SaveChangesAsync();
                         }
                     }
+                    else
+                        savePicture = true;
 
-                    if (storedFile != null)
+                    if (savePicture)
                     {
-                        user.ProfilePictureId = storedFile.Id;
+                        storedFile = new BinaryObject(null, byteArray, contentType, fileName);
+                        await _binaryObjectManager.SaveAsync(storedFile);
                         await CurrentUnitOfWork.SaveChangesAsync();
                     }
+                }
+
+                if (storedFile != null)
+                {
+                    user.ProfilePictureId = storedFile.Id;
+                    await CurrentUnitOfWork.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -886,161 +914,176 @@ namespace Eaf.Middleware.Web.Controllers
         [UnitOfWork]
         private async Task<User> RegisterExternalUserAsync(ExternalAuthUserInfo externalLoginInfo)
         {
-            string username;
             try
             {
-                using (var providerManager = _iocManager.ResolveAsDisposable<DefaultExternalLoginInfoManager>())
-                {
-                    username = providerManager.Object.GetUserNameFromExternalAuthUserInfo(externalLoginInfo);
-                }
-
-                var randomPassword = Authorization.Users.User.CreateRandomPassword();
-
-                var userExist = await _userManager.FindByNameOrEmailAsync(username);
-                if (userExist == null)
-                    userExist = await _userManager.FindByNameOrEmailAsync(externalLoginInfo.EmailAddress);
-
-                if (userExist == null)
-                {
-                    Logger.DebugFormat("RegisterExternalUser Create {0}:{1} ", username, externalLoginInfo.EmailAddress);
-                    var user = new User
-                    {
-                        TenantId = AbpSession.TenantId,
-                        UserName = username,
-                        EmailAddress = externalLoginInfo.EmailAddress,
-                        Name = externalLoginInfo.Name.Split(' ')[0],
-                        Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1],
-                    };
-
-                    user.Password = _passwordHasher.HashPassword(user, randomPassword);
-                    user.AuthenticationSource = externalLoginInfo.Provider;
-                    user.ExternalAuthProviderformation = externalLoginInfo.Provider;
-                    user.IsActive = true;
-                    user.IsTwoFactorEnabled = false;
-                    user.IsEmailConfirmed = true;
-                    user.IsLockoutEnabled = false;
-                    user.IsDeleted = false;
-                    user.TenantId = AbpSession?.TenantId;
-
-                    user.SetNormalizedNames();
-
-                    user.Logins = new List<UserLogin>
-                    {
-                        new UserLogin
-                            {
-                                LoginProvider = externalLoginInfo.Provider,
-                                ProviderKey = externalLoginInfo.ProviderKey,
-                                TenantId = user.TenantId
-                            }
-                    };
-
-                    if (user.Roles == null)
-                    {
-                        user.Roles = new List<UserRole>();
-                        foreach (var defaultRole in _roleManager.Roles.Where(r => r.TenantId == user.TenantId && r.IsDefault).ToList())
-                        {
-                            user.Roles.Add(new UserRole(AbpSession?.TenantId, user.Id, defaultRole.Id));
-                        }
-                    }
-
-                    var result = await _userManager.CreateAsync(user);
-
-                    if (!result.Succeeded && result.Errors.Any())
-                    {
-                        throw new UserFriendlyException(Convert.ToInt32(result.Errors.First().Code), result.Errors.First().Description);
-                    }
-
-                    await CurrentUnitOfWork.SaveChangesAsync();
-                    await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(user.ToUserIdentifier());
-                    await NotificationNewUser(user);
-                    await WelcomeToTheApplicationAsync(user);
-                    userExist = user;
-                }
-                else
-                {
-                    Logger.DebugFormat("RegisterExternalUser Update {0}:{1} ", username, externalLoginInfo.EmailAddress);
-                    userExist.EmailAddress = externalLoginInfo.EmailAddress;
-                    userExist.Name = externalLoginInfo.Name.Split(' ')[0];
-                    userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
-                    userExist.UserName = username;
-                    userExist.AuthenticationSource = externalLoginInfo.Provider;
-                    userExist.ExternalAuthProviderformation = externalLoginInfo.Provider;
-                    userExist.IsActive = true;
-                    userExist.IsTwoFactorEnabled = false;
-                    userExist.IsEmailConfirmed = true;
-                    userExist.IsLockoutEnabled = false;
-                    userExist.IsDeleted = false;
-                    userExist.TenantId = AbpSession?.TenantId;
-
-                    userExist.SetNormalizedNames();
-
-                    userExist.Logins = new List<UserLogin>
-                    {
-                        new UserLogin
-                            {
-                                LoginProvider = externalLoginInfo.Provider,
-                                ProviderKey = externalLoginInfo.ProviderKey,
-                                TenantId = userExist.TenantId
-                            }
-                    };
-
-                    if (userExist.Roles == null)
-                    {
-                        userExist.Roles = new List<UserRole>();
-                        foreach (var defaultRole in _roleManager.Roles.Where(r => r.TenantId == userExist.TenantId && r.IsDefault).ToList())
-                        {
-                            if (!await _userManager.IsInRoleAsync(userExist, defaultRole.NormalizedName))
-                                userExist.Roles.Add(new UserRole(AbpSession?.TenantId, userExist.Id, defaultRole.Id));
-                        }
-                    }
-
-                    var result = await _userManager.UpdateWithValidateAsync(userExist);
-
-                    if (!result.Succeeded && result.Errors.Any())
-                    {
-                        throw new UserFriendlyException(Convert.ToInt32(result.Errors.First().Code), result.Errors.First().Description);
-                    }
-
-                    await CurrentUnitOfWork.SaveChangesAsync();
-                    await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(userExist.ToUserIdentifier());
-                    await NotificationNewUser(userExist);
-                    await WelcomeToTheApplicationAsync(userExist);
-                }
-
-                try
-                {
-                    if (!externalLoginInfo.Picture.IsNullOrEmpty())
-                    {
-                        var contentType = ".bmp";
-                        var fileName = $"{Guid.NewGuid()}.bmp";
-                        BinaryObject storedFile;
-
-                        var byteArray = Convert.FromBase64String(externalLoginInfo.Picture);
-
-                        using (CurrentUnitOfWork.SetTenantId(null))
-                        {
-                            storedFile = new BinaryObject(null, byteArray, contentType, fileName);
-                            if (userExist.ProfilePictureId.HasValue)
-                                await _binaryObjectManager.DeleteAsync(userExist.ProfilePictureId.Value);
-                            await _binaryObjectManager.SaveAsync(storedFile);
-                            await CurrentUnitOfWork.SaveChangesAsync();
-                        }
-
-                        userExist.ProfilePictureId = storedFile.Id;
-                        await CurrentUnitOfWork.SaveChangesAsync();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.WarnFormat(ex, "Error on Update External Profile Picture from user {0}", userExist.FullName);
-                }
-
-                return userExist;
+                var user = await GetOrCreateExternalUserAsync(externalLoginInfo);
+                await SaveExternalProfilePictureAsync(user, externalLoginInfo);
+                return user;
             }
             catch (Exception ex)
             {
                 Logger.ErrorFormat(ex, "Error on RegisterExternalUserAsync {0}", externalLoginInfo.EmailAddress);
                 throw;
+            }
+        }
+
+        private async Task<User> GetOrCreateExternalUserAsync(ExternalAuthUserInfo externalLoginInfo)
+        {
+            string username;
+            using (var providerManager = _iocManager.ResolveAsDisposable<DefaultExternalLoginInfoManager>())
+            {
+                username = providerManager.Object.GetUserNameFromExternalAuthUserInfo(externalLoginInfo);
+            }
+
+            var randomPassword = Authorization.Users.User.CreateRandomPassword();
+
+            var userExist = await _userManager.FindByNameOrEmailAsync(username);
+            if (userExist == null)
+                userExist = await _userManager.FindByNameOrEmailAsync(externalLoginInfo.EmailAddress);
+
+            if (userExist == null)
+                return await CreateNewExternalUserAsync(externalLoginInfo, username, randomPassword);
+
+            return await UpdateExistingExternalUserAsync(externalLoginInfo, username, userExist);
+        }
+
+        private async Task<User> CreateNewExternalUserAsync(ExternalAuthUserInfo externalLoginInfo, string username, string randomPassword)
+        {
+            Logger.DebugFormat("RegisterExternalUser Create {0}:{1} ", username, externalLoginInfo.EmailAddress);
+            var user = new User
+            {
+                TenantId = AbpSession.TenantId,
+                UserName = username,
+                EmailAddress = externalLoginInfo.EmailAddress,
+                Name = externalLoginInfo.Name.Split(' ')[0],
+                Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1],
+            };
+
+            user.Password = _passwordHasher.HashPassword(user, randomPassword);
+            user.AuthenticationSource = externalLoginInfo.Provider;
+            user.ExternalAuthProviderformation = externalLoginInfo.Provider;
+            user.IsActive = true;
+            user.IsTwoFactorEnabled = false;
+            user.IsEmailConfirmed = true;
+            user.IsLockoutEnabled = false;
+            user.IsDeleted = false;
+            user.TenantId = AbpSession?.TenantId;
+
+            user.SetNormalizedNames();
+
+            user.Logins = new List<UserLogin>
+            {
+                new UserLogin
+                    {
+                        LoginProvider = externalLoginInfo.Provider,
+                        ProviderKey = externalLoginInfo.ProviderKey,
+                        TenantId = user.TenantId
+                    }
+            };
+
+            if (user.Roles == null)
+            {
+                user.Roles = new List<UserRole>();
+                foreach (var defaultRole in _roleManager.Roles.Where(r => r.TenantId == user.TenantId && r.IsDefault).ToList())
+                {
+                    user.Roles.Add(new UserRole(AbpSession?.TenantId, user.Id, defaultRole.Id));
+                }
+            }
+
+            var result = await _userManager.CreateAsync(user);
+
+            if (!result.Succeeded && result.Errors.Any())
+            {
+                throw new UserFriendlyException(Convert.ToInt32(result.Errors.First().Code), result.Errors.First().Description);
+            }
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+            await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(user.ToUserIdentifier());
+            await NotificationNewUser(user);
+            await WelcomeToTheApplicationAsync(user);
+            return user;
+        }
+
+        private async Task<User> UpdateExistingExternalUserAsync(ExternalAuthUserInfo externalLoginInfo, string username, User userExist)
+        {
+            Logger.DebugFormat("RegisterExternalUser Update {0}:{1} ", username, externalLoginInfo.EmailAddress);
+            userExist.EmailAddress = externalLoginInfo.EmailAddress;
+            userExist.Name = externalLoginInfo.Name.Split(' ')[0];
+            userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
+            userExist.UserName = username;
+            userExist.AuthenticationSource = externalLoginInfo.Provider;
+            userExist.ExternalAuthProviderformation = externalLoginInfo.Provider;
+            userExist.IsActive = true;
+            userExist.IsTwoFactorEnabled = false;
+            userExist.IsEmailConfirmed = true;
+            userExist.IsLockoutEnabled = false;
+            userExist.IsDeleted = false;
+            userExist.TenantId = AbpSession?.TenantId;
+
+            userExist.SetNormalizedNames();
+
+            userExist.Logins = new List<UserLogin>
+            {
+                new UserLogin
+                    {
+                        LoginProvider = externalLoginInfo.Provider,
+                        ProviderKey = externalLoginInfo.ProviderKey,
+                        TenantId = userExist.TenantId
+                    }
+            };
+
+            if (userExist.Roles == null)
+            {
+                userExist.Roles = new List<UserRole>();
+                foreach (var defaultRole in _roleManager.Roles.Where(r => r.TenantId == userExist.TenantId && r.IsDefault).ToList())
+                {
+                    if (!await _userManager.IsInRoleAsync(userExist, defaultRole.NormalizedName))
+                        userExist.Roles.Add(new UserRole(AbpSession?.TenantId, userExist.Id, defaultRole.Id));
+                }
+            }
+
+            var result = await _userManager.UpdateWithValidateAsync(userExist);
+
+            if (!result.Succeeded && result.Errors.Any())
+            {
+                throw new UserFriendlyException(Convert.ToInt32(result.Errors.First().Code), result.Errors.First().Description);
+            }
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+            await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(userExist.ToUserIdentifier());
+            await NotificationNewUser(userExist);
+            await WelcomeToTheApplicationAsync(userExist);
+            return userExist;
+        }
+
+        private async Task SaveExternalProfilePictureAsync(User userExist, ExternalAuthUserInfo externalLoginInfo)
+        {
+            if (externalLoginInfo.Picture.IsNullOrEmpty())
+                return;
+
+            try
+            {
+                var contentType = ".bmp";
+                var fileName = $"{Guid.NewGuid()}.bmp";
+                BinaryObject storedFile;
+
+                var byteArray = Convert.FromBase64String(externalLoginInfo.Picture);
+
+                using (CurrentUnitOfWork.SetTenantId(null))
+                {
+                    storedFile = new BinaryObject(null, byteArray, contentType, fileName);
+                    if (userExist.ProfilePictureId.HasValue)
+                        await _binaryObjectManager.DeleteAsync(userExist.ProfilePictureId.Value);
+                    await _binaryObjectManager.SaveAsync(storedFile);
+                    await CurrentUnitOfWork.SaveChangesAsync();
+                }
+
+                userExist.ProfilePictureId = storedFile.Id;
+                await CurrentUnitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat(ex, "Error on Update External Profile Picture from user {0}", userExist.FullName);
             }
         }
 

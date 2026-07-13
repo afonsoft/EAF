@@ -106,6 +106,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(1).Debug("NullKeyVaultManager : NotImplementedException");
+            manager.ShouldNotBeNull();
         }
 
         [Fact]
@@ -119,6 +120,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(2).Debug("NullKeyVaultManager : NotImplementedException"); // Uma para GetKeyValuesAsync e uma para GetKeyValues
+            manager.ShouldNotBeNull();
         }
 
         #endregion
@@ -198,6 +200,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(1).Debug("NullKeyVaultManager : NotImplementedException");
+            manager.ShouldNotBeNull();
         }
 
         [Fact]
@@ -211,6 +214,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(2).Debug("NullKeyVaultManager : NotImplementedException"); // Uma para GetValueAsync e uma para GetValue
+            manager.ShouldNotBeNull();
         }
 
         #endregion
@@ -304,6 +308,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(1).Debug("NullKeyVaultManager : NotImplementedException");
+            manager.ShouldNotBeNull();
         }
 
         [Fact]
@@ -317,6 +322,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(2).Debug("NullKeyVaultManager : NotImplementedException"); // Uma para SetValueAsync e uma para SetValue
+            manager.ShouldNotBeNull();
         }
 
         #endregion
@@ -493,6 +499,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(3).Debug("NullKeyVaultManager : NotImplementedException");
+            manager.ShouldNotBeNull();
         }
 
         [Fact]
@@ -508,6 +515,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(3).Debug("NullKeyVaultManager : NotImplementedException");
+            manager.ShouldNotBeNull();
         }
 
         [Fact]
@@ -523,6 +531,7 @@ namespace Eaf.KeyVault.Tests
 
             // Então
             _mockLogger.Received(3).Debug("NullKeyVaultManager : NotImplementedException");
+            manager.ShouldNotBeNull();
         }
 
         #endregion

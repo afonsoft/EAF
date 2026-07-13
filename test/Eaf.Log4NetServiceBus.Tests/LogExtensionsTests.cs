@@ -22,6 +22,7 @@ namespace Eaf.Log4NetServiceBus.Tests
 
             // Assert
             logger.Received(1).Debug(message);
+            logger.ShouldNotBeNull();
         }
 
         [Fact]
@@ -52,6 +53,7 @@ namespace Eaf.Log4NetServiceBus.Tests
 
             // Assert
             logger.Received(1).Error(message);
+            logger.ShouldNotBeNull();
         }
 
         [Fact]
@@ -82,6 +84,7 @@ namespace Eaf.Log4NetServiceBus.Tests
 
             // Assert
             logger.Received(1).Info(message);
+            logger.ShouldNotBeNull();
         }
 
         [Fact]
@@ -112,6 +115,7 @@ namespace Eaf.Log4NetServiceBus.Tests
 
             // Assert
             logger.Received(1).Warn(message);
+            logger.ShouldNotBeNull();
         }
 
         [Fact]
@@ -166,6 +170,7 @@ namespace Eaf.Log4NetServiceBus.Tests
 
             // Assert
             logger.Received(1).Info(message);
+            logger.ShouldNotBeNull();
         }
     }
 }

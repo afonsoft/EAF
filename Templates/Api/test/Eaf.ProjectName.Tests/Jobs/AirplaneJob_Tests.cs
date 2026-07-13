@@ -20,7 +20,7 @@ namespace Eaf.ProjectName.Tests.Jobs
             // Dado (Given)
             
             // Quando (When)
-            await _airplaneJob.StartProcess();
+            await Should.NotThrowAsync(async () => await _airplaneJob.StartProcess());
             
             // Então (Then)
             // Job deve executar sem lançar exceção
