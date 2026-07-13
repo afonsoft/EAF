@@ -38,49 +38,48 @@ namespace Eaf.Middleware.Core.Authentication.External.Microsoft
         {
             ExternalAuthUserInfo externalAuthUserInfo;
             using var client = _httpClientFactory.CreateClient("ExternalAuth");
-            {
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
-                client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-                client.Timeout = TimeSpan.FromSeconds(30.0);
-                client.MaxResponseContentBufferSize = 10485760L;
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+            client.Timeout = TimeSpan.FromSeconds(30.0);
+            client.MaxResponseContentBufferSize = 10485760L;
 
-                HttpResponseMessage httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, MicrosoftAccountDefaults.UserInformationEndpoint)
+            HttpResponseMessage httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, MicrosoftAccountDefaults.UserInformationEndpoint)
+            {
+                Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
+            });
+
+            httpResponseMessage.EnsureSuccessStatusCode();
+            JObject user = JObject.Parse(await httpResponseMessage.Content.ReadAsStringAsync());
+            externalAuthUserInfo = new ExternalAuthUserInfo()
+            {
+                Name = MicrosoftAccountHelper.GetDisplayName(user),
+                EmailAddress = MicrosoftAccountHelper.GetEmail(user),
+                Surname = MicrosoftAccountHelper.GetSurname(user),
+                Provider = "Microsoft",
+                ProviderKey = MicrosoftAccountHelper.GetId(user),
+                AccessCode = accessCode,
+                Object = user,
+            };
+
+            try
+            {
+                httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, MicrosoftAccountDefaults.UserInformationEndpoint + "/photo/$value")
                 {
                     Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
                 });
-
-                httpResponseMessage.EnsureSuccessStatusCode();
-                JObject user = JObject.Parse(await httpResponseMessage.Content.ReadAsStringAsync());
-                externalAuthUserInfo = new ExternalAuthUserInfo()
+                if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    Name = MicrosoftAccountHelper.GetDisplayName(user),
-                    EmailAddress = MicrosoftAccountHelper.GetEmail(user),
-                    Surname = MicrosoftAccountHelper.GetSurname(user),
-                    Provider = "Microsoft",
-                    ProviderKey = MicrosoftAccountHelper.GetId(user),
-                    AccessCode = accessCode,
-                    Object = user,
-                };
-
-                try
-                {
-                    httpResponseMessage = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, MicrosoftAccountDefaults.UserInformationEndpoint + "/photo/$value")
-                    {
-                        Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessCode) }
-                    });
-                    if (httpResponseMessage.IsSuccessStatusCode)
-                    {
-                        var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
-                        byte[] bytes = new byte[stream.Length];
-                        int bytesRead = await stream.ReadAsync(bytes, 0, bytes.Length);
-                        externalAuthUserInfo.Picture = Convert.ToBase64String(bytes, 0, bytesRead);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.DebugFormat(ex, "Error on retrive Profile Picture {0}", externalAuthUserInfo.EmailAddress);
+                    var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
+                    byte[] bytes = new byte[stream.Length];
+                    int bytesRead = await stream.ReadAsync(bytes, 0, bytes.Length);
+                    externalAuthUserInfo.Picture = Convert.ToBase64String(bytes, 0, bytesRead);
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.DebugFormat(ex, "Error on retrive Profile Picture {0}", externalAuthUserInfo.EmailAddress);
+            }
+
             return externalAuthUserInfo;
         }
     }

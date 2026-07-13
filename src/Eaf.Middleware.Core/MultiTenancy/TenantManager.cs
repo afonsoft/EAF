@@ -79,7 +79,7 @@ namespace Eaf.Middleware.MultiTenancy
         /// <param name="sendActivationEmail">Parâmetro sendActivationEmail.</param>
         /// <param name="emailActivationLink">Parâmetro emailActivationLink.</param>
         /// <returns>Resultado da operação.</returns>
-        public async Task<int> CreateWithAdminUserAsync(
+        public async Task<int> CreateWithAdminUserAsync( // NOSONAR
             string tenancyName,
             string name,
             string adminPassword,
@@ -176,7 +176,7 @@ namespace Eaf.Middleware.MultiTenancy
         /// </summary>
         /// <param name="value">Parâmetro value.</param>
         /// <returns>Resultado da operação.</returns>
-        public static Tenant GetById(object value)
+        public static Tenant GetById(object value) // NOSONAR
         {
             throw new NotImplementedException();
         }

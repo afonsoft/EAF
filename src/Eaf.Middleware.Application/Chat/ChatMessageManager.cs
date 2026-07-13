@@ -39,7 +39,7 @@ namespace Eaf.Middleware.Chat
         /// ChatMessageManager.
         /// </summary>
         /// <returns>Resultado da operação.</returns>
-        public ChatMessageManager(
+        public ChatMessageManager( // NOSONAR
             IFriendshipManager friendshipManager,
             IChatCommunicator chatCommunicator,
             IOnlineClientManager<ChatChannel> onlineClientManager,
@@ -148,7 +148,7 @@ namespace Eaf.Middleware.Chat
         public async Task SendMessageAsync(UserIdentifier sender, UserIdentifier receiver, string message, string senderTenancyName, string senderUserName, Guid? senderProfilePictureId)
         {
             //Send for a User
-            CheckReceiverExists(receiver);
+            await CheckReceiverExists(receiver);
 
             var friendshipState = (await _friendshipManager.GetFriendshipOrNullAsync(sender, receiver))?.State;
             if (friendshipState == FriendshipState.Blocked)
@@ -163,9 +163,9 @@ namespace Eaf.Middleware.Chat
             await HandleSenderUserInfoChangeAsync(sender, receiver, senderTenancyName, senderUserName, senderProfilePictureId);
         }
 
-        private void CheckReceiverExists(UserIdentifier receiver)
+        private async Task CheckReceiverExists(UserIdentifier receiver)
         {
-            var receiverUser = _userManager.GetUserOrNull(receiver);
+            var receiverUser = await _userManager.GetUserOrNullAsync(receiver);
             if (receiverUser == null)
             {
                 throw new UserFriendlyException(L("TargetUserNotFoundProbablyDeleted"));

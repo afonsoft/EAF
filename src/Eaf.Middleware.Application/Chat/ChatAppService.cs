@@ -71,37 +71,36 @@ namespace Eaf.Middleware.Chat
                 );
             }
 
-            if (userIdentifier.TenantId != null && userIdentifier.TenantId.HasValue)
+            if (userIdentifier.TenantId != null && userIdentifier.TenantId.HasValue &&
+                await FeatureChecker.IsEnabledAsync(userIdentifier.TenantId.Value, AppFeatures.GroupChatFeature))
             {
-                if (await FeatureChecker.IsEnabledAsync(userIdentifier.TenantId.Value, AppFeatures.GroupChatFeature))
+                friends.Insert(0, new FriendshipDto
                 {
-                    friends.Insert(0, new FriendshipDto
-                    {
-                        GroupId = 1,
-                        FriendUserId = 0,
-                        FriendTenancyName = "Default",
-                        FriendTenantId = userIdentifier.TenantId,
-                        IsOnline = true,
-                        State = Friendships.FriendshipState.Accepted,
-                        Email = L("GroupEmail"),
-                        FriendUserName = L("Group"),
-                        Name = L("Group"),
-                        Surname = "",
-                        UnreadMessageCount = await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
-                                                                   cm.UserId == userIdentifier.UserId &&
-                                                                   cm.TenantId == userIdentifier.TenantId &&
-                                                                   cm.TargetUserId == 0 &&
-                                                                   cm.TargetTenantId == userIdentifier.TenantId &&
-                                                                   cm.Side == ChatSide.Receiver) +
-                                             await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
-                                                                   cm.UserId == 0 &&
-                                                                   cm.TenantId == userIdentifier.TenantId &&
-                                                                   cm.TargetUserId == userIdentifier.UserId &&
-                                                                   cm.TargetTenantId == userIdentifier.TenantId &&
-                                                                   cm.Side == ChatSide.Receiver)
-                    });
-                }
+                    GroupId = 1,
+                    FriendUserId = 0,
+                    FriendTenancyName = "Default",
+                    FriendTenantId = userIdentifier.TenantId,
+                    IsOnline = true,
+                    State = Friendships.FriendshipState.Accepted,
+                    Email = L("GroupEmail"),
+                    FriendUserName = L("Group"),
+                    Name = L("Group"),
+                    Surname = "",
+                    UnreadMessageCount = await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                                                               cm.UserId == userIdentifier.UserId &&
+                                                               cm.TenantId == userIdentifier.TenantId &&
+                                                               cm.TargetUserId == 0 &&
+                                                               cm.TargetTenantId == userIdentifier.TenantId &&
+                                                               cm.Side == ChatSide.Receiver) +
+                                         await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                                                               cm.UserId == 0 &&
+                                                               cm.TenantId == userIdentifier.TenantId &&
+                                                               cm.TargetUserId == userIdentifier.UserId &&
+                                                               cm.TargetTenantId == userIdentifier.TenantId &&
+                                                               cm.Side == ChatSide.Receiver)
+                });
             }
+
             return new GetUserChatFriendsWithSettingsOutput
             {
                 Friends = friends,

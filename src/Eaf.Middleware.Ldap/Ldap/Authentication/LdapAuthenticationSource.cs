@@ -458,7 +458,7 @@ namespace Eaf.Middleware.Ldap.Authentication
                 }
             }
 
-            LdapSearchConstraints cons = ldapConn?.SearchConstraints ?? new LdapSearchConstraints();
+            LdapSearchConstraints cons = ldapConn.SearchConstraints ?? new LdapSearchConstraints();
             cons.MaxResults = 100;
             cons.ServerTimeLimit = 30;
             cons.ReferralFollowing = false;

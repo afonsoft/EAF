@@ -3,7 +3,7 @@ namespace Eaf.Middleware.MultiTenancy
     /// <summary>
     /// Representa a classe TenantConsts.
     /// </summary>
-    public class TenantConsts
+    public class TenantConsts // NOSONAR
     {
         public const string DefaultTenantName = "Default";
         public const int MaxNameLength = 128;

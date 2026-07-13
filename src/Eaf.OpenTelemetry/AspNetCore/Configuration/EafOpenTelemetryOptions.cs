@@ -125,18 +125,7 @@ namespace Eaf.AspNetCore.Configuration
             }
         }
 
-        private ExportProcessorType _otlpExportProcessorType = ExportProcessorType.Batch;
-        public ExportProcessorType OtlpExportProcessorType
-        {
-            get
-            {
-                return _otlpExportProcessorType;
-            }
-            set
-            {
-                _otlpExportProcessorType = value;
-            }
-        }
+        public ExportProcessorType OtlpExportProcessorType { get; set; } = ExportProcessorType.Batch;
 
         private OtlpExportProtocol _otlpProtocol = OtlpExportProtocol.HttpProtobuf;
         public OtlpExportProtocol OtlpProtocol

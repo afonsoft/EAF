@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace Eaf.ProjectName.WorkerService
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {

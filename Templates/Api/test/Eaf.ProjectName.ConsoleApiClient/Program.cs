@@ -15,9 +15,9 @@ namespace Eaf.ProjectName.ConsoleApiClient
      * Enable IdentityServer from appsettings.json of Web.Host/Web.Mvc project first.
      */
 
-    internal class Program
+    internal static class Program
     {
-        private const string ServerUrlBase = "https://localhost:8001/";
+        private const string ServerUrlBase = "https://localhost:8001/"; // NOSONAR
 
         // If you have changed "Configuration.MultiTenancy.TenantIdResolveKey" in your web app, use the same value here.
         private const string TenantIdResolveKey = "Eaf.TenantId";

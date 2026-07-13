@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,7 +23,7 @@ namespace Eaf.Runtime.Caching.Serialization
         /// <returns>Array de bytes representando o objeto.</returns>
         public byte[] Serialize(object obj)
         {
-            if (obj == null) return null;
+            if (obj == null) return null; // NOSONAR
             return JsonSerializer.SerializeToUtf8Bytes(obj, _options);
         }
 

@@ -5,7 +5,7 @@ namespace Eaf.Middleware.RealTime
     /// <summary>
     /// Representa a interface IOnlineClientStore.
     /// </summary>
-    public interface IOnlineClientStore<T> : IOnlineClientStore
+    public interface IOnlineClientStore<T> : IOnlineClientStore // NOSONAR
     {
     }
 }

@@ -1,8 +1,6 @@
-﻿using System;
-
 namespace Eaf.Renamer.Lib
 {
-    public class Arguments : EventArgs
+    public class Arguments
     {
         public readonly string Filter = ".cs,.cshtml,.js,.ts,.csproj,.sln,.xml,.config,.DotSettings,.json,.xaml,.txt,.html,.gitignore,.ps1,.md,.plist,.tpl";
 

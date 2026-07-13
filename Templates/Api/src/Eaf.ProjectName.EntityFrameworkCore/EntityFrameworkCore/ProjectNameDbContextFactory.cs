@@ -31,7 +31,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public static IConfigurationRoot GetConfigurationRoot()
         {
             var path = CalculateContentRootFolder();
-            return _configurationCache.GetOrAdd(path, _ => buildConfiguration(path));
+            return _configurationCache.GetOrAdd(path, p => buildConfiguration(p));
         }
 
         private static IConfigurationRoot buildConfiguration(string path)
@@ -44,7 +44,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
             var coreAssemblyDirectoryPath = Path.GetDirectoryName(typeof(ProjectNameDbContextFactory).Assembly.Location);
             if (coreAssemblyDirectoryPath == null)
             {
-                throw new ArgumentNullException($"Could not find location of Suite.Docs.Core assembly!");
+                throw new InvalidOperationException($"Could not find location of Suite.Docs.Core assembly!");
             }
 
             var directoryInfo = new DirectoryInfo(coreAssemblyDirectoryPath);
@@ -52,7 +52,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
             while (!DirectoryContains(directoryInfo.FullName, "appsettings.json"))
             {
                 if (directoryInfo.Parent == null)
-                    throw new ArgumentNullException($"Could not find content root folder!");
+                    throw new InvalidOperationException($"Could not find content root folder!");
 
                 directoryInfo = directoryInfo.Parent;
             }

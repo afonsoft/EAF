@@ -1,6 +1,7 @@
 using Abp.Dependency;
 using Abp.Extensions;
 using System.Linq;
+using System.Text;
 
 namespace Eaf.Middleware.Auditing
 {
@@ -38,7 +39,7 @@ namespace Eaf.Middleware.Auditing
         private static string StripGenericNamespace(string serviceName)
         {
             var serviceNameParts = serviceName.Split('[').Where(s => !s.IsNullOrEmpty()).ToList();
-            var genericServiceName = "";
+            var genericServiceName = new StringBuilder();
             var openBracketCount = 0;
 
             for (var i = 0; i < serviceNameParts.Count; i++)
@@ -46,20 +47,20 @@ namespace Eaf.Middleware.Auditing
                 var serviceNamePart = serviceNameParts[i];
                 if (serviceNamePart.Contains("`"))
                 {
-                    genericServiceName += GetTextAfterLastDot(serviceNamePart[..serviceNamePart.IndexOf('`')]) + "<";
+                    genericServiceName.Append(GetTextAfterLastDot(serviceNamePart[..serviceNamePart.IndexOf('`')])).Append('<');
                     openBracketCount++;
                 }
 
                 if (serviceNamePart.Contains(","))
                 {
-                    genericServiceName += GetTextAfterLastDot(serviceNamePart[..serviceNamePart.IndexOf(',')]);
+                    genericServiceName.Append(GetTextAfterLastDot(serviceNamePart[..serviceNamePart.IndexOf(',')]));
                     if (i + 1 < serviceNameParts.Count && serviceNameParts[i + 1].Contains(","))
                     {
-                        genericServiceName += ", ";
+                        genericServiceName.Append(", ");
                     }
                     else
                     {
-                        genericServiceName += ">";
+                        genericServiceName.Append('>');
                         openBracketCount--;
                     }
                 }
@@ -67,10 +68,10 @@ namespace Eaf.Middleware.Auditing
 
             for (int i = 0; i < openBracketCount; i++)
             {
-                genericServiceName += ">";
+                genericServiceName.Append('>');
             }
 
-            return genericServiceName;
+            return genericServiceName.ToString();
         }
     }
 }

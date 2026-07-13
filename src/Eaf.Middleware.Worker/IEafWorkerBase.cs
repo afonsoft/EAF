@@ -24,9 +24,9 @@ namespace Eaf
         IEventBus EventBus { get; set; }
 
         /// <summary>
-        /// Define o localization manager.
+        /// Obtém ou define o localization manager.
         /// </summary>
-        ILocalizationManager LocalizationManager { set; }
+        ILocalizationManager LocalizationManager { get; set; }
 
         /// <summary>
         /// Obtém ou define o object mapper.

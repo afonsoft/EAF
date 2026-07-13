@@ -9,7 +9,7 @@ namespace Eaf.Middleware.Authorization.Users.Dto
     /// <summary>
     /// Representa a classe UserListDto.
     /// </summary>
-    public class UserListDto : FullAuditedEntityDto<long>, IPassivable, IHasCreationTime
+    public class UserListDto : FullAuditedEntityDto<long>, IPassivable
     {
         /// <summary>
         /// Obtém ou define AuthenticationSource.

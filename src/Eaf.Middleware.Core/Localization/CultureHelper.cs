@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace Eaf.Middleware.Localization
 {
@@ -11,9 +12,9 @@ namespace Eaf.Middleware.Localization
         /// <summary>
         /// GetCultures.
         /// </summary>
-        public static CultureInfo[] AllCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+        public static CultureInfo[] AllCultures { get; } = CultureInfo.GetCultures(CultureTypes.AllCultures);
 
-        public static bool UsingLunarCalendar = CultureInfo.CurrentUICulture.DateTimeFormat.Calendar.AlgorithmType == CalendarAlgorithmType.LunarCalendar;
+        public static bool UsingLunarCalendar { get; } = CultureInfo.CurrentUICulture.DateTimeFormat.Calendar.AlgorithmType == CalendarAlgorithmType.LunarCalendar;
         public static bool IsRtl => CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace Eaf.Middleware.Localization
             {
                 var cultureInfo = CultureInfo.GetCultureInfo(name);
 
-                if (!Array.Exists(AllCultures, c => c.Name.Equals(cultureInfo.Name, StringComparison.OrdinalIgnoreCase)))
+                if (!AllCultures.Any(c => c.Name.Equals(cultureInfo.Name, StringComparison.OrdinalIgnoreCase)))
                 {
                     return CultureInfo.CurrentCulture;
                 }

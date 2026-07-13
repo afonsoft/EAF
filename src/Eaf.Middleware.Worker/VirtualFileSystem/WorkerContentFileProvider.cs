@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Primitives;
+using System;
 using System.Collections.Generic;
 
 namespace Eaf.Middleware.Worker.VirtualFileSystem
@@ -13,9 +14,9 @@ namespace Eaf.Middleware.Worker.VirtualFileSystem
     /// </summary>
     public class WorkerContentFileProvider : IWorkerContentFileProvider, ISingletonDependency
     {
-        private readonly IFileProvider _fileProvider;
+        private readonly Lazy<IFileProvider> _fileProvider;
         private readonly IHostEnvironment _hostingEnvironment;
-        private string _rootPath = "/";
+        private readonly string _rootPath = "/";
 
         /// <summary>
         /// WorkerContentFileProvider.
@@ -27,7 +28,7 @@ namespace Eaf.Middleware.Worker.VirtualFileSystem
         {
             _hostingEnvironment = hostingEnvironment;
 
-            _fileProvider = CreateFileProvider();
+            _fileProvider = new Lazy<IFileProvider>(CreateFileProvider);
         }
 
         /// <summary>
@@ -44,13 +45,13 @@ namespace Eaf.Middleware.Worker.VirtualFileSystem
                 return new NotFoundFileInfo(subpath);
             }
 
-            var fileInfo = _fileProvider.GetFileInfo(subpath);
+            var fileInfo = _fileProvider.Value.GetFileInfo(subpath);
             if (fileInfo.Exists)
             {
                 return fileInfo;
             }
 
-            return _fileProvider.GetFileInfo(_rootPath + subpath);
+            return _fileProvider.Value.GetFileInfo(_rootPath + subpath);
         }
 
         /// <summary>
@@ -67,13 +68,13 @@ namespace Eaf.Middleware.Worker.VirtualFileSystem
                 return NotFoundDirectoryContents.Singleton;
             }
 
-            var directory = _fileProvider.GetDirectoryContents(subpath);
+            var directory = _fileProvider.Value.GetDirectoryContents(subpath);
             if (directory.Exists)
             {
                 return directory;
             }
 
-            return _fileProvider.GetDirectoryContents(_rootPath + subpath);
+            return _fileProvider.Value.GetDirectoryContents(_rootPath + subpath);
         }
 
         /// <summary>
@@ -86,8 +87,8 @@ namespace Eaf.Middleware.Worker.VirtualFileSystem
             return new CompositeChangeToken(
                 new[]
                 {
-                    _fileProvider.Watch(_rootPath + filter),
-                    _fileProvider.Watch(filter)
+                    _fileProvider.Value.Watch(_rootPath + filter),
+                    _fileProvider.Value.Watch(filter)
                 }
             );
         }

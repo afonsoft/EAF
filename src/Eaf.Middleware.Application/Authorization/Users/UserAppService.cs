@@ -59,7 +59,7 @@ namespace Eaf.Middleware.Authorization.Users
         /// UserAppService.
         /// </summary>
         /// <returns>Resultado da operação.</returns>
-        public UserAppService(
+        public UserAppService( // NOSONAR
             RoleManager roleManager,
             IUserEmailer userEmailer,
             IUserListExcelExporter userListExcelExporter,

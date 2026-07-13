@@ -26,15 +26,10 @@ namespace Eaf.ProjectName.EntityHistory
                 };
             }
 
-            var entityHistoryEnabledEntities = new List<string>();
-
-            foreach (var type in EntityHistoryHelper.TrackedTypes)
-            {
-                if (_eafStartupConfiguration.EntityHistory.Selectors.Any(s => s.Predicate(type)))
-                {
-                    entityHistoryEnabledEntities.Add(type.FullName);
-                }
-            }
+            var entityHistoryEnabledEntities = EntityHistoryHelper.TrackedTypes
+                .Where(type => _eafStartupConfiguration.EntityHistory.Selectors.Any(s => s.Predicate(type)))
+                .Select(type => type.FullName)
+                .ToList();
 
             return new Dictionary<string, object>
             {

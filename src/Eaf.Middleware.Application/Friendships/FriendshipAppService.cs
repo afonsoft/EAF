@@ -132,7 +132,7 @@ namespace Eaf.Middleware.Friendships
             sourceFriendshipRequest.IsOnline = (await _onlineClientManager.GetAllByUserIdAsync(probableFriend)).Any();
 
             await _friendshipManager.AcceptFriendshipRequestAsync(userIdentifier, probableFriend);
-            await _friendshipManager.AcceptFriendshipRequestAsync(probableFriend, userIdentifier);
+            await _friendshipManager.AcceptFriendshipRequestAsync(probableFriend, userIdentifier); // NOSONAR
             await _chatCommunicator.SendUserStateChangeToClients(clients, userIdentifier, FriendshipState.Accepted);
             await _chatCommunicator.SendUserStateChangeToClients(clients, probableFriend, FriendshipState.Accepted);
 

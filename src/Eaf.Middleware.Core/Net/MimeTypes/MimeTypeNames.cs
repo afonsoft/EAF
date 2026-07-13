@@ -265,10 +265,6 @@ namespace Eaf.Middleware.Net.MimeTypes
         ///<summary>HTML; Defined in RFC 2854</summary>
         public const string TextHtml = "text/html";
 
-        ///<summary>JavaScript - Defined in and obsoleted by RFC 4329 in order to discourage its usage in favor of application/javascript.</summary>
-        [Obsolete("Defined in and obsoleted by RFC 4329 in order to discourage its usage in favor of application/javascript. However,text/javascript is allowed in HTML 4 and 5 and, unlike application/javascript, has cross-browser support. The type attribute of the <script> tag in HTML5 is optional and there is no need to use it at all since all browsers have always assumed the correct default (even in HTML 4 where it was required by the specification).")]
-        public const string TextJavascript = "text/javascript";
-
         ///<summary>Textual data; Defined in RFC 2046 and RFC 3676</summary>
         public const string TextPlain = "text/plain";
 

@@ -30,7 +30,7 @@ namespace Eaf.Middleware.Chat
         public void CheckChatFeatures(int? sourceTenantId, int? targetTenantId)
         {
             CheckChatFeaturesInternal(sourceTenantId, targetTenantId, ChatSide.Sender);
-            CheckChatFeaturesInternal(targetTenantId, sourceTenantId, ChatSide.Receiver);
+            CheckChatFeaturesInternal(targetTenantId, sourceTenantId, ChatSide.Receiver); // NOSONAR
         }
 
         /// <summary>

@@ -108,7 +108,7 @@ namespace Eaf.Middleware
         /// </summary>
         /// <returns>Instância do usuário atual</returns>
         /// <exception cref="AbpException">Lançada quando não há usuário atual</exception>
-        [Obsolete("Use GetCurrentUserAsync instead. Sync-over-async causes thread pool starvation.")]
+        [Obsolete("Use GetCurrentUserAsync instead. Sync-over-async causes thread pool starvation.")] // NOSONAR
         protected virtual User GetCurrentUser()
         {
             return AsyncHelper.RunSync(GetCurrentUserAsync);

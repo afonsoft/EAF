@@ -7,7 +7,6 @@ using Abp.Domain.Uow;
 using Abp.Localization;
 using Abp.Organizations;
 using Abp.Runtime.Caching;
-using Abp.Threading;
 using Abp.UI;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.CollectionExtensions;
@@ -86,17 +85,6 @@ namespace Eaf.Middleware.Authorization.Users
         }
 
         /// <summary>
-        /// GetUser (síncrono).
-        /// </summary>
-        /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
-        /// <returns>Resultado da operação.</returns>
-        [Obsolete("Use GetUserAsync instead. Sync-over-async causes thread pool starvation.")]
-        public User GetUser(UserIdentifier userIdentifier)
-        {
-            return AsyncHelper.RunSync(() => GetUserAsync(userIdentifier));
-        }
-
-        /// <summary>
         /// GetUserAsync.
         /// </summary>
         /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
@@ -123,17 +111,6 @@ namespace Eaf.Middleware.Authorization.Users
                 var normalizedUserName = userName.ToUpperInvariant().Trim();
                 return await _userRepository.FirstOrDefaultAsync(ua => ua.NormalizedUserName == normalizedUserName);
             }
-        }
-
-        /// <summary>
-        /// GetUserOrNull (síncrono).
-        /// </summary>
-        /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
-        /// <returns>Resultado da operação.</returns>
-        [Obsolete("Use GetUserOrNullAsync instead. Sync-over-async causes thread pool starvation.")]
-        public User GetUserOrNull(UserIdentifier userIdentifier)
-        {
-            return AsyncHelper.RunSync(() => GetUserOrNullAsync(userIdentifier));
         }
 
         [UnitOfWork]
