@@ -102,6 +102,9 @@ namespace Eaf.Middleware.Web.Controllers
         /// <returns>Resultado da operação.</returns>
         public async Task<FileResult> GetProfilePictureByUser(long userId)
         {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
             var output = await _profileAppService.GetProfilePictureByUser(userId);
             if (output.ProfilePicture.IsNullOrEmpty())
             {

@@ -19,6 +19,7 @@
 		<text name="Users" value="Usuários" />
 		<text name="Create" value="Criar" />
 		<text name="InvalidUserNameOrPassword" value="Usuário ou senha Inválidos" />
+		<text name="InvalidRequest" value="Requisição inválida" />
 		<text name="ThereIsNoTenantDefinedWithName{0}" value="Não existe nenhum canal com o nome {0}" />
 		<text name="TenantIsNotActive" value="Canal {0} não está ativo." />
 		<text name="UserIsNotActiveAndCanNotLogin" value="Usuário {0} não está ativo e não pode logar." />

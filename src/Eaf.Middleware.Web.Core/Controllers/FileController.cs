@@ -45,6 +45,9 @@ namespace Eaf.Middleware.Web.Controllers
         [DisableAuditing]
         public async Task<ActionResult> DownloadTempFile(FileDto file)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var fileBytes = _tempFileCacheManager.GetFile(file.FileToken);
             if (fileBytes == null)
             {
@@ -70,6 +73,9 @@ namespace Eaf.Middleware.Web.Controllers
         [DisableAuditing]
         public async Task<ActionResult> DownloadBinaryFile(Guid id, string contentType = null, string fileName = null)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             using (CurrentUnitOfWork.SetTenantId(null))
             {
                 var fileObject = await _binaryObjectManager.GetOrNullAsync(id);
