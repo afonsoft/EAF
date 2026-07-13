@@ -95,6 +95,35 @@ namespace Eaf.MiddlewareCore.Tests.Security
             setting1.Equals(setting2).ShouldBeFalse();
         }
 
+        [Fact]
+        public void Dado_SettingComparadoComOutroTipo_Quando_Equals_Entao_DeveRetornarFalse()
+        {
+            var setting = new PasswordComplexitySetting { RequireDigit = true };
+            setting.Equals("not-a-setting").ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_DoisSettingsIguais_Quando_GetHashCode_Entao_DeveRetornarMesmoValor()
+        {
+            var setting1 = new PasswordComplexitySetting
+            {
+                RequireDigit = true,
+                RequireLowercase = true,
+                RequireNonAlphanumeric = false,
+                RequireUppercase = true,
+                RequiredLength = 8
+            };
+            var setting2 = new PasswordComplexitySetting
+            {
+                RequireDigit = true,
+                RequireLowercase = true,
+                RequireNonAlphanumeric = false,
+                RequireUppercase = true,
+                RequiredLength = 8
+            };
+            setting1.GetHashCode().ShouldBe(setting2.GetHashCode());
+        }
+
         #endregion
     }
 }

@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority48-coverage-audit`
+Last session branch: `feature/devin-20260713-priority49-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -9,6 +9,14 @@ Current coverage (after P45): Line 96.2%, Branch 82.3%, Method 99.1%.
 Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1%.
 Current coverage (after P47): Line 96.2%, Branch 82.8%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
 Current coverage (after P48): Line 96.3%, Branch 83.0%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
+Current coverage (after P49): Line 96.3%, Branch 82.9%, Method 99.2% (4393 tests, 4392 passing, 1 skipped). Build warnings: 140.
+
+## P49 gotchas
+- The `main` branch advanced after P48 with commit `c4450a3` (Sonar fixes), adding `SanitizeForLog` in `AbpLoginResultTypeHelper` and `Equals`/`GetHashCode` in `PasswordComplexitySetting`. This temporarily lowered the P49 baseline before new BDD tests recovered the metrics.
+- `PasswordComplexitySetting.GetHashCode` and `Equals(object)` are reachable and should be covered with identical/equivalent instances and cross-type comparisons.
+- `AbpLoginResultTypeHelper.SanitizeForLog` is private and reachable via `CreateExceptionForFailedLoginAttempt`; test `null` input and `\r`/`\n` replacement. The protected `L(string, CultureInfo)` overload can be covered with a `TestableAbpLoginResultTypeHelper` subclass.
+- `EafOpenTelemetryServiceCollectionExtensions` line coverage improved from 90.6% to 98.1% due to test coverage added in previous P42–P48 runs; ensure no `OpenTelemetry` test changes are needed unless new branches are added.
+- `LdapAuthenticationSource` and `MiddlewareWebCoreModule` still contain branches that are infeasible on Linux (real LDAP, Hangfire infrastructure, `??` constructor fallback). Document these as inalcançáveis rather than changing production code.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
