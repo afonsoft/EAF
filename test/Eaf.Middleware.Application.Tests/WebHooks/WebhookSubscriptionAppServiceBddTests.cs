@@ -217,7 +217,7 @@ namespace Eaf.Middleware.Application.Tests.WebHooks
 
             // Então
             subscription.IsActive.ShouldBeTrue();
-            _webhookSubscriptionManager.Received(1).AddOrUpdateSubscription(subscription);
+            await _webhookSubscriptionManager.Received(1).AddOrUpdateSubscriptionAsync(subscription);
         }
 
         [Fact]

@@ -227,12 +227,18 @@ namespace Eaf.Middleware.Tests.Application.Chat
                 var userId = ci.ArgAt<UserIdentifier>(0).UserId;
                 return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
             });
+            userManager.GetUserAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
 
             var friendshipManager = Substitute.For<IFriendshipManager>();
             friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
 
             var tenantCache = Substitute.For<ITenantCache>();
             tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
             chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
@@ -327,12 +333,18 @@ namespace Eaf.Middleware.Tests.Application.Chat
                 var userId = ci.ArgAt<UserIdentifier>(0).UserId;
                 return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
             });
+            userManager.GetUserAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
 
             var friendshipManager = Substitute.For<IFriendshipManager>();
             friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
 
             var tenantCache = Substitute.For<ITenantCache>();
             tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
             chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
@@ -398,12 +410,18 @@ namespace Eaf.Middleware.Tests.Application.Chat
                 var userId = ci.ArgAt<UserIdentifier>(0).UserId;
                 return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
             });
+            userManager.GetUserAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
 
             var friendshipManager = Substitute.For<IFriendshipManager>();
             friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
 
             var tenantCache = Substitute.For<ITenantCache>();
             tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
             chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
@@ -465,6 +483,7 @@ namespace Eaf.Middleware.Tests.Application.Chat
 
             var tenantCache = Substitute.For<ITenantCache>();
             tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
             chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
@@ -525,6 +544,7 @@ namespace Eaf.Middleware.Tests.Application.Chat
 
             var tenantCache = Substitute.For<ITenantCache>();
             tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
             chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);

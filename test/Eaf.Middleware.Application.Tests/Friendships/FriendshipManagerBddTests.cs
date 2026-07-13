@@ -24,10 +24,10 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
                 .Returns(Task.FromResult<Friendship>(friendshipToReturn!));
 
-            repository.Insert(Arg.Any<Friendship>())
-                .Returns(callInfo => callInfo.Arg<Friendship>());
-            repository.Update(Arg.Any<Friendship>())
-                .Returns(callInfo => callInfo.Arg<Friendship>());
+            repository.InsertAsync(Arg.Any<Friendship>())
+                .Returns(callInfo => Task.FromResult(callInfo.Arg<Friendship>()));
+            repository.UpdateAsync(Arg.Any<Friendship>())
+                .Returns(callInfo => Task.FromResult(callInfo.Arg<Friendship>()));
 
             var activeUow = Substitute.For<IActiveUnitOfWork>();
             activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
@@ -66,18 +66,12 @@ namespace Eaf.Middleware.Application.Tests.Friendships
         public async Task Dado_AmizadeValida_Quando_CreateFriendshipAsync_Entao_DeveInserirNoRepositorio()
         {
             var repository = Substitute.For<IRepository<Friendship, long>>();
-            repository.Insert(Arg.Any<Friendship>()).Returns(callInfo => callInfo.Arg<Friendship>());
-            repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
-                .Returns(Task.FromResult<Friendship>(null!));
-            repository.Update(Arg.Any<Friendship>())
-                .Returns(callInfo => callInfo.Arg<Friendship>());
-
             var sut = CriarSut(repository, friendshipToReturn: null);
             var friendship = CriarFriendship(userId: 1, friendUserId: 2);
 
             await sut.CreateFriendshipAsync(friendship);
 
-            repository.Received(1).Insert(Arg.Is<Friendship>(f => f.UserId == 1 && f.FriendUserId == 2));
+            await repository.Received(1).InsertAsync(Arg.Is<Friendship>(f => f.UserId == 1 && f.FriendUserId == 2));
         }
 
         [Fact]
@@ -142,18 +136,12 @@ namespace Eaf.Middleware.Application.Tests.Friendships
         public async Task Dado_Amizade_Quando_UpdateFriendshipAsync_Entao_DeveAtualizarNoRepositorio()
         {
             var repository = Substitute.For<IRepository<Friendship, long>>();
-            repository.Insert(Arg.Any<Friendship>()).Returns(callInfo => callInfo.Arg<Friendship>());
-            repository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Friendship, bool>>>())
-                .Returns(Task.FromResult<Friendship>(null!));
-            repository.Update(Arg.Any<Friendship>())
-                .Returns(callInfo => callInfo.Arg<Friendship>());
-
             var sut = CriarSut(repository, friendshipToReturn: null);
             var friendship = CriarFriendship();
 
             await sut.UpdateFriendshipAsync(friendship);
 
-            repository.Received(1).Update(Arg.Is<Friendship>(f => f.UserId == friendship.UserId));
+            await repository.Received(1).UpdateAsync(Arg.Is<Friendship>(f => f.UserId == friendship.UserId));
         }
 
         [Fact]

@@ -26,6 +26,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Login
         public UserLoginAppServiceBddTests()
         {
             _userLoginAttemptRepository = Substitute.For<IRepository<UserLoginAttempt, long>>();
+            _userLoginAttemptRepository.GetAllAsync().Returns(_ => Task.FromResult(_userLoginAttemptRepository.GetAll()));
             _sut = new UserLoginAppService(_userLoginAttemptRepository);
         }
 

@@ -41,7 +41,7 @@ namespace Eaf.WebHooks
         {
             var subscription = await _webhookSubscriptionManager.GetAsync(input.SubscriptionId);
             subscription.IsActive = input.IsActive;
-            _webhookSubscriptionManager.AddOrUpdateSubscription(subscription);
+            await _webhookSubscriptionManager.AddOrUpdateSubscriptionAsync(subscription);
         }
 
         /// <summary>

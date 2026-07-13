@@ -229,6 +229,7 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             _friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
             _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
             _tenantCache.Get(tenantId).Returns(new TenantCacheItem { TenancyName = "acme" });
+            _tenantCache.GetAsync(tenantId).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var objectMapper = Substitute.For<IObjectMapper>();
             objectMapper.Map<FriendshipDto>(Arg.Any<Friendship>()).Returns(new FriendshipDto { FriendUserId = friendId, FriendUserName = "user100" });
@@ -275,6 +276,7 @@ namespace Eaf.Middleware.Application.Tests.Friendships
 
             _friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
             _tenantCache.Get(tenantId).Returns(new TenantCacheItem { TenancyName = "acme" });
+            _tenantCache.GetAsync(tenantId).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var onlineClient = Substitute.For<IOnlineClient>();
             _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient> { onlineClient });
@@ -380,6 +382,7 @@ namespace Eaf.Middleware.Application.Tests.Friendships
             _friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
             _onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
             _tenantCache.Get(tenantId).Returns(new TenantCacheItem { TenancyName = "acme" });
+            _tenantCache.GetAsync(tenantId).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
 
             var objectMapper = Substitute.For<IObjectMapper>();
             objectMapper.Map<FriendshipDto>(Arg.Any<Friendship>()).Returns(new FriendshipDto { FriendUserId = friendId, FriendUserName = "user100" });

@@ -5,6 +5,7 @@ using Abp.ObjectMapping;
 using Abp.Runtime.Session;
 using Abp.Webhooks;
 using Abp.Webhooks.BackgroundWorker;
+using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.WebHooks;
 using Eaf.Middleware.WebHooks.Dto;
 using NSubstitute;
@@ -212,7 +213,7 @@ namespace Eaf.Middleware.Application.Tests.WebHooks
                 Id = subscriptionId,
                 WebhookUri = webhookUri
             };
-            _subscriptionRepository.GetAll().Returns(new List<WebhookSubscriptionInfo> { subscription }.AsQueryable());
+            _subscriptionRepository.GetAllAsync().Returns(Task.FromResult(new List<WebhookSubscriptionInfo> { subscription }.AsAsyncQueryable()));
 
             var objectMapper = Substitute.For<IObjectMapper>();
             objectMapper
@@ -296,7 +297,7 @@ namespace Eaf.Middleware.Application.Tests.WebHooks
                 .Returns(webhookSubscription);
 
             _backgroundJobManager
-                .Enqueue<WebhookSenderJob, WebhookSenderArgs>(Arg.Any<WebhookSenderArgs>())
+                .EnqueueAsync<WebhookSenderJob, WebhookSenderArgs>(Arg.Any<WebhookSenderArgs>())
                 .Returns("job-id");
 
             // Quando
@@ -306,9 +307,9 @@ namespace Eaf.Middleware.Application.Tests.WebHooks
             await _webhookSendAttemptStore.Received(1).GetAsync(abpSession.TenantId, attemptId);
             await _webhookEventAppService.Received(1).Get(eventId.ToString());
             await _webhookSubscriptionManager.Received(1).GetAsync(subscriptionId);
-            _backgroundJobManager
+            await _backgroundJobManager
                 .Received(1)
-                .Enqueue<WebhookSenderJob, WebhookSenderArgs>(
+                .EnqueueAsync<WebhookSenderJob, WebhookSenderArgs>(
                     Arg.Is<WebhookSenderArgs>(args =>
                         args.TenantId == abpSession.TenantId &&
                         args.WebhookEventId == eventId &&

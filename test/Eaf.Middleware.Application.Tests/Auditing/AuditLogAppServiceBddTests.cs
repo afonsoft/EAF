@@ -38,12 +38,17 @@ namespace Eaf.Middleware.Application.Tests.Auditing
         public AuditLogAppServiceBddTests()
         {
             _auditLogRepository = Substitute.For<IRepository<AuditLog, long>>();
+            _auditLogRepository.GetAllAsync().Returns(_ => Task.FromResult(_auditLogRepository.GetAll()));
             _userRepository = Substitute.For<IRepository<User, long>>();
+            _userRepository.GetAllAsync().Returns(_ => Task.FromResult(_userRepository.GetAll()));
             _auditLogListExcelExporter = Substitute.For<IAuditLogListExcelExporter>();
             _namespaceStripper = Substitute.For<INamespaceStripper>();
             _entityChangeRepository = Substitute.For<IRepository<EntityChange, long>>();
+            _entityChangeRepository.GetAllAsync().Returns(_ => Task.FromResult(_entityChangeRepository.GetAll()));
             _entityChangeSetRepository = Substitute.For<IRepository<EntityChangeSet, long>>();
+            _entityChangeSetRepository.GetAllAsync().Returns(_ => Task.FromResult(_entityChangeSetRepository.GetAll()));
             _entityPropertyChangeRepository = Substitute.For<IRepository<EntityPropertyChange, long>>();
+            _entityPropertyChangeRepository.GetAllAsync().Returns(_ => Task.FromResult(_entityPropertyChangeRepository.GetAll()));
             _eafStartupConfiguration = Substitute.For<IAbpStartupConfiguration>();
 
             _sut = new AuditLogAppService(

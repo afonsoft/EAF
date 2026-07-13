@@ -117,7 +117,7 @@ namespace Eaf.Middleware.Authorization.Users
 
             var cache = _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey);
             foreach (var token in tokens)
-                cache.Remove(token);
+                await cache.RemoveAsync(token);
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Eaf.Middleware.Authorization.Users
         public async Task<GetUserPermissionsForEditOutput> GetUserPermissionsForEdit(EntityDto<long> input)
         {
             var user = await UserManager.GetUserByIdAsync(input.Id);
-            var permissions = PermissionManager.GetAllPermissions();
+            var permissions = await PermissionManager.GetAllPermissionsAsync();
             var grantedPermissions = await UserManager.GetGrantedPermissionsAsync(user);
 
             return new GetUserPermissionsForEditOutput
@@ -486,7 +486,7 @@ namespace Eaf.Middleware.Authorization.Users
         {
             /* This method is optimized to fill role names to given list. */
             var ids = userListDtos.Select(x => x.Id);
-            var userRoles = await _userRoleRepository.GetAll()
+            var userRoles = await (await _userRoleRepository.GetAllAsync())
                 .Where(userRole => ids.Any(id => id == userRole.UserId))
                 .ToListAsync();
 

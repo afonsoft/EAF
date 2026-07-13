@@ -33,6 +33,7 @@ namespace Eaf.Middleware.Application.Tests.Chat
         public ChatAppServiceBddTests()
         {
             _chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
+            _chatMessageRepository.GetAllAsync().Returns(_ => Task.FromResult(_chatMessageRepository.GetAll()));
             _userFriendsCache = Substitute.For<IUserFriendsCache>();
             _onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
             _chatCommunicator = Substitute.For<IChatCommunicator>();

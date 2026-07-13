@@ -104,4 +104,4 @@ app.UseCors("EafGateWayCorsPolicy"); //Enable CORS!
 app.MapControllers();
 app.UseWebSockets();
 app.UseOcelot().Wait();
-app.Run();
+await app.RunAsync();

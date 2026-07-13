@@ -87,13 +87,13 @@ namespace Eaf.Middleware.Chat
                         FriendUserName = L("Group"),
                         Name = L("Group"),
                         Surname = "",
-                        UnreadMessageCount = _chatMessageRepository.GetAll().Count(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                        UnreadMessageCount = await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
                                                                    cm.UserId == userIdentifier.UserId &&
                                                                    cm.TenantId == userIdentifier.TenantId &&
                                                                    cm.TargetUserId == 0 &&
                                                                    cm.TargetTenantId == userIdentifier.TenantId &&
                                                                    cm.Side == ChatSide.Receiver) +
-                                             _chatMessageRepository.GetAll().Count(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                                             await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
                                                                    cm.UserId == 0 &&
                                                                    cm.TenantId == userIdentifier.TenantId &&
                                                                    cm.TargetUserId == userIdentifier.UserId &&
@@ -118,7 +118,7 @@ namespace Eaf.Middleware.Chat
 
             if (input.UserId.HasValue && input.UserId.Value > 0)
             {
-                messages = await _chatMessageRepository.GetAll()
+                messages = await (await _chatMessageRepository.GetAllAsync())
                         .WhereIf(input.MinMessageId.HasValue, m => m.Id < input.MinMessageId.Value)
                         .Where(m => m.UserId == userId && m.TargetTenantId == input.TenantId && m.TargetUserId == input.UserId)
                         .OrderByDescending(m => m.CreationTime)
@@ -132,7 +132,7 @@ namespace Eaf.Middleware.Chat
                 {
                     try
                     {
-                        message.TargetUserName = UserManager.GetUserById(message.TargetUserId).Name;
+                        message.TargetUserName = (await UserManager.GetUserByIdAsync(message.TargetUserId)).Name;
                     }
                     catch
                     {
@@ -145,7 +145,7 @@ namespace Eaf.Middleware.Chat
 
             if (input.GroupId.HasValue && input.GroupId.Value > 0)
             {
-                messages = await _chatMessageRepository.GetAll()
+                messages = await (await _chatMessageRepository.GetAllAsync())
                        .WhereIf(input.MinMessageId.HasValue, m => m.Id < input.MinMessageId.Value)
                        .Where(m => m.TargetTenantId == input.TenantId && m.TargetUserId == 0)
                        .OrderByDescending(m => m.CreationTime)
@@ -174,7 +174,7 @@ namespace Eaf.Middleware.Chat
                 {
                     try
                     {
-                        message.TargetUserName = UserManager.GetUserById(message.TargetUserId).Name;
+                        message.TargetUserName = (await UserManager.GetUserByIdAsync(message.TargetUserId)).Name;
                     }
                     catch
                     {
@@ -197,8 +197,7 @@ namespace Eaf.Middleware.Chat
             if (input.UserId.HasValue && input.UserId.Value > 0)
             {
                 // receiver messages
-                var messages = await _chatMessageRepository
-                     .GetAll()
+                var messages = await (await _chatMessageRepository.GetAllAsync())
                      .Where(m =>
                             m.UserId == userId &&
                             m.TargetTenantId == input.TenantId &&
@@ -219,7 +218,7 @@ namespace Eaf.Middleware.Chat
                 // sender messages
                 using (CurrentUnitOfWork.SetTenantId(input.TenantId))
                 {
-                    var reverseMessages = await _chatMessageRepository.GetAll()
+                    var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
                         .Where(m => m.UserId == input.UserId && m.TargetTenantId == tenantId && m.TargetUserId == userId)
                         .ToListAsync();
 
@@ -254,8 +253,7 @@ namespace Eaf.Middleware.Chat
             else if (input.GroupId.HasValue && input.GroupId.Value > 0)
             {
                 // receiver messages
-                var messages = await _chatMessageRepository
-                     .GetAll()
+                var messages = await (await _chatMessageRepository.GetAllAsync())
                      .Where(m =>
                             m.UserId == 0 &&
                             m.TargetTenantId == input.TenantId &&
@@ -275,7 +273,7 @@ namespace Eaf.Middleware.Chat
 
                 using (CurrentUnitOfWork.SetTenantId(input.TenantId))
                 {
-                    var reverseMessages = await _chatMessageRepository.GetAll()
+                    var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
                         .Where(m => m.UserId == 0
                             && m.TargetTenantId == tenantId
                             && m.TargetUserId == userId
