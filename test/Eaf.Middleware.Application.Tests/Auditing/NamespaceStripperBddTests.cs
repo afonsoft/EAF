@@ -113,5 +113,18 @@ namespace Eaf.Middleware.Tests.Auditing
             result.ShouldContain(">");
             result.ShouldContain(",");
         }
+
+        [Fact]
+        public void Dado_NomeGenericoSemNamespaceArgumentos_Quando_StripNameSpace_Entao_DeveFecharGenerico()
+        {
+            // Dado
+            var genericName = "System.Collections.Generic.List`1[[Foo]]";
+
+            // Quando
+            var result = _stripper.StripNameSpace(genericName);
+
+            // Então
+            result.ShouldBe("List<>");
+        }
     }
 }

@@ -52,6 +52,8 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
                 set => base.LocalizationSourceName = value;
             }
 
+            public new IActiveUnitOfWork? CurrentUnitOfWorkProperty => base.CurrentUnitOfWork;
+
             public override Task ProcessRequest(string requestBody)
             {
                 return Task.CompletedTask;
@@ -173,6 +175,39 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
         {
             var receiver = new TestWebhookReceiver();
             receiver.PublicL("TestKey", System.Globalization.CultureInfo.InvariantCulture, "arg1").ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_Receiver_Quando_UsarLocalizacaoComArgs_Entao_DeveRetornarChaveComoFallback()
+        {
+            var receiver = new TestWebhookReceiver();
+            receiver.PublicL("TestKey", "arg1").ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_Receiver_Quando_ConfigurarPropriedades_Entao_DeveRetornarValores()
+        {
+            var receiver = new TestWebhookReceiver
+            {
+                ReceiverName = "TestReceiver",
+                context = null
+            };
+
+            receiver.ReceiverName.ShouldBe("TestReceiver");
+            receiver.context.ShouldBeNull();
+        }
+
+        [Fact]
+        public void Dado_UnitOfWorkManagerDefinido_Quando_AcessarCurrentUnitOfWork_Entao_DeveRetornarValor()
+        {
+            var receiver = new TestWebhookReceiver();
+            var uowManager = Substitute.For<IUnitOfWorkManager>();
+            var uow = Substitute.For<IActiveUnitOfWork>();
+            uowManager.Current.Returns(uow);
+
+            receiver.UnitOfWorkManagerProperty = uowManager;
+
+            receiver.CurrentUnitOfWorkProperty.ShouldBeSameAs(uow);
         }
     }
 }
