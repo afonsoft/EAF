@@ -20,7 +20,7 @@ namespace Eaf.MiddlewareCore.Tests.MultiTenancy
                 out _, out _, out _, out _, out _);
 
             // Quando / Então
-            Should.Throw<NotImplementedException>(() => tenantManager.GetById(1));
+            Should.Throw<NotImplementedException>(() => TenantManager.GetById(1));
         }
 
         [Fact]

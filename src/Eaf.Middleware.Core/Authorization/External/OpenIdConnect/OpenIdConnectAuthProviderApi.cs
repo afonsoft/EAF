@@ -38,7 +38,7 @@ namespace Eaf.Middleware.Core.Authentication.External.OpenIdConnect
         public override async Task<ExternalAuthUserInfo> GetUserInfo(string accessCode)
         {
             string additionalParam = this.ProviderInfo.AdditionalParams["Authority"];
-            ConfigurationManager<OpenIdConnectConfiguration> configurationManager = !string.IsNullOrEmpty(additionalParam) ? new ConfigurationManager<OpenIdConnectConfiguration>(additionalParam + "/.well-known/openid-configuration", new OpenIdConnectConfigurationRetriever(), new HttpDocumentRetriever()) : throw new ApplicationException("Authentication:OpenId:Issuer configuration is required.");
+            ConfigurationManager<OpenIdConnectConfiguration> configurationManager = !string.IsNullOrEmpty(additionalParam) ? new ConfigurationManager<OpenIdConnectConfiguration>(additionalParam + "/.well-known/openid-configuration", new OpenIdConnectConfigurationRetriever(), new HttpDocumentRetriever()) : throw new AbpException("Authentication:OpenId:Issuer configuration is required.");
             ValidateTokenResult validateTokenResult = await ValidateToken(accessCode, additionalParam, configurationManager);
 
             Claim claim1 = validateTokenResult.Principal.Claims.FirstOrDefault(c => c.Type == "name");

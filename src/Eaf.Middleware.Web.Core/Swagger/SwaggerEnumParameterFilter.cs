@@ -29,7 +29,7 @@ namespace Eaf.Middleware.Web.Swagger
             }
             else if (type.IsArray || (type.IsGenericType && type.GetInterfaces().Contains(typeof(IEnumerable))))
             {
-                var itemType = type.GetElementType() ?? type.GenericTypeArguments.First();
+                var itemType = type.GetElementType() ?? type.GenericTypeArguments[0];
                 AddEnumSpec(itemType, context);
             }
         }

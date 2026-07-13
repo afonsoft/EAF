@@ -38,8 +38,8 @@ namespace Eaf.Middleware.Chat.Exporting
         /// <returns>Resultado da operação.</returns>
         public FileDto ExportToFile(UserIdentifier user, List<ChatMessageExportDto> messages)
         {
-            var tenancyName = messages.Count > 0 ? messages.First().TargetTenantName : L("Anonymous");
-            var userName = messages.Count > 0 ? messages.First().TargetUserName : L("Anonymous");
+            var tenancyName = messages.Count > 0 ? messages[0].TargetTenantName : L("Anonymous");
+            var userName = messages.Count > 0 ? messages[0].TargetUserName : L("Anonymous");
 
             return CreateExcelPackage(
                 $"Chat_{tenancyName}_{userName}.xlsx",

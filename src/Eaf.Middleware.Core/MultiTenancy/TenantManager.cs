@@ -176,7 +176,7 @@ namespace Eaf.Middleware.MultiTenancy
         /// </summary>
         /// <param name="value">Parâmetro value.</param>
         /// <returns>Resultado da operação.</returns>
-        public Tenant GetById(object value)
+        public static Tenant GetById(object value)
         {
             throw new NotImplementedException();
         }

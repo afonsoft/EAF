@@ -27,6 +27,9 @@ namespace Eaf.Middleware.Authorization.Users
     /// </summary>
     public class UserEmailer : DomainService, IUserEmailer, ITransientDependency
     {
+        private const string HtmlBoldEndWithColon = "</b>: ";
+        private const string HtmlBreak = "<br />";
+
         private readonly IEmailSender _emailSender;
         private readonly IEmailTemplateProvider _emailTemplateProvider;
         private readonly ISettingManager _settingManager;
@@ -121,21 +124,21 @@ namespace Eaf.Middleware.Authorization.Users
             var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("EmailActivation_Title"), L("EmailActivation_SubTitle"));
             var mailMessage = new StringBuilder();
 
-            mailMessage.AppendLine("<b>" + L("NameSurname") + "</b>: " + user.Name + " " + user.Surname + "<br />");
+            mailMessage.AppendLine("<b>" + L("NameSurname") + HtmlBoldEndWithColon + user.Name + " " + user.Surname + HtmlBreak);
 
             if (!tenancyName.IsNullOrEmpty())
             {
-                mailMessage.AppendLine("<b>" + L("TenancyName") + "</b>: " + tenancyName + "<br />");
+                mailMessage.AppendLine("<b>" + L("TenancyName") + HtmlBoldEndWithColon + tenancyName + HtmlBreak);
             }
 
-            mailMessage.AppendLine("<b>" + L("UserName") + "</b>: " + user.UserName + "<br />");
+            mailMessage.AppendLine("<b>" + L("UserName") + HtmlBoldEndWithColon + user.UserName + HtmlBreak);
 
             if (!plainPassword.IsNullOrEmpty())
             {
-                mailMessage.AppendLine("<b>" + L("Password") + "</b>: " + plainPassword + "<br />");
+                mailMessage.AppendLine("<b>" + L("Password") + HtmlBoldEndWithColon + plainPassword + HtmlBreak);
             }
 
-            mailMessage.AppendLine("<br />");
+            mailMessage.AppendLine(HtmlBreak);
             mailMessage.AppendLine(L("EmailActivation_ClickTheLinkBelowToVerifyYourEmail") + "<br /><br />");
             mailMessage.AppendLine("<a href=\"" + link + "\">" + link + "</a>");
 
@@ -158,15 +161,15 @@ namespace Eaf.Middleware.Authorization.Users
             var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("PasswordResetEmail_Title"), L("PasswordResetEmail_SubTitle"));
             var mailMessage = new StringBuilder();
 
-            mailMessage.AppendLine("<b>" + L("NameSurname") + "</b>: " + user.Name + " " + user.Surname + "<br />");
+            mailMessage.AppendLine("<b>" + L("NameSurname") + HtmlBoldEndWithColon + user.Name + " " + user.Surname + HtmlBreak);
 
             if (!tenancyName.IsNullOrEmpty())
             {
-                mailMessage.AppendLine("<b>" + L("TenancyName") + "</b>: " + tenancyName + "<br />");
+                mailMessage.AppendLine("<b>" + L("TenancyName") + HtmlBoldEndWithColon + tenancyName + HtmlBreak);
             }
 
-            mailMessage.AppendLine("<b>" + L("UserName") + "</b>: " + user.UserName + "<br />");
-            mailMessage.AppendLine("<b>" + L("ResetCode") + "</b>: " + user.PasswordResetCode + "<br />");
+            mailMessage.AppendLine("<b>" + L("UserName") + HtmlBoldEndWithColon + user.UserName + HtmlBreak);
+            mailMessage.AppendLine("<b>" + L("ResetCode") + HtmlBoldEndWithColon + user.PasswordResetCode + HtmlBreak);
 
             if (!link.IsNullOrEmpty())
             {
@@ -182,7 +185,7 @@ namespace Eaf.Middleware.Authorization.Users
 
                 link = EncryptQueryParameters(link);
 
-                mailMessage.AppendLine("<br />");
+                mailMessage.AppendLine(HtmlBreak);
                 mailMessage.AppendLine(L("PasswordResetEmail_ClickTheLinkBelowToResetYourPassword") + "<br /><br />");
                 mailMessage.AppendLine("<a href=\"" + link + "\">" + link + "</a>");
             }
@@ -204,10 +207,10 @@ namespace Eaf.Middleware.Authorization.Users
                 var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("NewChatMessageEmail_Title"), L("NewChatMessageEmail_SubTitle"));
                 var mailMessage = new StringBuilder();
 
-                mailMessage.AppendLine("<b>" + L("Sender") + "</b>: " + senderTenancyName + "/" + senderUsername + "<br />");
-                mailMessage.AppendLine("<b>" + L("Time") + "</b>: " + chatMessage.CreationTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss") + " UTC<br />");
-                mailMessage.AppendLine("<b>" + L("Message") + "</b>: " + chatMessage.Message + "<br />");
-                mailMessage.AppendLine("<br />");
+                mailMessage.AppendLine("<b>" + L("Sender") + HtmlBoldEndWithColon + senderTenancyName + "/" + senderUsername + HtmlBreak);
+                mailMessage.AppendLine("<b>" + L("Time") + HtmlBoldEndWithColon + chatMessage.CreationTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss") + " UTC<br />");
+                mailMessage.AppendLine("<b>" + L("Message") + HtmlBoldEndWithColon + chatMessage.Message + HtmlBreak);
+                mailMessage.AppendLine(HtmlBreak);
 
                 await ReplaceBodyAndSend(user.EmailAddress, L("NewChatMessageEmail_Subject"), emailTemplate, mailMessage);
             }
@@ -241,8 +244,8 @@ namespace Eaf.Middleware.Authorization.Users
                         var emailTemplate = GetTitleAndSubTitle(tenantId, L("SubscriptionExpire_Title"), L("SubscriptionExpire_SubTitle"));
                         var mailMessage = new StringBuilder();
 
-                        mailMessage.AppendLine("<b>" + L("Message") + "</b>: " + L("SubscriptionExpire_Email_Body", culture, utcNow.ToString("yyyy-MM-dd") + " UTC") + "<br />");
-                        mailMessage.AppendLine("<br />");
+                        mailMessage.AppendLine("<b>" + L("Message") + HtmlBoldEndWithColon + L("SubscriptionExpire_Email_Body", culture, utcNow.ToString("yyyy-MM-dd") + " UTC") + HtmlBreak);
+                        mailMessage.AppendLine(HtmlBreak);
 
                         await ReplaceBodyAndSend(tenantAdmin.EmailAddress, L("SubscriptionExpire_Email_Subject"), emailTemplate, mailMessage);
                     }
@@ -254,7 +257,7 @@ namespace Eaf.Middleware.Authorization.Users
             }
         }
 
-        private string EncryptQueryParameters(string link, string encrptedParameterName = "c")
+        private static string EncryptQueryParameters(string link, string encrptedParameterName = "c")
         {
             if (!link.Contains("?"))
             {

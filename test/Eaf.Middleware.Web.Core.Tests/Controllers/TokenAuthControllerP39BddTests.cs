@@ -206,13 +206,13 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var userManager = IdentityTestHelper.CreateUserManager();
             var roleManager = IdentityTestHelper.CreateRoleManager();
             var controller = CriarController(userManager, roleManager, CriarLogInManagerSubstituto(userManager, roleManager, null));
-            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Static);
             method.ShouldNotBeNull();
 
             var a1 = new byte[] { 1, 2, 3 };
             var a2 = new byte[] { 1, 2, 3 };
 
-            var result = method.Invoke(controller, new object[] { a1, a2 });
+            var result = method.Invoke(null, new object[] { a1, a2 });
             result.ShouldBe(true);
         }
 
@@ -222,11 +222,11 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var userManager = IdentityTestHelper.CreateUserManager();
             var roleManager = IdentityTestHelper.CreateRoleManager();
             var controller = CriarController(userManager, roleManager, CriarLogInManagerSubstituto(userManager, roleManager, null));
-            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Static);
             method.ShouldNotBeNull();
 
-            var result1 = method.Invoke(controller, new object[] { new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 4 } });
-            var result2 = method.Invoke(controller, new object[] { new byte[] { 1, 2 }, new byte[] { 1, 2, 3 } });
+            var result1 = method.Invoke(null, new object[] { new byte[] { 1, 2, 3 }, new byte[] { 1, 2, 4 } });
+            var result2 = method.Invoke(null, new object[] { new byte[] { 1, 2 }, new byte[] { 1, 2, 3 } });
             var result3 = method.Invoke(controller, new object[] { null, new byte[] { 1, 2, 3 } });
 
             result1.ShouldBe(false);

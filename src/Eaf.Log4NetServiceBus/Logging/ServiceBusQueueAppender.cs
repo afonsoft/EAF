@@ -112,7 +112,7 @@ namespace Eaf.Log4NetServiceBus.Logging
             AppendBuffer(events);
         }
 
-        private string GetParams(int index, string message)
+        private static string GetParams(int index, string message)
         {
             try
             {

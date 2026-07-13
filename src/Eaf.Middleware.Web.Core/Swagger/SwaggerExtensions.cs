@@ -31,7 +31,7 @@ namespace Eaf.Middleware.Web.Swagger
                     .Select(SchemaIdSelector)
                     .Aggregate<string>((previous, current) => previous + current);
 
-                return modelType.Name.Split('`').First() + "Of" + prefix;
+                return modelType.Name.Split('`')[0] + "Of" + prefix;
             }
 
             options.CustomSchemaIds(SchemaIdSelector);

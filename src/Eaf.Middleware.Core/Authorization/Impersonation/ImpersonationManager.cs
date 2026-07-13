@@ -118,8 +118,8 @@ namespace Eaf.Middleware.Authorization.Impersonation
                     TargetTenantId = userToken.TenantId,
                     TargetUserId = userToken.UserId,
                     IsBackToImpersonator = string.IsNullOrEmpty(userToken.Value),
-                    ImpersonatorTenantId = !string.IsNullOrEmpty(userToken.Value) ? Convert.ToInt32(userToken.Value.Split("-").First()) : null,
-                    ImpersonatorUserId = !string.IsNullOrEmpty(userToken.Value) ? Convert.ToInt32(userToken.Value.Split("-").Last()) : 2
+                    ImpersonatorTenantId = !string.IsNullOrEmpty(userToken.Value) ? Convert.ToInt32(userToken.Value.Split("-")[0]) : null,
+                    ImpersonatorUserId = !string.IsNullOrEmpty(userToken.Value) ? Convert.ToInt32(userToken.Value.Split("-")[^1]) : 2
                 };
             }
 

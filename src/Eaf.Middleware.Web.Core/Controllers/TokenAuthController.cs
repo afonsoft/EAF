@@ -59,6 +59,8 @@ namespace Eaf.Middleware.Web.Controllers
     [Route("api/[controller]/[action]")]
     public class TokenAuthController : MiddlewareControllerBase, IApplicationService
     {
+        private const string ExternalTokenInformationCacheName = "ExternalTokenInformationCache";
+
         private readonly ICacheManager _cacheManager;
         private readonly TokenAuthConfiguration _configuration;
         private readonly AbpLoginResultTypeHelper _AbpLoginResultTypeHelper;
@@ -281,7 +283,7 @@ namespace Eaf.Middleware.Web.Controllers
                             }
 
                             _cacheManager
-                                  .GetCache("ExternalTokenInformationCache")
+                                  .GetCache(ExternalTokenInformationCacheName)
                                   .Set(loginResult.User.ToUserIdentifier().ToString(),
                                       model.ProviderAccessCode,
                                       slidingExpireTime: TimeSpan.FromDays(1));
@@ -329,7 +331,7 @@ namespace Eaf.Middleware.Web.Controllers
                             }
 
                             _cacheManager
-                                .GetCache("ExternalTokenInformationCache")
+                                .GetCache(ExternalTokenInformationCacheName)
                                 .Set(loginResult.User.ToUserIdentifier().ToString(),
                                     model.ProviderAccessCode,
                                     slidingExpireTime: TimeSpan.FromDays(1));
@@ -513,7 +515,7 @@ namespace Eaf.Middleware.Web.Controllers
                 if (AbpSession?.UserId != null)
                 {
                     var user = _userManager.GetUser(AbpSession.ToUserIdentifier());
-                    _cacheManager.GetCache("ExternalTokenInformationCache").Remove(user.ToUserIdentifier().ToString());
+                    _cacheManager.GetCache(ExternalTokenInformationCacheName).Remove(user.ToUserIdentifier().ToString());
                     await _userManager.UpdateSecurityStampAsync(user);
                 }
             }
@@ -537,7 +539,7 @@ namespace Eaf.Middleware.Web.Controllers
                     }
                     if (!string.IsNullOrEmpty(userIdentifierString))
                     {
-                        _cacheManager.GetCache("ExternalTokenInformationCache").Remove(UserIdentifier.Parse(userIdentifierString).ToString());
+                        _cacheManager.GetCache(ExternalTokenInformationCacheName).Remove(UserIdentifier.Parse(userIdentifierString).ToString());
                         var user = _userManager.GetUser(UserIdentifier.Parse(userIdentifierString));
                         await _userManager.UpdateSecurityStampAsync(user);
                     }
@@ -562,7 +564,7 @@ namespace Eaf.Middleware.Web.Controllers
                     }
                     if (userIdentifier != null)
                     {
-                        _cacheManager.GetCache("ExternalTokenInformationCache").Remove(userIdentifier.ToString());
+                        _cacheManager.GetCache(ExternalTokenInformationCacheName).Remove(userIdentifier.ToString());
                         var user = _userManager.GetUser(userIdentifier);
                         await _userManager.UpdateSecurityStampAsync(user);
                     }
@@ -813,8 +815,8 @@ namespace Eaf.Middleware.Web.Controllers
         [UnitOfWork]
         private async Task UpdateExternalUserAsync(User user, ExternalAuthUserInfo externalLoginInfo)
         {
-            string name = externalLoginInfo.Name.Split(' ').First();
-            string surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last();
+            string name = externalLoginInfo.Name.Split(' ')[0];
+            string surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
 
             try
             {
@@ -906,8 +908,8 @@ namespace Eaf.Middleware.Web.Controllers
                         TenantId = AbpSession.TenantId,
                         UserName = username,
                         EmailAddress = externalLoginInfo.EmailAddress,
-                        Name = externalLoginInfo.Name.Split(' ').First(),
-                        Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last(),
+                        Name = externalLoginInfo.Name.Split(' ')[0],
+                        Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1],
                     };
 
                     user.Password = _passwordHasher.HashPassword(user, randomPassword);
@@ -958,8 +960,8 @@ namespace Eaf.Middleware.Web.Controllers
                 {
                     Logger.DebugFormat("RegisterExternalUser Update {0}:{1} ", username, externalLoginInfo.EmailAddress);
                     userExist.EmailAddress = externalLoginInfo.EmailAddress;
-                    userExist.Name = externalLoginInfo.Name.Split(' ').First();
-                    userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last();
+                    userExist.Name = externalLoginInfo.Name.Split(' ')[0];
+                    userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
                     userExist.UserName = username;
                     userExist.AuthenticationSource = externalLoginInfo.Provider;
                     userExist.ExternalAuthProviderformation = externalLoginInfo.Provider;
@@ -1167,7 +1169,7 @@ namespace Eaf.Middleware.Web.Controllers
                );
         }
 
-        private bool ByteArrayCompare(byte[]? a1, byte[]? a2)
+        private static bool ByteArrayCompare(byte[]? a1, byte[]? a2)
         {
             try
             {
