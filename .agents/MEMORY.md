@@ -1,12 +1,13 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority46-coverage-audit`
+Last session branch: `feature/devin-20260713-priority47-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
 Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
 Current coverage (after P45): Line 96.2%, Branch 82.3%, Method 99.1%.
-Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1% (4377 tests, 4376 passing, 1 skipped).
+Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1%.
+Current coverage (after P47): Line 96.2%, Branch 82.8%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -63,6 +64,15 @@ Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1% (4377 tests
 - `MiddlewareWebCoreModule.PostInitialize` `JobStorage.Current` is always reassigned; `recurringJobs`/`failedJobs` loops cannot be populated without real Hangfire infrastructure.
 - `MiddlewareWebCoreModule.SetAppFolders` `CompositeFileProvider` catch is not triggered by a single `null` `IFileProvider`; it requires an `IEnumerable<IFileProvider>` overload to throw.
 - SonarCloud link in READMEs should point to `https://sonarcloud.io/project/overview?id=afonsoft_EAF2`, not `summary/overall?id=afonsoft_EAF2&branch=main`.
+
+## P47 gotchas
+- `MiddlewareWebCoreModule.PostInitialize` `RedisConnectionString` null branch (`?? "localhost"`) is not reachable without `RedisStorage` constructor throwing because no Redis server is available; testing it causes `RedisConnectionException` outside the `try` block.
+- `MiddlewareWebCoreModule.PostInitialize` `recurringJobs`/`failedJobs` loops cannot be populated with data because `JobStorage.Current` is always reassigned during `PostInitialize` and `InMemoryStorage` returns empty collections.
+- `LdapAuthenticationSource.SearchWithLimit` is Windows-only and throws `PlatformNotSupportedException` on Linux; cover it by asserting the exception.
+- `EafHostBuilderExtensions.UseAbpConfiguration` and `EafWebHostBuilderExtensions.UseEafConfiguration` have default lambdas with `if (!string.IsNullOrEmpty(prefix))` branches; cover both with `Substitute` `ConfigureAppConfiguration` and `IHostBuilder`/`IWebHostBuilder`.
+- `EafServiceCollectionExtensions.AddEafWithoutCreatingServiceProvider` has a `removeConventionalInterceptors` false branch; cover it by passing `removeConventionalInterceptors: false`.
+- `Eaf.Middleware.Ldap` assembly line coverage is 68.1%; class `LdapAuthenticationSource<T1, T2>` is at 61.8% due to Windows-only `CreatePrincipalContext`/`UpdateUserFromPrincipal`/`ValidateCredentials` paths.
+- `Eaf.Middleware.Web.Core` assembly line coverage is 96.1%; `MiddlewareWebCoreModule` is at 86.2% with branch 70% due to unreachable Hangfire cleanup loops.
 
 ## P45 gotchas
 - `LdapAuthenticationSource` `GetAttribute` returns `null` when the attribute is missing; the `mail` attribute fallback returns `String.Empty` and the `EmailAddress` is `null` because the `Name` is split by `StringSplitOptions.None` and joined with space.

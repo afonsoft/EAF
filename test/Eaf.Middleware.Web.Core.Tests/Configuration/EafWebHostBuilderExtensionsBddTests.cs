@@ -104,6 +104,77 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
         }
 
         [Fact]
+        public void Dado_WebHostBuilder_Quando_UseEafConfigurationComPrefixoENulo_Entao_DeveAdicionarEnvironmentVariablesComPrefixo()
+        {
+            var builder = Substitute.For<IWebHostBuilder>();
+            Action<WebHostBuilderContext, IConfigurationBuilder> capturedAction = null!;
+            builder.ConfigureAppConfiguration(Arg.Do<Action<WebHostBuilderContext, IConfigurationBuilder>>(a => capturedAction = a))
+                .Returns(builder);
+
+            builder.UseEafConfiguration(null, "EAF_");
+
+            capturedAction.ShouldNotBeNull();
+
+            var context = new WebHostBuilderContext
+            {
+                HostingEnvironment = Substitute.For<IWebHostEnvironment>(),
+                Configuration = Substitute.For<IConfiguration>()
+            };
+
+            var sources = new List<IConfigurationSource>();
+            var properties = new Dictionary<string, object>();
+            var configBuilder = Substitute.For<IConfigurationBuilder>();
+            configBuilder.Sources.Returns(sources);
+            configBuilder.Properties.Returns(properties);
+            configBuilder.Add(Arg.Any<IConfigurationSource>())
+                .Returns(ci =>
+                {
+                    sources.Add(ci.Arg<IConfigurationSource>());
+                    return configBuilder;
+                });
+
+            capturedAction(context, configBuilder);
+
+            sources.Count.ShouldBe(5);
+            sources.Any(s => s is EnvironmentVariablesConfigurationSource).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_WebHostBuilder_Quando_UseEafConfigurationComPrefixoVazio_Entao_DeveConfigurarSemPrefixo()
+        {
+            var builder = Substitute.For<IWebHostBuilder>();
+            Action<WebHostBuilderContext, IConfigurationBuilder> capturedAction = null!;
+            builder.ConfigureAppConfiguration(Arg.Do<Action<WebHostBuilderContext, IConfigurationBuilder>>(a => capturedAction = a))
+                .Returns(builder);
+
+            builder.UseEafConfiguration("");
+
+            capturedAction.ShouldNotBeNull();
+
+            var context = new WebHostBuilderContext
+            {
+                HostingEnvironment = Substitute.For<IWebHostEnvironment>(),
+                Configuration = Substitute.For<IConfiguration>()
+            };
+
+            var sources = new List<IConfigurationSource>();
+            var properties = new Dictionary<string, object>();
+            var configBuilder = Substitute.For<IConfigurationBuilder>();
+            configBuilder.Sources.Returns(sources);
+            configBuilder.Properties.Returns(properties);
+            configBuilder.Add(Arg.Any<IConfigurationSource>())
+                .Returns(ci =>
+                {
+                    sources.Add(ci.Arg<IConfigurationSource>());
+                    return configBuilder;
+                });
+
+            capturedAction(context, configBuilder);
+
+            sources.Count.ShouldBe(4);
+        }
+
+        [Fact]
         public void Dado_WebHostBuilder_Quando_UseEafConfigurationComAction_Entao_DeveDelegarConfiguracao()
         {
             var builder = Substitute.For<IWebHostBuilder>();

@@ -1080,6 +1080,164 @@ namespace Eaf.Middleware.Tests.WebCore
             }
         }
 
+        [Fact]
+        public void Dado_HangfireRedisComDatabaseIdInvalido_Quando_PostInitialize_Entao_DeveConfigurarRedisStorageComDatabaseIdZero()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"Hangfire\":{\"IsEnabled\":true},\"Database\":{\"Provider\":\"MySql\"},\"RedisCache\":{\"IsEnabled\":true,\"ConnectionString\":\"localhost:6379,abortConnect=false,connectTimeout=1\",\"DatabaseId\":\"abc\"}}");
+
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+
+                iocManager.IocContainer.Register(
+                    Component.For<ISettingManager>().Instance(Substitute.For<ISettingManager>()),
+                    Component.For<IAbpSession>().Instance(Substitute.For<IAbpSession>()),
+                    Component.For<ICacheManager>().Instance(Substitute.For<ICacheManager>()),
+                    Component.For<ExternalAuthConfiguration>().Instance(new ExternalAuthConfiguration()),
+                    Component.For<AppFolders>().Instance(new AppFolders())
+                );
+
+                iocManager.Register<TenantBasedOpenIdConnectExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedGoogleExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedMicrosoftExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedAuthZeroExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+
+                var backgroundJobs = Substitute.For<Abp.BackgroundJobs.IBackgroundJobConfiguration>();
+                backgroundJobs.IsJobExecutionEnabled.Returns(true);
+                configType.GetProperty("BackgroundJobs")?.SetValue(config, backgroundJobs);
+
+                var auditing = Substitute.For<Abp.Auditing.IAuditingConfiguration>();
+                auditing.IsEnabled.Returns(false);
+                configType.GetProperty("Auditing")?.SetValue(config, auditing);
+
+                var entityHistory = Substitute.For<Abp.EntityHistory.IEntityHistoryConfiguration>();
+                entityHistory.IsEnabled.Returns(false);
+                configType.GetProperty("EntityHistory")?.SetValue(config, entityHistory);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                Should.NotThrow(() => module.PostInitialize());
+
+                global::Hangfire.JobStorage.Current.ShouldBeOfType<global::Hangfire.Redis.StackExchange.RedisStorage>();
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_HangfireNaoConfiguradoComAuditingHabilitado_Quando_PostInitialize_Entao_DeveRegistrarExpiredAuditLogDeleterWorker()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var workManager = Substitute.For<IBackgroundWorkerManager>();
+
+                iocManager.IocContainer.Register(
+                    Component.For<ISettingManager>().Instance(Substitute.For<ISettingManager>()),
+                    Component.For<IAbpSession>().Instance(Substitute.For<IAbpSession>()),
+                    Component.For<ICacheManager>().Instance(Substitute.For<ICacheManager>()),
+                    Component.For<IBackgroundWorkerManager>().Instance(workManager),
+                    Component.For<ExternalAuthConfiguration>().Instance(new ExternalAuthConfiguration()),
+                    Component.For<AppFolders>().Instance(new AppFolders()),
+                    Component.For<IRepository<AuditLog, long>>().Instance(Substitute.For<IRepository<AuditLog, long>>()),
+                    Component.For<IRepository<Tenant>>().Instance(Substitute.For<IRepository<Tenant>>())
+                );
+
+                iocManager.Register<AbpTimer>(Abp.Dependency.DependencyLifeStyle.Transient);
+                iocManager.Register<ExpiredAuditLogDeleterWorker>(Abp.Dependency.DependencyLifeStyle.Singleton);
+
+                iocManager.Register<TenantBasedOpenIdConnectExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedGoogleExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedMicrosoftExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+                iocManager.Register<TenantBasedAuthZeroExternalLoginInfoProvider>(Abp.Dependency.DependencyLifeStyle.Singleton);
+
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configType = Type.GetType("Abp.Configuration.Startup.AbpStartupConfiguration, Abp");
+                var config = Activator.CreateInstance(configType, iocManager);
+
+                var backgroundJobs = Substitute.For<Abp.BackgroundJobs.IBackgroundJobConfiguration>();
+                backgroundJobs.IsJobExecutionEnabled.Returns(true);
+                configType.GetProperty("BackgroundJobs")?.SetValue(config, backgroundJobs);
+
+                var auditing = Substitute.For<Abp.Auditing.IAuditingConfiguration>();
+                auditing.IsEnabled.Returns(true);
+                configType.GetProperty("Auditing")?.SetValue(config, auditing);
+
+                var entityHistory = Substitute.For<Abp.EntityHistory.IEntityHistoryConfiguration>();
+                entityHistory.IsEnabled.Returns(false);
+                configType.GetProperty("EntityHistory")?.SetValue(config, entityHistory);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, config);
+
+                Should.NotThrow(() => module.PostInitialize());
+
+                workManager.Received().Add(Arg.Any<ExpiredAuditLogDeleterWorker>());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_BackgroundJobsHabilitadoHangfireNaoConfigurado_Quando_PreInitialize_Entao_NaoDeveUsarHangfire()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+
+            try
+            {
+                var env = Substitute.For<IHostEnvironment>();
+                env.ContentRootPath.Returns(tempDirectory);
+                env.EnvironmentName.Returns("Development");
+
+                var iocManager = new IocManager();
+                var module = new MiddlewareWebCoreModule(env);
+                var iocProperty = typeof(Abp.Modules.AbpModule).GetProperty("IocManager", BindingFlags.NonPublic | BindingFlags.Instance);
+                iocProperty?.SetValue(module, iocManager);
+
+                var configuration = CriarConfiguracao(iocManager);
+                configuration.BackgroundJobs.IsJobExecutionEnabled.Returns(true);
+
+                var configProperty = typeof(Abp.Modules.AbpModule).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Instance);
+                configProperty?.SetValue(module, configuration);
+
+                Should.NotThrow(() => module.PreInitialize());
+            }
+            finally
+            {
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
         private static IAbpStartupConfiguration CriarConfiguracao(IIocManager iocManager)
         {
             var configuration = Substitute.For<IAbpStartupConfiguration>();
