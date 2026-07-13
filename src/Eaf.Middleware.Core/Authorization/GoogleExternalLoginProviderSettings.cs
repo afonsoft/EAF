@@ -6,7 +6,7 @@ namespace Eaf.Middleware.Core.Authentication
     /// <summary>
     /// Representa a classe GoogleExternalLoginProviderSettings.
     /// </summary>
-    public class GoogleExternalLoginProviderSettings
+    public class GoogleExternalLoginProviderSettings : IExternalLoginProviderSettings
     {
         /// <summary>
         /// Obtém ou define ClientId.

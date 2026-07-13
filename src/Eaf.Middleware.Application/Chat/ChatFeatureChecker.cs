@@ -45,41 +45,42 @@ namespace Eaf.Middleware.Chat
 
         private void CheckChatFeaturesInternal(int? sourceTenantId, int? targetTenantId, ChatSide side)
         {
-            var localizationPosfix = side == ChatSide.Sender ? "ForSender" : "ForReceiver";
-            if (sourceTenantId.HasValue)
+            var localizationSuffix = GetSideSuffix(side);
+            if (!sourceTenantId.HasValue)
             {
-                if (!_featureChecker.IsEnabled(sourceTenantId.Value, AppFeatures.ChatFeature))
-                {
-                    throw new UserFriendlyException(L("ChatFeatureIsNotEnabled" + localizationPosfix));
-                }
-
                 if (targetTenantId.HasValue)
-                {
-                    if (sourceTenantId == targetTenantId)
-                    {
-                        return;
-                    }
+                    AssertFeatureEnabled(targetTenantId.Value, AppFeatures.TenantToHostChatFeature, GetTenantToHostChatFeatureErrorKey(side));
+                return;
+            }
 
-                    if (!_featureChecker.IsEnabled(sourceTenantId.Value, AppFeatures.TenantToTenantChatFeature))
-                    {
-                        throw new UserFriendlyException(L("TenantToTenantChatFeatureIsNotEnabled" + localizationPosfix));
-                    }
-                }
-                else
-                {
-                    if (!_featureChecker.IsEnabled(sourceTenantId.Value, AppFeatures.TenantToHostChatFeature))
-                    {
-                        throw new UserFriendlyException(L("TenantToHostChatFeatureIsNotEnabled" + localizationPosfix));
-                    }
-                }
-            }
-            else
+            AssertFeatureEnabled(sourceTenantId.Value, AppFeatures.ChatFeature, "ChatFeatureIsNotEnabled" + localizationSuffix);
+
+            if (!targetTenantId.HasValue)
             {
-                if (targetTenantId.HasValue && !_featureChecker.IsEnabled(targetTenantId.Value, AppFeatures.TenantToHostChatFeature))
-                {
-                    throw new UserFriendlyException(L("TenantToHostChatFeatureIsNotEnabled" + (side == ChatSide.Sender ? "ForReceiver" : "ForSender")));
-                }
+                AssertFeatureEnabled(sourceTenantId.Value, AppFeatures.TenantToHostChatFeature, "TenantToHostChatFeatureIsNotEnabled" + localizationSuffix);
+                return;
             }
+
+            if (sourceTenantId == targetTenantId)
+                return;
+
+            AssertFeatureEnabled(sourceTenantId.Value, AppFeatures.TenantToTenantChatFeature, "TenantToTenantChatFeatureIsNotEnabled" + localizationSuffix);
+        }
+
+        private static string GetSideSuffix(ChatSide side)
+        {
+            return side == ChatSide.Sender ? "ForSender" : "ForReceiver";
+        }
+
+        private static string GetTenantToHostChatFeatureErrorKey(ChatSide side)
+        {
+            return "TenantToHostChatFeatureIsNotEnabled" + (side == ChatSide.Sender ? "ForReceiver" : "ForSender");
+        }
+
+        private void AssertFeatureEnabled(int tenantId, string featureName, string errorKey)
+        {
+            if (!_featureChecker.IsEnabled(tenantId, featureName))
+                throw new UserFriendlyException(L(errorKey));
         }
     }
 }

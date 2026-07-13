@@ -6,7 +6,7 @@ namespace Eaf.Middleware.Core.Authentication
     /// <summary>
     /// Representa a classe AuthZeroExternalLoginProviderSettings.
     /// </summary>
-    public class AuthZeroExternalLoginProviderSettings
+    public class AuthZeroExternalLoginProviderSettings : IExternalLoginProviderSettings
     {
         /// <summary>
         /// Obtém ou define ClientId.

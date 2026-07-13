@@ -7,7 +7,7 @@ namespace Eaf.Middleware.Core.Authentication
     /// <summary>
     /// Representa a classe OpenIdConnectExternalLoginProviderSettings.
     /// </summary>
-    public class OpenIdConnectExternalLoginProviderSettings
+    public class OpenIdConnectExternalLoginProviderSettings : IExternalLoginProviderSettings
     {
         /// <summary>
         /// Obtém ou define Authority.
