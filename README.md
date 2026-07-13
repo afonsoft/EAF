@@ -1,15 +1,15 @@
 # Enterprise Application Foundation (EAF)
 
-[![GitHub](https://img.shields.io/github/license/afonsoft/eaf)](LICENSE) [![GitHub version](https://badge.fury.io/gh/afonsoft%2Feaf.svg)](https://badge.fury.io/gh/afonsoft%2Feaf) [![Commits History](https://img.shields.io/badge/Commits-History-critical)](https://github.com/afonsoft/EAF/commits/main/) [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=alert_status)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) [![DeepWiki](https://img.shields.io/badge/DeepWiki-afonsoft%2FEAF-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNCAxOWguMDEiLz48cGF0aCBkPSJNMjAgMTEuMmMuNy40IDEuMSAxIDEuMSAxLjggMCAuNS0uMyAxLjEtLjcgMS41bC0zLjEgMy4xYy0uNS41LTEgLjctMS42LjdsLS44LS4xLTEuNC0uNS0xLjgtMS4xIi8+PHBhdGggZD0iTTQuMyAxNS4zYy0uNC0uNy0uNS0xLjUtLjMtMi4yLjItLjguNy0xLjQgMS4zLTEuOGwxLjgtMS4yYy43LS40IDEuNS0uNiAyLjItLjQuOC4yIDEuNS43IDEuOSAxLjMiLz48cGF0aCBkPSJNOCA1YzAtLjUuMi0xIC42LTEuNEM5IDMuMiA5LjUgMyAxMCAzaDRjLjUgMCAxIC4yIDEuNC42LjQuNC42LjkuNiAxLjR2M2MwIC41LS4yIDEtLjYgMS40LS40LjQtLjkuNi0xLjQuNmgtNGMtLjUgMC0xLS4yLTEuNC0uNkM4LjIgOSA4IDguNSA4IDgiLz48L3N2Zz4=)](https://deepwiki.com/afonsoft/EAF)
+[![GitHub](https://img.shields.io/github/license/afonsoft/eaf)](LICENSE) [![GitHub version](https://badge.fury.io/gh/afonsoft%2Feaf.svg)](https://badge.fury.io/gh/afonsoft%2Feaf) [![Commits History](https://img.shields.io/badge/Commits-History-critical)](https://github.com/afonsoft/EAF/commits/main/) [![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=alert_status)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) [![DeepWiki](https://img.shields.io/badge/DeepWiki-afonsoft%2FEAF-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNCAxOWguMDEiLz48cGF0aCBkPSJNMjAgMTEuMmMuNy40IDEuMSAxIDEuMSAxLjggMCAuNS0uMyAxLjEtLjcgMS41bC0zLjEgMy4xYy0uNS41LTEgLjctMS42LjdsLS44LS4xLTEuNC0uNS0xLjgtMS4xIi8+PHBhdGggZD0iTTQuMyAxNS4zYy0uNC0uNy0uNS0xLjUtLjMtMi4yLjItLjguNy0xLjQgMS4zLTEuOGwxLjgtMS4yYy43LS40IDEuNS0uNiAyLjItLjQuOC4yIDEuNS43IDEuOSAxLjMiLz48cGF0aCBkPSJNOCA1YzAtLjUuMi0xIC42LTEuNEM5IDMuMiA5LjUgMyAxMCAzaDRjLjUgMCAxIC4yIDEuNC42LjQuNC42LjkuNiAxLjR2M2MwIC41LS4yIDEtLjYgMS40LS40LjQtLjkuNi0xLjQuNmgtNGMtLjUgMC0xLS4yLTEuNC0uNkM4LjIgOSA4IDguNSA4IDgiLz48L3N2Zz4=)](https://deepwiki.com/afonsoft/EAF)
 
 English | **[Português](README_pt.md)**
 
 ![Line Coverage](https://img.shields.io/badge/Line%20Coverage-96.2%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-82.3%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-82.6%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.1%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4367-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4366-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4377-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4376-brightgreen)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-121-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
@@ -375,15 +375,15 @@ This example demonstrates several EAF features:
 
 ## Code Coverage
 
-### Latest Test Results (2026-07-12)
+### Latest Test Results (2026-07-13)
 
 | Metric | Value |
 |---|---|
-| **Line coverage** | 96.1% |
-| **Branch coverage** | 82.0% |
+| **Line coverage** | 96.2% |
+| **Branch coverage** | 82.6% |
 | **Method coverage** | 99.1% |
-| **Total tests** | 4344 |
-| **Passed** | 4343 |
+| **Total tests** | 4377 |
+| **Passed** | 4376 |
 | **Skipped** | 1 |
 | **Failed** | 0 |
 
@@ -395,16 +395,16 @@ This example demonstrates several EAF features:
 | **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excellent |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excellent |
 | **Eaf.Middleware.Application** | 1421 | 97.0% | ✅ Excellent |
-| **Eaf.Middleware.Core** | 1222 | 98.6% | ✅ Excellent |
-| **Eaf.Middleware.Web.Core** | 707 | 95.8% | ✅ Excellent |
-| **Eaf.Middleware.Worker** | 169 | 96.6% | ✅ Excellent |
+| **Eaf.Middleware.Core** | 1228 | 98.7% | ✅ Excellent |
+| **Eaf.Middleware.Web.Core** | 714 | 96.1% | ✅ Excellent |
+| **Eaf.Middleware.Worker** | 171 | 97.0% | ✅ Excellent |
 | **Eaf.SqliteCache** | 158 | 96.5% | ✅ Excellent |
 | **Eaf.SqlServerCache** | 95 | 98.1% | ✅ Excellent |
 | **Eaf.OpenTelemetry** | 61 | 98.7% | ✅ Excellent |
 | **Eaf.KeyVault** | 244 | 99.6% | ✅ Excellent |
 | **Eaf.Log4NetServiceBus** | 51 | 96.0% | ✅ Good |
 | **Eaf.Middleware.AzureActiveDirectory** | 58 | 93.2% | ✅ Excellent |
-| **Eaf.Middleware.Ldap** | 77 | 65.4% | ⚠️ Needs improvement |
+| **Eaf.Middleware.Ldap** | 95 | 67.7% | ⚠️ Needs improvement |
 
 ---
 
@@ -456,21 +456,21 @@ This example demonstrates several EAF features:
 
 ## Quality and Metrics
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main)
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
 
 | Code Smell | Bugs | Tests | Lang | Quality |
 |------------|------|-------|------|---------|
-| [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=code_smells)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=bugs)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | ![AppVeyor tests](https://img.shields.io/appveyor/tests/afonsoft/eaf) | ![GitHub top language](https://img.shields.io/github/languages/top/afonsoft/eaf) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=alert_status)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) |
+| [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=code_smells)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=bugs)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | ![AppVeyor tests](https://img.shields.io/appveyor/tests/afonsoft/eaf) | ![GitHub top language](https://img.shields.io/github/languages/top/afonsoft/eaf) | [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=alert_status)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) |
 
 ### Statistics
 
 | Lines of Code | Duplicated Lines | Coverage | Maintainability |
 |---------------|------------------|----------|-----------------|
-| [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=ncloc)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=duplicated_lines_density)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=coverage)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) |
+| [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=ncloc)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=duplicated_lines_density)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=coverage)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_rating)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) |
 
 | Reliability | Security | Technical Debt | Vulnerabilities |
 |-------------|----------|----------------|-----------------|
-| [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=security_rating)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_index)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) | [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=afonsoft_EAF2&branch=main) |
+| [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=reliability_rating)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=security_rating)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_index)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) | [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=vulnerabilities)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2) |
 
 ### Downloads
 
