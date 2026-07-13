@@ -584,6 +584,95 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
             await Should.NotThrowAsync(async () => await sut.CheckIsEnabledPublic(null!));
         }
 
+        [Fact]
+        public async Task Dado_TenantNulo_Quando_CreateUserAsync_Entao_DeveRetornarUsuarioBase()
+        {
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var user = await sut.CreateUserAsync("user", null!);
+
+            user.ShouldNotBeNull();
+            user.UserName.ShouldBe("user");
+        }
+
+        [Fact]
+        public async Task Dado_TenantNuloEUsuarioComEmail_Quando_CreateUserAsync_Entao_DeveRetornarUsuarioBase()
+        {
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var user = await sut.CreateUserAsync("user@example.com", null!);
+
+            user.ShouldNotBeNull();
+            user.UserName.ShouldBe("user");
+        }
+
+        [Fact]
+        public async Task Dado_TenantNulo_Quando_UpdateUserAsync_Entao_DeveManterUsuarioOriginal()
+        {
+            var sut = CriarSut(domain: "example.com");
+            sut.LdapContextToReturn = Substitute.For<ILdapConnection>();
+            sut.LdapContextToReturn.SearchAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<bool>()).Returns(callInfo => CriarSearchResults());
+
+            var user = new TestUser { UserName = "olduser", Name = "Old", Surname = "Surname", EmailAddress = "old@example.com" };
+            await sut.UpdateUserAsync(user, null!);
+
+            user.UserName.ShouldBe("olduser");
+            user.Name.ShouldBe("Old");
+            user.EmailAddress.ShouldBe("old@example.com");
+        }
+
+        [Fact]
+        public async Task Dado_TenantNaoNulo_UserNameEPasswordNulos_Quando_CreateLdapContext_Entao_DeveUsarConfiguracoes()
+        {
+            var sut = CriarSut(userName: "admin", password: "secret");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(new TestTenant(), null, null));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TenantNaoNulo_UserNameFornecido_Quando_CreateLdapContext_Entao_DevePrefixarUserName()
+        {
+            var sut = CriarSut(domain: "example", container: "DC=example,DC=com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(new TestTenant(), "admin", "secret"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TenantNaoNulo_DominioComDC_Quando_CreateLdapContext_Entao_DeveNaoPrefixarUserName()
+        {
+            var sut = CriarSut(domain: "DC=example,DC=com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(new TestTenant(), "admin", "secret"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TenantNaoNulo_DominioComPonto_Quando_CreateLdapContext_Entao_DeveNaoPrefixarUserName()
+        {
+            var sut = CriarSut(domain: "example.com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(new TestTenant(), "admin", "secret"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TenantNaoNulo_ContainerComDC_Quando_CreateLdapContext_Entao_DeveManterContainer()
+        {
+            var sut = CriarSut(domain: "localhost", container: "DC=example,DC=com");
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(new TestTenant(), "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TenantNaoNulo_ContainerVazioComDominioComPonto_Quando_CreateLdapContext_Entao_DeveTransformarContainer()
+        {
+            var sut = CriarSut(domain: "example.com", container: string.Empty);
+            var ex = await Should.ThrowAsync<AbpException>(async () => await sut.CreateLdapContextBaseAsync(new TestTenant(), "user", "pass"));
+            ex.Message.ShouldNotBeNull();
+        }
+
         private static ILdapSearchResults CriarSearchResultsComErro()
         {
             var search = Substitute.For<ILdapSearchResults>();

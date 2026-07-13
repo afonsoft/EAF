@@ -1,11 +1,12 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260712-priority45-coverage-audit`
+Last session branch: `feature/devin-20260713-priority46-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
 Current coverage (after P44): Line 96.1%, Branch 82.0%, Method 99.1%.
 Current coverage (after P45): Line 96.2%, Branch 82.3%, Method 99.1%.
+Current coverage (after P46): Line 96.2%, Branch 82.6%, Method 99.1% (4377 tests, 4376 passing, 1 skipped).
 
 ## Mocking gotchas
 - `UserManager.GetUserByLoginAsync(string userName, int? tanantId)` is non-virtual; cannot be mocked with `NSubstitute.Returns`. Tests must rely on the underlying `_userRepository` substitute defaulting to null.
@@ -53,6 +54,15 @@ Current coverage (after P45): Line 96.2%, Branch 82.3%, Method 99.1%.
 |- `Substitute.For<ILdapConnection>()` `SearchAsync` returns `Task<ILdapSearchResults>`; use `.Returns(callInfo => CriarSearchResults())` instead of `.Returns(CriarSearchResults())` when `CriarSearchResults` configures other substitutes, so `NSubstitute` does not lose the last call context.
 |- `LdapAuthenticationSource.CreateUserAsync` delegates to `DefaultExternalAuthenticationSource.CreateUserAsync`, which sets `IsEmailConfirmed` and `IsActive` to `true`; do not assert these flags when testing the empty-search result branch.
 |- `MiddlewareWebCoreModule.PostInitialize` with `Hangfire:IsEnabled=true` and `Database:Provider=SqlServer` plus `ConnectionStrings:Default` sets `JobStorage.Current = new SqlServerStorage(...)`; set `Auditing.IsEnabled=true` and `EntityHistory.IsEnabled=true` to exercise `SetExpiredAuditWoker`/`SetExpiredHistoryEntityWoker` and `RecurringJob.AddOrUpdate`.
+
+## P46 gotchas
+- `LdapAuthenticationSource` `CreateUserAsync`/`UpdateUserAsync` with `tenant == null` reuses the same code paths; add `tenant` null tests to cover the `tenant?.Id` branches and `GetDomain`/`GetContainer` null-tenant fallbacks.
+- `LdapAuthenticationSource.CreateLdapContext` has separate branch logic for domain/container strings containing `DC=`, `.` or `\`; test these combinations to raise branch coverage without a real LDAP server.
+- `CreateLdapContext` with `userName`/`password` null falls back to configured credentials; the `userName != null` prefix branch only runs when the domain does not contain `DC=` or `.`.
+- `HangFireConfigurer.ResolveStorageType` defaults to `InMemory` when `Hangfire:IsInMemoryDatabase=false`, `Database:Provider` is not `SqlServer`/`MSSQL` and `RedisCache:IsEnabled`/`IsRedisEnabled` are false.
+- `MiddlewareWebCoreModule.PostInitialize` `JobStorage.Current` is always reassigned; `recurringJobs`/`failedJobs` loops cannot be populated without real Hangfire infrastructure.
+- `MiddlewareWebCoreModule.SetAppFolders` `CompositeFileProvider` catch is not triggered by a single `null` `IFileProvider`; it requires an `IEnumerable<IFileProvider>` overload to throw.
+- SonarCloud link in READMEs should point to `https://sonarcloud.io/project/overview?id=afonsoft_EAF2`, not `summary/overall?id=afonsoft_EAF2&branch=main`.
 
 ## P45 gotchas
 - `LdapAuthenticationSource` `GetAttribute` returns `null` when the attribute is missing; the `mail` attribute fallback returns `String.Empty` and the `EmailAddress` is `null` because the `Name` is split by `StringSplitOptions.None` and joined with space.
