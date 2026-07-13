@@ -56,7 +56,7 @@ namespace Eaf.Middleware.Core.Editions
             var amount = GetPaymentAmountOrNull(paymentPeriodType);
             if (!amount.HasValue)
             {
-                throw new Exception("No price information found for " + DisplayName + " edition!");
+                throw new InvalidOperationException("No price information found for " + DisplayName + " edition!");
             }
 
             return amount.Value;

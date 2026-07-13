@@ -71,7 +71,7 @@ namespace Eaf.Middleware.Timing
                 return timezoneSettingDefinition.DefaultValue;
             }
 
-            throw new Exception("Unknown scope for default timezone setting.");
+            throw new InvalidOperationException("Unknown scope for default timezone setting.");
         }
 
         /// <summary>

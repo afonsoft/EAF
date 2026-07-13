@@ -111,7 +111,7 @@ namespace Eaf.AspNetCore.Hangfire
             }
         }
 
-        private void GetTenantIdClaim(string jwtToken, out Claim id, out Claim tenanIdClaim, out Claim userIdentifierString)
+        private static void GetTenantIdClaim(string jwtToken, out Claim id, out Claim tenanIdClaim, out Claim userIdentifierString)
         {
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
             JwtSecurityToken securityToken = handler.ReadToken(jwtToken) as JwtSecurityToken;
@@ -121,7 +121,7 @@ namespace Eaf.AspNetCore.Hangfire
             tenanIdClaim = securityToken.Claims.FirstOrDefault(claim => claim.Type == AbpClaimTypes.TenantId);
         }
 
-        private bool IsPermissionGranted(DashboardContext context, UserIdentifier userIdentifier, params string[] requiredPermissionName)
+        private static bool IsPermissionGranted(DashboardContext context, UserIdentifier userIdentifier, params string[] requiredPermissionName)
         {
             if (userIdentifier == null)
                 return false;
@@ -135,7 +135,7 @@ namespace Eaf.AspNetCore.Hangfire
             return true;
         }
 
-        private string GetToken(DashboardContext context)
+        private static string GetToken(DashboardContext context)
         {
             string jwtToken = "";
             string[] auths = { "auth", "authtoken", "token", "accesstoken", "eaf.authtoken" };

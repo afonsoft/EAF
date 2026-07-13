@@ -1,4 +1,5 @@
 using Abp.Extensions;
+using System;
 using System.Text.RegularExpressions;
 
 namespace Eaf.Middleware.Validation
@@ -22,7 +23,7 @@ namespace Eaf.Middleware.Validation
                 return false;
             }
 
-            var regex = new Regex(EmailRegex);
+            var regex = new Regex(EmailRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
             return regex.IsMatch(value);
         }
     }

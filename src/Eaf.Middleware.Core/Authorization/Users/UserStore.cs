@@ -49,7 +49,7 @@ namespace Eaf.Middleware.Authorization.Users
         /// <returns>Resultado da operação.</returns>
         public User GetUserById(long id)
         {
-            var user = UserRepository.GetAll().Where(d => d.Id == id).FirstOrDefault();
+            var user = UserRepository.GetAll().FirstOrDefault(d => d.Id == id);
             if (user == null)
                 throw new AbpException("There is no user: " + id);
 

@@ -9,14 +9,14 @@ namespace Eaf.Middleware.Web.Core.Tests.Security
         [Fact]
         public void Dado_UserIdentifierClaimType_Quando_Verificar_Entao_DeveSerCorreto()
         {
-            EafClaimTypes.UserIdentifierClaimType.ShouldBe("http://aspnetzero.com/claims/useridentifier");
+            EafClaimTypes.UserIdentifierClaimType.ShouldBe("https://aspnetzero.com/claims/useridentifier");
         }
 
         [Fact]
         public void Dado_ExternalAuthProviderformation_Quando_Verificar_Entao_DeveSerCorreto()
         {
             EafClaimTypes.ExternalAuthProviderformation
-                .ShouldBe("http://www.aspnetboilerplate.com/identity/claims/externalAuthProviderformation");
+                .ShouldBe("https://www.aspnetboilerplate.com/identity/claims/externalAuthProviderformation");
         }
 
         [Fact]

@@ -152,7 +152,7 @@ namespace Eaf.Middleware.Localization
                     defaultLanguage = (await _applicationLanguageManager.GetLanguagesAsync(AbpSession.TenantId)).FirstOrDefault();
                     if (defaultLanguage == null)
                     {
-                        throw new Exception("No language found in the application!");
+                        throw new InvalidOperationException("No language found in the application!");
                     }
                 }
 

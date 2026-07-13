@@ -27,11 +27,5 @@ namespace Eaf.Runtime.Caching.SqlServer
             IocManager.Register<SqlServerCacheOptions>();
         }
 
-        /// <summary>
-        /// PostInitialize.
-        /// </summary>
-        public override void PostInitialize()
-        {
-        }
     }
 }
