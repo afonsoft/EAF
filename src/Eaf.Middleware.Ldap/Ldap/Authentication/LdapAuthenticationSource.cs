@@ -54,7 +54,7 @@ namespace Eaf.Middleware.Ldap.Authentication
             await CheckIsEnabled(tenant);
 
             if (userNameOrEmailAddress.IndexOf("@") != -1)
-                userNameOrEmailAddress = userNameOrEmailAddress.Split("@").First();
+                userNameOrEmailAddress = userNameOrEmailAddress.Split("@")[0];
 
             var user = await base.CreateUserAsync(userNameOrEmailAddress, tenant);
 
@@ -293,7 +293,7 @@ namespace Eaf.Middleware.Ldap.Authentication
             }
 
             if (userNameOrEmailAddress.IndexOf("@") != -1)
-                userNameOrEmailAddress = userNameOrEmailAddress.Split("@").First();
+                userNameOrEmailAddress = userNameOrEmailAddress.Split("@")[0];
 
             if (OperatingSystem.IsWindows() && !_ldapModuleConfig.UseNovellProvider)
             {

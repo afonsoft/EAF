@@ -813,8 +813,8 @@ namespace Eaf.Middleware.Web.Controllers
         [UnitOfWork]
         private async Task UpdateExternalUserAsync(User user, ExternalAuthUserInfo externalLoginInfo)
         {
-            string name = externalLoginInfo.Name.Split(' ').First();
-            string surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last();
+            string name = externalLoginInfo.Name.Split(' ')[0];
+            string surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
 
             try
             {
@@ -906,8 +906,8 @@ namespace Eaf.Middleware.Web.Controllers
                         TenantId = AbpSession.TenantId,
                         UserName = username,
                         EmailAddress = externalLoginInfo.EmailAddress,
-                        Name = externalLoginInfo.Name.Split(' ').First(),
-                        Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last(),
+                        Name = externalLoginInfo.Name.Split(' ')[0],
+                        Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1],
                     };
 
                     user.Password = _passwordHasher.HashPassword(user, randomPassword);
@@ -958,8 +958,8 @@ namespace Eaf.Middleware.Web.Controllers
                 {
                     Logger.DebugFormat("RegisterExternalUser Update {0}:{1} ", username, externalLoginInfo.EmailAddress);
                     userExist.EmailAddress = externalLoginInfo.EmailAddress;
-                    userExist.Name = externalLoginInfo.Name.Split(' ').First();
-                    userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ').Last();
+                    userExist.Name = externalLoginInfo.Name.Split(' ')[0];
+                    userExist.Surname = externalLoginInfo.Surname ?? externalLoginInfo.Name.Split(' ')[^1];
                     userExist.UserName = username;
                     userExist.AuthenticationSource = externalLoginInfo.Provider;
                     userExist.ExternalAuthProviderformation = externalLoginInfo.Provider;
