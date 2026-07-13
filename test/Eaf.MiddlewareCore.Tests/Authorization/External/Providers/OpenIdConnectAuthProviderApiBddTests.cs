@@ -42,10 +42,10 @@ namespace Eaf.Middleware.Tests.Authorization.External.Providers
         }
 
         [Fact]
-        public async Task Dado_ProviderInfoComAuthorityVazia_Quando_GetUserInfo_Entao_DeveLancarApplicationException()
+        public async Task Dado_ProviderInfoComAuthorityVazia_Quando_GetUserInfo_Entao_DeveLancarAbpException()
         {
             var sut = CriarSut(new Dictionary<string, string> { ["Authority"] = "" });
-            await Should.ThrowAsync<ApplicationException>(async () => await sut.GetUserInfo("any-token"));
+            await Should.ThrowAsync<AbpException>(async () => await sut.GetUserInfo("any-token"));
         }
 
         [Fact]

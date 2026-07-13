@@ -16,6 +16,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Abp;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.Authorization.External
@@ -130,7 +131,7 @@ namespace Eaf.Middleware.Tests.Authorization.External
                 { "Authority", string.Empty }
             });
 
-            await Assert.ThrowsAsync<ApplicationException>(() => api.GetUserInfo("access-token"));
+            await Assert.ThrowsAsync<AbpException>(() => api.GetUserInfo("access-token"));
         }
 
         [Fact]
