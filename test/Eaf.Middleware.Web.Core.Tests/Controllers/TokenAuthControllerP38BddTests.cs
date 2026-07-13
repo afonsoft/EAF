@@ -1162,14 +1162,14 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, null!);
             var controller = CriarController(userManager, roleManager, logInManager);
 
-            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Static);
             method.ShouldNotBeNull();
 
             var a1 = new byte[] { 1, 2, 3 };
             var a2 = new byte[] { 1, 2, 3 };
 
             // Quando
-            var result = method.Invoke(controller, new object[] { a1, a2 });
+            var result = method.Invoke(null, new object[] { a1, a2 });
 
             // Então
             result.ShouldBe(true);
@@ -1185,14 +1185,14 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, null!);
             var controller = CriarController(userManager, roleManager, logInManager);
 
-            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = typeof(TokenAuthController).GetMethod("ByteArrayCompare", BindingFlags.NonPublic | BindingFlags.Static);
             method.ShouldNotBeNull();
 
             var a1 = new byte[] { 1, 2, 3 };
             var a2 = new byte[] { 1, 2, 4 };
 
             // Quando
-            var result = method.Invoke(controller, new object[] { a1, a2 });
+            var result = method.Invoke(null, new object[] { a1, a2 });
 
             // Então
             result.ShouldBe(false);

@@ -1167,7 +1167,7 @@ namespace Eaf.Middleware.Web.Controllers
                );
         }
 
-        private bool ByteArrayCompare(byte[]? a1, byte[]? a2)
+        private static bool ByteArrayCompare(byte[]? a1, byte[]? a2)
         {
             try
             {

@@ -57,7 +57,7 @@ namespace Eaf.Middleware.DataExporting.Excel.EpPlus
         /// </summary>
         /// <param name="sheet">Sheet <see cref="ExcelWorksheet"/></param>
         /// <param name="headerTexts">Header Texts</param>
-        protected void AddHeader(ExcelWorksheet sheet, params string[] headerTexts)
+        protected static void AddHeader(ExcelWorksheet sheet, params string[] headerTexts)
         {
             if (headerTexts.IsNullOrEmpty())
             {
@@ -76,7 +76,7 @@ namespace Eaf.Middleware.DataExporting.Excel.EpPlus
         /// <param name="sheet">Sheet <see cref="ExcelWorksheet"/></param>
         /// <param name="columnIndex">Column Index</param>
         /// <param name="headerText">Header Text</param>
-        protected void AddHeader(ExcelWorksheet sheet, int columnIndex, string headerText)
+        protected static void AddHeader(ExcelWorksheet sheet, int columnIndex, string headerText)
         {
             sheet.Cells[1, columnIndex].Value = headerText;
             sheet.Cells[1, columnIndex].Style.Font.Bold = true;
@@ -90,7 +90,7 @@ namespace Eaf.Middleware.DataExporting.Excel.EpPlus
         /// <param name="startRowIndex">Start Row Index</param>
         /// <param name="items">items <see cref="List{T}"/></param>
         /// <param name="propertySelectors">Property Selectors</param>
-        protected void AddObjects<T>(ExcelWorksheet sheet, int startRowIndex, IList<T> items, params Func<T, object>[] propertySelectors)
+        protected static void AddObjects<T>(ExcelWorksheet sheet, int startRowIndex, IList<T> items, params Func<T, object>[] propertySelectors)
         {
             if (items.IsNullOrEmpty() || propertySelectors.IsNullOrEmpty())
             {

@@ -254,7 +254,7 @@ namespace Eaf.Middleware.Authorization.Users
             }
         }
 
-        private string EncryptQueryParameters(string link, string encrptedParameterName = "c")
+        private static string EncryptQueryParameters(string link, string encrptedParameterName = "c")
         {
             if (!link.Contains("?"))
             {

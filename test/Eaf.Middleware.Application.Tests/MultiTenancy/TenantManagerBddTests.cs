@@ -13,7 +13,7 @@ namespace Eaf.Middleware.Tests.Application.MultiTenancy
         {
             var tenantManager = ManagerTestHelper.CreateTenantManager();
 
-            Should.Throw<NotImplementedException>(() => tenantManager.GetById(1));
+            Should.Throw<NotImplementedException>(() => TenantManager.GetById(1));
         }
     }
 }

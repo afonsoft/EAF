@@ -284,7 +284,7 @@ namespace Eaf.Middleware.Configuration
             };
         }
 
-        private IEnumerable<SettingDefinition> GetTenantSettings()
+        private static IEnumerable<SettingDefinition> GetTenantSettings()
         {
             return new[] {
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled, "false", isVisibleToClients: true, scopes: SettingScopes.Tenant),

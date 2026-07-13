@@ -408,7 +408,7 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             var type = typeof(ServiceBusQueueAppender);
 
             // Quando
-            var getParamsMethod = type.GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+            var getParamsMethod = type.GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Static);
 
             // Então
             getParamsMethod.ShouldNotBeNull();
@@ -435,10 +435,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             // Dado
             var appender = new ServiceBusQueueAppender();
             var getParamsMethod = typeof(ServiceBusQueueAppender)
-                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Static);
 
             // Quando
-            var result = getParamsMethod!.Invoke(appender, new object[] { 2, "INFO | server | event | message | json" });
+            var result = getParamsMethod!.Invoke(null, new object[] { 2, "INFO | server | event | message | json" });
 
             // Então
             result!.ShouldBe("event");
@@ -450,10 +450,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             // Dado
             var appender = new ServiceBusQueueAppender();
             var getParamsMethod = typeof(ServiceBusQueueAppender)
-                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Static);
 
             // Quando
-            var result = getParamsMethod!.Invoke(appender, new object[] { 0, "(null) | server" });
+            var result = getParamsMethod!.Invoke(null, new object[] { 0, "(null) | server" });
 
             // Então
             result!.ShouldBe("");
@@ -465,10 +465,10 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             // Dado
             var appender = new ServiceBusQueueAppender();
             var getParamsMethod = typeof(ServiceBusQueueAppender)
-                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Instance);
+                .GetMethod("GetParams", BindingFlags.NonPublic | BindingFlags.Static);
 
             // Quando
-            var result = getParamsMethod!.Invoke(appender, new object[] { 10, "apenas um valor" });
+            var result = getParamsMethod!.Invoke(null, new object[] { 10, "apenas um valor" });
 
             // Então
             result!.ShouldBe("Params parse error");

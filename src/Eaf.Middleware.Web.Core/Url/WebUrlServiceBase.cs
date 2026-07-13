@@ -77,7 +77,7 @@ namespace Eaf.Middleware.Web.Url
             return ReplaceTenancyNameInUrl(WebSiteRootAddressFormat, tenancyName);
         }
 
-        private string ReplaceTenancyNameInUrl(string siteRootFormat, string tenancyName)
+        private static string ReplaceTenancyNameInUrl(string siteRootFormat, string tenancyName)
         {
             if (!siteRootFormat.Contains(TenancyNamePlaceHolder))
             {
