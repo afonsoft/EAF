@@ -71,7 +71,9 @@ namespace Eaf.ProjectName.Web.Startup
             {
                 options.ConsoleExporter = false;
                 options.OtlpEndpoint = "https://otlp.nr-data.net";
-                options.OtlpVariables["OTEL_EXPORTER_OTLP_HEADERS"] = "api-key=46782092ba7b00989cc813eda016127aFFFFNRAL";
+                var otlpHeaders = _appConfiguration["OpenTelemetry:OtlpHeaders"];
+                if (!string.IsNullOrEmpty(otlpHeaders))
+                    options.OtlpVariables["OTEL_EXPORTER_OTLP_HEADERS"] = otlpHeaders;
                 options.OtlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf";
                 options.ServiceName = "Eaf.ProjectName";
                 options.SourceName = new[]
@@ -83,7 +85,6 @@ namespace Eaf.ProjectName.Web.Startup
                 };
             });
             // Add OpenTelemetry and configure it to use Azure Monitor.
-            //.UseAzureMonitor();
 
             //Configure CORS for angular2 UI
             services.AddCors(options =>
@@ -192,7 +193,10 @@ namespace Eaf.ProjectName.Web.Startup
             app.UseResponseCompression();
             app.UseEafHealthChecks();
             app.UseMiddleware<ContentSecurityPolicyMiddleware>();
-            app.UseDeveloperExceptionPage();
+            if (env.IsDevelopment())
+                app.UseDeveloperExceptionPage();
+            else
+                app.UseExceptionHandler("/Error");
             app.UseCors(ProjectNameConsts.DefaultCorsPolicyName); //Enable CORS!
             app.UseJwtTokenMiddleware();
             app.UseAbpRequestLocalization();

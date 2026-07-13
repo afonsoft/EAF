@@ -65,8 +65,5 @@ namespace Eaf.ProjectName.Web.Startup
             };
         }
 
-        public override void PostInitialize()
-        {
-        }
     }
 }

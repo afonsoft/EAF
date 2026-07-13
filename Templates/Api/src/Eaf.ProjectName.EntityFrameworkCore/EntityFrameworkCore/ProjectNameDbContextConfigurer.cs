@@ -39,9 +39,6 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                     builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     break;
 
-                case "SQLSERVER":
-                case "MSSQL":
-                case null:
                 default:
                     builder.UseSqlServer(connectionString);
                     break;
@@ -73,9 +70,6 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                     builder.UseMySql(connection, ServerVersion.AutoDetect(connection.ConnectionString));
                     break;
 
-                case "SQLSERVER":
-                case "MSSQL":
-                case null:
                 default:
                     builder.UseSqlServer(connection);
                     break;

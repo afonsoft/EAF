@@ -22,4 +22,5 @@ RUN dotnet publish "src/Eaf.Gateways.API.csproj" -c $BUILD_CONFIGURATION -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER app
 ENTRYPOINT ["dotnet", "Eaf.Gateways.API.dll"]

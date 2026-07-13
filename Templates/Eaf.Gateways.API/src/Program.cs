@@ -1,11 +1,9 @@
 using Eaf.Gateways.API;
 using Microsoft.IdentityModel.Tokens;
 using MMLib.SwaggerForOcelot.DependencyInjection;
-// using Ocelot.Administration;
 using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-// using Ocelot.Provider.Kubernetes;
 using Ocelot.Provider.Polly;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -63,7 +61,6 @@ builder.Services.AddOpenTelemetry()
         // Metrics provides by ASP.NET Core in .NET 8
         .AddMeter("Microsoft.AspNetCore.Hosting")
         .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
-        // .AddPrometheusExporter();
     });
 
 // Swagger for ocelot
@@ -71,19 +68,8 @@ builder.Services.AddSwaggerGen();
 // Add Ocelot with plugin
 builder.Services.AddOcelot(builder.Configuration)
     .AddPolly()
-    // .AddKubernetes()
     .AddCacheManager(x => x.WithDictionaryHandle())
     .AddConfigPlaceholders();
-    // .AddAdministration("/administration", o =>
-    // {
-    //     o.Authority = "BFF.Web";
-    //     o.SaveToken = true;
-    //     o.RequireHttpsMetadata = false;
-    //     o.TokenValidationParameters = new TokenValidationParameters
-    //     {
-    //         ValidateAudience = false
-    //     };
-    // });
 
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddSignalR();
