@@ -15,6 +15,7 @@ namespace Abp.Runtime.Caching.Sqlite
         private readonly ConcurrentBag<SqliteCommand>[] _commands = new ConcurrentBag<SqliteCommand>[DbCommands.Count];
         private readonly ConcurrentBag<SqliteConnection> _connections = new ConcurrentBag<SqliteConnection>();
         private readonly string _connectionString;
+        private bool _disposed;
 
         /// <summary>
         /// DbCommandPool.
@@ -109,18 +110,36 @@ namespace Abp.Runtime.Caching.Sqlite
         /// </summary>
         public void Dispose()
         {
-            foreach (var pool in _commands)
-            {
-                while (pool.TryTake(out var cmd))
-                {
-                    cmd.Dispose();
-                }
-            }
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
-            foreach (var conn in _connections)
+        /// <summary>
+        /// Dispose.
+        /// </summary>
+        /// <param name="disposing">Parâmetro disposing.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
             {
-                conn.Close();
-                conn.Dispose();
+                if (disposing)
+                {
+                    foreach (var pool in _commands)
+                    {
+                        while (pool.TryTake(out var cmd))
+                        {
+                            cmd.Dispose();
+                        }
+                    }
+
+                    foreach (var conn in _connections)
+                    {
+                        conn.Close();
+                        conn.Dispose();
+                    }
+                }
+
+                _disposed = true;
             }
         }
     }

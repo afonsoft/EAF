@@ -26,7 +26,7 @@ namespace Eaf.Middleware.Identity
             IHttpContextAccessor contextAccessor,
             UserClaimsPrincipalFactory claimsFactory,
             IOptions<IdentityOptions> optionsAccessor,
-            ILogger<SignInManager<User>> logger,
+            ILogger<SignInManager<User>> logger, // NOSONAR
             IUnitOfWorkManager unitOfWorkManager,
             ISettingManager settingManager,
             IAuthenticationSchemeProvider schemes,

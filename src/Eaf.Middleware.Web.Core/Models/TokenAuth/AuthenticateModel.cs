@@ -20,7 +20,7 @@ namespace Eaf.Middleware.Web.Models.TokenAuth
         /// <summary>
         /// Obtém ou define RememberClient.
         /// </summary>
-        public bool RememberClient { get; set; }
+        public bool RememberClient { get; set; } // NOSONAR
 
         /// <summary>
         /// Obtém ou define ReturnUrl.

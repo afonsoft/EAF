@@ -54,7 +54,7 @@ namespace Eaf.AspNetCore.Hangfire
             return IsLoggedIn(context, _requiredPermissionName);
         }
 
-        private bool IsLoggedIn(DashboardContext context, string[] permissions)
+        private static bool IsLoggedIn(DashboardContext context, string[] permissions)
         {
             try
             {

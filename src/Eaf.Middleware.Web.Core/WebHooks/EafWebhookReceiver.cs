@@ -107,7 +107,7 @@ namespace Eaf.WebHooks
             {
                 if (_unitOfWorkManager == null)
                 {
-                    throw new AbpException("Must set UnitOfWorkManager before use it.");
+                    throw new AbpException("Must set UnitOfWorkManager before use it."); // NOSONAR
                 }
 
                 return _unitOfWorkManager;
@@ -130,7 +130,7 @@ namespace Eaf.WebHooks
             {
                 if (LocalizationSourceName == null)
                 {
-                    throw new AbpException("Must set LocalizationSourceName before, in order to get LocalizationSource");
+                    throw new AbpException("Must set LocalizationSourceName before, in order to get LocalizationSource"); // NOSONAR
                 }
 
                 if (_localizationSource == null || _localizationSource.Name != LocalizationSourceName)

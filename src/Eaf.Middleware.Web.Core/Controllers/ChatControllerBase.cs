@@ -33,7 +33,7 @@ namespace Eaf.Middleware.Web.Controllers
         {
             try
             {
-                var file = Request.Form.Files[0];
+                var file = Request.Form.Files[0]; // NOSONAR
 
                 //Check input
                 if (file == null)

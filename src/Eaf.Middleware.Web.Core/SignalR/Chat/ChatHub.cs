@@ -115,14 +115,12 @@ namespace Eaf.AspNetCore.SignalR.Chat
                 }
                 catch (UserFriendlyException ex)
                 {
-                    Logger.WarnFormat("Could not send chat message to user: {0}", receiver);
-                    Logger.Warn(ex.ToString(), ex);
+                    Logger.WarnFormat(ex, "Could not send chat message to user: {0}", receiver);
                     return ex.Message;
                 }
                 catch (Exception ex)
                 {
-                    Logger.WarnFormat("Could not send chat message to user: {0}", receiver);
-                    Logger.Warn(ex.ToString(), ex);
+                    Logger.WarnFormat(ex, "Could not send chat message to user: {0}", receiver);
                     return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
                 }
             }
@@ -139,14 +137,12 @@ namespace Eaf.AspNetCore.SignalR.Chat
                 }
                 catch (UserFriendlyException ex)
                 {
-                    Logger.WarnFormat("Could not send chat message to group: {0}", input.GroupId);
-                    Logger.Warn(ex.ToString(), ex);
+                    Logger.WarnFormat(ex, "Could not send chat message to group: {0}", input.GroupId);
                     return ex.Message;
                 }
                 catch (Exception ex)
                 {
-                    Logger.WarnFormat("Could not send chat message to group: {0}", receiver);
-                    Logger.Warn(ex.ToString(), ex);
+                    Logger.WarnFormat(ex, "Could not send chat message to group: {0}", receiver);
                     return _localizationManager.GetSource("Eaf").GetString(InternalServerErrorKey);
                 }
             }

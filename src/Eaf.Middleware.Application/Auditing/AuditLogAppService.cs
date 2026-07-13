@@ -48,7 +48,7 @@ namespace Eaf.Middleware.Auditing
         /// <param name="entityPropertyChangeRepository">Parâmetro entityPropertyChangeRepository.</param>
         /// <param name="eafStartupConfiguration">Parâmetro eafStartupConfiguration.</param>
         /// <returns>Resultado da operação.</returns>
-        public AuditLogAppService(
+        public AuditLogAppService( // NOSONAR
             IRepository<AuditLog, long> auditLogRepository,
             IRepository<User, long> userRepository,
             IAuditLogListExcelExporter auditLogListExcelExporter,

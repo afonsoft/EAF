@@ -21,7 +21,7 @@ namespace Eaf.Middleware.Web.Url
         /// </summary>
         /// <param name="configurationAccessor">Parâmetro configurationAccessor.</param>
         /// <returns>Resultado da operação.</returns>
-        public WebUrlServiceBase(IAppConfigurationAccessor configurationAccessor)
+        protected WebUrlServiceBase(IAppConfigurationAccessor configurationAccessor)
         {
             _appConfiguration = configurationAccessor.Configuration;
         }

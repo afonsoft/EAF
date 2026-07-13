@@ -1,6 +1,7 @@
 // Repository Implementation Template for .NET 8+
 // Demonstrates both Dapper (performance) and EF Core (convenience) patterns
 
+using System;
 using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -372,6 +373,7 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
     private IDbContextTransaction? _transaction;
+    private bool _disposed;
 
     public IProductRepository Products { get; }
     public IOrderRepository Orders { get; }
@@ -416,8 +418,22 @@ public class UnitOfWork : IUnitOfWork
 
     public void Dispose()
     {
-        _transaction?.Dispose();
-        _context.Dispose();
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _transaction?.Dispose();
+                _context.Dispose();
+            }
+
+            _disposed = true;
+        }
     }
 }
 

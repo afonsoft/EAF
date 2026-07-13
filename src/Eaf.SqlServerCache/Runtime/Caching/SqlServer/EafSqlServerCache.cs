@@ -213,7 +213,7 @@ namespace Eaf.Runtime.Caching.SqlServer
         {
             if (objData == null)
             {
-                return default;
+                return Array.Empty<byte>();
             }
 
             try

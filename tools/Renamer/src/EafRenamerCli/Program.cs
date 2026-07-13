@@ -121,7 +121,7 @@ namespace EafRenamerCli
             isRunning = true;
             isRunningRename = true;
             isRunninginstall = true;
-            template.Log += Template_Log;
+            template.Log += (_, e) => Template_Log(e);
             template.WorkerCompleted += Template_WorkerCompleted;
             template.ProgressChanged += Template_ProgressChanged;
 
@@ -224,7 +224,7 @@ namespace EafRenamerCli
             Environment.Exit(0);
         }
 
-        private static void Template_Log(object sender, string e)
+        private static void Template_Log(string e)
         {
             Console.ForegroundColor = oldColor;
             Write(e);

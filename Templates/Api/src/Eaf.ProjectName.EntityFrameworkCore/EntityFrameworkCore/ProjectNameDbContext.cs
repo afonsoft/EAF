@@ -22,6 +22,11 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 
         public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options) : base(options)
         {
+            MigrateDatabase(Database);
+        }
+
+        private static void MigrateDatabase(DatabaseFacade database)
+        {
             if (!_created)
             {
                 try
@@ -30,7 +35,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                     if (!SkipMigrate)
                     {
                         Logger.Trace("Database Migrate started...");
-                        Database.Migrate();
+                        database.Migrate();
                     }
                 }
                 catch (Exception ex)

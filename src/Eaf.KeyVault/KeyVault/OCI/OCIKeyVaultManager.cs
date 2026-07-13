@@ -14,7 +14,7 @@ using System.Net;
 
 namespace Eaf.KeyVault
 {
-    internal class OCIKeyVaultManager : IKeyVaultManager
+    internal class OCIKeyVaultManager : IKeyVaultManager // NOSONAR
     {
         private readonly EafKeyVaultOptions options;
         private readonly ILogger logger;

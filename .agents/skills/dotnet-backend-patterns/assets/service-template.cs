@@ -69,6 +69,7 @@ public class ProductService : IProductService
     private readonly IValidator<UpdateProductRequest> _updateValidator;
     private readonly ILogger<ProductService> _logger;
     private readonly ProductServiceOptions _options;
+    private const string InternalErrorCode = "INTERNAL_ERROR";
 
     public ProductService(
         IProductRepository repository,
@@ -120,7 +121,7 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving product {ProductId}", id);
-            return Result<Product>.Failure("An error occurred while retrieving the product", "INTERNAL_ERROR");
+            return Result<Product>.Failure("An error occurred while retrieving the product", InternalErrorCode);
         }
     }
 
@@ -157,7 +158,7 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching products with request {@Request}", request);
-            return Result<PagedResult<Product>>.Failure("An error occurred while searching products", "INTERNAL_ERROR");
+            return Result<PagedResult<Product>>.Failure("An error occurred while searching products", InternalErrorCode);
         }
     }
 
@@ -199,7 +200,7 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating product with SKU {Sku}", request.Sku);
-            return Result<Product>.Failure("An error occurred while creating the product", "INTERNAL_ERROR");
+            return Result<Product>.Failure("An error occurred while creating the product", InternalErrorCode);
         }
     }
 
@@ -245,7 +246,7 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating product {ProductId}", id);
-            return Result<Product>.Failure("An error occurred while updating the product", "INTERNAL_ERROR");
+            return Result<Product>.Failure("An error occurred while updating the product", InternalErrorCode);
         }
     }
 
@@ -273,7 +274,7 @@ public class ProductService : IProductService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting product {ProductId}", id);
-            return Result<bool>.Failure("An error occurred while deleting the product", "INTERNAL_ERROR");
+            return Result<bool>.Failure("An error occurred while deleting the product", InternalErrorCode);
         }
     }
 

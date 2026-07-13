@@ -12,7 +12,7 @@ namespace Eaf.Middleware.Localization
         /// new.
         /// </summary>
         /// <returns>Resultado da operação.</returns>
-        public static readonly List<string> FlagClassNames = new()
+        public static IReadOnlyList<string> FlagClassNames { get; } = new List<string>
         {
             "famfamfam-flags zw",
             "famfamfam-flags zm",

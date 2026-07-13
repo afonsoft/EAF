@@ -37,12 +37,10 @@ namespace Abp.Runtime.Caching.Sqlite
                 }
                 value = value.Trim();
 
-                if (value.Contains("="))
-
-                    if (value.Contains("=") && !value.StartsWith("./") && !value.StartsWith("../") && !value.StartsWith("/") && !value.Contains(":") && !value.EndsWith(".db"))
-                    {
-                        throw new ArgumentException("CachePath must be a path and not a connection string!");
-                    }
+                if (value.Contains('=') && !value.StartsWith("./") && !value.StartsWith("../") && !value.StartsWith('/') && !value.Contains(':') && !value.EndsWith(".db"))
+                {
+                    throw new ArgumentException("CachePath must be a path and not a connection string!");
+                }
                 _cachePath = value;
             }
         }

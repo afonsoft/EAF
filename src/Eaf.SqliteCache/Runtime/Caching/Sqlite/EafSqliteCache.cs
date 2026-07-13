@@ -72,6 +72,9 @@ namespace Abp.Runtime.Caching.Sqlite
         public override void Set(string key, object value, TimeSpan? slidingExpireTime = null,
             DateTimeOffset? absoluteExpireTime = null)
         {
+            if (value == null)
+                throw new InvalidOperationException("Cache value cannot be null.");
+
             Commands.Use(Operation.Insert, cmd =>
             {
                 CreateForSet(cmd, FixKey(key), ObjectToByteArray(value), slidingExpireTime, absoluteExpireTime);
@@ -242,8 +245,8 @@ namespace Abp.Runtime.Caching.Sqlite
                 expiry = (expiry ?? DateTimeOffset.UtcNow) + renewal;
             }
 
-            cmd.Parameters.AddWithValue("@expiry", expiry?.Ticks ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@renewal", renewal?.Ticks ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@expiry", expiry.Value.Ticks);
+            cmd.Parameters.AddWithValue("@renewal", renewal.Value.Ticks);
         }
 
         #endregion CreateForSet and AddExpirationParameters
@@ -273,7 +276,7 @@ namespace Abp.Runtime.Caching.Sqlite
                 catch (SqliteException ex)
                 {
                     logger.Warn("Error while opening existing cache db, recreating it!", ex);
-                    db.Dispose();
+                    db?.Dispose();
                     db = null;
                     File.Delete(config.CachePath);
                     SqliteConnection.ClearAllPools();
@@ -376,7 +379,7 @@ namespace Abp.Runtime.Caching.Sqlite
         {
             if (objData == null)
             {
-                return default;
+                return Array.Empty<byte>();
             }
 
             try

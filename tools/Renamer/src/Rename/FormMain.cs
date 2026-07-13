@@ -17,6 +17,8 @@ namespace Eaf.Renamer.Win
     public partial class FormMain : Form
     {
         private readonly RenameTemplate renameTemplate;
+        private const string PromptTitle = "Prompt";
+        private const string ProjectPathMessage = "Please select the project path!";
 
         private void BtnStart_Click(object sender, EventArgs e)
         {
@@ -40,7 +42,7 @@ namespace Eaf.Renamer.Win
             };
             if (string.IsNullOrEmpty(arguments.NewProjectName))
             {
-                MessageBox.Show("Please select the project path!", "Prompt", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                MessageBox.Show(ProjectPathMessage, PromptTitle, MessageBoxButtons.OK, MessageBoxIcon.Question);
                 txtNewProjectName.Focus();
             }
             else
@@ -48,7 +50,7 @@ namespace Eaf.Renamer.Win
                 arguments.RootDir = txtRootDir.Text.Trim();
                 if (string.IsNullOrWhiteSpace(arguments.RootDir))
                 {
-                    if (DialogResult.Yes != MessageBox.Show("Please select the project path!", "Prompt", MessageBoxButtons.OK, MessageBoxIcon.Question))
+                    if (DialogResult.Yes != MessageBox.Show(ProjectPathMessage, PromptTitle, MessageBoxButtons.OK, MessageBoxIcon.Question))
                         return;
                     BtnSelect_Click(this, null);
                 }
@@ -58,7 +60,7 @@ namespace Eaf.Renamer.Win
                 }
                 else if (chk.Checked && string.IsNullOrWhiteSpace(arguments.NewAreaName))
                 {
-                    MessageBox.Show("Please type new Area name!", "Prompt", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                    MessageBox.Show("Please type new Area name!", PromptTitle, MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
                 }
                 else
                 {
@@ -123,7 +125,7 @@ namespace Eaf.Renamer.Win
                     throw e.Error;
                 }
 
-                if (DialogResult.Yes != MessageBox.Show("Processing completed successfully. Terminate EAF Renamer？", "Prompt", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk))
+                if (DialogResult.Yes != MessageBox.Show("Processing completed successfully. Terminate EAF Renamer？", PromptTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk))
                 {
                     return;
                 }
@@ -142,7 +144,7 @@ namespace Eaf.Renamer.Win
                 return;
             if (string.IsNullOrEmpty(folderBrowserDialog.SelectedPath))
             {
-                MessageBox.Show(this, "Folder path cannot be empty", "Prompt");
+                MessageBox.Show(this, "Folder path cannot be empty", PromptTitle);
             }
             else
                 txtRootDir.Text = folderBrowserDialog.SelectedPath;

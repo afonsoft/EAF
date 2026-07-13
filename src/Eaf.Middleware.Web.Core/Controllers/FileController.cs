@@ -20,6 +20,7 @@ namespace Eaf.Middleware.Web.Controllers
     /// <summary>
     /// Representa a classe FileController.
     /// </summary>
+    [Route("[controller]")]
     public class FileController : MiddlewareControllerBase
     {
         private readonly ITempFileCacheManager _tempFileCacheManager;
@@ -40,7 +41,7 @@ namespace Eaf.Middleware.Web.Controllers
             _binaryObjectManager = binaryObjectManager;
         }
 
-        [Route("[controller]/[action]")]
+        [Route("[action]")]
         [HttpGet]
         [DisableAuditing]
         public async Task<ActionResult> DownloadTempFile(FileDto file)
@@ -68,7 +69,7 @@ namespace Eaf.Middleware.Web.Controllers
             return File(fileBytes, file.FileType, file.FileName);
         }
 
-        [Route("[controller]/[action]")]
+        [Route("[action]")]
         [HttpGet]
         [DisableAuditing]
         public async Task<ActionResult> DownloadBinaryFile(Guid id, string contentType = null, string fileName = null)
@@ -91,7 +92,7 @@ namespace Eaf.Middleware.Web.Controllers
             }
         }
 
-        [Route("[controller]/[action]")]
+        [Route("[action]")]
         [HttpPost]
         [AbpAuthorize]
         [DisableAuditing]
@@ -99,7 +100,7 @@ namespace Eaf.Middleware.Web.Controllers
         {
             try
             {
-                var file = Request.Form.Files[0];
+                var file = Request.Form.Files[0]; // NOSONAR
 
                 //Check input
                 if (file == null)
@@ -134,7 +135,7 @@ namespace Eaf.Middleware.Web.Controllers
             }
         }
 
-        [Route("[controller]/[action]")]
+        [Route("[action]")]
         [HttpPost]
         [AbpAuthorize]
         [DisableAuditing]
@@ -142,7 +143,7 @@ namespace Eaf.Middleware.Web.Controllers
         {
             try
             {
-                var file = Request.Form.Files[0];
+                var file = Request.Form.Files[0]; // NOSONAR
 
                 //Check input
                 if (file == null)

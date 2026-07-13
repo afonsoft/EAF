@@ -18,10 +18,9 @@ namespace Eaf.Middleware.Web.Configuration
         /// <param name="sections">Parâmetro sections.</param>
         public static void SetConfiguration(this IAbpStartupConfiguration configuration, IEnumerable<IConfigurationSection> sections)
         {
-            foreach (var section in sections)
+            foreach (var section in sections.Where(s => s != null && s.Exists() && s.GetChildren().Any()))
             {
-                if (section != null && section.Exists() && section.GetChildren().Any())
-                    configuration.Set(section.Key, GetChildren(section));
+                configuration.Set(section.Key, GetChildren(section));
             }
         }
 

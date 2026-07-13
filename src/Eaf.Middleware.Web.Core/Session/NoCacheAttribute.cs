@@ -12,13 +12,13 @@ namespace Eaf.Middleware.Web.Session
         /// <summary>
         /// OnResultExecuting.
         /// </summary>
-        /// <param name="filterContext">Parâmetro filterContext.</param>
-        public override void OnResultExecuting(ResultExecutingContext filterContext)
+        /// <param name="context">Parâmetro context.</param>
+        public override void OnResultExecuting(ResultExecutingContext context)
         {
-            filterContext.HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-            filterContext.HttpContext.Response.Headers["Expires"] = "-1";
-            filterContext.HttpContext.Response.Headers["Pragma"] = "no-cache";
-            base.OnResultExecuting(filterContext);
+            context.HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            context.HttpContext.Response.Headers["Expires"] = "-1";
+            context.HttpContext.Response.Headers["Pragma"] = "no-cache";
+            base.OnResultExecuting(context);
         }
     }
 }

@@ -87,7 +87,7 @@ namespace Eaf.Middleware.Web.Controllers
         /// TokenAuthController.
         /// </summary>
         /// <returns>Resultado da operação.</returns>
-        public TokenAuthController(
+        public TokenAuthController( // NOSONAR
             LogInManager logInManager,
             AbpLoginResultTypeHelper AbpLoginResultTypeHelper,
             TokenAuthConfiguration configuration,
@@ -149,104 +149,96 @@ namespace Eaf.Middleware.Web.Controllers
             if (!ModelState.IsValid)
                 throw new UserFriendlyException(L("InvalidRequest"));
 
-            try
+            if (UseCaptchaOnLogin())
             {
-                if (UseCaptchaOnLogin())
-                {
-                    await ValidateReCaptcha(model.CaptchaResponse);
-                }
+                await ValidateReCaptcha(model.CaptchaResponse);
+            }
 
-                var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
-                var expiration = TimeSpan.FromSeconds(expirationSettings);
-                var currentUserName = model.UserNameOrEmailAddress.ToLower().Trim();
+            var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+            var expiration = TimeSpan.FromSeconds(expirationSettings);
+            var currentUserName = model.UserNameOrEmailAddress.ToLower().Trim();
 
-                if (model.RememberClient)
-                    expiration = TimeSpan.FromDays(365);
+            if (model.RememberClient)
+                expiration = TimeSpan.FromDays(365);
 
-                var loginResult = await GetLoginResultAsync(
-                        currentUserName,
-                        model.Password,
-                        GetTenancyNameOrNull()
-                    );
+            var loginResult = await GetLoginResultAsync(
+                    currentUserName,
+                    model.Password,
+                    GetTenancyNameOrNull()
+                );
 
-                var returnUrl = model.ReturnUrl;
+            var returnUrl = model.ReturnUrl;
 
-                if (model.SingleSignIn.HasValue && model.SingleSignIn.Value && loginResult.Result == AbpLoginResultType.Success)
-                {
-                    loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
-                    returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken, loginResult.User.Id, loginResult.User.TenantId);
-                }
+            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value && loginResult.Result == AbpLoginResultType.Success)
+            {
+                loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
+                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken, loginResult.User.Id, loginResult.User.TenantId);
+            }
 
-                //Password reset
-                if (loginResult.User.ShouldChangePasswordOnNextLogin)
-                {
-                    loginResult.User.SetNewPasswordResetCode();
-                    return new AuthenticateResultModel
-                    {
-                        ShouldResetPassword = true,
-                        PasswordResetCode = loginResult.User.PasswordResetCode,
-                        UserId = loginResult.User.Id,
-                        ReturnUrl = returnUrl
-                    };
-                }
-
-                //Two factor auth
-                await _userManager.InitializeOptionsAsync(loginResult.Tenant?.Id);
-
-                string twoFactorRememberClientToken = null;
-                if (await IsTwoFactorAuthRequiredAsync(loginResult, model))
-                {
-                    if (model.TwoFactorVerificationCode.IsNullOrEmpty())
-                    {
-                        //Add a cache item which will be checked in SendTwoFactorAuthCode to prevent sending unwanted two factor code to users.
-                        await _cacheManager
-                            .GetTwoFactorCodeCache()
-                            .SetAsync(
-                                loginResult.User.ToUserIdentifier().ToString(),
-                                new TwoFactorCodeCacheItem()
-                            );
-
-                        return new AuthenticateResultModel
-                        {
-                            RequiresTwoFactorVerification = true,
-                            UserId = loginResult.User.Id,
-                            TwoFactorAuthProviders = await _userManager.GetValidTwoFactorProvidersAsync(loginResult.User),
-                            ReturnUrl = returnUrl
-                        };
-                    }
-
-                    twoFactorRememberClientToken = await TwoFactorAuthenticateAsync(loginResult.User, model);
-                }
-
-                // One Concurrent Login
-                if (AllowOneConcurrentLoginPerUser())
-                {
-                    var identityResult = await _userManager.UpdateSecurityStampAsync(loginResult.User);
-                    if (identityResult.Succeeded)
-                    {
-                        loginResult.User.SecurityStamp = await _userManager.GetSecurityStampAsync(loginResult.User);
-                        loginResult.Identity.ReplaceClaim(new Claim(MiddlewareCoreConsts.SecurityStampKey, loginResult.User.SecurityStamp));
-                        loginResult.Identity.ReplaceClaim(new Claim(MiddlewareCoreConsts.TokenValidityValue, loginResult.User.SecurityStamp));
-                    }
-                }
-
-                //Login!
-                var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User), expiration);
+            //Password reset
+            if (loginResult.User.ShouldChangePasswordOnNextLogin)
+            {
+                loginResult.User.SetNewPasswordResetCode();
                 return new AuthenticateResultModel
                 {
-                    AccessToken = accessToken,
-                    ExpireInSeconds = (int)expiration.TotalSeconds,
-                    EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
-                    TwoFactorRememberClientToken = twoFactorRememberClientToken,
+                    ShouldResetPassword = true,
+                    PasswordResetCode = loginResult.User.PasswordResetCode,
                     UserId = loginResult.User.Id,
                     ReturnUrl = returnUrl
                 };
             }
-            catch (Exception ex)
+
+            //Two factor auth
+            await _userManager.InitializeOptionsAsync(loginResult.Tenant?.Id);
+
+            string twoFactorRememberClientToken = null;
+            if (await IsTwoFactorAuthRequiredAsync(loginResult, model))
             {
-                Logger.ErrorFormat(ex, "Authenticate : {0}", ex.Message);
-                throw;
+                if (model.TwoFactorVerificationCode.IsNullOrEmpty())
+                {
+                    //Add a cache item which will be checked in SendTwoFactorAuthCode to prevent sending unwanted two factor code to users.
+                    await _cacheManager
+                        .GetTwoFactorCodeCache()
+                        .SetAsync(
+                            loginResult.User.ToUserIdentifier().ToString(),
+                            new TwoFactorCodeCacheItem()
+                        );
+
+                    return new AuthenticateResultModel
+                    {
+                        RequiresTwoFactorVerification = true,
+                        UserId = loginResult.User.Id,
+                        TwoFactorAuthProviders = await _userManager.GetValidTwoFactorProvidersAsync(loginResult.User),
+                        ReturnUrl = returnUrl
+                    };
+                }
+
+                twoFactorRememberClientToken = await TwoFactorAuthenticateAsync(loginResult.User, model);
             }
+
+            // One Concurrent Login
+            if (AllowOneConcurrentLoginPerUser())
+            {
+                var identityResult = await _userManager.UpdateSecurityStampAsync(loginResult.User);
+                if (identityResult.Succeeded)
+                {
+                    loginResult.User.SecurityStamp = await _userManager.GetSecurityStampAsync(loginResult.User);
+                    loginResult.Identity.ReplaceClaim(new Claim(MiddlewareCoreConsts.SecurityStampKey, loginResult.User.SecurityStamp));
+                    loginResult.Identity.ReplaceClaim(new Claim(MiddlewareCoreConsts.TokenValidityValue, loginResult.User.SecurityStamp));
+                }
+            }
+
+            //Login!
+            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User), expiration);
+            return new AuthenticateResultModel
+            {
+                AccessToken = accessToken,
+                ExpireInSeconds = (int)expiration.TotalSeconds,
+                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                TwoFactorRememberClientToken = twoFactorRememberClientToken,
+                UserId = loginResult.User.Id,
+                ReturnUrl = returnUrl
+            };
         }
 
         [AbpAllowAnonymous]
@@ -257,128 +249,102 @@ namespace Eaf.Middleware.Web.Controllers
             if (!ModelState.IsValid)
                 throw new UserFriendlyException(L("InvalidRequest"));
 
-            try
+            var externalUser = await GetExternalUserInfo(model);
+
+            var loginResult = await _logInManager.LoginAsync(
+                new UserLoginInfo(model.AuthProvider, externalUser.ProviderKey, model.AuthProvider),
+                GetTenancyNameOrNull()
+            );
+            Logger.DebugFormat("ExternalAuthenticate {0}", loginResult.Result);
+
+            var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+            var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+            switch (loginResult.Result)
             {
-                var externalUser = await GetExternalUserInfo(model);
+                case AbpLoginResultType.Success:
+                    await UpdateExternalUserAsync(loginResult.User, externalUser);
+                    return await GetExternalAuthenticateResultAsync(loginResult.User, loginResult.Identity, model, expiration);
+                case AbpLoginResultType.UnknownExternalLogin:
+                    return await HandleUnknownExternalLoginAsync(externalUser, model, expiration);
+                default:
+                    throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
+                        loginResult.Result,
+                        model.ProviderKey,
+                        GetTenancyNameOrNull()
+                    );
+            }
+        }
 
-                var loginResult = await _logInManager.LoginAsync(
-                    new UserLoginInfo(model.AuthProvider, externalUser.ProviderKey, model.AuthProvider),
-                    GetTenancyNameOrNull()
-                );
-                Logger.DebugFormat("ExternalAuthenticate {0}", loginResult.Result);
+        private async Task<ExternalAuthenticateResultModel> GetExternalAuthenticateResultAsync(
+            User user,
+            ClaimsIdentity identity,
+            ExternalAuthenticateModel model,
+            TimeSpan expiration)
+        {
+            await _cacheManager
+                .GetCache(ExternalTokenInformationCacheName)
+                .SetAsync(user.ToUserIdentifier().ToString(),
+                    model.ProviderAccessCode,
+                    slidingExpireTime: TimeSpan.FromDays(1));
 
-                var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
-                var expiration = TimeSpan.FromSeconds(expirationSettings);
+            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user, model.AuthProvider));
 
-                switch (loginResult.Result)
+            var returnUrl = model.ReturnUrl;
+
+            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value)
+            {
+                user.SetSignInToken((int)expiration.TotalSeconds);
+                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, user.SignInToken, user.Id, user.TenantId);
+            }
+
+            return new ExternalAuthenticateResultModel
+            {
+                AccessToken = accessToken,
+                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                ExpireInSeconds = (int)expiration.TotalSeconds,
+                ReturnUrl = returnUrl,
+                WaitingForActivation = false,
+                UserId = user.Id
+            };
+        }
+
+        private async Task<ExternalAuthenticateResultModel> HandleUnknownExternalLoginAsync(
+            ExternalAuthUserInfo externalUser,
+            ExternalAuthenticateModel model,
+            TimeSpan expiration)
+        {
+            var newUser = await RegisterExternalUserAsync(externalUser);
+            if (!newUser.IsActive)
+            {
+                return new ExternalAuthenticateResultModel
                 {
-                    case AbpLoginResultType.Success:
-                        {
-                            await UpdateExternalUserAsync(loginResult.User, externalUser);
+                    WaitingForActivation = true
+                };
+            }
 
-                            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User, model.AuthProvider));
+            //Try to login again with newly registered user!
+            var loginResult = await _logInManager.LoginAsync(
+                new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider),
+                GetTenancyNameOrNull()
+            );
 
-                            var returnUrl = model.ReturnUrl;
+            Logger.DebugFormat("ExternalAuthenticate - UnknownExternalLogin {0}", loginResult.Result);
 
-                            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value &&
-                                loginResult.Result == AbpLoginResultType.Success)
-                            {
-                                loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
-                                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken,
-                                    loginResult.User.Id, loginResult.User.TenantId);
-                            }
-
-                            await _cacheManager
-                                  .GetCache(ExternalTokenInformationCacheName)
-                                  .SetAsync(loginResult.User.ToUserIdentifier().ToString(),
-                                      model.ProviderAccessCode,
-                                      slidingExpireTime: TimeSpan.FromDays(1));
-
-                            return new ExternalAuthenticateResultModel
-                            {
-                                AccessToken = accessToken,
-                                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
-                                ExpireInSeconds = (int)expiration.TotalSeconds,
-                                ReturnUrl = returnUrl,
-                                WaitingForActivation = false,
-                                UserId = loginResult.User.Id
-                            };
-                        }
-                    case AbpLoginResultType.UnknownExternalLogin:
-                        {
-                            var newUser = await RegisterExternalUserAsync(externalUser);
-                            if (!newUser.IsActive)
-                            {
-                                return new ExternalAuthenticateResultModel
-                                {
-                                    WaitingForActivation = true
-                                };
-                            }
-
-                            //Try to login again with newly registered user!
-                            loginResult = await _logInManager.LoginAsync(
-                                new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider),
-                                GetTenancyNameOrNull()
-                            );
-
-                            Logger.DebugFormat("ExternalAuthenticate - UnknownExternalLogin {0}", loginResult.Result);
-
-                            if (loginResult.Result != AbpLoginResultType.Success)
-                            {
-                                loginResult = await _logInManager.CreateLoginResultAsync(newUser);
-                                if (loginResult.Result != AbpLoginResultType.Success)
-                                {
-                                    throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
-                                        loginResult.Result,
-                                        model.ProviderKey,
-                                        GetTenancyNameOrNull()
-                                    );
-                                }
-                            }
-
-                            await _cacheManager
-                                .GetCache(ExternalTokenInformationCacheName)
-                                .SetAsync(loginResult.User.ToUserIdentifier().ToString(),
-                                    model.ProviderAccessCode,
-                                    slidingExpireTime: TimeSpan.FromDays(1));
-
-                            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User, model.AuthProvider));
-
-                            var returnUrl = model.ReturnUrl;
-
-                            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value &&
-                               loginResult.Result == AbpLoginResultType.Success)
-                            {
-                                loginResult.User.SetSignInToken((int)expiration.TotalSeconds);
-                                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken,
-                                    loginResult.User.Id, loginResult.User.TenantId);
-                            }
-
-                            return new ExternalAuthenticateResultModel
-                            {
-                                AccessToken = accessToken,
-                                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
-                                ExpireInSeconds = (int)expiration.TotalSeconds,
-                                ReturnUrl = returnUrl,
-                                WaitingForActivation = false,
-                                UserId = loginResult.User.Id
-                            };
-                        }
-                    default:
-                        {
-                            throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
-                                loginResult.Result,
-                                model.ProviderKey,
-                                GetTenancyNameOrNull()
-                            );
-                        }
+            if (loginResult.Result != AbpLoginResultType.Success)
+            {
+                loginResult = await _logInManager.CreateLoginResultAsync(newUser);
+                if (loginResult.Result != AbpLoginResultType.Success)
+                {
+                    throw _AbpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
+                        loginResult.Result,
+                        model.ProviderKey,
+                        GetTenancyNameOrNull()
+                    );
                 }
             }
-            catch (Exception ex)
-            {
-                Logger.ErrorFormat(ex, "Error in ExternalAuthenticate {0}", ex.Message);
-                throw;
-            }
+
+            return await GetExternalAuthenticateResultAsync(loginResult.User, loginResult.Identity, model, expiration);
         }
 
         [AbpAllowAnonymous]
@@ -386,44 +352,36 @@ namespace Eaf.Middleware.Web.Controllers
         public async Task<ExternalAuthenticateResultModel> TeamsAuthenticate(
            [FromBody] string idToken)
         {
-            try
+            bool microsoftEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled);
+
+            if (!microsoftEnabled)
+                throw new AbpException("Microsoft Provider is not enabled in HostSettings");
+
+            var microsoftSettings = await SettingManager.GetSettingValueForApplicationAsync(AppSettings.ExternalLoginProvider.Host.Microsoft);
+
+            if (microsoftSettings.IsNullOrWhiteSpace())
+                throw new AbpException("Microsoft Provider is not configured in HostSettings");
+
+            var microsoft = microsoftSettings.FromJsonString<MicrosoftExternalLoginProviderSettings>();
+
+            var authenticationResult = await GetAccessTokenOnBehalfUserAsync(idToken, microsoft.ClientId, microsoft.ClientSecret, microsoft.TenantId);
+            Logger.DebugFormat("TeamsAuthenticate - authenticationResult {0}", authenticationResult);
+
+            if (authenticationResult == null
+                || authenticationResult.AccessToken.IsNullOrWhiteSpace())
+                throw new AbpException("authenticationResult is null in GetAccessTokenOnBehalfUser");
+
+            var model = new ExternalAuthenticateModel
             {
-                bool MicrosoftEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled);
+                AuthProvider = "Microsoft",
+                ReturnUrl = "",
+                SingleSignIn = false,
+                ProviderKey = authenticationResult.UniqueId ?? authenticationResult.IdToken,
+                ProviderAccessCode = authenticationResult.AccessToken
+            };
 
-                if (!MicrosoftEnabled)
-                    throw new AbpException("Microsoft Provider is not enabled in HostSettings");
-
-                var microsoftSettings = await SettingManager.GetSettingValueForApplicationAsync(AppSettings.ExternalLoginProvider.Host.Microsoft);
-
-                if (microsoftSettings.IsNullOrWhiteSpace())
-                    throw new AbpException("Microsoft Provider is not configured in HostSettings");
-
-                var Microsoft = microsoftSettings.FromJsonString<MicrosoftExternalLoginProviderSettings>();
-
-                var authenticationResult = await GetAccessTokenOnBehalfUserAsync(idToken, Microsoft.ClientId, Microsoft.ClientSecret, Microsoft.TenantId);
-                Logger.DebugFormat("TeamsAuthenticate - authenticationResult {0}", authenticationResult);
-
-                if (authenticationResult == null
-                    || authenticationResult.AccessToken.IsNullOrWhiteSpace())
-                    throw new AbpException("authenticationResult is null in GetAccessTokenOnBehalfUser");
-
-                var model = new ExternalAuthenticateModel
-                {
-                    AuthProvider = "Microsoft",
-                    ReturnUrl = "",
-                    SingleSignIn = false,
-                    ProviderKey = authenticationResult.UniqueId ?? authenticationResult.IdToken,
-                    ProviderAccessCode = authenticationResult.AccessToken
-                };
-
-                Logger.DebugFormat("TeamsAuthenticate Final -> ExternalAuthenticate {0}", model);
-                return await ExternalAuthenticate(model);
-            }
-            catch (Exception ex)
-            {
-                Logger.ErrorFormat(ex, "TeamsAuthenticate Error {0}", ex.Message);
-                throw;
-            }
+            Logger.DebugFormat("TeamsAuthenticate Final -> ExternalAuthenticate {0}", model);
+            return await ExternalAuthenticate(model);
         }
 
         [AbpAllowAnonymous]
@@ -767,7 +725,7 @@ namespace Eaf.Middleware.Web.Controllers
             var userInfo = await _externalAuthManager.GetUserInfo(model.AuthProvider, model.ProviderAccessCode);
             if (!ProviderKeysAreEqual(model, userInfo))
             {
-                Logger.DebugFormat("ProviderKey Invalid model {0} != {1}", model?.ProviderKey, userInfo?.ProviderKey);
+                Logger.DebugFormat("ProviderKey Invalid model {0} != {1}", model.ProviderKey, userInfo.ProviderKey);
                 throw new UserFriendlyException(L("CouldNotValidateExternalUser"));
             }
 
@@ -923,17 +881,9 @@ namespace Eaf.Middleware.Web.Controllers
         [UnitOfWork]
         private async Task<User> RegisterExternalUserAsync(ExternalAuthUserInfo externalLoginInfo)
         {
-            try
-            {
-                var user = await GetOrCreateExternalUserAsync(externalLoginInfo);
-                await SaveExternalProfilePictureAsync(user, externalLoginInfo);
-                return user;
-            }
-            catch (Exception ex)
-            {
-                Logger.ErrorFormat(ex, "Error on RegisterExternalUserAsync {0}", externalLoginInfo.EmailAddress);
-                throw;
-            }
+            var user = await GetOrCreateExternalUserAsync(externalLoginInfo);
+            await SaveExternalProfilePictureAsync(user, externalLoginInfo);
+            return user;
         }
 
         private async Task<User> GetOrCreateExternalUserAsync(ExternalAuthUserInfo externalLoginInfo)
@@ -1146,25 +1096,23 @@ namespace Eaf.Middleware.Web.Controllers
                     IssuerSigningKey = _configuration.SecurityKey
                 };
 
-                foreach (var validator in _jwtOptions.Value.SecurityTokenValidators)
+                foreach (var validator in _jwtOptions.Value.SecurityTokenValidators
+                    .Where(v => v.CanReadToken(authenticateModel.TwoFactorRememberClientToken)))
                 {
-                    if (validator.CanReadToken(authenticateModel.TwoFactorRememberClientToken))
+                    try
                     {
-                        try
+                        var principal = validator.ValidateToken(authenticateModel.TwoFactorRememberClientToken, validationParameters, out _);
+                        var useridentifierClaim = principal.FindFirst(c => c.Type == EafClaimTypes.UserIdentifierClaimType);
+                        if (useridentifierClaim == null)
                         {
-                            var principal = validator.ValidateToken(authenticateModel.TwoFactorRememberClientToken, validationParameters, out _);
-                            var useridentifierClaim = principal.FindFirst(c => c.Type == EafClaimTypes.UserIdentifierClaimType);
-                            if (useridentifierClaim == null)
-                            {
-                                return false;
-                            }
+                            return false;
+                        }
 
-                            return useridentifierClaim.Value == userIdentifier.ToString();
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Debug(ex.ToString(), ex);
-                        }
+                        return useridentifierClaim.Value == userIdentifier.ToString();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug(ex.Message, ex);
                     }
                 }
             }
@@ -1250,27 +1198,18 @@ namespace Eaf.Middleware.Web.Controllers
             string ClientSecret,
             string TenantId)
         {
-            try
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientId)
+                                            .WithClientSecret(ClientSecret)
+                                            .WithAuthority($"https://login.microsoftonline.com/{TenantId}")
+                                            .Build();
+            UserAssertion assert = new UserAssertion(idToken);
+            List<string> scopes = new List<string>
             {
-                Logger.DebugFormat("ClientId {0} | ClientSecret {1}", ClientId, ClientSecret);
-                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientId)
-                                                .WithClientSecret(ClientSecret)
-                                                .WithAuthority($"https://login.microsoftonline.com/{TenantId}")
-                                                .Build();
-                UserAssertion assert = new UserAssertion(idToken);
-                List<string> scopes = new List<string>
-                {
-                    "https://graph.microsoft.com/User.Read"
-                };
-                // Acquires an access token for this application (usually a Web API) from the authority configured in the application.
-                var responseToken = await app.AcquireTokenOnBehalfOf(scopes, assert).ExecuteAsync();
-                return responseToken;
-            }
-            catch (Exception ex)
-            {
-                Logger.WarnFormat(ex, "GetAccessTokenOnBehalfUserAsync: {0}", ex.Message);
-                throw;
-            }
+                "https://graph.microsoft.com/User.Read"
+            };
+            // Acquires an access token for this application (usually a Web API) from the authority configured in the application.
+            var responseToken = await app.AcquireTokenOnBehalfOf(scopes, assert).ExecuteAsync();
+            return responseToken;
         }
     }
 }
