@@ -1,4 +1,3 @@
-﻿using Abp.Configuration.Startup;
 using Abp.Dependency;
 using Abp.Domain.Uow;
 using Abp.Extensions;
@@ -14,19 +13,16 @@ namespace Eaf.ProjectName.Migrator
         public Log Log { get; private set; }
 
         private readonly ProjectNameDbMigrator _migrator;
-        private readonly IAbpStartupConfiguration _startupConfiguration;
         private readonly DefaultConnectionStringResolver _connectionStringResolver;
 
         public MigrateExecuter(
             Log log,
             ProjectNameDbMigrator migrator,
-            IAbpStartupConfiguration startupConfiguration,
             DefaultConnectionStringResolver connectionStringResolver
         )
         {
             Log = log;
             _migrator = migrator;
-            _startupConfiguration = startupConfiguration;
             _connectionStringResolver = connectionStringResolver;
         }
 

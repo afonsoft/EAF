@@ -1,5 +1,4 @@
 using Abp.Authorization.Users;
-using Abp.Configuration;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
 using Abp.Runtime.Caching;
@@ -27,7 +26,6 @@ namespace Eaf.Middleware.Authorization.Impersonation
         private readonly UserClaimsPrincipalFactory _principalFactory;
         private readonly UserManager _userManager;
         private readonly IRepository<UserToken, long> _userTokenRepository;
-        private readonly ISettingManager _settingManager;
 
         /// <summary>
         /// ImpersonationManager.
@@ -36,20 +34,17 @@ namespace Eaf.Middleware.Authorization.Impersonation
         /// <param name="userManager">Parâmetro userManager.</param>
         /// <param name="principalFactory">Parâmetro principalFactory.</param>
         /// <param name="userTokenRepository">Parâmetro userTokenRepository.</param>
-        /// <param name="settingManager">Parâmetro settingManager.</param>
         /// <returns>Resultado da operação.</returns>
         public ImpersonationManager(
             ICacheManager cacheManager,
             UserManager userManager,
             UserClaimsPrincipalFactory principalFactory,
-            IRepository<UserToken, long> userTokenRepository,
-            ISettingManager settingManager)
+            IRepository<UserToken, long> userTokenRepository)
         {
             _cacheManager = cacheManager;
             _userManager = userManager;
             _principalFactory = principalFactory;
             _userTokenRepository = userTokenRepository;
-            _settingManager = settingManager;
 
             AbpSession = NullAbpSession.Instance;
             LocalizationSourceName = Localization.MiddlewareLocalizationHelper.DefaultSourceName;

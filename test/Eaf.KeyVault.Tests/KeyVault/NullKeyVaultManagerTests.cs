@@ -23,11 +23,10 @@ namespace Eaf.KeyVault.Tests.KeyVault
         public void NullKeyVaultManager_ShouldBeInstantiable()
         {
             // Arrange
-            var options = new EafKeyVaultOptions();
             var logger = Substitute.For<ILogger>();
 
             // Act
-            var manager = new NullKeyVaultManager(options, logger);
+            var manager = new NullKeyVaultManager(logger);
 
             // Assert
             manager.ShouldNotBeNull();

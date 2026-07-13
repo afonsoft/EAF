@@ -10,19 +10,17 @@ namespace Eaf.KeyVault.Tests
     public class NullKeyVaultManagerTests
     {
         private readonly ILogger _logger;
-        private readonly EafKeyVaultOptions _options;
 
         public NullKeyVaultManagerTests()
         {
             _logger = Substitute.For<ILogger>();
-            _options = new EafKeyVaultOptions();
         }
 
         [Fact]
         public void GetKeyValues_ShouldReturnEmptyDictionary()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act
             var result = manager.GetKeyValues();
@@ -38,7 +36,7 @@ namespace Eaf.KeyVault.Tests
         public async Task GetKeyValuesAsync_ShouldReturnEmptyDictionary()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act
             var result = await manager.GetKeyValuesAsync();
@@ -54,7 +52,7 @@ namespace Eaf.KeyVault.Tests
         public void GetValue_ShouldReturnNull()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
             var key = "test-key";
 
             // Act
@@ -69,7 +67,7 @@ namespace Eaf.KeyVault.Tests
         public async Task GetValueAsync_ShouldReturnNull()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
             var key = "test-key";
 
             // Act
@@ -84,7 +82,7 @@ namespace Eaf.KeyVault.Tests
         public void SetValue_ShouldNotThrow()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
             var key = "test-key";
             var value = "test-value";
 
@@ -97,7 +95,7 @@ namespace Eaf.KeyVault.Tests
         public async Task SetValueAsync_ShouldNotThrow()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
             var key = "test-key";
             var value = "test-value";
 
@@ -115,7 +113,7 @@ namespace Eaf.KeyVault.Tests
         public void GetValue_WithDifferentKeys_ShouldAlwaysReturnNull(string? key)
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act
             var result = manager.GetValue(key);
@@ -133,7 +131,7 @@ namespace Eaf.KeyVault.Tests
         public void SetValue_WithDifferentValues_ShouldNotThrow(string? value)
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act & Assert
             Should.NotThrow(() => manager.SetValue("test-key", value));
@@ -143,28 +141,14 @@ namespace Eaf.KeyVault.Tests
         public void Constructor_WithNullLogger_ShouldNotThrow()
         {
             // Arrange & Act & Assert
-            Should.NotThrow(() => new NullKeyVaultManager(_options, null));
-        }
-
-        [Fact]
-        public void Constructor_WithNullOptions_ShouldNotThrow()
-        {
-            // Arrange & Act & Assert
-            Should.NotThrow(() => new NullKeyVaultManager(null, _logger));
-        }
-
-        [Fact]
-        public void Constructor_WithNullOptionsAndLogger_ShouldNotThrow()
-        {
-            // Arrange & Act & Assert
-            Should.NotThrow(() => new NullKeyVaultManager(null, null));
+            Should.NotThrow(() => new NullKeyVaultManager(null));
         }
 
         [Fact]
         public void MultipleOperations_ShouldBeConsistent()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act & Assert
             manager.GetKeyValues().ShouldBeEmpty();
@@ -184,7 +168,7 @@ namespace Eaf.KeyVault.Tests
         public async Task MultipleAsyncOperations_ShouldBeConsistent()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act & Assert
             (await manager.GetKeyValuesAsync()).ShouldBeEmpty();
@@ -204,7 +188,7 @@ namespace Eaf.KeyVault.Tests
         public void GetKeyValues_MultipleCalls_ShouldReturnNewInstancesButEmpty()
         {
             // Arrange
-            var manager = new NullKeyVaultManager(_options, _logger);
+            var manager = new NullKeyVaultManager(_logger);
 
             // Act
             var result1 = manager.GetKeyValues();
