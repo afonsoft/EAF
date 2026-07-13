@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority50-coverage-audit`
+Last session branch: `feature/devin-20260713-priority51-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -11,6 +11,14 @@ Current coverage (after P47): Line 96.2%, Branch 82.8%, Method 99.1% (4388 tests
 Current coverage (after P48): Line 96.3%, Branch 83.0%, Method 99.1% (4388 tests, 4387 passing, 1 skipped). Build warnings: 141.
 Current coverage (after P49): Line 96.3%, Branch 82.9%, Method 99.2% (4393 tests, 4392 passing, 1 skipped). Build warnings: 140.
 Current coverage (after P50): Line 96.4%, Branch 83.0%, Method 99.4% (4397 tests, 4396 passing, 1 skipped). Build warnings: 142.
+Current coverage (after P51): Line 96.4%, Branch 83.0%, Method 99.3% (4401 tests, 4400 passing, 1 skipped). Build warnings: 159.
+
+## P51 gotchas
+- `WorkerContentFileProvider` uncovered lines were the `if (fileInfo.Exists)` return and `if (directory.Exists)` return. Create a real temp file and subdirectory under `IHostEnvironment.ContentRootPath` to cover both branches.
+- `MiddlewareWorkerModule.PreInitialize` registers `Configuration.ReplaceService(typeof(IEmailSenderConfiguration), ...)` as a lambda. The lambda body is not executed during `PreInitialize`; invoke it via `configuration.GetType().GetProperty("ServiceReplaceActions")` and assert the `IEmailSenderConfiguration` component is registered in the `IocContainer`.
+- `AuthZeroAuthProviderApi.GetUserInfo` has branches for empty `Endpoint` (throws `AbpException`), non-`https` domain prefix, and the `Picture` base64 conversion (`bytes.Any()`). Supply a mocked `HttpClient` with `HttpStatusCode.OK` and `StringContent` for the picture URL to exercise the base64 branch.
+- `LdapAuthenticationSource` and `MiddlewareWebCoreModule` still contain branches that are infeasible on Linux (real LDAP, Hangfire infrastructure, `??` constructor fallback). Document these as inalcançáveis rather than changing production code.
+- `UserAppService`, `TokenAuthController`, `MiddlewareControllerBase`, `UserManager`, `ChatAppService`, `FriendshipAppService`, `ChatMessageManager`, `PermissionAppService`, `ProfileAppService`, `MiddlewareCoreModule`, `AzureActiveDirectoryAuthenticationSource`, `LdapSettings`, `EafKeyVaultConfigurationProvider`, `ServiceBusQueueAppender`, `DefaultLanguagesCreator` and `TenantRoleAndUserBuilder` remain as accessible targets for P52.
 
 ## P50 gotchas
 - `NamespaceStripper.StripGenericNamespace` has a final `for` loop that appends `>` for unclosed `openBracketCount`. A generic name like `System.Collections.Generic.List`1[[Foo]]` (no comma in the type argument) leaves `openBracketCount` > 0 and covers the loop.
