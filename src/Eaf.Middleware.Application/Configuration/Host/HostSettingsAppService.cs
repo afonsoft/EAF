@@ -440,77 +440,47 @@ namespace Eaf.Middleware.Configuration.Host
         private async Task UpdateExternalLoginSettingsAsync(ExternalLoginProviderSettingsEditDto input)
         {
             if (input == null) return;
-            bool OpenIdConnectEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled);
-            bool MicrosoftEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled);
-            bool GoogleEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled);
-            bool AuthZeroEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled);
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-              AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled,
-               input.Google == null || !input.Google.IsValid()
-               ? AuthZeroEnabled.ToString().ToLower()
-               : input.AuthZero_IsEnabled.ToString().ToLower()
-          );
+            bool openIdConnectEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled);
+            bool microsoftEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled);
+            bool googleEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled);
+            bool authZeroEnabled = await SettingManager.GetSettingValueForApplicationAsync<bool>(AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled);
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-                AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled,
-                 input.Google == null || !input.Google.IsValid()
-                 ? GoogleEnabled.ToString().ToLower()
-                 : input.Google_IsEnabled.ToString().ToLower()
-            );
+            await SetExternalLoginToggleAsync(AppSettings.ExternalLoginProvider.Tenant.AuthZero_IsEnabled, authZeroEnabled, input.AuthZero, input.AuthZero_IsEnabled);
+            await SetExternalLoginToggleAsync(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled, googleEnabled, input.Google, input.Google_IsEnabled);
+            await SetExternalLoginToggleAsync(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled, microsoftEnabled, input.Microsoft, input.Microsoft_IsEnabled);
+            await SetExternalLoginToggleAsync(AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled, openIdConnectEnabled, input.OpenIdConnect, input.OpenIdConnect_IsEnabled);
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-               AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled,
-                 input.Microsoft == null || !input.Microsoft.IsValid()
-                 ? MicrosoftEnabled.ToString().ToLower()
-                 : input.Microsoft_IsEnabled.ToString().ToLower()
-           );
-            await SettingManager.ChangeSettingForApplicationAsync(
-               AppSettings.ExternalLoginProvider.Tenant.OpenIdConnect_IsEnabled,
-                 input.OpenIdConnect == null || !input.OpenIdConnect.IsValid()
-                 ? OpenIdConnectEnabled.ToString().ToLower()
-                 : input.OpenIdConnect_IsEnabled.ToString().ToLower()
-           );
+            await SetExternalLoginJsonAsync(AppSettings.ExternalLoginProvider.Host.AuthZero, input.AuthZero);
+            await SetExternalLoginJsonAsync(AppSettings.ExternalLoginProvider.Host.Google, input.Google);
+            await SetExternalLoginJsonAsync(AppSettings.ExternalLoginProvider.Host.Microsoft, input.Microsoft);
+            await SetExternalLoginJsonAsync(AppSettings.ExternalLoginProvider.Host.OpenIdConnect, input.OpenIdConnect);
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-              AppSettings.ExternalLoginProvider.Host.AuthZero,
-              input.AuthZero == null || !input.AuthZero.IsValid()
-                  ? _settingDefinitionManager.GetSettingDefinition(AppSettings.ExternalLoginProvider.Host.AuthZero)
-                      .DefaultValue
-                  : input.AuthZero.ToJsonString()
-          );
+            await SetExternalLoginClaimsMappingAsync(AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims, input.OpenIdConnectClaimsMapping);
+        }
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-                AppSettings.ExternalLoginProvider.Host.Google,
-                input.Google == null || !input.Google.IsValid()
-                    ? _settingDefinitionManager.GetSettingDefinition(AppSettings.ExternalLoginProvider.Host.Google)
-                        .DefaultValue
-                    : input.Google.ToJsonString()
-            );
+        private async Task SetExternalLoginToggleAsync<T>(string settingName, bool currentEnabled, T provider, bool isEnabled) where T : class, IExternalLoginProviderSettings
+        {
+            var value = provider == null || !provider.IsValid()
+                ? currentEnabled.ToString().ToLower()
+                : isEnabled.ToString().ToLower();
+            await SettingManager.ChangeSettingForApplicationAsync(settingName, value);
+        }
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-                AppSettings.ExternalLoginProvider.Host.Microsoft,
-                input.Microsoft == null || !input.Microsoft.IsValid()
-                    ? _settingDefinitionManager.GetSettingDefinition(AppSettings.ExternalLoginProvider.Host.Microsoft)
-                        .DefaultValue
-                    : input.Microsoft.ToJsonString()
-            );
+        private async Task SetExternalLoginJsonAsync<T>(string settingName, T provider) where T : class, IExternalLoginProviderSettings
+        {
+            var value = provider == null || !provider.IsValid()
+                ? _settingDefinitionManager.GetSettingDefinition(settingName).DefaultValue
+                : provider.ToJsonString();
+            await SettingManager.ChangeSettingForApplicationAsync(settingName, value);
+        }
 
-            await SettingManager.ChangeSettingForApplicationAsync(
-                AppSettings.ExternalLoginProvider.Host.OpenIdConnect,
-                input.OpenIdConnect == null || !input.OpenIdConnect.IsValid()
-                    ? _settingDefinitionManager
-                        .GetSettingDefinition(AppSettings.ExternalLoginProvider.Host.OpenIdConnect).DefaultValue
-                    : input.OpenIdConnect.ToJsonString()
-            );
-
-            await SettingManager.ChangeSettingForApplicationAsync(
-                AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims,
-                input.OpenIdConnectClaimsMapping.IsNullOrEmpty()
-                    ? _settingDefinitionManager
-                        .GetSettingDefinition(AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims).DefaultValue
-                    : input.OpenIdConnectClaimsMapping.ToJsonString()
-            );
+        private async Task SetExternalLoginClaimsMappingAsync(string settingName, List<JsonClaimMapDto> mapping)
+        {
+            var value = mapping.IsNullOrEmpty()
+                ? _settingDefinitionManager.GetSettingDefinition(settingName).DefaultValue
+                : mapping.ToJsonString();
+            await SettingManager.ChangeSettingForApplicationAsync(settingName, value);
         }
 
         private async Task UpdateGeneralSettingsAsync(GeneralSettingsEditDto settings)

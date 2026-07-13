@@ -37,7 +37,7 @@ namespace Eaf.Middleware.Authorization.Users
         {
             var userId = AbpSession.GetUserId();
 
-            var loginAttempts = await _userLoginAttemptRepository.GetAll()
+            var loginAttempts = await (await _userLoginAttemptRepository.GetAllAsync())
                 .Where(la => la.UserId == userId)
                 .OrderByDescending(la => la.CreationTime)
                 .Take(10)

@@ -3,6 +3,7 @@ using Abp.UI;
 using Eaf.Middleware.Chat;
 using Hangfire.Console;
 using Hangfire.Server;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace Eaf.ProjectName.Airplanes
 
         public async Task<Airplane> CreateAsync(Airplane airplane)
         {
-            if (_repositoryAirplane.GetAll().Any(e => e.Number.ToLower() == airplane.Number))
+            if (await (await _repositoryAirplane.GetAllAsync()).AnyAsync(e => e.Number.ToLower() == airplane.Number))
                 throw new UserFriendlyException(L("AirplaneValidate"));
 
             return await _repositoryAirplane.InsertAsync(airplane);

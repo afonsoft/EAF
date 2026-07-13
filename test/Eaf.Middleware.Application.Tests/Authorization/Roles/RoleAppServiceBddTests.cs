@@ -78,7 +78,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Roles
             // Dado
             var permissions = new List<Permission>();
             var permissionManager = Substitute.For<IPermissionManager>();
-            permissionManager.GetAllPermissions().Returns(permissions);
+            permissionManager.GetAllPermissionsAsync().Returns(permissions);
             _sut.PermissionManager = permissionManager;
 
             var objectMapper = Substitute.For<Abp.ObjectMapping.IObjectMapper>();
@@ -110,7 +110,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Roles
 
             var permissions = new List<Permission>();
             var permissionManager = Substitute.For<IPermissionManager>();
-            permissionManager.GetAllPermissions().Returns(permissions);
+            permissionManager.GetAllPermissionsAsync().Returns(permissions);
             _sut.PermissionManager = permissionManager;
 
             var grantedPermissions = new List<Permission>

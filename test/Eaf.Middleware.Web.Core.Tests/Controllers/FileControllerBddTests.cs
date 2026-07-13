@@ -155,12 +155,12 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         #region UploadTempFile
 
         [Fact]
-        public void Dado_ArquivoValido_Quando_UploadTempFile_Entao_DeveRetornarAjaxResponseComId()
+        public async Task Dado_ArquivoValido_Quando_UploadTempFile_Entao_DeveRetornarAjaxResponseComId()
         {
             var file = CriarFormFile("arquivo.txt", "text/plain", new byte[] { 1, 2, 3 });
             ConfigurarRequestComArquivo(file);
 
-            var resultado = _sut.UploadTempFile();
+            var resultado = await _sut.UploadTempFile();
 
             var json = resultado.ShouldBeOfType<JsonResult>();
             json.Value.ShouldNotBeNull();
@@ -168,12 +168,12 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         }
 
         [Fact]
-        public void Dado_ArquivoMuitoGrande_Quando_UploadTempFile_Entao_DeveRetornarErro()
+        public async Task Dado_ArquivoMuitoGrande_Quando_UploadTempFile_Entao_DeveRetornarErro()
         {
             var file = CriarFormFile("grande.bin", "application/octet-stream", new byte[20000001]);
             ConfigurarRequestComArquivo(file);
 
-            var resultado = _sut.UploadTempFile();
+            var resultado = await _sut.UploadTempFile();
 
             var json = resultado.ShouldBeOfType<JsonResult>();
             var ajaxResponse = json.Value.ShouldBeOfType<Abp.Web.Models.AjaxResponse>();
@@ -181,11 +181,11 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         }
 
         [Fact]
-        public void Dado_ArquivoNuloNaLista_Quando_UploadTempFile_Entao_DeveRetornarErro()
+        public async Task Dado_ArquivoNuloNaLista_Quando_UploadTempFile_Entao_DeveRetornarErro()
         {
             ConfigurarRequestComArquivo(null!);
 
-            var resultado = _sut.UploadTempFile();
+            var resultado = await _sut.UploadTempFile();
 
             var json = resultado.ShouldBeOfType<JsonResult>();
             var ajaxResponse = json.Value.ShouldBeOfType<Abp.Web.Models.AjaxResponse>();

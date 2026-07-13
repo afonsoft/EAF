@@ -6,7 +6,7 @@ namespace Eaf.Middleware.Core.Authentication
     /// <summary>
     /// Representa a classe MicrosoftExternalLoginProviderSettings.
     /// </summary>
-    public class MicrosoftExternalLoginProviderSettings
+    public class MicrosoftExternalLoginProviderSettings : IExternalLoginProviderSettings
     {
         /// <summary>
         /// Obtém ou define ClientId.

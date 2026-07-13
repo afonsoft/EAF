@@ -21,44 +21,44 @@ namespace Eaf.Middleware.Web.Authentication
         /// <returns>Tupla com nome e sobrenome extraídos.</returns>
         public (string name, string surname) GetNameAndSurnameFromClaims(List<Claim> claims, IdentityOptions identityOptions)
         {
-            string name = null;
-            string surname = null;
-
-            var givenNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
-            if (givenNameClaim != null && !givenNameClaim.Value.IsNullOrEmpty())
-            {
-                name = givenNameClaim.Value;
-            }
-
-            var surnameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
-            if (surnameClaim != null && !surnameClaim.Value.IsNullOrEmpty())
-            {
-                surname = surnameClaim.Value;
-            }
+            var name = GetGivenName(claims);
+            var surname = GetSurname(claims);
 
             if (name == null || surname == null)
             {
-                var nameClaim = claims.FirstOrDefault(c => c.Type == identityOptions.ClaimsIdentity.UserNameClaimType);
-                if (nameClaim != null)
-                {
-                    var nameSurName = nameClaim.Value;
-                    if (!nameSurName.IsNullOrEmpty())
-                    {
-                        var lastSpaceIndex = nameSurName.LastIndexOf(' ');
-                        if (lastSpaceIndex < 1 || lastSpaceIndex > (nameSurName.Length - 2))
-                        {
-                            name = surname = nameSurName;
-                        }
-                        else
-                        {
-                            name = nameSurName[..lastSpaceIndex];
-                            surname = nameSurName[(lastSpaceIndex)..];
-                        }
-                    }
-                }
+                (name, surname) = ExtractNameAndSurnameFromNameClaim(claims, identityOptions.ClaimsIdentity.UserNameClaimType);
             }
 
             return (name, surname);
+        }
+
+        private static string GetGivenName(List<Claim> claims)
+        {
+            var claim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
+            return claim != null && !claim.Value.IsNullOrEmpty() ? claim.Value : null;
+        }
+
+        private static string GetSurname(List<Claim> claims)
+        {
+            var claim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
+            return claim != null && !claim.Value.IsNullOrEmpty() ? claim.Value : null;
+        }
+
+        private static (string name, string surname) ExtractNameAndSurnameFromNameClaim(List<Claim> claims, string userNameClaimType)
+        {
+            var nameClaim = claims.FirstOrDefault(c => c.Type == userNameClaimType);
+            if (nameClaim == null)
+                return (null, null);
+
+            var nameSurName = nameClaim.Value;
+            if (nameSurName.IsNullOrEmpty())
+                return (null, null);
+
+            var lastSpaceIndex = nameSurName.LastIndexOf(' ');
+            if (lastSpaceIndex < 1 || lastSpaceIndex > nameSurName.Length - 2)
+                return (nameSurName, nameSurName);
+
+            return (nameSurName[..lastSpaceIndex], nameSurName[(lastSpaceIndex)..]);
         }
 
         /// <summary>

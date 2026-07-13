@@ -206,7 +206,7 @@ namespace Eaf.Middleware.Auditing
         /// <returns>Resultado da operação.</returns>
         public async Task<List<EntityPropertyChangeDto>> GetEntityPropertyChanges(long entityChangeId)
         {
-            return await _entityPropertyChangeRepository.GetAll()
+            return await (await _entityPropertyChangeRepository.GetAllAsync())
                 .AsNoTracking()
                 .Where(epc => epc.EntityChangeId == entityChangeId)
                 .Select(x => new EntityPropertyChangeDto
@@ -228,9 +228,13 @@ namespace Eaf.Middleware.Auditing
         /// <returns>Resultado da operação.</returns>
         public async Task<PagedResultDto<EntityChangeListDto>> GetEntityTypeChanges(GetEntityTypeChangeInput input)
         {
-            var query = from entityChangeSet in _entityChangeSetRepository.GetAll()
-                        join entityChange in _entityChangeRepository.GetAll() on entityChangeSet.Id equals entityChange.EntityChangeSetId
-                        join user in _userRepository.GetAll() on entityChangeSet.UserId equals user.Id
+            var entityChangeSets = await _entityChangeSetRepository.GetAllAsync();
+            var entityChanges = await _entityChangeRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            var query = from entityChangeSet in entityChangeSets
+                        join entityChange in entityChanges on entityChangeSet.Id equals entityChange.EntityChangeSetId
+                        join user in users on entityChangeSet.UserId equals user.Id
                         where entityChange.EntityTypeFullName == input.EntityTypeFullName && entityChange.EntityId == input.EntityId
                         select new EntityChangeAndUser
                         {

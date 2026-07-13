@@ -87,13 +87,13 @@ namespace Eaf.Middleware.Chat
                         FriendUserName = L("Group"),
                         Name = L("Group"),
                         Surname = "",
-                        UnreadMessageCount = _chatMessageRepository.GetAll().Count(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                        UnreadMessageCount = await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
                                                                    cm.UserId == userIdentifier.UserId &&
                                                                    cm.TenantId == userIdentifier.TenantId &&
                                                                    cm.TargetUserId == 0 &&
                                                                    cm.TargetTenantId == userIdentifier.TenantId &&
                                                                    cm.Side == ChatSide.Receiver) +
-                                             _chatMessageRepository.GetAll().Count(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                                             await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
                                                                    cm.UserId == 0 &&
                                                                    cm.TenantId == userIdentifier.TenantId &&
                                                                    cm.TargetUserId == userIdentifier.UserId &&
@@ -114,78 +114,82 @@ namespace Eaf.Middleware.Chat
         public async Task<ListResultDto<ChatMessageDto>> GetUserChatMessages(GetUserChatMessagesInput input)
         {
             var userId = AbpSession.GetUserId();
-            List<ChatMessage> messages;
 
             if (input.UserId.HasValue && input.UserId.Value > 0)
             {
-                messages = await _chatMessageRepository.GetAll()
-                        .WhereIf(input.MinMessageId.HasValue, m => m.Id < input.MinMessageId.Value)
-                        .Where(m => m.UserId == userId && m.TargetTenantId == input.TenantId && m.TargetUserId == input.UserId)
-                        .OrderByDescending(m => m.CreationTime)
-                        .Take(100)
-                        .ToListAsync();
-
-                messages.Reverse();
-                var listMessages = ObjectMapper.Map<List<ChatMessageDto>>(messages);
-
-                foreach (var message in listMessages)
-                {
-                    try
-                    {
-                        message.TargetUserName = UserManager.GetUserById(message.TargetUserId).Name;
-                    }
-                    catch
-                    {
-                        message.TargetUserName = "";
-                    }
-                }
-
-                return new ListResultDto<ChatMessageDto>(listMessages);
+                return await GetUserChatMessagesAsync(input, userId);
             }
 
             if (input.GroupId.HasValue && input.GroupId.Value > 0)
             {
-                messages = await _chatMessageRepository.GetAll()
-                       .WhereIf(input.MinMessageId.HasValue, m => m.Id < input.MinMessageId.Value)
-                       .Where(m => m.TargetTenantId == input.TenantId && m.TargetUserId == 0)
-                       .OrderByDescending(m => m.CreationTime)
-                       .Take(100)
-                       .ToListAsync();
-
-                messages.Reverse();
-                var listMessages = ObjectMapper.Map<List<ChatMessageDto>>(messages);
-
-                listMessages = listMessages.Select(x => new ChatMessageDto
-                {
-                    CreationTime = x.CreationTime,
-                    Id = x.Id,
-                    Message = x.Message,
-                    ReadState = x.ReadState,
-                    ReceiverReadState = x.ReceiverReadState,
-                    SharedMessageId = x.SharedMessageId,
-                    Side = x.UserId == userId ? ChatSide.Sender : ChatSide.Receiver,
-                    TargetTenantId = x.TargetTenantId,
-                    TargetUserId = x.UserId,
-                    UserId = userId,
-                    TenantId = x.TenantId
-                }).ToList();
-
-                foreach (var message in listMessages)
-                {
-                    try
-                    {
-                        message.TargetUserName = UserManager.GetUserById(message.TargetUserId).Name;
-                    }
-                    catch
-                    {
-                        message.TargetUserName = "";
-                    }
-                }
-
-                return new ListResultDto<ChatMessageDto>(listMessages);
+                return await GetGroupChatMessagesAsync(input, userId);
             }
 
             return new ListResultDto<ChatMessageDto>(new List<ChatMessageDto>());
+        }
+
+        private async Task<ListResultDto<ChatMessageDto>> GetUserChatMessagesAsync(GetUserChatMessagesInput input, long userId)
+        {
+            var messages = await (await _chatMessageRepository.GetAllAsync())
+                .WhereIf(input.MinMessageId.HasValue, m => m.Id < input.MinMessageId.Value)
+                .Where(m => m.UserId == userId && m.TargetTenantId == input.TenantId && m.TargetUserId == input.UserId)
+                .OrderByDescending(m => m.CreationTime)
+                .Take(100)
+                .ToListAsync();
+
+            messages.Reverse();
+            var listMessages = ObjectMapper.Map<List<ChatMessageDto>>(messages);
+
+            await SetTargetUserNamesAsync(listMessages);
+
+            return new ListResultDto<ChatMessageDto>(listMessages);
+        }
+
+        private async Task<ListResultDto<ChatMessageDto>> GetGroupChatMessagesAsync(GetUserChatMessagesInput input, long userId)
+        {
+            var messages = await (await _chatMessageRepository.GetAllAsync())
+                .WhereIf(input.MinMessageId.HasValue, m => m.Id < input.MinMessageId.Value)
+                .Where(m => m.TargetTenantId == input.TenantId && m.TargetUserId == 0)
+                .OrderByDescending(m => m.CreationTime)
+                .Take(100)
+                .ToListAsync();
+
+            messages.Reverse();
+            var listMessages = ObjectMapper.Map<List<ChatMessageDto>>(messages);
+
+            listMessages = listMessages.Select(x => new ChatMessageDto
+            {
+                CreationTime = x.CreationTime,
+                Id = x.Id,
+                Message = x.Message,
+                ReadState = x.ReadState,
+                ReceiverReadState = x.ReceiverReadState,
+                SharedMessageId = x.SharedMessageId,
+                Side = x.UserId == userId ? ChatSide.Sender : ChatSide.Receiver,
+                TargetTenantId = x.TargetTenantId,
+                TargetUserId = x.UserId,
+                UserId = userId,
+                TenantId = x.TenantId
+            }).ToList();
+
+            await SetTargetUserNamesAsync(listMessages);
+
+            return new ListResultDto<ChatMessageDto>(listMessages);
+        }
+
+        private async Task SetTargetUserNamesAsync(List<ChatMessageDto> messages)
+        {
+            foreach (var message in messages)
+            {
+                try
+                {
+                    message.TargetUserName = (await UserManager.GetUserByIdAsync(message.TargetUserId)).Name;
+                }
+                catch
+                {
+                    message.TargetUserName = "";
+                }
+            }
         }
 
         [Produces("application/json", "application/json-patch+json", "text/json")]
@@ -196,111 +200,116 @@ namespace Eaf.Middleware.Chat
 
             if (input.UserId.HasValue && input.UserId.Value > 0)
             {
-                // receiver messages
-                var messages = await _chatMessageRepository
-                     .GetAll()
-                     .Where(m =>
-                            m.UserId == userId &&
-                            m.TargetTenantId == input.TenantId &&
-                            m.TargetUserId == input.UserId &&
-                            m.ReadState == ChatMessageReadState.Unread)
-                     .ToListAsync();
-
-                if (!messages.Any())
-                {
-                    return;
-                }
-
-                foreach (var message in messages)
-                {
-                    message.ChangeReadState(ChatMessageReadState.Read);
-                }
-
-                // sender messages
-                using (CurrentUnitOfWork.SetTenantId(input.TenantId))
-                {
-                    var reverseMessages = await _chatMessageRepository.GetAll()
-                        .Where(m => m.UserId == input.UserId && m.TargetTenantId == tenantId && m.TargetUserId == userId)
-                        .ToListAsync();
-
-                    if (!reverseMessages.Any())
-                    {
-                        return;
-                    }
-
-                    foreach (var message in reverseMessages)
-                    {
-                        message.ChangeReceiverReadState(ChatMessageReadState.Read);
-                    }
-                }
-
-                var userIdentifier = AbpSession.ToUserIdentifier();
-                var friendIdentifier = input.ToUserIdentifier();
-
-                _userFriendsCache.ResetUnreadMessageCount(userIdentifier, friendIdentifier);
-
-                var onlineUserClients = await _onlineClientManager.GetAllByUserIdAsync(userIdentifier);
-                if (onlineUserClients.Any())
-                {
-                    await _chatCommunicator.SendAllUnreadMessagesOfUserReadToClients(onlineUserClients, friendIdentifier);
-                }
-
-                var onlineFriendClients = await _onlineClientManager.GetAllByUserIdAsync(friendIdentifier);
-                if (onlineFriendClients.Any())
-                {
-                    await _chatCommunicator.SendReadStateChangeToClients(onlineFriendClients, userIdentifier);
-                }
+                await MarkUserMessagesAsReadAsync(input, userId, tenantId);
             }
             else if (input.GroupId.HasValue && input.GroupId.Value > 0)
             {
-                // receiver messages
-                var messages = await _chatMessageRepository
-                     .GetAll()
-                     .Where(m =>
-                            m.UserId == 0 &&
-                            m.TargetTenantId == input.TenantId &&
-                            m.TargetUserId == userId &&
-                            m.ReadState == ChatMessageReadState.Unread)
-                     .ToListAsync();
+                await MarkGroupMessagesAsReadAsync(input, userId, tenantId);
+            }
+        }
 
-                if (!messages.Any())
+        private async Task MarkUserMessagesAsReadAsync(MarkAllUnreadMessagesOfUserAsReadInput input, long userId, int? tenantId)
+        {
+            var messages = await (await _chatMessageRepository.GetAllAsync())
+                .Where(m =>
+                    m.UserId == userId &&
+                    m.TargetTenantId == input.TenantId &&
+                    m.TargetUserId == input.UserId &&
+                    m.ReadState == ChatMessageReadState.Unread)
+                .ToListAsync();
+
+            if (!messages.Any())
+            {
+                return;
+            }
+
+            foreach (var message in messages)
+            {
+                message.ChangeReadState(ChatMessageReadState.Read);
+            }
+
+            using (CurrentUnitOfWork.SetTenantId(input.TenantId))
+            {
+                var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
+                    .Where(m => m.UserId == input.UserId && m.TargetTenantId == tenantId && m.TargetUserId == userId)
+                    .ToListAsync();
+
+                if (!reverseMessages.Any())
                 {
                     return;
                 }
 
-                foreach (var message in messages)
+                foreach (var message in reverseMessages)
                 {
-                    message.ChangeReadState(ChatMessageReadState.Read);
+                    message.ChangeReceiverReadState(ChatMessageReadState.Read);
+                }
+            }
+
+            var userIdentifier = AbpSession.ToUserIdentifier();
+            var friendIdentifier = input.ToUserIdentifier();
+
+            _userFriendsCache.ResetUnreadMessageCount(userIdentifier, friendIdentifier);
+
+            var onlineUserClients = await _onlineClientManager.GetAllByUserIdAsync(userIdentifier);
+            if (onlineUserClients.Any())
+            {
+                await _chatCommunicator.SendAllUnreadMessagesOfUserReadToClients(onlineUserClients, friendIdentifier);
+            }
+
+            var onlineFriendClients = await _onlineClientManager.GetAllByUserIdAsync(friendIdentifier);
+            if (onlineFriendClients.Any())
+            {
+                await _chatCommunicator.SendReadStateChangeToClients(onlineFriendClients, userIdentifier);
+            }
+        }
+
+        private async Task MarkGroupMessagesAsReadAsync(MarkAllUnreadMessagesOfUserAsReadInput input, long userId, int? tenantId)
+        {
+            var messages = await (await _chatMessageRepository.GetAllAsync())
+                .Where(m =>
+                    m.UserId == 0 &&
+                    m.TargetTenantId == input.TenantId &&
+                    m.TargetUserId == userId &&
+                    m.ReadState == ChatMessageReadState.Unread)
+                .ToListAsync();
+
+            if (!messages.Any())
+            {
+                return;
+            }
+
+            foreach (var message in messages)
+            {
+                message.ChangeReadState(ChatMessageReadState.Read);
+            }
+
+            using (CurrentUnitOfWork.SetTenantId(input.TenantId))
+            {
+                var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
+                    .Where(m => m.UserId == 0
+                        && m.TargetTenantId == tenantId
+                        && m.TargetUserId == userId
+                        && m.ReadState == ChatMessageReadState.Unread)
+                    .ToListAsync();
+
+                if (!reverseMessages.Any())
+                {
+                    return;
                 }
 
-                using (CurrentUnitOfWork.SetTenantId(input.TenantId))
+                foreach (var message in reverseMessages)
                 {
-                    var reverseMessages = await _chatMessageRepository.GetAll()
-                        .Where(m => m.UserId == 0
-                            && m.TargetTenantId == tenantId
-                            && m.TargetUserId == userId
-                            && m.ReadState == ChatMessageReadState.Unread)
-                        .ToListAsync();
-
-                    if (!reverseMessages.Any())
-                    {
-                        return;
-                    }
-
-                    foreach (var message in reverseMessages)
-                    {
-                        message.ChangeReceiverReadState(ChatMessageReadState.Read);
-                    }
+                    message.ChangeReceiverReadState(ChatMessageReadState.Read);
                 }
+            }
 
-                var userIdentifier = AbpSession.ToUserIdentifier();
+            var userIdentifier = AbpSession.ToUserIdentifier();
 
-                var onlineUserClients = await _onlineClientManager.GetAllByUserIdAsync(userIdentifier);
-                if (onlineUserClients.Any())
-                {
-                    await _chatCommunicator.SendAllUnreadMessagesOfUserReadToClients(onlineUserClients, userIdentifier);
-                    await _chatCommunicator.SendReadStateChangeToClients(onlineUserClients, userIdentifier);
-                }
+            var onlineUserClients = await _onlineClientManager.GetAllByUserIdAsync(userIdentifier);
+            if (onlineUserClients.Any())
+            {
+                await _chatCommunicator.SendAllUnreadMessagesOfUserReadToClients(onlineUserClients, userIdentifier);
+                await _chatCommunicator.SendReadStateChangeToClients(onlineUserClients, userIdentifier);
             }
         }
     }

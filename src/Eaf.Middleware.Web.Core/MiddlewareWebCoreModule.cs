@@ -97,92 +97,111 @@ namespace Eaf.Middleware.Web
         /// </summary>
         public override void PostInitialize()
         {
-            //Setup de default folder
             SetAppFolders();
-
-            //Configure External Auth Google / Microsoft
             ConfigureExternalAuthProviders();
+            ConfigureBackgroundJobs();
+        }
 
-            if (Configuration.BackgroundJobs.IsJobExecutionEnabled)
+        private void ConfigureBackgroundJobs()
+        {
+            if (!Configuration.BackgroundJobs.IsJobExecutionEnabled)
+                return;
+
+            bool.TryParse(_appConfiguration[HangfireIsEnabledKey], out bool isEnabled);
+
+            if (_appConfiguration[HangfireIsEnabledKey] == null || !isEnabled)
             {
-                bool.TryParse(_appConfiguration[HangfireIsEnabledKey], out bool IsEnabled);
+                AddExpiredAuditLogDeleterWorker();
+                return;
+            }
 
-                if (_appConfiguration[HangfireIsEnabledKey] == null || !IsEnabled)
-                {
-                    //Expired Audit Log Deleter Worker
-                    var workManager = IocManager.Resolve<IBackgroundWorkerManager>();
-                    if (Configuration.Auditing.IsEnabled)
+            ConfigureHangfireStorage();
+            RemoveOutdatedHangfireJobs();
+
+            Configuration.Auditing.SetExpiredAuditWoker();
+            Configuration.EntityHistory.SetExpiredHistoryEntityWoker();
+        }
+
+        private void AddExpiredAuditLogDeleterWorker()
+        {
+            var workManager = IocManager.Resolve<IBackgroundWorkerManager>();
+            if (Configuration.Auditing.IsEnabled)
+                workManager.Add(IocManager.Resolve<ExpiredAuditLogDeleterWorker>());
+        }
+
+        private void ConfigureHangfireStorage()
+        {
+            string connectionString = Configuration.DefaultNameOrConnectionString;
+            var storageType = Middleware.Web.Startup.HangFireConfigurer.ResolveStorageType(_appConfiguration);
+
+            switch (storageType)
+            {
+                case HangfireStorageType.SqlServer:
+                    if (!string.IsNullOrEmpty(connectionString))
+                        JobStorage.Current = new SqlServerStorage(connectionString, new SqlServerStorageOptions() { TransactionTimeout = TimeSpan.FromMinutes(30) });
+                    else
+                        JobStorage.Current = new InMemoryStorage();
+                    break;
+
+                case HangfireStorageType.Redis:
+                    var redisConnectionString = _appConfiguration["RedisCache:ConnectionString"] ?? "localhost";
+                    var redisDatabaseId = 0;
+                    if (_appConfiguration["RedisCache:DatabaseId"] != null)
+                        int.TryParse(_appConfiguration["RedisCache:DatabaseId"], out redisDatabaseId);
+
+                    JobStorage.Current = new RedisStorage(redisConnectionString, new RedisStorageOptions
                     {
-                        workManager.Add(IocManager.Resolve<ExpiredAuditLogDeleterWorker>());
-                    }
+                        Db = redisDatabaseId,
+                        Prefix = "hangfire:"
+                    });
+                    break;
+
+                default:
+                    JobStorage.Current = new InMemoryStorage();
+                    break;
+            }
+        }
+
+        private void RemoveOutdatedHangfireJobs()
+        {
+            Logger.Info("Removing outdated Job in HangFire");
+            try
+            {
+                using (var connection = JobStorage.Current.GetConnection())
+                {
+                    RemoveOutdatedRecurringJobs(connection);
+                    RemoveOutdatedFailedJobs();
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                Logger.DebugFormat(ex, "Error on removing outdated job : {0}", ex.Message);
+            }
+        }
+
+        private void RemoveOutdatedRecurringJobs(IStorageConnection connection)
+        {
+            foreach (var recurringJob in connection.GetRecurringJobs())
+            {
+                if (recurringJob.Removed
+                    || (recurringJob.LastExecution < Clock.Now.AddMonths(-1)
+                        && recurringJob.LastJobState != "Succeeded"))
                 {
-                    string connectionString = Configuration.DefaultNameOrConnectionString;
-                    var storageType = Middleware.Web.Startup.HangFireConfigurer.ResolveStorageType(_appConfiguration);
+                    Logger.DebugFormat("Removing outdated Job {0}", recurringJob.Id);
+                    RecurringJob.RemoveIfExists(recurringJob.Id);
+                }
+            }
+        }
 
-                    switch (storageType)
-                    {
-                        case HangfireStorageType.SqlServer:
-                            if (!string.IsNullOrEmpty(connectionString))
-                                JobStorage.Current = new SqlServerStorage(connectionString, new SqlServerStorageOptions() { TransactionTimeout = TimeSpan.FromMinutes(30) });
-                            else
-                                JobStorage.Current = new InMemoryStorage();
-                            break;
-
-                        case HangfireStorageType.Redis:
-                            var redisConnectionString = _appConfiguration["RedisCache:ConnectionString"] ?? "localhost";
-                            var redisDatabaseId = 0;
-                            if (_appConfiguration["RedisCache:DatabaseId"] != null)
-                                int.TryParse(_appConfiguration["RedisCache:DatabaseId"], out redisDatabaseId);
-
-                            JobStorage.Current = new RedisStorage(redisConnectionString, new RedisStorageOptions
-                            {
-                                Db = redisDatabaseId,
-                                Prefix = "hangfire:"
-                            });
-                            break;
-
-                        default:
-                            JobStorage.Current = new InMemoryStorage();
-                            break;
-                    }
-
-                    Logger.Info("Removing outdated Job in HangFire");
-                    try
-                    {
-                        using (var connection = JobStorage.Current.GetConnection())
-                        {
-                            foreach (var recurringJob in connection.GetRecurringJobs())
-                            {
-                                if (recurringJob.Removed
-                                    || (recurringJob.LastExecution < Clock.Now.AddMonths(-1)
-                                        && recurringJob.LastJobState != "Succeeded"))
-                                {
-                                    Logger.DebugFormat("Removing outdated Job {0}", recurringJob.Id);
-                                    RecurringJob.RemoveIfExists(recurringJob.Id);
-                                }
-                            }
-
-                            var api = JobStorage.Current.GetMonitoringApi();
-                            foreach (var failedJob in api.FailedJobs(0, 1000))
-                            {
-                                if (failedJob.Value.FailedAt < Clock.Now.AddMonths(-1))
-                                {
-                                    BackgroundJob.Delete(failedJob.Key);
-                                    Logger.DebugFormat("Removing outdated Job {0}", failedJob.Key);
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.DebugFormat(ex, "Error on removing outdated job : {0}", ex.Message);
-                    }
-
-                    //Enable Job expireted log
-                    Configuration.Auditing.SetExpiredAuditWoker();
-                    Configuration.EntityHistory.SetExpiredHistoryEntityWoker();
+        private void RemoveOutdatedFailedJobs()
+        {
+            var api = JobStorage.Current.GetMonitoringApi();
+            foreach (var failedJob in api.FailedJobs(0, 1000))
+            {
+                if (failedJob.Value.FailedAt < Clock.Now.AddMonths(-1))
+                {
+                    BackgroundJob.Delete(failedJob.Key);
+                    Logger.DebugFormat("Removing outdated Job {0}", failedJob.Key);
                 }
             }
         }

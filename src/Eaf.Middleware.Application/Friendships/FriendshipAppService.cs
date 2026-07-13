@@ -106,11 +106,11 @@ namespace Eaf.Middleware.Friendships
                 probableFriendUser = await UserManager.FindByIdAsync(input.UserId.ToString());
             }
 
-            var friendTenancyName = probableFriend.TenantId.HasValue ? _tenantCache.Get(probableFriend.TenantId.Value).TenancyName : null;
+            var friendTenancyName = probableFriend.TenantId.HasValue ? (await _tenantCache.GetAsync(probableFriend.TenantId.Value)).TenancyName : null;
             var sourceFriendship = new Friendship(userIdentifier, probableFriend, friendTenancyName, probableFriendUser.UserName, probableFriendUser.ProfilePictureId, FriendshipState.Accepted);
             await _friendshipManager.CreateFriendshipAsync(sourceFriendship);
 
-            var userTenancyName = user.TenantId.HasValue ? _tenantCache.Get(user.TenantId.Value).TenancyName : null;
+            var userTenancyName = user.TenantId.HasValue ? (await _tenantCache.GetAsync(user.TenantId.Value)).TenancyName : null;
             var targetFriendship = new Friendship(probableFriend, userIdentifier, userTenancyName, user.UserName, user.ProfilePictureId, FriendshipState.Accepted);
             await _friendshipManager.CreateFriendshipAsync(targetFriendship);
 

@@ -68,7 +68,7 @@ namespace Eaf.Middleware.Authorization.Roles
         [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Roles_Create, MiddlewarePermissions.Pages_Administration_Roles_Edit)]
         public async Task<GetRoleForEditOutput> GetRoleForEdit(NullableIdDto input)
         {
-            var permissions = PermissionManager.GetAllPermissions();
+            var permissions = await PermissionManager.GetAllPermissionsAsync();
             var grantedPermissions = new Permission[0];
             RoleEditDto roleEditDto;
 

@@ -117,7 +117,7 @@ namespace Eaf.Middleware.Authorization.Users
 
             var cache = _cacheManager.GetCache(MiddlewareCoreConsts.TokenValidityKey);
             foreach (var token in tokens)
-                cache.Remove(token);
+                await cache.RemoveAsync(token);
         }
 
         /// <summary>
@@ -139,46 +139,66 @@ namespace Eaf.Middleware.Authorization.Users
         {
             foreach (var currentUserName in input.UserNames)
             {
-                if (string.IsNullOrEmpty(currentUserName))
-                    continue;
+                await CreateUserFromActiveDirectoryAsync(input, currentUserName);
+            }
+        }
 
-                var userName = currentUserName.ToLower();
-                var onlyUserName = userName.Contains("@") ? userName.Split('@')[0] : userName;
+        private async Task CreateUserFromActiveDirectoryAsync(CreateActiveDirectoryUserInput input, string currentUserName)
+        {
+            if (string.IsNullOrEmpty(currentUserName))
+                return;
 
-                var currentUser = await UserManager.GetUserByLoginAsync(onlyUserName, AbpSession.TenantId);
-                if (currentUser != null)
-                    continue;
+            var userName = currentUserName.ToLower();
+            var onlyUserName = GetUserNameWithoutDomain(userName);
 
-                var user = await _appAzureActiveDirectoryAuthenticationSource.GetUserAsync(userName);
-                user.UserName = onlyUserName;
+            var currentUser = await UserManager.GetUserByLoginAsync(onlyUserName, AbpSession.TenantId);
+            if (currentUser != null)
+                return;
 
-                if (string.IsNullOrEmpty(user.Name))
-                    user.Name = userName.Contains("@") ? userName.Split('@')[0] : userName;
+            var user = await _appAzureActiveDirectoryAuthenticationSource.GetUserAsync(userName);
+            user.UserName = onlyUserName;
 
-                if (string.IsNullOrEmpty(user.Surname))
-                    user.Surname = userName;
+            SetUserDefaults(user, userName);
 
-                if (string.IsNullOrEmpty(user.EmailAddress))
-                    user.EmailAddress = userName;
+            user.TenantId = AbpSession.TenantId;
+            user.AuthenticationSource = AzureActiveDirectorySettingNames.ActiveDirectoryProvider;
+            user.Password = new PasswordHasher<User>().HashPassword(user, Guid.NewGuid().ToString("N").Left(16));
+            user.IsActive = input.IsActive;
+            user.IsEmailConfirmed = true;
 
-                user.TenantId = AbpSession.TenantId;
-                user.AuthenticationSource = AzureActiveDirectorySettingNames.ActiveDirectoryProvider;
-                user.Password = new PasswordHasher<User>().HashPassword(user, Guid.NewGuid().ToString("N").Left(16));
-                user.IsActive = input.IsActive;
-                user.IsEmailConfirmed = true;
+            await AssignRolesAsync(user, input.AssignedRoleNames);
 
-                user.Roles = new Collection<UserRole>();
-                foreach (var roleName in input.AssignedRoleNames)
-                {
-                    var role = await _roleManager.GetRoleByNameAsync(roleName);
-                    user.Roles.Add(new UserRole(AbpSession.TenantId, user.Id, role.Id));
-                }
+            CheckErrors(await UserManager.CreateAsync(user));
+            await CurrentUnitOfWork.SaveChangesAsync();
+            await _usersCache.ClearAsync();
+            //Notifications
+            await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(user.ToUserIdentifier());
+        }
 
-                CheckErrors(await UserManager.CreateAsync(user));
-                await CurrentUnitOfWork.SaveChangesAsync();
-                await _usersCache.ClearAsync();
-                //Notifications
-                await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(user.ToUserIdentifier());
+        private static string GetUserNameWithoutDomain(string userName)
+        {
+            return userName.Contains("@") ? userName.Split('@')[0] : userName;
+        }
+
+        private static void SetUserDefaults(User user, string userName)
+        {
+            if (string.IsNullOrEmpty(user.Name))
+                user.Name = GetUserNameWithoutDomain(userName);
+
+            if (string.IsNullOrEmpty(user.Surname))
+                user.Surname = userName;
+
+            if (string.IsNullOrEmpty(user.EmailAddress))
+                user.EmailAddress = userName;
+        }
+
+        private async Task AssignRolesAsync(User user, string[] assignedRoleNames)
+        {
+            user.Roles = new Collection<UserRole>();
+            foreach (var roleName in assignedRoleNames)
+            {
+                var role = await _roleManager.GetRoleByNameAsync(roleName);
+                user.Roles.Add(new UserRole(AbpSession.TenantId, user.Id, role.Id));
             }
         }
 
@@ -304,7 +324,7 @@ namespace Eaf.Middleware.Authorization.Users
         public async Task<GetUserPermissionsForEditOutput> GetUserPermissionsForEdit(EntityDto<long> input)
         {
             var user = await UserManager.GetUserByIdAsync(input.Id);
-            var permissions = PermissionManager.GetAllPermissions();
+            var permissions = await PermissionManager.GetAllPermissionsAsync();
             var grantedPermissions = await UserManager.GetGrantedPermissionsAsync(user);
 
             return new GetUserPermissionsForEditOutput
@@ -486,7 +506,7 @@ namespace Eaf.Middleware.Authorization.Users
         {
             /* This method is optimized to fill role names to given list. */
             var ids = userListDtos.Select(x => x.Id);
-            var userRoles = await _userRoleRepository.GetAll()
+            var userRoles = await (await _userRoleRepository.GetAllAsync())
                 .Where(userRole => ids.Any(id => id == userRole.UserId))
                 .ToListAsync();
 

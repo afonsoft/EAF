@@ -71,7 +71,7 @@ namespace Eaf.Middleware.Tests.WebCore.Notifications
 
             await notifier.SendNotificationsAsync(userNotifications);
 
-            emailSender.Received(1).Send(
+            await emailSender.Received(1).SendAsync(
                 "test@example.com",
                 "You have a new notification!",
                 "Hello World",

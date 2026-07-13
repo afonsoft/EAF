@@ -58,59 +58,74 @@ namespace Eaf.AspNetCore.Hangfire
         {
             try
             {
-                if (context?.GetHttpContext()?.Request?.Host != null &&
-                    context.GetHttpContext().Request.Host.Host == "localhost")
+                if (IsLocalHost(context))
                     return true;
 
-                UserIdentifier userIdentifier = null;
-                var eafSession = context.GetHttpContext().RequestServices.GetRequiredService<IAbpSession>();
-                if (eafSession?.UserId != null)
-                {
-                    userIdentifier = eafSession.ToUserIdentifier();
-                }
-
+                var userIdentifier = GetUserIdentifier(context);
                 if (userIdentifier == null)
-                {
-                    string token = GetToken(context);
-                    if (token != null)
-                    {
-                        GetTenantIdClaim(token, out Claim id, out Claim tenanIdClaim, out Claim userIdentifierString);
-                        if (userIdentifierString != null)
-                        {
-                            userIdentifier = UserIdentifier.Parse(userIdentifierString.Value);
-                        }
-                        else
-                        {
-                            int? tenanId = null;
-                            long? userId = null;
-                            if (tenanIdClaim != null)
-                                tenanId = int.Parse(tenanIdClaim.Value);
+                    return false;
 
-                            if (id != null && !string.IsNullOrEmpty(id.Value))
-                            {
-                                userId = long.Parse(id.Value);
-                            }
-                            if (userId != null)
-                                userIdentifier = new UserIdentifier(tenanId, userId.Value);
-                        }
-                    }
-                }
+                if (permissions == null || !permissions.Any())
+                    return true;
 
-                if (userIdentifier != null)
-                {
-                    if (permissions == null || !permissions.Any())
-                        return true;
-
-                    return IsPermissionGranted(context, userIdentifier, permissions);
-                }
-
-                return false;
+                return IsPermissionGranted(context, userIdentifier, permissions);
             }
             catch (Exception ex)
             {
                 LogHelper.Logger.WarnFormat(ex, "EafHangfireAuthorizationFilter: {0}", ex.Message);
                 return false;
             }
+        }
+
+        private bool IsLocalHost(DashboardContext context)
+        {
+            var host = context?.GetHttpContext()?.Request?.Host;
+            return host.HasValue && host.Value.Host == "localhost";
+        }
+
+        private UserIdentifier GetUserIdentifier(DashboardContext context)
+        {
+            var userIdentifier = GetUserIdentifierFromSession(context);
+            if (userIdentifier != null)
+                return userIdentifier;
+
+            return GetUserIdentifierFromToken(context);
+        }
+
+        private UserIdentifier GetUserIdentifierFromSession(DashboardContext context)
+        {
+            var eafSession = context.GetHttpContext().RequestServices.GetRequiredService<IAbpSession>();
+            return eafSession?.UserId != null ? eafSession.ToUserIdentifier() : null;
+        }
+
+        private UserIdentifier GetUserIdentifierFromToken(DashboardContext context)
+        {
+            string token = GetToken(context);
+            if (token == null)
+                return null;
+
+            GetTenantIdClaim(token, out Claim id, out Claim tenanIdClaim, out Claim userIdentifierString);
+            if (userIdentifierString != null)
+                return UserIdentifier.Parse(userIdentifierString.Value);
+
+            return BuildUserIdentifierFromClaims(id, tenanIdClaim);
+        }
+
+        private static UserIdentifier BuildUserIdentifierFromClaims(Claim id, Claim tenanIdClaim)
+        {
+            int? tenantId = null;
+            long? userId = null;
+
+            if (tenanIdClaim != null)
+                tenantId = int.Parse(tenanIdClaim.Value);
+
+            if (id != null && !string.IsNullOrEmpty(id.Value))
+                userId = long.Parse(id.Value);
+
+            if (userId != null)
+                return new UserIdentifier(tenantId, userId.Value);
+
+            return null;
         }
 
         private static void GetTenantIdClaim(string jwtToken, out Claim id, out Claim tenanIdClaim, out Claim userIdentifierString)

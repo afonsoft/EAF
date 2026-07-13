@@ -88,6 +88,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             _cacheManager.GetCache(Arg.Any<string>()).Returns(_usersCache);
 
             _userRoleRepository = Substitute.For<IRepository<Abp.Authorization.Users.UserRole, long>>();
+            _userRoleRepository.GetAllAsync().Returns(_ => Task.FromResult(_userRoleRepository.GetAll()));
             _userListExcelExporter = Substitute.For<IUserListExcelExporter>();
 
             _passwordValidator = Substitute.For<IPasswordValidator<User>>();
@@ -215,8 +216,8 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             await _sut.CloseSessionUser(1);
 
             // Então
-            cache.Received(1).Remove("token1");
-            cache.Received(1).Remove("token2");
+            await cache.Received(1).RemoveAsync("token1");
+            await cache.Received(1).RemoveAsync("token2");
         }
 
         [Fact]
@@ -316,7 +317,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             userManager.GetGrantedPermissionsAsync(user).Returns(new List<Permission>());
 
             var permissionManager = Substitute.For<IPermissionManager>();
-            permissionManager.GetAllPermissions().Returns(new List<Permission> { new Permission("Pages.Test", displayName: null) });
+            permissionManager.GetAllPermissionsAsync().Returns(new List<Permission> { new Permission("Pages.Test", displayName: null) });
 
             var objectMapper = Substitute.For<IObjectMapper>();
             objectMapper.Map<List<FlatPermissionDto>>(Arg.Any<object>()).Returns(new List<FlatPermissionDto> { new FlatPermissionDto { Name = "Pages.Test" } });

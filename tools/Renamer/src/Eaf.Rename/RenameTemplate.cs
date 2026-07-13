@@ -132,9 +132,9 @@ namespace Eaf.Renamer.Lib
         private void RenameAllDir(BackgroundWorker worker, DoWorkEventArgs e, Arguments arguments)
         {
             string[] directories = Directory.GetDirectories(arguments.RootDir);
-            int totalProgress = 0;
             int totalDirectories = directories.Length <= 0 ? 1 : directories.Length;
 
+            int totalProgress = 0;
             foreach (string path in directories)
             {
                 totalProgress++;
@@ -144,44 +144,59 @@ namespace Eaf.Renamer.Lib
                     break;
                 }
 
-                int percentProgress = (totalProgress * 100) / totalDirectories;
-
                 if (IsIgonreDir(path))
                     continue;
 
                 arguments.RootDir = path;
                 RenameAllDir(worker, e, arguments);
-                DirectoryInfo directoryInfo = new(path);
-                if (directoryInfo.Name.Contains(arguments.OldCompanyName) || directoryInfo.Name.Contains(arguments.OldProjectName) || arguments.ChangeAreaName && directoryInfo.Name.Contains(arguments.OldAreaName))
-                {
-                    string str = directoryInfo.Name;
-                    if (!string.IsNullOrEmpty(arguments.OldCompanyName))
-                        str = str.Replace(arguments.OldCompanyName, arguments.NewCompanyName);
-                    string path2 = str.Replace(arguments.OldProjectName, arguments.NewProjectName);
-                    if (arguments.ChangeAreaName)
-                        path2 = path2.Replace(arguments.OldAreaName, arguments.NewAreaName);
-                    string destDirName = Path.Combine(directoryInfo.Parent.FullName, path2);
-                    if (directoryInfo.FullName != destDirName)
-                    {
-                        worker.ReportProgress(percentProgress, (directoryInfo.FullName + "\r\n => \r\n" + destDirName + "\r\n\r\n"));
-                        directoryInfo.MoveTo(destDirName);
-                    }
-                }
+
+                int percentProgress = (totalProgress * 100) / totalDirectories;
+                RenameDirectoryIfNeeded(worker, arguments, path, percentProgress);
             }
         }
 
-        private void RenameAllFileNameAndContent(
-          BackgroundWorker worker,
-          DoWorkEventArgs e,
-          Arguments arguments)
+        private void RenameDirectoryIfNeeded(BackgroundWorker worker, Arguments arguments, string path, int percentProgress)
         {
-            List<FileInfo> list = ((IEnumerable<FileInfo>)new DirectoryInfo(arguments.RootDir).GetFiles()).Where<FileInfo>((Func<FileInfo, bool>)(m => arguments.Filter.Contains(m.Extension))).ToList<FileInfo>();
-            int percentProgress = 0;
+            DirectoryInfo directoryInfo = new(path);
+            if (!ShouldRenameDirectoryName(directoryInfo.Name, arguments))
+                return;
+
+            string newName = GetRenamedDirectoryName(directoryInfo.Name, arguments);
+            string destDirName = Path.Combine(directoryInfo.Parent.FullName, newName);
+            if (directoryInfo.FullName != destDirName)
+            {
+                worker.ReportProgress(percentProgress, (directoryInfo.FullName + "\r\n => \r\n" + destDirName + "\r\n\r\n"));
+                directoryInfo.MoveTo(destDirName);
+            }
+        }
+
+        private static bool ShouldRenameDirectoryName(string name, Arguments arguments)
+        {
+            return name.Contains(arguments.OldCompanyName)
+                || name.Contains(arguments.OldProjectName)
+                || (arguments.ChangeAreaName && name.Contains(arguments.OldAreaName));
+        }
+
+        private static string GetRenamedDirectoryName(string name, Arguments arguments)
+        {
+            if (!string.IsNullOrEmpty(arguments.OldCompanyName))
+                name = name.Replace(arguments.OldCompanyName, arguments.NewCompanyName);
+            name = name.Replace(arguments.OldProjectName, arguments.NewProjectName);
+            if (arguments.ChangeAreaName)
+                name = name.Replace(arguments.OldAreaName, arguments.NewAreaName);
+            return name;
+        }
+
+        private void RenameAllFileNameAndContent(
+            BackgroundWorker worker,
+            DoWorkEventArgs e,
+            Arguments arguments)
+        {
+            List<FileInfo> files = GetFilteredFiles(arguments.RootDir, arguments.Filter);
+            int totalFiles = files.Count <= 0 ? 1 : files.Count;
 
             int totalProgress = 0;
-            int totalfiles = list.Count <= 0 ? 1 : list.Count;
-
-            foreach (FileInfo fileInfo in list)
+            foreach (FileInfo fileInfo in files)
             {
                 totalProgress++;
                 if (worker.CancellationPending)
@@ -190,42 +205,14 @@ namespace Eaf.Renamer.Lib
                     break;
                 }
 
-                percentProgress = (totalProgress * 100) / totalfiles;
-
+                int percentProgress = (totalProgress * 100) / totalFiles;
                 if (IsIgonreDir(fileInfo.DirectoryName))
                     continue;
 
-                if (fileInfo.FullName.Contains("package.json"))
-                    PathFileUiApi["UI"] = fileInfo.DirectoryName;
-                if (fileInfo.FullName.Contains(".sln"))
-                    PathFileUiApi["API"] = fileInfo.FullName;
-
-                string str1 = File.ReadAllText(fileInfo.FullName, Encoding.UTF8);
-                if (!string.IsNullOrEmpty(arguments.OldCompanyName))
-                    str1 = str1.Replace(arguments.OldCompanyName, arguments.NewCompanyName);
-                string contents = str1.Replace(arguments.OldProjectName, arguments.NewProjectName);
-                if (arguments.ChangeAreaName)
-                    contents = contents.Replace(arguments.OldAreaName, arguments.NewAreaName);
-                if (fileInfo.Name.Contains(arguments.OldCompanyName) || fileInfo.Name.Contains(arguments.OldProjectName) || arguments.ChangeAreaName && fileInfo.Name.Contains(arguments.OldAreaName))
-                {
-                    string str2 = fileInfo.Name;
-                    if (!string.IsNullOrEmpty(arguments.OldCompanyName))
-                        str2 = str2.Replace(arguments.OldCompanyName, arguments.NewCompanyName);
-                    string path2 = str2.Replace(arguments.OldProjectName, arguments.NewProjectName);
-                    if (arguments.ChangeAreaName)
-                        path2 = path2.Replace(arguments.OldAreaName, arguments.NewAreaName);
-                    string path = Path.Combine(fileInfo.DirectoryName, path2);
-                    if (path != fileInfo.FullName)
-                    {
-                        worker.ReportProgress(percentProgress, ("\r\n" + fileInfo.FullName + "\r\n=>\r\n" + path + "\r\n\r\n"));
-                        File.Delete(fileInfo.FullName);
-                    }
-                    File.WriteAllText(path, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-                }
-                else
-                    File.WriteAllText(fileInfo.FullName, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-                worker.ReportProgress(percentProgress, (fileInfo.Name + " => Complete\r\n"));
+                UpdatePathFileUiApi(fileInfo.FullName);
+                RenameFileContentAndName(worker, arguments, fileInfo, percentProgress);
             }
+
             foreach (string directory in Directory.GetDirectories(arguments.RootDir))
             {
                 if (worker.CancellationPending)
@@ -236,6 +223,70 @@ namespace Eaf.Renamer.Lib
                 arguments.RootDir = directory;
                 RenameAllFileNameAndContent(worker, e, arguments);
             }
+        }
+
+        private static List<FileInfo> GetFilteredFiles(string rootDir, string filter)
+        {
+            return new DirectoryInfo(rootDir).GetFiles()
+                .Where(m => filter.Contains(m.Extension))
+                .ToList();
+        }
+
+        private void UpdatePathFileUiApi(string fullName)
+        {
+            if (fullName.Contains("package.json"))
+                PathFileUiApi["UI"] = Path.GetDirectoryName(fullName);
+            if (fullName.Contains(".sln"))
+                PathFileUiApi["API"] = fullName;
+        }
+
+        private void RenameFileContentAndName(BackgroundWorker worker, Arguments arguments, FileInfo fileInfo, int percentProgress)
+        {
+            string contents = GetRenamedFileContents(fileInfo.FullName, arguments);
+            if (ShouldRenameFileName(fileInfo.Name, arguments))
+            {
+                string newName = GetRenamedFileName(fileInfo.Name, arguments);
+                string path = Path.Combine(fileInfo.DirectoryName, newName);
+                if (path != fileInfo.FullName)
+                {
+                    worker.ReportProgress(percentProgress, ("\r\n" + fileInfo.FullName + "\r\n=>\r\n" + path + "\r\n\r\n"));
+                    File.Delete(fileInfo.FullName);
+                }
+                File.WriteAllText(path, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            }
+            else
+            {
+                File.WriteAllText(fileInfo.FullName, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            }
+            worker.ReportProgress(percentProgress, (fileInfo.Name + " => Complete\r\n"));
+        }
+
+        private static string GetRenamedFileContents(string filePath, Arguments arguments)
+        {
+            string contents = File.ReadAllText(filePath, Encoding.UTF8);
+            if (!string.IsNullOrEmpty(arguments.OldCompanyName))
+                contents = contents.Replace(arguments.OldCompanyName, arguments.NewCompanyName);
+            contents = contents.Replace(arguments.OldProjectName, arguments.NewProjectName);
+            if (arguments.ChangeAreaName)
+                contents = contents.Replace(arguments.OldAreaName, arguments.NewAreaName);
+            return contents;
+        }
+
+        private static bool ShouldRenameFileName(string name, Arguments arguments)
+        {
+            return name.Contains(arguments.OldCompanyName)
+                || name.Contains(arguments.OldProjectName)
+                || (arguments.ChangeAreaName && name.Contains(arguments.OldAreaName));
+        }
+
+        private static string GetRenamedFileName(string name, Arguments arguments)
+        {
+            if (!string.IsNullOrEmpty(arguments.OldCompanyName))
+                name = name.Replace(arguments.OldCompanyName, arguments.NewCompanyName);
+            name = name.Replace(arguments.OldProjectName, arguments.NewProjectName);
+            if (arguments.ChangeAreaName)
+                name = name.Replace(arguments.OldAreaName, arguments.NewAreaName);
+            return name;
         }
 
         #endregion RenameAll

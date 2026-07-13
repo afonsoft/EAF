@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 
@@ -21,76 +21,61 @@ namespace EafRenamerCli
                 TimeSpan.FromMilliseconds(100));
 
             string Parameter = null;
-            string[] Parts;
 
-            // Valid parameters forms:
-            // {-,/,--}param{ ,=,:}((",')value(",'))
-            // Examples:
-            // -param1 value1 --param2 /param3:"Test-:-work"
-            //   /param4=happy -param5 '--=nice=--'
             foreach (string Txt in Args)
             {
-                // Look for new parameters (-,/ or --) and a
-                // possible enclosed value (=,:)
-                Parts = Spliter.Split(Txt, 3);
-
-                switch (Parts.Length)
-                {
-                    // Found a value (for the last parameter
-                    // found (space separator))
-                    case 1:
-                        if (Parameter != null)
-                        {
-                            if (!Parameters.ContainsKey(Parameter))
-                            {
-                                Parts[0] =
-                                    Remover.Replace(Parts[0], "$1");
-
-                                Parameters.Add(Parameter, Parts[0]);
-                            }
-                            Parameter = null;
-                        }
-                        // else Error: no parameter waiting for a value (skipped)
-                        break;
-
-                    // Found just a parameter
-                    case 2:
-                        // The last parameter is still waiting.
-                        // With no value, set it to true.
-                        if (Parameter != null && !Parameters.ContainsKey(Parameter))
-                        {
-                            Parameters.Add(Parameter, "true");
-                        }
-                        Parameter = Parts[1];
-                        break;
-
-                    // Parameter with enclosed value
-                    case 3:
-                        // The last parameter is still waiting.
-                        // With no value, set it to true.
-                        if (Parameter != null && !Parameters.ContainsKey(Parameter))
-                        {
-                            Parameters.Add(Parameter, "true");
-                        }
-
-                        Parameter = Parts[1];
-
-                        // Remove possible enclosing characters (",')
-                        if (!Parameters.ContainsKey(Parameter))
-                        {
-                            Parts[2] = Remover.Replace(Parts[2], "$1");
-                            Parameters.Add(Parameter, Parts[2]);
-                        }
-
-                        Parameter = null;
-                        break;
-                }
+                string[] Parts = Spliter.Split(Txt, 3);
+                Parameter = ProcessParts(Parts, Parameter, Remover);
             }
+
             // In case a parameter is still waiting
             if (Parameter != null && !Parameters.ContainsKey(Parameter))
             {
                 Parameters.Add(Parameter, "true");
             }
+        }
+
+        private string ProcessParts(string[] Parts, string Parameter, Regex Remover)
+        {
+            switch (Parts.Length)
+            {
+                case 1:
+                    return ProcessValuePart(Parts, Parameter, Remover);
+                case 2:
+                    return ProcessParameterPart(Parts, Parameter, null, Remover);
+                case 3:
+                    return ProcessParameterPart(Parts, Parameter, Parts[2], Remover);
+                default:
+                    return Parameter;
+            }
+        }
+
+        private string ProcessValuePart(string[] Parts, string Parameter, Regex Remover)
+        {
+            if (Parameter != null && !Parameters.ContainsKey(Parameter))
+            {
+                Parts[0] = Remover.Replace(Parts[0], "$1");
+                Parameters.Add(Parameter, Parts[0]);
+            }
+            return null;
+        }
+
+        private string ProcessParameterPart(string[] Parts, string Parameter, string Value, Regex Remover)
+        {
+            if (Parameter != null && !Parameters.ContainsKey(Parameter))
+                Parameters.Add(Parameter, "true");
+
+            string newParameter = Parts[1];
+
+            if (string.IsNullOrEmpty(Value))
+                return newParameter;
+
+            if (!Parameters.ContainsKey(newParameter))
+            {
+                Value = Remover.Replace(Value, "$1");
+                Parameters.Add(newParameter, Value);
+            }
+            return null;
         }
 
         // Retrieve a parameter value if it exists

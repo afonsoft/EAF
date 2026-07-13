@@ -6,6 +6,7 @@ using Abp.Webhooks;
 using Abp.Webhooks.BackgroundWorker;
 using Eaf.Middleware.Authorization;
 using Eaf.Middleware.WebHooks.Dto;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,9 +102,9 @@ namespace Eaf.Middleware.WebHooks
             var mappedList = ObjectMapper.Map<List<GetAllSendAttemptsOfWebhookEventOutput>>(list);
             var subscriptionIds = list.Select(x => x.WebhookSubscriptionId).Distinct().ToArray();
 
-            var subscriptionUrisDictionary = _subscriptionRepository.GetAll().Where(subscription => subscriptionIds.Contains(subscription.Id))
+            var subscriptionUrisDictionary = await (await _subscriptionRepository.GetAllAsync()).Where(subscription => subscriptionIds.Contains(subscription.Id))
                  .Select(subscription => new { subscription.Id, subscription.WebhookUri })
-                 .ToDictionary(s => s.Id, s => s.WebhookUri);
+                 .ToDictionaryAsync(s => s.Id, s => s.WebhookUri);
 
             foreach (var output in mappedList)
             {
@@ -120,7 +121,7 @@ namespace Eaf.Middleware.WebHooks
             var webhookEvent = await _webhookEventAppService.Get(webhookSendAttempt.WebhookEventId.ToString());
             var webhookSubscription = await _webhookSubscriptionManager.GetAsync(webhookSendAttempt.WebhookSubscriptionId);
 
-            _backgroundJobManager.Enqueue<WebhookSenderJob, WebhookSenderArgs>(new WebhookSenderArgs()
+            await _backgroundJobManager.EnqueueAsync<WebhookSenderJob, WebhookSenderArgs>(new WebhookSenderArgs()
             {
                 TenantId = AbpSession.TenantId,
                 WebhookEventId = webhookSendAttempt.WebhookEventId,

@@ -49,7 +49,7 @@ namespace Eaf.Middleware.Web.Controllers
                 byte[] fileBytes;
                 using (var stream = file.OpenReadStream())
                 {
-                    fileBytes = stream.GetAllBytes();
+                    fileBytes = await stream.GetAllBytesAsync();
                 }
 
                 var fileObject = new BinaryObject(null, fileBytes, file.ContentType, file.FileName);

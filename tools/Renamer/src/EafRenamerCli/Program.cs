@@ -59,12 +59,28 @@ namespace EafRenamerCli
 
         private static void ProcessArgs(Arguments options)
         {
+            ResetOptions();
+            ReadOptions(options);
+            PrintOptions();
+
+            if (DL)
+                WriteLine($"{CYAN}Download {END}{RED}NotImplementedException{END}");
+
+            InitializeTemplate();
+            RunTemplateWithStatus();
+        }
+
+        private static void ResetOptions()
+        {
             UI = "eaf-projectname-ui";
             API = "Eaf.ProjectName";
             DIR = Environment.CurrentDirectory;
             DL = false;
             DEPS = false;
+        }
 
+        private static void ReadOptions(Arguments options)
+        {
             if (!string.IsNullOrEmpty(options["u"]))
                 UI = options["u"];
             if (!string.IsNullOrEmpty(options["i"]))
@@ -75,7 +91,10 @@ namespace EafRenamerCli
                 DL = true;
             if (!string.IsNullOrEmpty(options["deps"]))
                 DEPS = true;
+        }
 
+        private static void PrintOptions()
+        {
             WriteLine($"{NL}----------------------");
             WriteLine($"{YELLOW} /i:{END}{CYAN}{API}{END}");
             WriteLine($"{YELLOW} /u:{END}{CYAN}{UI}{END}");
@@ -86,10 +105,10 @@ namespace EafRenamerCli
                 WriteLine($"{YELLOW} /deps{END}");
             WriteLine($"");
             Console.ForegroundColor = oldColor;
+        }
 
-            if (DL)
-                WriteLine($"{CYAN}Download {END}{RED}NotImplementedException{END}");
-
+        private static void InitializeTemplate()
+        {
             template = new RenameTemplate();
             Eaf.Renamer.Lib.Arguments arg = new Eaf.Renamer.Lib.Arguments
             {
@@ -106,33 +125,37 @@ namespace EafRenamerCli
             template.WorkerCompleted += Template_WorkerCompleted;
             template.ProgressChanged += Template_ProgressChanged;
 
-            AnsiConsole.Status()
-            .Spinner(Spinner.Known.Circle)
-            .SpinnerStyle(Style.Parse("yellow bold"))
-            .Start("[yellow bold]Start process...[/]", ctx =>
-            {
-                ctx.Spinner(Spinner.Known.Circle);
-                ctx.SpinnerStyle(Style.Parse("yellow bold"));
-                template.RunWorker(arg);
+            template.RunWorker(arg);
+        }
 
-                while (isRunning)
+        private static void RunTemplateWithStatus()
+        {
+            AnsiConsole.Status()
+                .Spinner(Spinner.Known.Circle)
+                .SpinnerStyle(Style.Parse("yellow bold"))
+                .Start("[yellow bold]Start process...[/]", ctx =>
                 {
-                    Thread.Sleep(500);
-                    ctx.Refresh();
-                    while (isRunningRename)
+                    ctx.Spinner(Spinner.Known.Circle);
+                    ctx.SpinnerStyle(Style.Parse("yellow bold"));
+
+                    while (isRunning)
                     {
-                        ctx.Status = "[yellow bold]Rename files...[/]";
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                         ctx.Refresh();
+                        while (isRunningRename)
+                        {
+                            ctx.Status = "[yellow bold]Rename files...[/]";
+                            Thread.Sleep(1000);
+                            ctx.Refresh();
+                        }
+                        while (isRunninginstall)
+                        {
+                            ctx.Status = "[yellow bold]Installing the dependencies..[/]";
+                            Thread.Sleep(1000);
+                            ctx.Refresh();
+                        }
                     }
-                    while (isRunninginstall)
-                    {
-                        ctx.Status = "[yellow bold]Installing the dependencies..[/]";
-                        Thread.Sleep(1000);
-                        ctx.Refresh();
-                    }
-                }
-            });
+                });
         }
 
         private static void Template_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)

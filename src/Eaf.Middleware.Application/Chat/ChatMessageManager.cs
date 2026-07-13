@@ -225,7 +225,7 @@ namespace Eaf.Middleware.Chat
             if (friendshipState == null)
             {
                 var senderTenancyName = senderIdentifier.TenantId.HasValue ?
-                    _tenantCache.Get(senderIdentifier.TenantId.Value).TenancyName :
+                    (await _tenantCache.GetAsync(senderIdentifier.TenantId.Value)).TenancyName :
                     null;
 
                 var senderUser = await _userManager.GetUserAsync(senderIdentifier);
@@ -267,12 +267,12 @@ namespace Eaf.Middleware.Chat
             else if (GetUnreadMessageCount(senderIdentifier, receiverIdentifier) == 1)
             {
                 var senderTenancyName = senderIdentifier.TenantId.HasValue ?
-                    _tenantCache.Get(senderIdentifier.TenantId.Value).TenancyName :
+                    (await _tenantCache.GetAsync(senderIdentifier.TenantId.Value)).TenancyName :
                     null;
 
                 await _userEmailer.TryToSendChatMessageMail(
-                      _userManager.GetUser(receiverIdentifier),
-                      _userManager.GetUser(senderIdentifier).UserName,
+                      await _userManager.GetUserAsync(receiverIdentifier),
+                      (await _userManager.GetUserAsync(senderIdentifier)).UserName,
                       senderTenancyName,
                       sentMessage
                   );
@@ -287,10 +287,10 @@ namespace Eaf.Middleware.Chat
                 friendshipState = FriendshipState.Accepted;
 
                 var receiverTenancyName = receiverIdentifier.TenantId.HasValue
-                    ? _tenantCache.Get(receiverIdentifier.TenantId.Value).TenancyName
+                    ? (await _tenantCache.GetAsync(receiverIdentifier.TenantId.Value)).TenancyName
                     : null;
 
-                var receiverUser = _userManager.GetUser(receiverIdentifier);
+                var receiverUser = await _userManager.GetUserAsync(receiverIdentifier);
                 await _friendshipManager.CreateFriendshipAsync(
                     new Friendship(
                         senderIdentifier,

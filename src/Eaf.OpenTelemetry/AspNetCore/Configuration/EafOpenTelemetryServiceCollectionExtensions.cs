@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System;
@@ -38,6 +39,22 @@ namespace Eaf.AspNetCore.Configuration
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
+            var options = ConfigureOptions(services, optionsAction);
+            SetOtlpEnvironmentVariables(options);
+            ConfigureLoggingServices(services, options);
+
+            return services.AddOpenTelemetry()
+                .ConfigureResource(builder => builder
+                    .AddEnvironmentVariableDetector()
+                    .AddTelemetrySdk()
+                    .AddService(serviceName: options.ServiceName))
+                .WithTracing(builder => ConfigureTracing(builder, options))
+                .WithLogging(builder => ConfigureLoggingProvider(builder, options))
+                .WithMetrics(builder => ConfigureMetrics(builder, options));
+        }
+
+        private static EafOpenTelemetryOptions ConfigureOptions(IServiceCollection services, Action<EafOpenTelemetryOptions> optionsAction)
+        {
             var options = new EafOpenTelemetryOptions();
             if (optionsAction != null)
             {
@@ -51,7 +68,11 @@ namespace Eaf.AspNetCore.Configuration
             if (options.MeterName == null || !options.MeterName.Any())
                 options.MeterName = new[] { "Microsoft.AspNetCore.Hosting", "Eaf" };
 
-            //Set Variable
+            return options;
+        }
+
+        private static void SetOtlpEnvironmentVariables(EafOpenTelemetryOptions options)
+        {
             foreach (var otlp in options.OtlpVariables)
             {
                 try
@@ -63,10 +84,13 @@ namespace Eaf.AspNetCore.Configuration
                 }
                 catch
                 {
-                    //Igonre
+                    //Ignore
                 }
             }
+        }
 
+        private static void ConfigureLoggingServices(IServiceCollection services, EafOpenTelemetryOptions options)
+        {
             services.AddLogging(configure =>
             {
                 configure.AddOpenTelemetry(builder =>
@@ -75,35 +99,15 @@ namespace Eaf.AspNetCore.Configuration
                     builder.ParseStateValues = true;
                     builder.IncludeScopes = true;
 
-                    if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                    {
-                        builder.AddOtlpExporter(otlpOptions =>
-                        {
-                            otlpOptions.Endpoint = new Uri(options.OtlpEndpoint);
-                            otlpOptions.Headers = options.OtlpHeaders;
-                            otlpOptions.Protocol = options.OtlpProtocol;
-                            otlpOptions.ExportProcessorType = options.OtlpExportProcessorType;
-                        });
-                    }
-                    else
-                    {
-                        builder.AddOtlpExporter();
-                    }
-                    if (options.ConsoleExporter)
-                    {
-                        builder.AddConsoleExporter();
-                    }
+                    AddOtlpExporter(builder, options);
+                    AddConsoleExporter(builder, options);
                 });
             });
+        }
 
-            return services.AddOpenTelemetry()
-            .ConfigureResource(builder => builder
-                .AddEnvironmentVariableDetector()
-                .AddTelemetrySdk()
-                .AddService(serviceName: options.ServiceName))
-            .WithTracing(builder =>
-            {
-                builder
+        private static void ConfigureTracing(TracerProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            builder
                 .AddSource("Eaf")
                 .AddSource("Eaf.*")
                 .AddSource(options.SourceName)
@@ -125,50 +129,20 @@ namespace Eaf.AspNetCore.Configuration
                 {
                     o.RecordException = options.RecordException;
                 });
-                if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                {
-                    builder.AddOtlpExporter(otlpOptions =>
-                    {
-                        otlpOptions.Endpoint = new Uri(options.OtlpEndpoint);
-                        otlpOptions.Headers = options.OtlpHeaders;
-                        otlpOptions.Protocol = options.OtlpProtocol;
-                        otlpOptions.ExportProcessorType = options.OtlpExportProcessorType;
-                    });
-                }
-                else
-                {
-                    builder.AddOtlpExporter();
-                }
-                if (options.ConsoleExporter)
-                {
-                    builder.AddConsoleExporter();
-                }
-            })
-            .WithLogging(builder =>
-            {
-                if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                {
-                    builder.AddOtlpExporter(otlpOptions =>
-                    {
-                        otlpOptions.Endpoint = new Uri(options.OtlpEndpoint);
-                        otlpOptions.Headers = options.OtlpHeaders;
-                        otlpOptions.Protocol = options.OtlpProtocol;
-                        otlpOptions.ExportProcessorType = options.OtlpExportProcessorType;
-                    });
-                }
-                else
-                {
-                    builder.AddOtlpExporter();
-                }
-                if (options.ConsoleExporter)
-                {
-                    builder.AddConsoleExporter();
-                }
-            })
 
-            .WithMetrics(builder =>
-            {
-                builder
+            AddOtlpExporter(builder, options);
+            AddConsoleExporter(builder, options);
+        }
+
+        private static void ConfigureLoggingProvider(LoggerProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            AddOtlpExporter(builder, options);
+            AddConsoleExporter(builder, options);
+        }
+
+        private static void ConfigureMetrics(MeterProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            builder
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation()
@@ -180,25 +154,72 @@ namespace Eaf.AspNetCore.Configuration
                 .AddMeter(options.MeterName)
                 .AddPrometheusExporter();
 
-                if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                {
-                    builder.AddOtlpExporter(otlpOptions =>
-                    {
-                        otlpOptions.Endpoint = new Uri(options.OtlpEndpoint);
-                        otlpOptions.Headers = options.OtlpHeaders;
-                        otlpOptions.Protocol = options.OtlpProtocol;
-                        otlpOptions.ExportProcessorType = options.OtlpExportProcessorType;
-                    });
-                }
-                else
-                {
-                    builder.AddOtlpExporter();
-                }
-                if (options.ConsoleExporter)
-                {
-                    builder.AddConsoleExporter();
-                }
-            });
+            AddOtlpExporter(builder, options);
+            AddConsoleExporter(builder, options);
+        }
+
+        private static void AddOtlpExporter(TracerProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            else
+                builder.AddOtlpExporter();
+        }
+
+        private static void AddOtlpExporter(OpenTelemetryLoggerOptions builder, EafOpenTelemetryOptions options)
+        {
+            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            else
+                builder.AddOtlpExporter();
+        }
+
+        private static void AddOtlpExporter(MeterProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            else
+                builder.AddOtlpExporter();
+        }
+
+        private static void AddOtlpExporter(LoggerProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            else
+                builder.AddOtlpExporter();
+        }
+
+        private static void AddConsoleExporter(TracerProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            if (options.ConsoleExporter)
+                builder.AddConsoleExporter();
+        }
+
+        private static void AddConsoleExporter(LoggerProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            if (options.ConsoleExporter)
+                builder.AddConsoleExporter();
+        }
+
+        private static void AddConsoleExporter(OpenTelemetryLoggerOptions builder, EafOpenTelemetryOptions options)
+        {
+            if (options.ConsoleExporter)
+                builder.AddConsoleExporter();
+        }
+
+        private static void AddConsoleExporter(MeterProviderBuilder builder, EafOpenTelemetryOptions options)
+        {
+            if (options.ConsoleExporter)
+                builder.AddConsoleExporter();
+        }
+
+        private static void ConfigureOtlpExporterOptions(OtlpExporterOptions otlpOptions, EafOpenTelemetryOptions options)
+        {
+            otlpOptions.Endpoint = new Uri(options.OtlpEndpoint);
+            otlpOptions.Headers = options.OtlpHeaders;
+            otlpOptions.Protocol = options.OtlpProtocol;
+            otlpOptions.ExportProcessorType = options.OtlpExportProcessorType;
         }
     }
 }

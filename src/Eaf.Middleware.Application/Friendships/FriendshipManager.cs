@@ -89,7 +89,7 @@ namespace Eaf.Middleware.Friendships
 
             using (CurrentUnitOfWork.SetTenantId(friendship.TenantId))
             {
-                _friendshipRepository.Insert(friendship);
+                await _friendshipRepository.InsertAsync(friendship);
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
         }
@@ -112,7 +112,7 @@ namespace Eaf.Middleware.Friendships
         {
             using (CurrentUnitOfWork.SetTenantId(friendship.TenantId))
             {
-                _friendshipRepository.Update(friendship);
+                await _friendshipRepository.UpdateAsync(friendship);
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
         }

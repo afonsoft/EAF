@@ -112,122 +112,98 @@ namespace Eaf.Middleware.Ldap.Authentication
         /// <returns>Resultado da operação.</returns>
         public async Task<List<TUser>> GetUsersAsync(string userNameOrEmailAddress)
         {
-            List<TUser> users = new();
-
             if (string.IsNullOrEmpty(userNameOrEmailAddress))
-                return users;
+                return new List<TUser>();
 
             if (OperatingSystem.IsWindows() && !_ldapModuleConfig.UseNovellProvider)
+                return await GetUsersFromActiveDirectoryAsync(userNameOrEmailAddress);
+
+            return await GetUsersFromLdapAsync(userNameOrEmailAddress);
+        }
+
+        private async Task<List<TUser>> GetUsersFromActiveDirectoryAsync(string userNameOrEmailAddress)
+        {
+            using (var principalContext = await CreatePrincipalContext(null))
             {
-                #region Windows
+                var searchString = string.Format("*{0}*", userNameOrEmailAddress);
 
-                using (var principalContext = await CreatePrincipalContext(null))
-                {
-                    var searchString = string.Format("*{0}*", userNameOrEmailAddress);
-
-                    using (var searchMaskDisplayname = new UserPrincipal(principalContext) { DisplayName = searchString, Enabled = true })
-                    using (var searchMaskUsername = new UserPrincipal(principalContext) { SamAccountName = searchString, Enabled = true })
-                    using (var searchMaskEmail = new UserPrincipal(principalContext) { EmailAddress = searchString, Enabled = true })
-                    using (var searcherDisplayname = new PrincipalSearcher(searchMaskDisplayname))
-                    using (var searcherUsername = new PrincipalSearcher(searchMaskUsername))
-                    using (var searcherEmail = new PrincipalSearcher(searchMaskEmail))
+                using (var searchMaskDisplayname = new UserPrincipal(principalContext) { DisplayName = searchString, Enabled = true })
+                using (var searchMaskUsername = new UserPrincipal(principalContext) { SamAccountName = searchString, Enabled = true })
+                using (var searchMaskEmail = new UserPrincipal(principalContext) { EmailAddress = searchString, Enabled = true })
+                using (var searcherDisplayname = new PrincipalSearcher(searchMaskDisplayname))
+                using (var searcherUsername = new PrincipalSearcher(searchMaskUsername))
+                using (var searcherEmail = new PrincipalSearcher(searchMaskEmail))
 #pragma warning disable CA1416 // Already guarded by OperatingSystem.IsWindows()
-                    using (var taskDisplayname = Task.Run(() => SearchWithLimit(searcherDisplayname, 10)))
-                    using (var taskUsername = Task.Run(() => SearchWithLimit(searcherUsername, 10)))
-                    using (var taskEmail = Task.Run(() => SearchWithLimit(searcherEmail, 10)))
+                using (var taskDisplayname = Task.Run(() => SearchWithLimit(searcherDisplayname, 10)))
+                using (var taskUsername = Task.Run(() => SearchWithLimit(searcherUsername, 10)))
+                using (var taskEmail = Task.Run(() => SearchWithLimit(searcherEmail, 10)))
 #pragma warning restore CA1416
+                {
+                    var users = new List<TUser>();
+                    foreach (Principal result in (await taskDisplayname).Union(await taskUsername).Union(await taskEmail))
                     {
-                        foreach (Principal result in (await taskDisplayname).Union(await taskUsername).Union(await taskEmail))
+                        users.Add(new TUser
                         {
-                            users.Add(new TUser
-                            {
-                                UserName = result.SamAccountName,
-                                Name = result.DisplayName,
-                                EmailAddress = (result is UserPrincipal principal) ? principal.EmailAddress : ""
-                            });
-                        }
+                            UserName = result.SamAccountName,
+                            Name = result.DisplayName,
+                            EmailAddress = (result is UserPrincipal principal) ? principal.EmailAddress : ""
+                        });
                     }
 
                     return users.DistinctBy(o => o.UserName).Take(10).ToList();
                 }
-
-                #endregion Windows
             }
-            else
+        }
+
+        private async Task<List<TUser>> GetUsersFromLdapAsync(string userNameOrEmailAddress)
+        {
+            string container = NormalizeLdapContainer(SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(null)));
+            string userName = NormalizeLdapUserName(userNameOrEmailAddress);
+            string[] attributes = { "samAccountName", "displayName", "userPrincipalName", "mail" };
+
+            var results = await Task.WhenAll(
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(samAccountName={userName}))", attributes),
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(mail={userNameOrEmailAddress}))", attributes),
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(displayName={userName}*))", attributes),
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(userPrincipalName={userName}*))", attributes)
+            );
+
+            var users = results.SelectMany(r => r.Item1).ToList();
+            var exceptions = results.SelectMany(r => r.Item2).ToList();
+
+            ThrowIfNoUsersAndHasExceptions(users, exceptions);
+
+            return users.DistinctBy(o => o.Logins).Take(10).ToList();
+        }
+
+        private async Task<Tuple<List<TUser>, List<Exception>>> ExecuteLdapSearchAsync(string container, string filter, string[] attributes)
+        {
+            using (var principalContext = await CreateLdapContext(null) as IDisposable)
             {
-                #region NoWindows
-
-                string container = SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(null));
-                if (container.Contains(".") && !container.Contains("DC="))
-                    container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
-
-                string userName = userNameOrEmailAddress;
-                if (userNameOrEmailAddress.IndexOf("@") != -1)
-                    userName = userNameOrEmailAddress.Split("@")[0];
-
-                string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
-
-                var result1 = Task.Run(async () =>
-                {
-                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
-                    {
-                        var ldapContext = (ILdapConnection)principalContext;
-                        var filter1 = $"(&(objectClass=user)(samAccountName={userName}))";
-                        var searcher1 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
-                        return await FillUsersLdap(searcher1);
-                    }
-                });
-
-                var result2 = Task.Run(async () =>
-                {
-                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
-                    {
-                        var ldapContext = (ILdapConnection)principalContext;
-                        var filter4 = $"(&(objectClass=user)(mail={userNameOrEmailAddress}))";
-                        var searcher4 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter4, attrib, false);
-                        return await FillUsersLdap(searcher4);
-                    }
-                });
-
-                var result3 = Task.Run(async () =>
-                {
-                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
-                    {
-                        var ldapContext = (ILdapConnection)principalContext;
-                        var filter2 = $"(&(objectClass=user)(displayName={userName}*))";
-                        var searcher2 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter2, attrib, false);
-                        return await FillUsersLdap(searcher2);
-                    }
-                });
-
-                var result4 = Task.Run(async () =>
-                {
-                    using (var principalContext = await CreateLdapContext(null) as IDisposable)
-                    {
-                        var ldapContext = (ILdapConnection)principalContext;
-                        var filter3 = $"(&(objectClass=user)(userPrincipalName={userName}*))";
-                        var searcher3 = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter3, attrib, false);
-                        return await FillUsersLdap(searcher3);
-                    }
-                });
-
-                var r1 = await result1;
-                var r2 = await result2;
-                var r3 = await result3;
-                var r4 = await result4;
-
-                users = (r1.Item1).Union(r2.Item1).Union(r3.Item1).Union(r4.Item1).ToList();
-                var exptions = (r1.Item2).Union(r2.Item2).Union(r3.Item2).Union(r4.Item2).ToList();
-
-                if (exptions != null && exptions.Any() && !users.Any())
-                {
-                    throw new AggregateException(exptions);
-                }
-
-                return users.DistinctBy(o => o.Logins).Take(10).ToList();
-
-                #endregion NoWindows
+                var ldapContext = (ILdapConnection)principalContext;
+                var searcher = await ldapContext.SearchAsync(container, LdapConnection.ScopeSub, filter, attributes, false);
+                return await FillUsersLdap(searcher);
             }
+        }
+
+        private static string NormalizeLdapContainer(string container)
+        {
+            if (container.Contains(".") && !container.Contains("DC="))
+                return "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
+            return container;
+        }
+
+        private static string NormalizeLdapUserName(string userNameOrEmailAddress)
+        {
+            if (userNameOrEmailAddress.IndexOf("@") != -1)
+                return userNameOrEmailAddress.Split("@")[0];
+            return userNameOrEmailAddress;
+        }
+
+        private static void ThrowIfNoUsersAndHasExceptions(List<TUser> users, List<Exception> exceptions)
+        {
+            if (exceptions != null && exceptions.Any() && !users.Any())
+                throw new AggregateException(exceptions);
         }
 
         private async Task<Tuple<List<TUser>, List<Exception>>> FillUsersLdap(ILdapSearchResults serach)

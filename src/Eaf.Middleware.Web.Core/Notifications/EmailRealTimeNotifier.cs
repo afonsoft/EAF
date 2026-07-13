@@ -48,7 +48,7 @@ namespace Eaf.Notifications
                 {
                     var user = await _userManager.GetUserByIdAsync(userNotification.UserId);
 
-                    _emailSender.Send(
+                    await _emailSender.SendAsync(
                         to: user.EmailAddress,
                         subject: "You have a new notification!",
                         body: data.Message,
