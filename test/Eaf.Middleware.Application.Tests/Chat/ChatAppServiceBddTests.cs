@@ -5,6 +5,7 @@ using Abp.ObjectMapping;
 using Abp.RealTime;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Chat.Dto;
 using Eaf.Middleware.Friendships.Cache;
@@ -413,7 +414,99 @@ namespace Eaf.Middleware.Application.Tests.Chat
 
         #endregion
 
+        [Fact]
+        public async Task Dado_UsuarioLogadoComMensagensDeUsuario_Quando_GetUserChatMessages_Entao_DeveDefinirTargetUserName()
+        {
+            // Dado
+            var userId = 42L;
+            var friendUserId = 10L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(userId);
+            abpSession.TenantId.Returns(tenantId);
+            _sut.AbpSession = abpSession;
+
+            var message = new ChatMessage(
+                new UserIdentifier(tenantId, userId),
+                new UserIdentifier(tenantId, friendUserId),
+                ChatSide.Sender,
+                "Ola",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+            message.Id = 1;
+
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage> { message }.AsAsyncQueryable());
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<ChatMessageDto>>(Arg.Any<object>())
+                .Returns(callInfo =>
+                {
+                    var items = (callInfo.Arg<object>() as IEnumerable<ChatMessage>)!;
+                    return items.Select(x => new ChatMessageDto
+                    {
+                        Id = (int)x.Id,
+                        CreationTime = x.CreationTime,
+                        Message = x.Message,
+                        ReadState = x.ReadState,
+                        ReceiverReadState = x.ReceiverReadState,
+                        SharedMessageId = x.SharedMessageId?.ToString(),
+                        Side = x.Side,
+                        TargetTenantId = x.TargetTenantId,
+                        TargetUserId = x.TargetUserId,
+                        TenantId = x.TenantId,
+                        UserId = x.UserId
+                    }).ToList();
+                });
+            _sut.ObjectMapper = objectMapper;
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(friendUserId).Returns(new User { Id = friendUserId, Name = "Friend" });
+            _sut.UserManager = userManager;
+
+            var input = new GetUserChatMessagesInput
+            {
+                TenantId = tenantId,
+                UserId = friendUserId
+            };
+
+            // Quando
+            var result = await _sut.GetUserChatMessages(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].TargetUserName.ShouldBe("Friend");
+        }
+
         #region MarkAllUnreadMessagesOfUserAsRead
+
+        [Fact]
+        public async Task Dado_UsuarioSemMensagensNaoLidasDeUsuario_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveRetornarSemAlterar()
+        {
+            var userId = 42L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(userId);
+            abpSession.TenantId.Returns(tenantId);
+            _sut.AbpSession = abpSession;
+
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage>().AsAsyncQueryable());
+
+            var input = new MarkAllUnreadMessagesOfUserAsReadInput
+            {
+                TenantId = tenantId,
+                UserId = 10
+            };
+
+            await _sut.MarkAllUnreadMessagesOfUserAsRead(input);
+
+            await _chatCommunicator.DidNotReceive().SendAllUnreadMessagesOfUserReadToClients(
+                Arg.Any<IReadOnlyList<IOnlineClient>>(),
+                Arg.Any<UserIdentifier>());
+        }
 
         [Fact]
         public async Task Dado_UsuarioComMensagensNaoLidasDeUsuario_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveMarcarComoLidaEComunicar()

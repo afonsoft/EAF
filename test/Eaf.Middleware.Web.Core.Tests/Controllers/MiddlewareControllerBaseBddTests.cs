@@ -16,6 +16,7 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         {
             public string CallL(string name) => L(name);
             public string CallLWithArgs(string name, params object[] args) => L(name, args);
+            public string CallLWithCulture(string name, System.Globalization.CultureInfo culture) => L(name, culture);
             public void CallSetTenantIdCookie(int? tenantId) => SetTenantIdCookie(tenantId);
             public void CallCheckErrors(IdentityResult identityResult) => CheckErrors(identityResult);
         }
@@ -110,6 +111,19 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
 
             // Quando & Então
             Should.Throw<Abp.UI.UserFriendlyException>(() => sut.CallCheckErrors(failedResult));
+        }
+
+        [Fact]
+        public void Dado_ChaveECultura_Quando_L_Entao_DeveRetornarChaveLocalizada()
+        {
+            // Dado
+            var sut = new TestableController();
+
+            // Quando
+            var result = sut.CallLWithCulture("ChaveInexistente_P52", System.Globalization.CultureInfo.InvariantCulture);
+
+            // Então
+            result.ShouldBe("ChaveInexistente_P52");
         }
     }
 }

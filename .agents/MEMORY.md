@@ -12,6 +12,19 @@ Current coverage (after P48): Line 96.3%, Branch 83.0%, Method 99.1% (4388 tests
 Current coverage (after P49): Line 96.3%, Branch 82.9%, Method 99.2% (4393 tests, 4392 passing, 1 skipped). Build warnings: 140.
 Current coverage (after P50): Line 96.4%, Branch 83.0%, Method 99.4% (4397 tests, 4396 passing, 1 skipped). Build warnings: 142.
 Current coverage (after P51): Line 96.4%, Branch 83.0%, Method 99.3% (4401 tests, 4400 passing, 1 skipped). Build warnings: 159.
+Current coverage (after P52): Line 96.6%, Branch 83.6%, Method 99.3% (4416 tests, 4415 passing, 1 skipped). Build warnings: 159.
+
+## P52 gotchas
+- `MiddlewareControllerBase.L(string, CultureInfo)` is protected; create a `TestableController` subclass that exposes `CallLWithCulture` to call `L(name, culture)`.
+- `EafKeyVaultConfigurationProvider` with an unknown `Provider` falls through `KeyVaultManagerFactory` to `NullKeyVaultManager`; `Load()` completes and `TryGet` returns false.
+- `DefaultLanguagesCreator.Create` and `TenantRoleAndUserBuilder.Create` are idempotent; call them twice to cover the duplicate branches and exercise `UsingDbContext` on the `SampleAppDbContext`.
+- `ProfileAppService.GetProfilePicture` with `ProfilePictureId` set returns a base64 string from `GetProfilePictureById`. `GetProfilePictureByUser`/`GetFriendProfilePicture` with `ProfilePictureId == null` return empty string. `UpdateProfilePicture` throws `UserFriendlyException` when the decoded image exceeds `MaxProfilPictureBytes` (5 MB); use a generated 24-bit BMP (e.g., 1400x1400) to exceed the limit.
+- `ChatAppService.GetUserChatMessages` calls `SetTargetUserNamesAsync`; set `UserManager.GetUserByIdAsync` to return a user to cover the `try` exit path, otherwise the catch path is taken.
+- `ChatAppService.MarkAllUnreadMessagesOfUserAsRead` with a valid `UserId` but no matching messages returns early; it also covers the `!messages.Any()` branch and `!reverseMessages.Any()` branch.
+- `ChatMessageManager.SendMessageAsync` with `UserManager.GetUserOrNullAsync` returning null throws `UserFriendlyException` with `TargetUserNotFoundProbablyDeleted`. Supplying an online client list covers `HandleReceiverToSenderAsync` `clients.Any()` branch.
+- `ChatMessageManager.HandleSenderUserInfoChangeAsync` returns early when `senderAsFriend` info is unchanged or when `friendship` is null; configure `UserFriendsCache` accordingly.
+- `PermissionAppService` 92.5% branch `permission.Children == null` is unreachable because `Permission.Children` getter uses `ImmutableList.CreateRange` and throws `ArgumentNullException` when `_children` is null.
+- `LdapAuthenticationSource`, `TokenAuthController`, `UserAppService`, `UserManager`, `FriendshipAppService`, `MiddlewareCoreModule`, `MiddlewareWebCoreModule`, `AzureActiveDirectoryAuthenticationSource`, `LdapSettings` and `ServiceBusQueueAppender` still have Linux-inaccessible branches or require complex mock setup; leave for P53 if no accessible branch is found.
 
 ## P51 gotchas
 - `WorkerContentFileProvider` uncovered lines were the `if (fileInfo.Exists)` return and `if (directory.Exists)` return. Create a real temp file and subdirectory under `IHostEnvironment.ContentRootPath` to cover both branches.
