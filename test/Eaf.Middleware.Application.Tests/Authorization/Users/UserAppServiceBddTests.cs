@@ -533,6 +533,39 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             await userRepository.Received(1).FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>());
         }
 
+        [Fact]
+        public async Task Dado_UserNameNovoDoAzureAD_Quando_CreateUsersByActiveDirectory_Entao_DeveCriarUsuarioComRoles()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>()).Returns((User)null);
+            userManager.CreateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            _appAzureActiveDirectoryAuthenticationSource.GetUserAsync("user@tenant.com")
+                .Returns(new User { UserName = "user", Name = "", Surname = "", EmailAddress = "" });
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "user@tenant.com" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            // Quando
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            // Então
+            await _appAzureActiveDirectoryAuthenticationSource.Received(1).GetUserAsync("user@tenant.com");
+            await userManager.Received(1).CreateAsync(Arg.Any<User>());
+        }
+
         #endregion
 
         #region CreateUsersByLdap
@@ -586,6 +619,32 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
             await _appLdapAuthenticationSource.Received(1).CreateUserAsync("john", Arg.Any<Tenant>());
             await userManager.Received(1).CreateAsync(user);
+        }
+
+        [Fact]
+        public async Task Dado_UserNamesLdapComVazioEExistente_Quando_CreateUsersByLdap_Entao_DeveIgnorar()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>())
+                .Returns(new User { Id = 2, UserName = "existing", NormalizedUserName = "EXISTING" });
+            userManager.CreateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            var input = new CreateLdapUserInput
+            {
+                UserNames = new[] { "", "existing" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByLdap(input);
+
+            await _appLdapAuthenticationSource.DidNotReceiveWithAnyArgs().CreateUserAsync(Arg.Any<string>(), Arg.Any<Tenant>());
+            await userManager.DidNotReceiveWithAnyArgs().CreateAsync(Arg.Any<User>());
         }
 
         #endregion

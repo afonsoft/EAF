@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority51-coverage-audit`
+Last session branch: `feature/devin-20260713-priority53-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -13,6 +13,20 @@ Current coverage (after P49): Line 96.3%, Branch 82.9%, Method 99.2% (4393 tests
 Current coverage (after P50): Line 96.4%, Branch 83.0%, Method 99.4% (4397 tests, 4396 passing, 1 skipped). Build warnings: 142.
 Current coverage (after P51): Line 96.4%, Branch 83.0%, Method 99.3% (4401 tests, 4400 passing, 1 skipped). Build warnings: 159.
 Current coverage (after P52): Line 96.6%, Branch 83.6%, Method 99.3% (4416 tests, 4415 passing, 1 skipped). Build warnings: 159.
+Current coverage (after P53): Line 97.1%, Branch 84.2%, Method 99.4% (4433 tests, 4432 passing, 1 skipped). Build warnings: 163.
+
+## P53 gotchas
+- `AbpUserManager.GetOldUserNameAsync` is `protected virtual` and the admin-rename branch in `UserManager.UpdateWithValidateAsync` is not reachable with pure NSubstitute. Use a `Moq.Mock<UserManager>` with `CallBase = true` and `mock.Protected().Setup<Task<string>>("GetOldUserNameAsync", 1L).ReturnsAsync("admin")` to cover it.
+- `UserManager.UpdateWithValidateAsync` with duplicate username can be covered by substituting `CheckDuplicateUsernameOrEmailAddressAsync` to return `IdentityResult.Failed`.
+- `UserManager.SetGrantedPermissionsAsync` and `SetRolesAsync` are `virtual`; use `userManager.When(x => x.SetGrantedPermissionsAsync(...)).CallBase()` and configure `GetGrantedPermissionsAsync`/`GrantPermissionAsync` and `AddToRoleAsync`.
+- `AppAzureActiveDirectoryAuthenticationSource.GetUserAsync` and `GetUsersAsync` had to be made `virtual` in `AzureActiveDirectoryAuthenticationSource<TUser, TTenant>` so NSubstitute can return mocked users for `UserAppService.CreateUsersByActiveDirectory` tests.
+- `UserAppService.CreateUsersByLdap` ignores empty or already-existing usernames; `UserManager.GetUserByLoginAsync` is non-virtual and relies on the underlying `_userRepository` substitute.
+- `FriendshipAppService.BlockUser` with online clients calls `_chatCommunicator.SendUserStateChangeToClients`; configure `_onlineClientManager.GetAllByUserIdAsync` to return a list.
+- `FriendshipAppService.CreateFriendshipRequestByUserName` with a missing tenancy name throws `UserFriendlyException`; configure `TenantManager.FindByTenancyNameAsync` to return `null` and `LocalizationManager` to avoid null reference.
+- `TokenAuthController.Authenticate` and `ExternalAuthenticate` validate `ModelState` and throw `UserFriendlyException` when invalid.
+- `MiddlewareCoreModuleIntegrationTests` must use `Abp.AbpBootstrapper.Create(typeof(...), options => options.IocManager = new IocManager())` to avoid `UnitOfWorkDefaultOptions` duplicate registration in the static `IocManager.Instance`.
+- `LdapAuthenticationSource` and `MiddlewareWebCoreModule` still contain branches that are infeasible on Linux (real LDAP, Hangfire/Redis/SQL Server, `??` constructor fallback). Document these as inalcançáveis.
+- `PermissionAppService` 92.5% branch `permission.Children == null` remains unreachable because `Permission.Children` uses `ImmutableList`.
 
 ## P52 gotchas
 - `MiddlewareControllerBase.L(string, CultureInfo)` is protected; create a `TestableController` subclass that exposes `CallLWithCulture` to call `L(name, culture)`.
@@ -24,7 +38,7 @@ Current coverage (after P52): Line 96.6%, Branch 83.6%, Method 99.3% (4416 tests
 - `ChatMessageManager.SendMessageAsync` with `UserManager.GetUserOrNullAsync` returning null throws `UserFriendlyException` with `TargetUserNotFoundProbablyDeleted`. Supplying an online client list covers `HandleReceiverToSenderAsync` `clients.Any()` branch.
 - `ChatMessageManager.HandleSenderUserInfoChangeAsync` returns early when `senderAsFriend` info is unchanged or when `friendship` is null; configure `UserFriendsCache` accordingly.
 - `PermissionAppService` 92.5% branch `permission.Children == null` is unreachable because `Permission.Children` getter uses `ImmutableList.CreateRange` and throws `ArgumentNullException` when `_children` is null.
-- `LdapAuthenticationSource`, `TokenAuthController`, `UserAppService`, `UserManager`, `FriendshipAppService`, `MiddlewareCoreModule`, `MiddlewareWebCoreModule`, `AzureActiveDirectoryAuthenticationSource`, `LdapSettings` and `ServiceBusQueueAppender` still have Linux-inaccessible branches or require complex mock setup; leave for P53 if no accessible branch is found.
+- `LdapAuthenticationSource`, `TokenAuthController`, `UserAppService`, `UserManager`, `FriendshipAppService`, `MiddlewareCoreModule`, `MiddlewareWebCoreModule`, `AzureActiveDirectoryAuthenticationSource`, `LdapSettings` and `ServiceBusQueueAppender` had Linux-inaccessible branches or complex mock setup; P53 covered `UserManager`, `UserAppService`, `FriendshipAppService`, `MiddlewareCoreModule`, `TokenAuthController`, `AzureActiveDirectoryAuthenticationSource` and `LdapAuthenticationSource` reachable branches. `MiddlewareWebCoreModule`, `LdapSettings` and `ServiceBusQueueAppender` remain for P54 if no accessible branch is found.
 
 ## P51 gotchas
 - `WorkerContentFileProvider` uncovered lines were the `if (fileInfo.Exists)` return and `if (directory.Exists)` return. Create a real temp file and subdirectory under `IHostEnvironment.ContentRootPath` to cover both branches.

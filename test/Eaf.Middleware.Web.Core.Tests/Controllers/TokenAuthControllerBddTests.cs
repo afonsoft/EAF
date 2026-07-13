@@ -260,6 +260,40 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
         }
 
         [Fact]
+        public async Task Dado_ModeloInvalido_Quando_Authenticate_Entao_DeveLancarUserFriendlyException()
+        {
+            // Dado
+            var user = IdentityTestHelper.CreateUser();
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = IdentityTestHelper.CreateApplicationLogInManager(userManager, roleManager);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.ModelState.AddModelError("Password", "Required");
+
+            // Quando & Então
+            var exception = await Should.ThrowAsync<UserFriendlyException>(() =>
+                controller.Authenticate(new AuthenticateModel { UserNameOrEmailAddress = "user", Password = null }));
+            exception.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ModeloInvalido_Quando_ExternalAuthenticate_Entao_DeveLancarUserFriendlyException()
+        {
+            // Dado
+            var user = IdentityTestHelper.CreateUser();
+            var userManager = IdentityTestHelper.CreateUserManager(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = IdentityTestHelper.CreateApplicationLogInManager(userManager, roleManager);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.ModelState.AddModelError("ProviderKey", "Required");
+
+            // Quando & Então
+            var exception = await Should.ThrowAsync<UserFriendlyException>(() =>
+                controller.ExternalAuthenticate(new ExternalAuthenticateModel { AuthProvider = "test", ProviderKey = null, ProviderAccessCode = "code" }));
+            exception.ShouldNotBeNull();
+        }
+
+        [Fact]
         public async Task Dado_CredenciaisValidas_Quando_Authenticate_Entao_DeveRetornarAccessToken()
         {
             var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");

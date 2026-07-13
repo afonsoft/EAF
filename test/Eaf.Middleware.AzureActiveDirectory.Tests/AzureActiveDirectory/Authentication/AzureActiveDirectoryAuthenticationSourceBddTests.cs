@@ -206,6 +206,27 @@ namespace Eaf.Middleware.AzureActiveDirectory.Tests.AzureActiveDirectory.Authent
             result.ShouldBeEmpty();
         }
 
+        private static IGraphServiceUsersCollectionRequestBuilder CriarGraphBuilderComErroAbp()
+        {
+            var request = Substitute.For<IGraphServiceUsersCollectionRequest>();
+            request.Filter(Arg.Any<string>()).Returns(request);
+            request.Top(Arg.Any<int>()).Returns(request);
+            request.GetAsync().Returns(Task.FromException<IGraphServiceUsersCollectionPage>(new AbpException("graph error")));
+
+            var builder = Substitute.For<IGraphServiceUsersCollectionRequestBuilder>();
+            builder.Request().Returns(request);
+            return builder;
+        }
+
+        [Fact]
+        public async Task Dado_GraphLancandoAbpException_Quando_GetUsersAsync_Entao_DeveLancarAbpException()
+        {
+            var sut = CriarSut();
+            sut.UsersRequestBuilderToReturn = CriarGraphBuilderComErroAbp();
+
+            await Should.ThrowAsync<AbpException>(() => sut.GetUsersAsync("user"));
+        }
+
         [Fact]
         public async Task Dado_UsuarioNoGraph_Quando_UpdateUserAsync_Entao_DeveAtualizarUsuario()
         {
