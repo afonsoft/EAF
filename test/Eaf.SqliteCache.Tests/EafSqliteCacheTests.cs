@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.SqliteCache.Tests
@@ -194,7 +195,7 @@ namespace Eaf.SqliteCache.Tests
         }
 
         [Fact]
-        public void Set_WithSlidingExpiration_ShouldExpireCorrectly()
+        public async Task Set_WithSlidingExpiration_ShouldExpireCorrectly()
         {
             // Arrange
             var options = new EafSqliteCacheOptions
@@ -211,7 +212,7 @@ namespace Eaf.SqliteCache.Tests
             var immediateResult = cache.TryGetValue("expiring-key", out var immediateValue);
 
             // Wait for expiration
-            Thread.Sleep(150);
+            await Task.Delay(150);
             cache.RemoveExpired();
 
             var expiredResult = cache.TryGetValue("expiring-key", out var expiredValue);
@@ -224,7 +225,7 @@ namespace Eaf.SqliteCache.Tests
         }
 
         [Fact]
-        public void Set_WithAbsoluteExpiration_ShouldExpireCorrectly()
+        public async Task Set_WithAbsoluteExpiration_ShouldExpireCorrectly()
         {
             // Arrange
             var options = new EafSqliteCacheOptions
@@ -242,7 +243,7 @@ namespace Eaf.SqliteCache.Tests
             var immediateResult = cache.TryGetValue("absolute-expiring-key", out var immediateValue);
 
             // Wait for expiration
-            Thread.Sleep(150);
+            await Task.Delay(150);
             cache.RemoveExpired();
 
             var expiredResult = cache.TryGetValue("absolute-expiring-key", out var expiredValue);
@@ -288,7 +289,7 @@ namespace Eaf.SqliteCache.Tests
         }
 
         [Fact]
-        public void RemoveExpired_ShouldOnlyRemoveExpiredItems()
+        public async Task RemoveExpired_ShouldOnlyRemoveExpiredItems()
         {
             // Arrange
             var options = new EafSqliteCacheOptions
@@ -302,7 +303,7 @@ namespace Eaf.SqliteCache.Tests
             cache.Set("permanent-key", "permanent-value");
             cache.Set("expiring-key", "expiring-value", TimeSpan.FromMilliseconds(50));
 
-            Thread.Sleep(100);
+            await Task.Delay(100);
             cache.RemoveExpired();
 
             var permanentResult = cache.TryGetValue("permanent-key", out var permanentValue);

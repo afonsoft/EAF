@@ -125,7 +125,7 @@ namespace Eaf.SqliteCache.Tests
                 {
                     cmd.Parameters.AddWithValue("@key", $"chave-{i}");
                     cmd.Parameters.AddWithValue("@now", DateTimeOffset.UtcNow.Ticks);
-                    System.Threading.Thread.Sleep(100);
+                    Task.Delay(100).GetAwaiter().GetResult();
                     return cmd.ExecuteScalar();
                 });
             });

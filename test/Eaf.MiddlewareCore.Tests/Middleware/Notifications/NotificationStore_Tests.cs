@@ -36,12 +36,12 @@ namespace Eaf.Middleware.Notifications
             var userIdentifier = AbpSession.ToUserIdentifier();
             await _notificationPublisher.PublishAsync("TestNotification", userIds: new[] { userIdentifier });
 
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
             //this notification's creation time will be more than now+5sec
             await _notificationPublisher.PublishAsync("TestNotification2", userIds: new[] { userIdentifier });
 
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
             //this notification's creation time will be more than now+10sec
             await _notificationPublisher.PublishAsync("TestNotification3", userIds: new[] { userIdentifier });
@@ -118,12 +118,12 @@ namespace Eaf.Middleware.Notifications
             var now = DateTime.Now;
             await _notificationPublisher.PublishAsync("TestNotification", userIds: new[] { userIdentifier });
 
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
             //this notification's creation time will be more than now+5sec
             await _notificationPublisher.PublishAsync("TestNotification2", userIds: new[] { userIdentifier });
 
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
             //this notification's creation time will be more than now+10sec
             await _notificationPublisher.PublishAsync("TestNotification3", userIds: new[] { userIdentifier });

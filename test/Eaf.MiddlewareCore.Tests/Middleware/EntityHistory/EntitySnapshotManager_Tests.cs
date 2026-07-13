@@ -36,7 +36,7 @@ namespace Eaf.Middleware.EntityHistory
                 await uow.CompleteAsync();
             }
 
-            Thread.Sleep(3 * 1000);
+            await Task.Delay(3 * 1000);
 
             using (var uow = Resolve<IUnitOfWorkManager>().Begin())
             {
@@ -47,7 +47,7 @@ namespace Eaf.Middleware.EntityHistory
                 await uow.CompleteAsync();
             }
 
-            Thread.Sleep(3 * 1000);
+            await Task.Delay(3 * 1000);
 
             using (var uow = Resolve<IUnitOfWorkManager>().Begin())
             {
