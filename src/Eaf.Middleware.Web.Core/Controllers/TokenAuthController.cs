@@ -1193,7 +1193,7 @@ namespace Eaf.Middleware.Web.Controllers
             return true;
         }
 
-        private async Task<AuthenticationResult> GetAccessTokenOnBehalfUserAsync(string idToken,
+        private static async Task<AuthenticationResult> GetAccessTokenOnBehalfUserAsync(string idToken,
             string ClientId,
             string ClientSecret,
             string TenantId)
