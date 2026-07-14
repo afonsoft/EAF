@@ -171,6 +171,304 @@ namespace Eaf.Middleware.Application.Tests.Configuration.Host
         }
 
         [Fact]
+        public async Task Dado_InputNulo_Quando_UpdateAllSettings_Entao_DeveRetornarSemErro()
+        {
+            var sut = CreateSut(out _, out _, out _);
+
+            await Should.NotThrowAsync(async () => await sut.UpdateAllSettings(null));
+        }
+
+        [Fact]
+        public async Task Dado_SubConfiguracoesNulasEAdLdapHabilitados_Quando_UpdateAllSettings_Entao_DeveRetornarSemErro()
+        {
+            var sut = CreateSut(out _, out _, out _, out _, out var azureConfig, out var ldapConfig);
+            azureConfig.IsEnabled.Returns(true);
+            ldapConfig.IsEnabled.Returns(true);
+
+            var input = new HostSettingsEditDto
+            {
+                General = null,
+                UserManagement = null,
+                Security = null,
+                Email = null,
+                Google = null,
+                ExternalLoginProviderSettings = null,
+                AzureActiveDirectory = null,
+                Ldap = null,
+                LogDeleter = null,
+                LoginImpersonator = null
+            };
+
+            await Should.NotThrowAsync(async () => await sut.UpdateAllSettings(input));
+        }
+
+        [Fact]
+        public async Task Dado_SecurityComSubConfiguracoesNulas_Quando_UpdateAllSettings_Entao_DeveRetornarSemErro()
+        {
+            var sut = CreateSut(out _, out _, out _);
+            var input = CreateValidInput();
+            input.Security = new SecuritySettingsEditDto
+            {
+                UseDefaultPasswordComplexitySettings = false,
+                PasswordComplexity = null,
+                UserLockOut = null,
+                TwoFactorLogin = null,
+                AllowOneConcurrentLoginPerUser = false
+            };
+
+            await Should.NotThrowAsync(async () => await sut.UpdateAllSettings(input));
+        }
+
+        [Fact]
+        public async Task Dado_RelogioNaoSuportaMultiplosTimezones_Quando_UpdateAllSettings_Entao_NaoDeveAtualizarTimezone()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.General.Timezone = "America/Sao_Paulo";
+
+            var originalProvider = Clock.Provider;
+            var clockProvider = Substitute.For<IClockProvider>();
+            clockProvider.SupportsMultipleTimezone.Returns(false);
+            Clock.Provider = clockProvider;
+
+            try
+            {
+                await sut.UpdateAllSettings(input);
+
+                await settingManager.DidNotReceive().ChangeSettingForApplicationAsync(TimingSettingNames.TimeZone, Arg.Any<string>());
+            }
+            finally
+            {
+                Clock.Provider = originalProvider;
+            }
+        }
+
+        [Fact]
+        public async Task Dado_TimezoneDiferenteDoPadrao_Quando_GetAllSettings_Entao_DeveRetornarTimezoneFornecido()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            settingManager.GetSettingValueForApplicationAsync(TimingSettingNames.TimeZone).Returns("America/Sao_Paulo");
+
+            var result = await sut.GetAllSettings();
+
+            result.ShouldNotBeNull();
+            result.General.ShouldNotBeNull();
+            result.General.Timezone.ShouldBe("America/Sao_Paulo");
+        }
+
+        [Fact]
+        public async Task Dado_ValoresNulosNoLogDeleter_Quando_UpdateAllSettings_Entao_DeveUsarValoresPadrao()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.LogDeleter = new ExpiredEntityLogDeleterSettingsEditDto
+            {
+                DeletedQuantity = null,
+                Enabled = null,
+                ExpiredDays = null
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LogDeleter.ExpiredDays, "180");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LogDeleter.DeletedQuantity, "30000");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LogDeleter.IsEnabled, "true");
+        }
+
+        [Fact]
+        public async Task Dado_LoginImpersonatorEnabledNulo_Quando_UpdateAllSettings_Entao_DeveUsarValorPadrao()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.LoginImpersonator = new ExpiredEntityLoginImpersonatorSettingsEditDto { Enabled = null };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LoginImpersonator.IsEnabled, "true");
+        }
+
+        [Fact]
+        public async Task Dado_GoogleComCamposVazios_Quando_UpdateAllSettings_Entao_DeveDefinirNulo()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.Google = new GoogleSettingsEditDto
+            {
+                Analytics = "UA-123",
+                Tag = "",
+                RecaptchaSiteKey = null
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.Google.Analytics, "UA-123");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.Google.TagManager, Arg.Is<string>(v => v == null));
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.Google.RecaptchaSiteKey, Arg.Is<string>(v => v == null));
+        }
+
+        [Fact]
+        public async Task Dado_AzureActiveDirectoryHabilitadoComCamposVazios_Quando_UpdateAllSettings_Entao_DeveDefinirNuloENaoDeletar()
+        {
+            var sut = CreateSut(out _, out _, out _, out _, out var azureConfig, out _);
+            azureConfig.IsEnabled.Returns(true);
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.Users.Returns(new List<User>().AsQueryable());
+            sut.UserManager = userManager;
+
+            var input = CreateValidInput();
+            input.AzureActiveDirectory = new AzureActiveDirectorySettingsEditDto
+            {
+                IsEnabled = true,
+                ClientId = "client-id",
+                Tenant = " ",
+                ClientSecret = ""
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await userManager.DidNotReceive().DeleteAsync(Arg.Any<User>());
+        }
+
+        [Fact]
+        public async Task Dado_LdapHabilitadoComCamposVazios_Quando_UpdateAllSettings_Entao_DeveDefinirNuloENaoDeletar()
+        {
+            var sut = CreateSut(out _, out _, out _, out _, out _, out var ldapConfig);
+            ldapConfig.IsEnabled.Returns(true);
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.Users.Returns(new List<User>().AsQueryable());
+            sut.UserManager = userManager;
+
+            var input = CreateValidInput();
+            input.Ldap = new LdapSettingsEditDto
+            {
+                IsEnabled = true,
+                Domain = " ",
+                UserName = null,
+                Password = ""
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await userManager.DidNotReceive().DeleteAsync(Arg.Any<User>());
+        }
+
+        [Fact]
+        public async Task Dado_ExternalLoginProviderComProvedorNuloEInvalido_Quando_UpdateAllSettings_Entao_DeveAtualizarComValoresCorretos()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.ExternalLoginProviderSettings = new ExternalLoginProviderSettingsEditDto
+            {
+                Google = null,
+                Google_IsEnabled = true,
+                Microsoft = new MicrosoftExternalLoginProviderSettings { ClientId = "cid", ClientSecret = "secret" },
+                Microsoft_IsEnabled = true,
+                OpenIdConnect = new OpenIdConnectExternalLoginProviderSettings(),
+                OpenIdConnect_IsEnabled = true,
+                AuthZero = new AuthZeroExternalLoginProviderSettings(),
+                AuthZero_IsEnabled = true,
+                OpenIdConnectClaimsMapping = null
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AppSettings.ExternalLoginProvider.Tenant.Microsoft_IsEnabled, "true");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AppSettings.ExternalLoginProvider.Host.Microsoft, Arg.Is<string>(v => v.Contains("cid")));
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AppSettings.ExternalLoginProvider.Tenant.Google_IsEnabled, "false");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AppSettings.ExternalLoginProvider.Host.Google, "false");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AppSettings.ExternalLoginProvider.Host.OpenIdConnect, "false");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AppSettings.ExternalLoginProvider.Host.AuthZero, "false");
+        }
+
+        [Fact]
+        public async Task Dado_ExternalLoginProviderComClaimsMapping_Quando_UpdateAllSettings_Entao_DeveSerializarMapeamento()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.ExternalLoginProviderSettings = new ExternalLoginProviderSettingsEditDto
+            {
+                Google = new GoogleExternalLoginProviderSettings(),
+                Google_IsEnabled = false,
+                Microsoft = new MicrosoftExternalLoginProviderSettings(),
+                Microsoft_IsEnabled = false,
+                OpenIdConnect = new OpenIdConnectExternalLoginProviderSettings(),
+                OpenIdConnect_IsEnabled = false,
+                AuthZero = new AuthZeroExternalLoginProviderSettings(),
+                AuthZero_IsEnabled = false,
+                OpenIdConnectClaimsMapping = new List<JsonClaimMapDto> { new JsonClaimMapDto { Claim = "sub", Key = "id" } }
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(
+                AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims,
+                Arg.Is<string>(v => v.Contains("sub")));
+        }
+
+        [Fact]
+        public async Task Dado_ExternalLoginProviderHostVazio_Quando_GetAllSettings_Entao_DeveUsarConfiguracaoPadrao()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            settingManager.GetSettingValueForApplicationAsync(Arg.Any<string>()).Returns(ci =>
+            {
+                var name = ci.Arg<string>();
+                if (name == AppSettings.ExternalLoginProvider.Host.Google ||
+                    name == AppSettings.ExternalLoginProvider.Host.Microsoft ||
+                    name == AppSettings.ExternalLoginProvider.Host.OpenIdConnect ||
+                    name == AppSettings.ExternalLoginProvider.Host.AuthZero)
+                {
+                    return string.Empty;
+                }
+                return GetSettingValue(name);
+            });
+
+            var result = await sut.GetAllSettings();
+
+            result.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.Google.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.Microsoft.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.OpenIdConnect.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.AuthZero.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ExternalLoginProviderHostComJsonValido_Quando_GetAllSettings_Entao_DeveDeserializarConfiguracoes()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            settingManager.GetSettingValueForApplicationAsync(Arg.Any<string>()).Returns(ci =>
+            {
+                var name = ci.Arg<string>();
+                if (name == AppSettings.ExternalLoginProvider.Host.Google)
+                    return "{\"ClientId\":\"cid\",\"ClientSecret\":\"secret\"}";
+                if (name == AppSettings.ExternalLoginProvider.Host.Microsoft)
+                    return "{\"ClientId\":\"cid\",\"ClientSecret\":\"secret\",\"TenantId\":\"tenant\"}";
+                if (name == AppSettings.ExternalLoginProvider.Host.OpenIdConnect)
+                    return "{\"ClientId\":\"cid\",\"ClientSecret\":\"secret\",\"Authority\":\"https://localhost\"}";
+                if (name == AppSettings.ExternalLoginProvider.Host.AuthZero)
+                    return "{\"ClientId\":\"cid\",\"ClientSecret\":\"secret\",\"Domain\":\"dev\"}";
+                if (name == AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims)
+                    return "[{\"Claim\":\"sub\",\"Key\":\"id\"}]";
+                return GetSettingValue(name);
+            });
+
+            var result = await sut.GetAllSettings();
+
+            result.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.Google.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.Google.ClientId.ShouldBe("cid");
+            result.ExternalLoginProviderSettings.Microsoft.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.Microsoft.ClientId.ShouldBe("cid");
+            result.ExternalLoginProviderSettings.OpenIdConnect.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.OpenIdConnect.ClientId.ShouldBe("cid");
+            result.ExternalLoginProviderSettings.AuthZero.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.AuthZero.ClientId.ShouldBe("cid");
+            result.ExternalLoginProviderSettings.OpenIdConnectClaimsMapping.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.OpenIdConnectClaimsMapping.Count.ShouldBe(1);
+        }
+
+        [Fact]
         public async Task Dado_TimezoneIgualAoPadrao_Quando_GetAllSettings_Entao_TimezoneDeveRetornarVazio()
         {
             var sut = CreateSut(out var settingManager, out _, out _);

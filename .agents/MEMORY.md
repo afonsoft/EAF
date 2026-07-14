@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority55-coverage-audit`
+Last session branch: `feature/devin-20260713-priority56-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -16,6 +16,17 @@ Current coverage (after P52): Line 96.6%, Branch 83.6%, Method 99.3% (4416 tests
 Current coverage (after P53): Line 97.1%, Branch 84.2%, Method 99.4% (4433 tests, 4432 passing, 1 skipped). Build warnings: 163.
 Current coverage (after P54): Line 97.2%, Branch 85.1%, Method 99.5% (4467 tests, 4466 passing, 1 skipped). Build warnings: 127.
 Current coverage (after P55): Line 97.5%, Branch 85.6%, Method 99.6% (4492 tests, 4491 passing, 1 skipped). Build warnings: 129.
+Current coverage (after P56): Line 97.6%, Branch 87.2%, Method 99.6% (4516 tests, 4515 passing, 1 skipped). Build warnings: 154.
+
+## P56 gotchas
+- `HostSettingsAppService.UpdateAllSettings` has many branches around null sub-DTOs (`UserManagement`, `Email`, `Security`, `ExternalLoginProvider`, `LogDeleter`, `LoginImpersonator`), empty JSON, `IsNullOrWhiteSpace` ternaries, timezone validation and external-login provider toggles/JSON/claims mapping. Use a full `UpdateAllSettingsInput` with valid JSON for Google/Microsoft/OpenIdConnect/AuthZero and OpenIdConnect claims mapping to exercise them.
+- `HostSettingsAppService.GetAllSettings` deserializes `ExternalLoginProvider.Host.*` settings from JSON; `OpenIdConnectClaimsMapping` is a list of `JsonClaimMap` objects. Mock `GetSettingValueForApplicationAsync` to return valid JSON for each host and the claims mapping list.
+- `ChatAppService.GetGroupChatMessagesAsync` sets `Side` via a ternary comparing `message.UserId` with current user; mix messages from current user and another user to cover both sides.
+- `ChatAppService.MarkGroupMessagesAsReadAsync` has a reverse-messages branch and an online-clients branch. Use messages with different `TargetTenantId` values so the reverse query returns results, and configure `_onlineClientManager.GetAllByUserIdAsync` for the online-clients branch.
+- `AzureActiveDirectoryAuthenticationSource.GetUserAsync`/`GetUsersAsync`/`UpdateUserAsync` normalize e-mail when `Mail`/`UserPrincipalName` do not contain `@`, composing `{userName}@{azureTenant}`. The Graph `User.Mail` can be set without `@` while `UserPrincipalName` contains the tenant domain.
+- `EafHostBuilderExtensions.UseEafConfiguration` (Core) and `UseAbpConfiguration` (Worker) have branches for `configureLogger == null` and `string.IsNullOrEmpty(prefix)`. Use a real `HostBuilder` in a temp directory with `ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()))` to avoid runtime exceptions.
+- `EafServiceCollectionExtensions.AddEaf<TStartupModule>()` has an `optionsAction == null` path; call `services.AddEaf<WorkerModuleTestDependenciesModule>()` with no arguments.
+- `LdapAuthenticationSource`, `MiddlewareWebCoreModule`, `TokenAuthController`, `PermissionAppService`, `ServiceBusQueueAppender`, `EafSqliteCache`, `EafSqlServerCache`, `ChatHub`, `EafHangfireAuthorizationFilter`, `EafHangfireApplicationBuilderExtensions`, `OpenIdConnectAuthProviderApi`, `MiddlewareAppServiceBase`, `TenantAppService` and `HostSettingsAppService` still contain Linux-inaccessible or sealed-builder branches. Document as inalcançáveis.
 
 ## P55 gotchas
 - `UserManager.PasswordValidators` is non-virtual; inject `IPasswordValidator<User>` list into `UserManager` constructor via `CoreManagerTestHelper` overloads to test `TenantManager.CreateWithAdminUserAsync` with a custom validator.

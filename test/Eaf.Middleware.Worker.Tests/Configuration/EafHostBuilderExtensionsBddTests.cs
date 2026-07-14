@@ -1,8 +1,10 @@
 using Eaf.Middleware.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Eaf.Middleware.Worker.Tests.Configuration
@@ -70,6 +72,32 @@ namespace Eaf.Middleware.Worker.Tests.Configuration
 
             result.ShouldBeSameAs(hostBuilder);
             hostBuilder.Received(1).ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, Microsoft.Extensions.Configuration.IConfigurationBuilder>>());
+        }
+
+        [Fact]
+        public void Dado_HostBuilderReal_Quando_UsarAbpConfigurationComActionNulaEPrefixo_Entao_DeveCriarHost()
+        {
+            var builder = new HostBuilder()
+                .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()))
+                .UseAbpConfiguration(configureLogger: null, prefix: "EAF_");
+
+            using var host = builder.Build();
+
+            host.ShouldNotBeNull();
+            host.Services.GetService(typeof(IConfiguration)).ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_HostBuilderReal_Quando_UsarAbpConfigurationComPrefixoVazio_Entao_DeveCriarHost()
+        {
+            var builder = new HostBuilder()
+                .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string?>()))
+                .UseAbpConfiguration(prefix: string.Empty);
+
+            using var host = builder.Build();
+
+            host.ShouldNotBeNull();
+            host.Services.GetService(typeof(IConfiguration)).ShouldNotBeNull();
         }
     }
 }
