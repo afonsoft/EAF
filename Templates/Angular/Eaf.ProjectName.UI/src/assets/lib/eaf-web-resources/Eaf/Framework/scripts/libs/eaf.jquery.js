@@ -248,8 +248,6 @@
                 eaf.ajax.handleResponse(data, userOptions);
             };
 
-            //TODO: Error? // NOSONAR
-
             options.complete = function () {
                 eaf.ajax.unblockUI(options);
                 userOptions.complete && userOptions.complete.apply(this, arguments); // NOSONAR
