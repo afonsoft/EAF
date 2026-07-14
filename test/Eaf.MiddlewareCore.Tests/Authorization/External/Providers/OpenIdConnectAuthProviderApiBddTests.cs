@@ -152,6 +152,35 @@ namespace Eaf.Middleware.Tests.Authorization.External.Providers
         }
 
         [Fact]
+        public async Task Dado_TokenJwtValidoComNomeDeUmaPalavra_Quando_GetUserInfo_Entao_DeveRetornarSurnameIgualAoNome()
+        {
+            var rsa = RSA.Create(2048);
+            var accessCode = CriarTokenJwtAssinadoRsa("https://localhost", "client-id", "Fulano", "fulano@example.com", rsa, "sub-123");
+            var handler = new OidcHttpMessageHandler(rsa);
+            var (originalHandler, httpClient, originalUniqueName) = SubstituirHttpClientHandler(handler);
+
+            try
+            {
+                var sut = CriarSut(new Dictionary<string, string>
+                {
+                    ["Authority"] = "https://localhost",
+                    ["ValidateIssuer"] = "false"
+                });
+
+                var result = await sut.GetUserInfo(accessCode);
+
+                result.ShouldNotBeNull();
+                result.Name.ShouldBe("Fulano");
+                result.Surname.ShouldBe("Fulano");
+                result.EmailAddress.ShouldBe("fulano@example.com");
+            }
+            finally
+            {
+                RestaurarHttpClientHandler(originalHandler, httpClient, originalUniqueName);
+            }
+        }
+
+        [Fact]
         public async Task Dado_TokenJwtValidoSemUniqueNameClaim_Quando_GetUserInfo_Entao_DeveLancarAbpException()
         {
             var rsa = RSA.Create(2048);

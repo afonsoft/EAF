@@ -1,6 +1,8 @@
 using Abp;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
+using Abp.Localization;
+using Abp.Localization.Sources;
 using Abp.MultiTenancy;
 using Abp.RealTime;
 using Abp.UI;
@@ -13,6 +15,7 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
@@ -21,7 +24,7 @@ namespace Eaf.Middleware.Tests.Application.Chat
 {
     public class ChatMessageManagerBddTests
     {
-        private static ChatMessageManager CriarChatMessageManager(
+        private static TestableChatMessageManager CriarChatMessageManager(
             IRepository<ChatMessage, long>? chatMessageRepository,
             UserManager? userManager)
         {
@@ -40,7 +43,7 @@ namespace Eaf.Middleware.Tests.Application.Chat
             var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
             unitOfWorkManager.Current.Returns(activeUow);
 
-            return new ChatMessageManager(
+            return new TestableChatMessageManager(
                 friendshipManager,
                 chatCommunicator,
                 onlineClientManager,
@@ -799,6 +802,198 @@ namespace Eaf.Middleware.Tests.Application.Chat
             await sut.SendMessageAsync(sender, receiver, "Hello", "acme", "sender", null);
 
             await friendshipManager.DidNotReceive().UpdateFriendshipAsync(Arg.Any<Friendship>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioLogadoComDestinoSemTenant_Quando_SendMessageAsync_Entao_DeveCriarAmizadeSemTenancyName()
+        {
+            var sender = new UserIdentifier(1, 10);
+            var receiver = new UserIdentifier(null, 20);
+            var senderUser = new User { Id = 10, UserName = "sender", TenantId = 1 };
+            var receiverUser = new User { Id = 20, UserName = "receiver", TenantId = 1 };
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserOrNullAsync(Arg.Any<UserIdentifier>()).Returns(receiverUser);
+            userManager.GetUserAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
+
+            var friendshipManager = Substitute.For<IFriendshipManager>();
+            friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
+
+            var tenantCache = Substitute.For<ITenantCache>();
+            tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
+
+            var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
+            chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
+
+            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+            onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
+
+            var chatCommunicator = Substitute.For<IChatCommunicator>();
+            chatCommunicator.SendMessageToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<ChatMessage>()).Returns(Task.CompletedTask);
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+
+            var sut = new TestableChatMessageManager(
+                friendshipManager,
+                chatCommunicator,
+                onlineClientManager,
+                userManager,
+                tenantCache,
+                Substitute.For<IUserFriendsCache>(),
+                Substitute.For<IUserEmailer>(),
+                chatMessageRepository,
+                Substitute.For<IChatFeatureChecker>(),
+                unitOfWorkManager);
+
+            await sut.SendMessageAsync(sender, receiver, "Hello", "acme", "sender", null);
+
+            await friendshipManager.Received(2).CreateFriendshipAsync(Arg.Any<Friendship>());
+        }
+
+        [Fact]
+        public async Task Dado_AmizadeAtualizadaNaoEncontrada_Quando_SendMessageAsync_Entao_NaoDeveAtualizarAmizade()
+        {
+            var sender = new UserIdentifier(1, 10);
+            var receiver = new UserIdentifier(1, 20);
+            var senderUser = new User { Id = 10, UserName = "sender", TenantId = 1, ProfilePictureId = Guid.NewGuid() };
+            var receiverUser = new User { Id = 20, UserName = "receiver", TenantId = 1 };
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserOrNullAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
+            userManager.GetUserAsync(Arg.Any<UserIdentifier>()).Returns(ci =>
+            {
+                var userId = ci.ArgAt<UserIdentifier>(0).UserId;
+                return Task.FromResult(userId == senderUser.Id ? senderUser : receiverUser);
+            });
+
+            var friendshipManager = Substitute.For<IFriendshipManager>();
+            friendshipManager.GetFriendshipOrNullAsync(Arg.Any<UserIdentifier>(), Arg.Any<UserIdentifier>()).Returns((Friendship?)null);
+
+            var tenantCache = Substitute.For<ITenantCache>();
+            tenantCache.Get(1).Returns(new TenantCacheItem { TenancyName = "acme" });
+            tenantCache.GetAsync(1).Returns(Task.FromResult(new TenantCacheItem { TenancyName = "acme" }));
+
+            var chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
+            chatMessageRepository.InsertAndGetId(Arg.Any<ChatMessage>()).Returns(1L);
+
+            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+            onlineClientManager.GetAllByUserIdAsync(Arg.Any<UserIdentifier>()).Returns(new List<IOnlineClient>());
+
+            var chatCommunicator = Substitute.For<IChatCommunicator>();
+            chatCommunicator.SendMessageToClient(Arg.Any<IReadOnlyList<IOnlineClient>>(), Arg.Any<ChatMessage>()).Returns(Task.CompletedTask);
+
+            var userFriendsCache = Substitute.For<IUserFriendsCache>();
+            var cacheItem = new UserWithFriendsCacheItem
+            {
+                Friends = new List<FriendCacheItem>
+                {
+                    new FriendCacheItem { FriendTenantId = 1, FriendUserId = 10, FriendTenancyName = "old", FriendUserName = "old", FriendProfilePictureId = null }
+                }
+            };
+            userFriendsCache.GetCacheItemOrNull(receiver).Returns(cacheItem);
+
+            var activeUow = Substitute.For<IActiveUnitOfWork>();
+            activeUow.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUow);
+
+            var sut = new TestableChatMessageManager(
+                friendshipManager,
+                chatCommunicator,
+                onlineClientManager,
+                userManager,
+                tenantCache,
+                userFriendsCache,
+                Substitute.For<IUserEmailer>(),
+                chatMessageRepository,
+                Substitute.For<IChatFeatureChecker>(),
+                unitOfWorkManager);
+
+            await sut.SendMessageAsync(sender, receiver, "Hello", "acme", "sender", senderUser.ProfilePictureId);
+
+            await friendshipManager.DidNotReceive().UpdateFriendshipAsync(Arg.Any<Friendship>());
+        }
+
+        [Fact]
+        public void Dado_LocalizationManagerComSource_Quando_LComArgs_Entao_DeveFormatar()
+        {
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("Welcome", Arg.Any<CultureInfo>()).Returns("Olá, {0}!");
+            localizationManager.GetSource("EafCore").Returns(source);
+
+            var sut = CriarChatMessageManager(null, null);
+            sut.LocalizationManager = localizationManager;
+
+            var result = sut.InvokeL("Welcome", "João");
+            result.ShouldBe("Olá, João!");
+        }
+
+        [Fact]
+        public void Dado_LocalizationManagerComSource_Quando_LComCultura_Entao_DeveRetornarTraducao()
+        {
+            var ptBR = new CultureInfo("pt-BR");
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("Save", ptBR).Returns("Salvar");
+            localizationManager.GetSource("EafCore").Returns(source);
+
+            var sut = CriarChatMessageManager(null, null);
+            sut.LocalizationManager = localizationManager;
+
+            var result = sut.InvokeL("Save", ptBR);
+            result.ShouldBe("Salvar");
+        }
+
+        [Fact]
+        public void Dado_LocalizationManagerComSource_Quando_LComCulturaEArgs_Entao_DeveFormatar()
+        {
+            var ptBR = new CultureInfo("pt-BR");
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("Count", ptBR).Returns("{0} itens");
+            localizationManager.GetSource("EafCore").Returns(source);
+
+            var sut = CriarChatMessageManager(null, null);
+            sut.LocalizationManager = localizationManager;
+
+            var result = sut.InvokeL("Count", ptBR, 5);
+            result.ShouldBe("5 itens");
+        }
+
+        private class TestableChatMessageManager : ChatMessageManager
+        {
+            public TestableChatMessageManager(
+                IFriendshipManager friendshipManager,
+                IChatCommunicator chatCommunicator,
+                IOnlineClientManager<ChatChannel> onlineClientManager,
+                UserManager userManager,
+                ITenantCache tenantCache,
+                IUserFriendsCache userFriendsCache,
+                IUserEmailer userEmailer,
+                IRepository<ChatMessage, long> chatMessageRepository,
+                IChatFeatureChecker chatFeatureChecker,
+                IUnitOfWorkManager unitOfWorkManager)
+                : base(friendshipManager, chatCommunicator, onlineClientManager, userManager, tenantCache, userFriendsCache, userEmailer, chatMessageRepository, chatFeatureChecker, unitOfWorkManager)
+            {
+            }
+
+            public string InvokeL(string name) => base.L(name);
+            public string InvokeL(string name, params object[] args) => base.L(name, args);
+            public string InvokeL(string name, CultureInfo culture) => base.L(name, culture);
+            public string InvokeL(string name, CultureInfo culture, params object[] args) => base.L(name, culture, args);
         }
     }
 }

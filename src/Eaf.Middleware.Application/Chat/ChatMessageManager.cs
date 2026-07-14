@@ -89,6 +89,14 @@ namespace Eaf.Middleware.Chat
             return MiddlewareLocalizationHelper.Localize(LocalizationManager, name, culture);
         }
 
+        /// <summary>
+        /// Obtém a string localizada com fallback para múltiplos sources para uma cultura específica com formatação.
+        /// </summary>
+        protected override string L(string name, CultureInfo culture, params object[] args)
+        {
+            return MiddlewareLocalizationHelper.Localize(LocalizationManager, name, culture, args);
+        }
+
         [UnitOfWork]
         public async Task<ChatMessage> FindMessageAsync(int id, long userId)
         {

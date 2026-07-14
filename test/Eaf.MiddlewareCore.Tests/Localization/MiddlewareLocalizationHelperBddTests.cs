@@ -108,6 +108,38 @@ namespace Eaf.Middleware.Tests.LocalizationTests
         }
 
         [Fact]
+        public void Dado_SourceComChave_Quando_LocalizeComArgsVazio_Entao_DeveRetornarTextoSemFormatar()
+        {
+            var manager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("WelcomeMessage", Arg.Any<CultureInfo>()).Returns("Olá, {0}!");
+            manager.GetSource("EafCore").Returns(source);
+
+            var result = MiddlewareLocalizationHelper.Localize(manager, "WelcomeMessage", new object[] { });
+            result.ShouldBe("Olá, {0}!");
+        }
+
+        [Fact]
+        public void Dado_SourceComChave_Quando_LocalizeComCulturaEArgsVazio_Entao_DeveRetornarTextoSemFormatar()
+        {
+            var ptBR = new CultureInfo("pt-BR");
+            var manager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("UserCount", ptBR).Returns("{0} usuários ativos");
+            manager.GetSource("EafCore").Returns(source);
+
+            var result = MiddlewareLocalizationHelper.Localize(manager, "UserCount", ptBR, Array.Empty<object>());
+            result.ShouldBe("{0} usuários ativos");
+        }
+
+        [Fact]
+        public void Dado_ManagerNulo_Quando_LocalizeComArgs_Entao_DeveRetornarChave()
+        {
+            var result = MiddlewareLocalizationHelper.Localize(null, "TestKey", "arg");
+            result.ShouldBe("TestKey");
+        }
+
+        [Fact]
         public void Dado_MiddlewareLocalizationHelper_Quando_VerificarSourceNames_Entao_DeveConterSourcesCorretos()
         {
             MiddlewareLocalizationHelper.SourceNames.Length.ShouldBe(6);

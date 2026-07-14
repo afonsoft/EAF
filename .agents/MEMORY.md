@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority53-coverage-audit`
+Last session branch: `feature/devin-20260713-priority54-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -14,6 +14,21 @@ Current coverage (after P50): Line 96.4%, Branch 83.0%, Method 99.4% (4397 tests
 Current coverage (after P51): Line 96.4%, Branch 83.0%, Method 99.3% (4401 tests, 4400 passing, 1 skipped). Build warnings: 159.
 Current coverage (after P52): Line 96.6%, Branch 83.6%, Method 99.3% (4416 tests, 4415 passing, 1 skipped). Build warnings: 159.
 Current coverage (after P53): Line 97.1%, Branch 84.2%, Method 99.4% (4433 tests, 4432 passing, 1 skipped). Build warnings: 163.
+Current coverage (after P54): Line 97.2%, Branch 85.1%, Method 99.5% (4467 tests, 4466 passing, 1 skipped). Build warnings: 127.
+
+## P54 gotchas
+- `ChatMessageManager` overrides `L(string, CultureInfo)` but did not override `L(string, CultureInfo, params object[])`, so the `args` overload fell back to the base `ApplicationService` and ignored the middleware fallback sources. Add `protected override string L(string name, CultureInfo culture, params object[] args)` in `ChatMessageManager` and forward to `MiddlewareLocalizationHelper.Localize`.
+- `TokenAuthController` `GetExternalAuthenticationProviders` with `AbpSession.TenantId` set filters by `IsSchemeEnabled` which checks `ClientId`/`ClientSecret` null/empty and then switches by provider name (`OpenIdConnect`, `Microsoft`, `Google`, `AuthZero`, default `Unknown`). Mock `IExternalLoginInfoProvider` per provider to reach each switch case.
+- `TokenAuthController` `GetDefaultEnabledProvider` defaults to `System` when none of `Ldap`, `AzureActiveDirectory`, `Microsoft`, `Google`, `AuthZero` or `OpenIdConnect` are enabled. Enable one provider at a time to cover each branch.
+- `TokenAuthController.TeamsAuthenticate` throws `AbpException` when `Microsoft_IsEnabled` is false and a different `AbpException` when the provider is enabled but `Microsoft` host is not configured.
+- `TokenAuthController.SendTwoFactorAuthCode` throws `UserFriendlyException` on `ModelState` invalid and does not call `_emailSender.SendAsync` when the provider is not `Email`.
+- `EmailRealTimeNotifier` `SendNotificationsAsync` only sends e-mail for `MessageNotificationData` and when `UseOnlyIfRequestedAsTarget` is false; for `LocalizableMessageNotificationData` construct `LocalizableString` instead of passing a raw string.
+- `MiddlewareLocalizationHelper` `Localize` fallback works for empty `args` and null `source` when the first `SourceNames` throws on `GetSource`.
+- `WebLogAppService` `GetLatestWebLogs` returns at most 100 lines; the `ReadLines().Take(100)` branch can be exercised with a file containing more than 100 lines.
+- `OpenIdConnectAuthProviderApi` `Surname` falls back to an empty string when the `name` claim has only one word.
+- `AzureActiveDirectoryAuthenticationSource` `GetUserAsync`/`GetUsersAsync` normalize e-mail without `@` by composing `{userName}@tenantName` when `mail`/`UserPrincipalName` are missing.
+- `ServiceBusQueueAppender` `OnClose` catch branch is unreachable because `ServiceBusConnection` is not sealed but `IsClosedOrClosing` and `CloseAsync` are non-virtual/non-override, so `NSubstitute` cannot force `CloseAsync` to throw. Document as inalcançável.
+- `LdapAuthenticationSource` and `MiddlewareWebCoreModule` still contain Linux-inaccessible branches (real LDAP, Hangfire/Redis/SQL Server, `??` fallback). Document as inalcançáveis.
 
 ## P53 gotchas
 - `AbpUserManager.GetOldUserNameAsync` is `protected virtual` and the admin-rename branch in `UserManager.UpdateWithValidateAsync` is not reachable with pure NSubstitute. Use a `Moq.Mock<UserManager>` with `CallBase = true` and `mock.Protected().Setup<Task<string>>("GetOldUserNameAsync", 1L).ReturnsAsync("admin")` to cover it.

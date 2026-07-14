@@ -1,3 +1,4 @@
+using Abp.Localization;
 using Abp.Net.Mail;
 using Abp.Notifications;
 using Eaf.Middleware;
@@ -76,6 +77,56 @@ namespace Eaf.Middleware.Tests.WebCore.Notifications
                 "You have a new notification!",
                 "Hello World",
                 true);
+        }
+
+        [Fact]
+        public async Task Dado_NotificacaoComDataNaoMensagem_Quando_EnviarNotificacoes_Entao_NaoDeveEnviarEmail()
+        {
+            var emailSender = Substitute.For<IEmailSender>();
+            var notifier = new EmailRealTimeNotifier(emailSender, new TestUserManager());
+
+            var userNotifications = new UserNotification[]
+            {
+                new UserNotification
+                {
+                    UserId = 1,
+                    Notification = new TenantNotification
+                    {
+                        Data = new LocalizableMessageNotificationData(new LocalizableString("TestKey", "EafCore"))
+                    }
+                }
+            };
+
+            await notifier.SendNotificationsAsync(userNotifications);
+
+            await emailSender.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>());
+        }
+
+        [Fact]
+        public async Task Dado_NotificacaoComDataNula_Quando_EnviarNotificacoes_Entao_NaoDeveEnviarEmail()
+        {
+            var emailSender = Substitute.For<IEmailSender>();
+            var notifier = new EmailRealTimeNotifier(emailSender, new TestUserManager());
+
+            var userNotifications = new UserNotification[]
+            {
+                new UserNotification
+                {
+                    UserId = 1,
+                    Notification = new TenantNotification()
+                }
+            };
+
+            await notifier.SendNotificationsAsync(userNotifications);
+
+            await emailSender.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>());
+        }
+
+        [Fact]
+        public void Dado_EmailRealTimeNotifier_Quando_VerificarUseOnlyIfRequestedAsTarget_Entao_DeveSerFalso()
+        {
+            var notifier = new EmailRealTimeNotifier(Substitute.For<IEmailSender>(), new TestUserManager());
+            notifier.UseOnlyIfRequestedAsTarget.ShouldBeFalse();
         }
     }
 }
