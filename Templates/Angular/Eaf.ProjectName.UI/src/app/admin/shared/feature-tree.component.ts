@@ -136,7 +136,6 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   isFeatureValueValid(featureName: string, value: string): boolean {
-
     const feature = this.findFeatureByName(featureName);
     if (!feature?.inputType?.validator) {
       return true;
@@ -144,41 +143,53 @@ export class FeatureTreeComponent extends AppComponentBase {
 
     const validator = feature.inputType.validator as any;
     if (validator.name === 'STRING') {
-      if (value === undefined || value === null) {
-        return validator.allowNull;
-      }
+      return this.validateStringValue(validator, value);
+    }
 
-      if (typeof value !== 'string') {
-        return false;
-      }
+    if (validator.name === 'NUMERIC') {
+      return this.validateNumericValue(validator, value);
+    }
 
-      if (validator.minLength > 0 && value.length < validator.minLength) {
-        return false;
-      }
+    return true;
+  }
 
-      if (validator.maxLength > 0 && value.length > validator.maxLength) {
-        return false;
-      }
+  private validateStringValue(validator: any, value: string): boolean {
+    if (value === undefined || value === null) {
+      return validator.allowNull;
+    }
 
-      if (validator.regularExpression) {
-        return new RegExp(validator.regularExpression).test(value);
-      }
-    } else if (validator.name === 'NUMERIC') {
-      const numValue = Number.parseInt(value);
+    if (typeof value !== 'string') {
+      return false;
+    }
 
-      if (isNaN(numValue)) {
-        return false;
-      }
+    if (validator.minLength > 0 && value.length < validator.minLength) {
+      return false;
+    }
 
-      const minValue = validator.minValue;
-      if (minValue > numValue) {
-        return false;
-      }
+    if (validator.maxLength > 0 && value.length > validator.maxLength) {
+      return false;
+    }
 
-      const maxValue = validator.maxValue;
-      if (maxValue > 0 && numValue > maxValue) {
-        return false;
-      }
+    if (validator.regularExpression) {
+      return new RegExp(validator.regularExpression).test(value);
+    }
+
+    return true;
+  }
+
+  private validateNumericValue(validator: any, value: string): boolean {
+    const numValue = Number.parseInt(value);
+
+    if (isNaN(numValue)) {
+      return false;
+    }
+
+    if (validator.minValue > numValue) {
+      return false;
+    }
+
+    if (validator.maxValue > 0 && numValue > validator.maxValue) {
+      return false;
     }
 
     return true;

@@ -55,7 +55,7 @@ import * as moment from 'moment';
   encapsulation: ViewEncapsulation.None,
 })
 export class ChatBarComponent extends AppComponentBase implements OnInit, AfterViewInit {
-  @Output() onProgress: EventEmitter<any> = new EventEmitter();
+  @Output() progressChange: EventEmitter<any> = new EventEmitter();
   @Input() userLookupModal: CommonLookupModalComponent;
 
   public progress = 0;
@@ -257,7 +257,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
           this.progress = Math.round((e.loaded / e.total) * 100);
         }
         (window as any).eaf.log.info('progress ' + this.progress);
-        this.onProgress.emit({ originalEvent: e, progress: this.progress });
+        this.progressChange.emit({ originalEvent: e, progress: this.progress });
       },
       false,
     );
@@ -267,7 +267,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
         this.progress = Math.round((e.loaded / e.total) * 100);
       }
       (window as any).eaf.log.info('onprogress ' + this.progress);
-      this.onProgress.emit({ originalEvent: e, progress: this.progress });
+      this.progressChange.emit({ originalEvent: e, progress: this.progress });
     };
   }
   onProgressChange($event) {
@@ -285,7 +285,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       return name + ' ' + surname;
     }
 
-    return (selectUser.friendTenancyName ? selectUser.friendTenancyName : '.') + '\\' + name;
+    return (selectUser.friendTenancyName || '.') + '\\' + name;
   }
   getShowTitle(selectUser: ChatFriendDto): string {
     const name = selectUser.name ?? selectUser.friendUserName;

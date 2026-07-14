@@ -14,7 +14,9 @@
       .split('&')
       .map(
         function (n) {
-          return (n = n.split('=')), (this[n[0]] = n[1]), this;
+          const parts = n.split('=');
+          this[parts[0]] = parts[1];
+          return this;
         }.bind({}),
       )[0];
   }
@@ -26,7 +28,9 @@
       .split('&')
       .map(
         function (n) {
-          return (n = n.split('=')), (this[n[0]] = n[1]), this;
+          const parts = n.split('=');
+          this[parts[0]] = parts[1];
+          return this;
         }.bind({}),
       )[0];
   }

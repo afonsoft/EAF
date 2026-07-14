@@ -22,28 +22,22 @@ export class ChatSignalrService extends AppComponentBase {
     let reconnectTime = 5000;
     let tries = 1;
     const maxTries = 8;
-    function start() {
-      return new Promise(function (resolve, reject) {
-        if (tries > maxTries) {
-          reject();
-        } else {
-          connection
-            .start()
-            .then(resolve)
-            .then(() => {
-              reconnectTime = 5000;
-              tries = 1;
-            })
-            .catch(() => {
-              setTimeout(() => {
-                start().then(resolve);
-              }, reconnectTime);
-              reconnectTime *= 2;
-              tries += 1;
-            });
+    const start = async () => {
+      while (tries <= maxTries) {
+        try {
+          await connection.start();
+          reconnectTime = 5000;
+          tries = 1;
+          return;
+        } catch {
+          await new Promise(resolve => setTimeout(resolve, reconnectTime));
+          reconnectTime *= 2;
+          tries += 1;
         }
-      });
-    }
+      }
+
+      throw new Error('Maximum reconnect attempts exceeded');
+    };
 
     // Reconnect if hub disconnects
     connection.onclose(e => {

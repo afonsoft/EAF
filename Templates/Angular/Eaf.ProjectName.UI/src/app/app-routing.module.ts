@@ -54,7 +54,7 @@ export class AppRoutingModule {
       }
 
       if (event instanceof NavigationEnd) {
-        document.querySelector('meta[property=og\\:url').setAttribute('content', window.location.href);
+        document.querySelector(String.raw`meta[property=og\:url]`).setAttribute('content', window.location.href);
       }
     });
   }

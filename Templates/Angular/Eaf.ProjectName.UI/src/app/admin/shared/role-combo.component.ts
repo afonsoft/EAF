@@ -52,7 +52,7 @@ export class RoleComboComponent extends AppComponentBase implements OnInit, Cont
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState?(isDisabled: boolean): void { // NOSONAR ControlValueAccessor interface requires a boolean flag
     if (isDisabled) {
       this.selectedRole.disable();
     } else {

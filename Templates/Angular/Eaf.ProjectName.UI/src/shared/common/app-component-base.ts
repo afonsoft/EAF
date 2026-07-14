@@ -66,7 +66,7 @@ export abstract class AppComponentBase {
 
     args.unshift(localizedText);
 
-    return eaf.utils.formatString.apply(this, args);
+    return eaf.utils.formatString.call(null, ...args);
   }
 
   isGranted(permissionName: string): boolean {

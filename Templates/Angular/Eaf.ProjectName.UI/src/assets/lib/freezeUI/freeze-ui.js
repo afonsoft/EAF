@@ -5,7 +5,7 @@
     /**
      * Setup the freeze element to be appended
      */
-    var freezeHtml = document.createElement('div');
+    const freezeHtml = document.createElement('div');
     freezeHtml.classList.add('freeze-ui');
 
     /** 
@@ -17,11 +17,9 @@
     * }
     */
     window.FreezeUI = function(options) {
-        if(!options){
-            options = {};
-        }
+        options = options || {};
 
-        var parent;
+        let parent;
 
         if (options.element) {
             parent = options.element;
@@ -29,7 +27,7 @@
             parent = document.querySelector(options.selector) || document.body;
         }
 
-        freezeHtml.setAttribute('data-text', options.text || 'Loading');
+        freezeHtml.dataset.text = options.text || 'Loading';
         if (document.querySelector(options.selector) || options.element) {
             freezeHtml.style.position = 'absolute';
         }
@@ -40,12 +38,10 @@
      * Unfreezes the UI.
      */
     window.UnFreezeUI = function(options) {
-        if(!options){
-            options = {};
-        }
+        options = options || {};
 
-        var freezeHtml;
-        if(options.element){
+        let freezeHtml;
+        if (options.element) {
             freezeHtml = options.element.querySelector('.freeze-ui');
         } else {
             freezeHtml = document.querySelector('.freeze-ui');
@@ -54,12 +50,8 @@
         if (freezeHtml) {
             freezeHtml.classList.add('is-unfreezing');
             setTimeout(function() {
-                if (freezeHtml) {
-                    freezeHtml.classList.remove('is-unfreezing');
-                    if (freezeHtml.parentElement) {
-                        freezeHtml.parentElement.removeChild(freezeHtml);
-                    }
-                }
+                freezeHtml.classList.remove('is-unfreezing');
+                freezeHtml.remove();
             }, 250);
         }
     };

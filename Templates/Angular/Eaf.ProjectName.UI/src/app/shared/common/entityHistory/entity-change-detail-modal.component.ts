@@ -28,7 +28,7 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
     if (!propertyChangeValue) {
       return propertyChangeValue;
     }
-    propertyChangeValue = propertyChangeValue.replace(/^['"]+/g, '').replace(/['"]+$/g, '');
+    propertyChangeValue = propertyChangeValue.replace(/^['"]+/, '').replace(/['"]+$/, '');
     if (this.isDate(propertyChangeValue, propertyTypeFullName)) {
       return moment(propertyChangeValue).format('YYYY-MM-DD HH:mm:ss');
     }

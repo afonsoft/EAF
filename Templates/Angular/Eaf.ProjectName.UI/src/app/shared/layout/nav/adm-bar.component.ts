@@ -22,12 +22,7 @@ export class AdmBarComponent extends AppComponentBase implements OnInit {
 
   ngOnInit() {
     this.menu = this._appNavigationService.getAdminMenu();
-    this.menu.items.forEach(element => {
-      if (this.showMenuItem(element)) {
-        this.showMenu = true;
-        return;
-      }
-    });
+    this.showMenu = this.menu.items.some(element => this.showMenuItem(element));
   }
 
   showMenuItem(menuItem): boolean {

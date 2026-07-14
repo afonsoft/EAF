@@ -11,7 +11,7 @@ export class MenuHorizontalDirective implements AfterViewInit {
 
   ngAfterViewInit(): void {
     // init the mMenu plugin
-    this.menu = new mMenu(this.el.nativeElement, {
+    this.menu = new (mMenu as any)(this.el.nativeElement, {
       submenu: {
         desktop: 'dropdown',
         tablet: 'accordion',

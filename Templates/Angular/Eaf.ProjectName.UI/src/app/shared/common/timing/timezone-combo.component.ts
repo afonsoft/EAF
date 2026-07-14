@@ -54,7 +54,7 @@ export class TimeZoneComboComponent extends AppComponentBase implements OnInit, 
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState?(isDisabled: boolean): void { // NOSONAR ControlValueAccessor interface requires a boolean flag
     if (isDisabled) {
       this.selectedTimeZone.disable();
     } else {

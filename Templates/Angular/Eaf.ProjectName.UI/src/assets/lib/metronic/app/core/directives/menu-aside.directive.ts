@@ -72,7 +72,7 @@ export class MenuAsideDirective {
     if (this.menu instanceof mMenu) {
       this.menu.update(options);
     } else {
-      this.menu = new mMenu(this.el.nativeElement, options);
+      this.menu = new (mMenu as any)(this.el.nativeElement, options);
     }
   }
 }

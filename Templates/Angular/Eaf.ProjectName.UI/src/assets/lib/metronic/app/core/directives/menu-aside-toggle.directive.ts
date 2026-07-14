@@ -9,7 +9,7 @@ export class MenuAsideToggleDirective implements AfterViewInit {
   constructor(private readonly el: ElementRef) {}
 
   ngAfterViewInit(): void {
-    this.toggle = new mToggle(this.el.nativeElement, {
+    this.toggle = new (mToggle as any)(this.el.nativeElement, {
       target: 'body',
       targetState: 'm-brand--minimize m-aside-left--minimize',
       togglerState: 'm-brand__toggler--active',

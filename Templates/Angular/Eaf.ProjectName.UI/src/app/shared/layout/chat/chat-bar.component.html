@@ -325,7 +325,7 @@
                   <div class="col-12">
                     <p-fileUpload
                       (onBeforeSend)="onBeforeSend($event)"
-                      (onProgress)="onProgressChange($event)"
+                      (progressChange)="onProgressChange($event)"
                       (uploadHandler)="uploadImage($event)"
                       #chatImageUpload
                       accept="image/*"
@@ -343,7 +343,7 @@
                     </p-fileUpload>
                     <p-fileUpload
                       (onBeforeSend)="onBeforeSend($event)"
-                      (onProgress)="onProgressChange($event)"
+                      (progressChange)="onProgressChange($event)"
                       (uploadHandler)="uploadFile($event)"
                       [url]="uploadUrl"
                       #chatFileUpload

@@ -117,8 +117,6 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
 
     if (this.paginator.getPage() !== 0) {
       this.paginator.changePage(0);
-
-      return;
     }
   }
 

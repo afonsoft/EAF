@@ -7,11 +7,11 @@ import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
   providers: [{ provide: NG_VALIDATORS, useExisting: forwardRef(() => PasswordComplexityValidator), multi: true }],
 })
 export class PasswordComplexityValidator implements Validator {
-  @Input('requireDigit') requireDigit: boolean;
-  @Input('requireUppercase') requireUppercase: boolean;
-  @Input('requireLowercase') requireLowercase: boolean;
-  @Input('requireNonAlphanumeric') requireNonAlphanumeric: boolean;
-  @Input('requiredLength') requiredLength: number;
+  @Input() requireDigit: boolean;
+  @Input() requireUppercase: boolean;
+  @Input() requireLowercase: boolean;
+  @Input() requireNonAlphanumeric: boolean;
+  @Input() requiredLength: number;
 
   validate(control: AbstractControl): { [key: string]: any } {
     const givenPassword = control.value;

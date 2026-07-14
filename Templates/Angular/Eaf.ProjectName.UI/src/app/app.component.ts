@@ -79,7 +79,7 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
   }
 
   setUpTagManager(): void {
-    if (AppConsts.googleTagManager !== undefined && typeof gtag !== 'undefined') {
+    if (AppConsts.googleTagManager !== undefined && gtag !== undefined) {
       this.router.events.forEach(item => {
         if (item instanceof NavigationEnd) {
           gtag('config', AppConsts.googleTagManager, {

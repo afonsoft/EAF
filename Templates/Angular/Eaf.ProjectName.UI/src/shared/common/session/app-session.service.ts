@@ -108,9 +108,7 @@ export class AppSessionService {
       return true;
     }
 
-    if (!tenantId && this.tenant) {
-      return false;
-    } else if (tenantId && this.tenant?.id !== tenantId) {
+    if ((!tenantId && this.tenant) || (tenantId && this.tenant?.id !== tenantId)) {
       return false;
     }
 

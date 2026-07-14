@@ -2,6 +2,8 @@
 import { AppLocalizationService } from '@app/shared/common/localization/app-localization.service';
 import * as moment from 'moment';
 
+type DateInput = string | Date | moment.Moment;
+
 @Injectable()
 export class DateTimeService {
   constructor(private readonly _appLocalizationService: AppLocalizationService) {}
@@ -54,7 +56,7 @@ export class DateTimeService {
     return moment().startOf('month').toDate();
   }
 
-  getStartOfDayForDate(date: string | Date | moment.Moment): Date {
+  getStartOfDayForDate(date: DateInput): Date {
     return moment(date).startOf('month').toDate();
   }
 
@@ -68,7 +70,7 @@ export class DateTimeService {
     return moment().endOf('month').toDate();
   }
 
-  getEndOfDayForDate(date: string | Date | moment.Moment): Date {
+  getEndOfDayForDate(date: DateInput): Date {
     return moment(date).endOf('month').toDate();
   }
 
@@ -84,15 +86,15 @@ export class DateTimeService {
     return this.getEndOfDayForDate(newDate);
   }
 
-  plusDays(date: string | Date | moment.Moment, dayCount: number): Date {
+  plusDays(date: DateInput, dayCount: number): Date {
     return moment(date).add(dayCount, 'days').toDate();
   }
 
-  plusSeconds(date: string | Date | moment.Moment, seconds: number): Date {
+  plusSeconds(date: DateInput, seconds: number): Date {
     return moment(date).add(seconds, 'seconds').toDate();
   }
 
-  minusDays(date: string | Date | moment.Moment, minutes: number): Date {
+  minusDays(date: DateInput, minutes: number): Date {
     return moment(date).add(minutes, 'minutes').toDate();
   }
 
@@ -108,11 +110,11 @@ export class DateTimeService {
     return this.formatDate(jsDate, format);
   }
 
-  formatDate(date: string | Date | moment.Moment, format: string): string {
+  formatDate(date: DateInput, format: string): string {
     return moment(date).format(format);
   }
 
-  getDiffInSeconds(maxDate: string | Date | moment.Moment, minDate: string | Date | moment.Moment): number {
+  getDiffInSeconds(maxDate: DateInput, minDate: DateInput): number {
     return moment(maxDate).diff(moment(minDate), 'seconds');
   }
 
@@ -134,7 +136,7 @@ export class DateTimeService {
       .toDate();
   }
 
-  toUtcDate(date: string | Date | moment.Moment): Date {
+  toUtcDate(date: DateInput): Date {
     return moment(date).utc().toDate();
   }
 
@@ -142,7 +144,7 @@ export class DateTimeService {
     return moment(date);
   }
 
-  fromNow(date: string | Date | moment.Moment): string {
+  fromNow(date: DateInput): string {
     return moment(date).fromNow();
   }
 }

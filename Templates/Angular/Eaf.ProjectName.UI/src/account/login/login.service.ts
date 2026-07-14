@@ -83,7 +83,7 @@ export class LoginService {
 
     args.unshift(localizedText);
 
-    return eaf.utils.formatString.apply(this, args);
+    return eaf.utils.formatString.call(null, ...args);
   }
 
   authenticate(finallyCallback?: () => void, redirectUrl?: string, captchaResponse?: string): void {
@@ -256,13 +256,11 @@ export class LoginService {
               if (containsPii) {
                 return;
               }
-              switch (level) {
-                case msal.LogLevel.Error:
-                  this._logService.error(message);
-                  eaf.message.error(message);
-                  return;
-                default:
-                  console.warn(message);
+              if (level === msal.LogLevel.Error) {
+                this._logService.error(message);
+                eaf.message.error(message);
+              } else {
+                console.warn(message);
               }
             },
             piiLoggingEnabled: true,

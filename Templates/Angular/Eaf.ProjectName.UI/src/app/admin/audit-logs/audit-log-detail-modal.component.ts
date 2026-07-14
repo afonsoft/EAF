@@ -35,6 +35,7 @@ export class AuditLogDetailModalComponent extends AppComponentBase {
       const json = JSON.parse(this.auditLog.parameters);
       return JSON.stringify(json, null, 4);
     } catch (e) {
+      eaf.log.warn(e);
       return this.auditLog.parameters;
     }
   }

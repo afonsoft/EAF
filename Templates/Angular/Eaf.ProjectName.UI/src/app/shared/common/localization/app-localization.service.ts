@@ -23,6 +23,6 @@ export class AppLocalizationService extends LocalizationService {
 
     args.unshift(localizedText);
 
-    return eaf.utils.formatString.apply(this, args);
+    return eaf.utils.formatString.call(null, ...args);
   }
 }

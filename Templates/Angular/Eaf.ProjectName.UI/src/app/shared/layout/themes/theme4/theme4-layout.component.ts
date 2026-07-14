@@ -66,6 +66,6 @@ export class Theme4LayoutComponent extends AppComponentBase implements AfterView
       options.offset.mobile = mUtil.attr(headerEl, 'm-minimize-mobile-offset');
     }
 
-    return new mHeader('m_header', options);
+    return new (mHeader as any)('m_header', options);
   }
 }

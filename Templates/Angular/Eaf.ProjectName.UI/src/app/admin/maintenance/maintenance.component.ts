@@ -98,23 +98,23 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
 
   getLogType(log: string): string {
     if (log.includes('DEBUG') || log.includes('[DBG]')) {
-      return '';
+      return 'DEBUG';
     }
 
     if (log.includes('INFO') || log.includes('[INF]')) {
-      return '';
+      return 'INFO';
     }
 
     if (log.includes('WARN') || log.includes('[WRN]')) {
-      return '';
+      return 'WARN';
     }
 
     if (log.includes('ERROR') || log.includes('[ERR]')) {
-      return '';
+      return 'ERROR';
     }
 
     if (log.includes('FATAL') || log.includes('[FAT]') || log.includes('[FTL]')) {
-      return '';
+      return 'FATAL';
     }
 
     return '';

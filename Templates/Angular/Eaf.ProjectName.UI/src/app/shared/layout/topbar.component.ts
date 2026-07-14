@@ -46,7 +46,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
 
   ngOnInit() {
     this.isMultiTenancyEnabled = this._eafMultiTenancyService.isEnabled;
-    this.languages = this.localization.languages?.filter(l => l.isDisabled === false) || [];
+    this.languages = this.localization.languages?.filter(l => !l.isDisabled) || [];
 
     this.currentLanguage = this.localization.currentLanguage;
     this.isImpersonatedLogin = this._eafSessionService.impersonatorUserId > 0;
@@ -102,7 +102,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
   }
 
   reloadLanguages(): void {
-    this.languages = this.localization.languages?.filter(l => (<any>l).isDisabled === false) || [];
+    this.languages = this.localization.languages?.filter(l => !(<any>l).isDisabled) || [];
   }
 
   setCurrentLoginInformations(): void {

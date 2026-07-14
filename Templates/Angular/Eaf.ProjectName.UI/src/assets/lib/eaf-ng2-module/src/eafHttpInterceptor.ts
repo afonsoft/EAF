@@ -177,12 +177,10 @@ export class EafHttpConfiguration {
         observer.next('');
         observer.complete();
       } else {
-        const reader = new FileReader();
-        reader.onload = function () {
-          observer.next(this.result);
+        blob.text().then(text => {
+          observer.next(text);
           observer.complete();
-        };
-        reader.readAsText(blob);
+        });
       }
     });
   }
@@ -266,8 +264,6 @@ export class EafHttpInterceptor implements HttpInterceptor {
 
     if (event instanceof HttpResponse) {
       if (event.body instanceof Blob && event.body.type && event.body.type.indexOf('application/json') >= 0) {
-        const clonedResponse = event.clone();
-
         this.configuration.blobToText(event.body).subscribe(json => {
           const responseBody = json == 'null' ? {} : JSON.parse(json);
 
@@ -345,8 +341,7 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   protected normalizeRequestHeaders(request: HttpRequest<any>): HttpRequest<any> {
-    let modifiedHeaders = new HttpHeaders();
-    modifiedHeaders = request.headers
+    let modifiedHeaders = request.headers
       .set('Pragma', 'no-cache')
       .set('Cache-Control', 'no-cache')
       .set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');

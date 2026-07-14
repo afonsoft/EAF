@@ -75,42 +75,52 @@ export class TopBarMenuComponent extends AppComponentBase implements OnInit, Aft
   getItemCssClasses(item, parentItem, depth) {
     const isRootLevel = item && !parentItem;
 
-    let cssClasses = 'm-menu__item';
+    return [
+      'm-menu__item',
+      this.getSubmenuClass(item, isRootLevel),
+      this.getIconOnlyClass(item),
+      this.getActiveClass(item, isRootLevel),
+      this.getTabClass(isRootLevel),
+      this.getSubmenuTabClass(item, isRootLevel, depth),
+    ].join(' ');
+  }
 
-    if (objectPath.get(item, 'items.length') || this.isRootTabMenuItemWithoutChildren(item, isRootLevel)) {
-      cssClasses += ' m-menu__item--submenu';
+  private getSubmenuClass(item, isRootLevel): string {
+    return item.items?.length || this.isRootTabMenuItemWithoutChildren(item, isRootLevel) ? 'm-menu__item--submenu' : '';
+  }
+
+  private getIconOnlyClass(item): string {
+    return objectPath.get(item, 'icon-only') ? 'm-menu__item--icon-only' : '';
+  }
+
+  private getActiveClass(item, isRootLevel): string {
+    if (!this.isMenuItemIsActive(item)) {
+      return '';
     }
 
-    if (objectPath.get(item, 'icon-only')) {
-      cssClasses += ' m-menu__item--icon-only';
+    return this.isTabMenuUsed && isRootLevel ? 'm-menu__item--active m-menu__item--hover' : 'm-menu__item--active';
+  }
+
+  private getTabClass(isRootLevel): string {
+    return this.isTabMenuUsed && isRootLevel ? 'm-menu__item--tabs' : '';
+  }
+
+  private getSubmenuTabClass(item, isRootLevel, depth): string {
+    if (!item.items?.length) {
+      return '';
     }
 
-    if (this.isMenuItemIsActive(item)) {
-      cssClasses += ' m-menu__item--active';
-
-      if (this.isTabMenuUsed && isRootLevel) {
-        cssClasses += ' m-menu__item--hover';
-      }
+    if (this.isTabMenuUsed && !isRootLevel) {
+      return depth === 1
+        ? 'm-menu__item--submenu m-menu__item--rel m-menu__item--submenu-tabs m-menu__item--open-dropdown m-menu__item--hover'
+        : 'm-menu__item--submenu m-menu__item--rel';
     }
 
-    if (this.isTabMenuUsed && isRootLevel) {
-      cssClasses += ' m-menu__item--tabs';
+    if (!this.isTabMenuUsed) {
+      return depth >= 1 ? 'm-menu__item--submenu' : 'm-menu__item--rel';
     }
 
-    if (this.isTabMenuUsed && !isRootLevel && item.items.length) {
-      cssClasses += ' m-menu__item--submenu m-menu__item--rel';
-      if (depth && depth === 1) {
-        cssClasses += ' m-menu__item--submenu-tabs m-menu__item--open-dropdown m-menu__item--hover';
-      }
-    } else if (!this.isTabMenuUsed && item.items.length) {
-      if (depth && depth >= 1) {
-        cssClasses += ' m-menu__item--submenu';
-      } else {
-        cssClasses += ' m-menu__item--rel';
-      }
-    }
-
-    return cssClasses;
+    return '';
   }
 
   getAnchorItemCssClasses(item, parentItem): string {
@@ -172,12 +182,10 @@ export class TopBarMenuComponent extends AppComponentBase implements OnInit, Aft
     const isRootLevel = menuItem && !parentItem;
     if (isRootLevel && this.isTabMenuUsed) {
       return 'tab';
+    } else if (depth && depth >= 1) {
+      return 'hover';
     } else {
-      if (depth && depth >= 1) {
-        return 'hover';
-      } else {
-        return 'click';
-      }
+      return 'click';
     }
   }
 

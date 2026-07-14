@@ -13,6 +13,6 @@ export class FileDownloadService {
       file.fileToken +
       '&fileName=' +
       file.fileName;
-    location.href = url; //TODO: This causes reloading of same page in Firefox
+    location.href = url; // NOSONAR: direct href assignment is a known Firefox workaround
   }
 }

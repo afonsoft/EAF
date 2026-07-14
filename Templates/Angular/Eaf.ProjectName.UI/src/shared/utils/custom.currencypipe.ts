@@ -10,7 +10,7 @@ export class CustomCurrencyPipe implements PipeTransform {
   transform(
     value: number,
     currencyCode: string = AppConsts.LocaleCurrency.find(l => l.locale == eaf.localization.currentLanguage.name).currencyCode,
-    display: 'code' | 'symbol' | 'symbol-narrow' | string | boolean = 'symbol',
+    display: string | boolean = 'symbol',
     // digitsInfo: string = '3.2-2',
     digitsInfo = '1.2-2',
     locale: string = eaf.localization.currentLanguage.name,
