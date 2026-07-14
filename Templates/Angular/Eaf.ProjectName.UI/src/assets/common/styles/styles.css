@@ -410,7 +410,6 @@ br {
 }
 
 .primeng-paging-container .ui-paginator a {
-    background-color: #dedede;
     color: #333 !important;
     background-color: #efefef !important;
 }
