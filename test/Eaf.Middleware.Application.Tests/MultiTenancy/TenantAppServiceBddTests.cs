@@ -5,6 +5,7 @@ using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
+using Abp.Localization;
 using Abp.Domain.Uow;
 using Abp.Events.Bus;
 using Abp.MultiTenancy;
@@ -344,7 +345,7 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
         public async Task Dado_TenantSemAdmin_Quando_UnlockTenantAdmin_Entao_NaoDeveLancarExcecao()
         {
             var userManager = ManagerTestHelper.CreateUserManager();
-            userManager.FindByNameAsync("admin").Returns((User)null);
+            userManager.FindByNameAsync("admin").Returns((User)null!);
 
             var unitOfWork = Substitute.For<IUnitOfWork>();
             unitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
@@ -361,6 +362,35 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
         #endregion
 
         #endregion
+
+        [Fact]
+        public async Task Dado_TenantExistente_Quando_GetTenantFeaturesForEdit_Entao_DeveRetornarFeaturesEValores()
+        {
+            // Dado
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.GetFeatureValuesAsync(1).Returns(new List<NameValue>
+            {
+                new NameValue("Feature1", "Value1")
+            });
+
+            var featureManager = Substitute.For<IFeatureManager>();
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<FlatFeatureDto>>(Arg.Any<object>())
+                .Returns(new List<FlatFeatureDto> { new FlatFeatureDto { DisplayName = "Test Feature" } });
+
+            _sut.TenantManager = tenantManager;
+            _sut.FeatureManager = featureManager;
+            _sut.ObjectMapper = objectMapper;
+
+            // Quando
+            var result = await _sut.GetTenantFeaturesForEdit(new EntityDto(1));
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Features.ShouldNotBeEmpty();
+            result.FeatureValues.ShouldNotBeEmpty();
+        }
 
         private TenantManager CriarTenantManagerParaCreateTenant(out RoleManager roleManager, out UserManager userManager)
         {

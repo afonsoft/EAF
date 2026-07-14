@@ -182,5 +182,21 @@ namespace Eaf.OpenTelemetry.Tests
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.ShouldNotBeNull();
         }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComOtlpVariableInvalida_Entao_DeveIgnorarExcecao()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.OtlpVariables["OTEL=INVALID"] = "value";
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+            Environment.GetEnvironmentVariable("OTEL=INVALID").ShouldBeNull();
+        }
     }
 }

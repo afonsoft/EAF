@@ -288,6 +288,33 @@ namespace Eaf.Middleware.Tests.Hangfire
             return httpContext;
         }
 
+        [Fact]
+        public void Dado_TokenJwtComTenantSemSub_Quando_Authorize_Entao_DeveRetornarFalso()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtComTenantSemSub(2);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "token", token }
+            });
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeFalse();
+        }
+
+        private static string CriarTokenJwtComTenantSemSub(int tenantId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = new JwtSecurityToken(
+                claims: new[]
+                {
+                    new Claim(AbpClaimTypes.TenantId, tenantId.ToString())
+                });
+            return tokenHandler.WriteToken(token);
+        }
+
         private static string CriarTokenJwtValido(long userId, int tenantId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

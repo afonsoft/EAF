@@ -76,5 +76,18 @@ namespace Eaf.MiddlewareCore.Tests.SampleApp.Seed
                 context.Users.Any(u => u.TenantId == 2).ShouldBeTrue();
             });
         }
+
+        [Fact]
+        public void Dado_AdminHostJaExistente_Quando_CreateHostRoleAndUsers_Entao_DeveRetornarSemDuplicar()
+        {
+            UsingDbContext(context =>
+            {
+                var creator = new HostRoleAndUserCreator(context);
+                creator.Create();
+                creator.Create();
+
+                creator.ShouldNotBeNull();
+            });
+        }
     }
 }

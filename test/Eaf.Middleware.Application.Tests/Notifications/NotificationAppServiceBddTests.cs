@@ -157,6 +157,28 @@ namespace Eaf.Middleware.Application.Tests.Notifications
                 .DeleteUserNotificationAsync(1, notificationId);
         }
 
+        [Fact]
+        public async Task Dado_NotificacaoDeOutroUsuario_Quando_DeleteNotification_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var notificationId = Guid.NewGuid();
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var userNotification = new UserNotification
+            {
+                UserId = 99,
+                TenantId = 1
+            };
+            _userNotificationManager.GetUserNotificationAsync(1, notificationId)
+                .Returns(userNotification);
+
+            // Quando & Então
+            await Should.ThrowAsync<Abp.UI.UserFriendlyException>(async () => await _sut.DeleteNotification(new EntityDto<Guid>(notificationId)));
+        }
+
         #endregion
 
         #region GetUserNotifications

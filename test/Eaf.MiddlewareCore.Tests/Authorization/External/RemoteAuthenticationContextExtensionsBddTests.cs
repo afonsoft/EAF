@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Shouldly;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using NSubstitute;
 using Xunit;
 
 namespace Eaf.Middleware.Tests.Authorization.External
@@ -181,6 +183,33 @@ namespace Eaf.Middleware.Tests.Authorization.External
 
             // Entao
             context.Principal.HasClaim(c => c.Type == "mapped_claim").ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_MapeamentosVazios_Quando_AddMappedClaimsNoContextoRemoto_Entao_DeveRetornarSemAdicionarIdentidades()
+        {
+            // Dado
+            var principal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim("custom_claim", "custom_value")
+            }));
+
+            var context = new TestRemoteAuthenticationContext(
+                Substitute.For<HttpContext>(),
+                new AuthenticationScheme("test", "test", typeof(TestAuthenticationHandler)),
+                Substitute.For<RemoteAuthenticationOptions>(),
+                new AuthenticationProperties
+                {
+                    Items = { }
+                });
+            context.Principal = principal;
+
+            // Quando
+            context.AddMappedClaims(new List<JsonClaimMap>());
+
+            // Então
+            context.Principal.ShouldBeSameAs(principal);
+            context.Principal.Identities.Count().ShouldBe(1);
         }
 
         #endregion

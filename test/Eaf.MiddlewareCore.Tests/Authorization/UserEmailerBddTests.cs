@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Abp;
@@ -603,6 +604,44 @@ namespace Eaf.Middleware.Tests.Authorization
             await emailSender.Received(1).SendAsync(Arg.Is<MailMessage>(m =>
                 m.Subject == "PasswordResetEmail_Subject" &&
                 m.Body.Contains("c=")));
+        }
+
+        [Fact]
+        public void Dado_UserEmailer_Quando_LocalizarComArgs_Entao_DeveRetornarChave()
+        {
+            var sut = new TestUserEmailer();
+
+            var result = sut.LocalizeWithArgs("TestKey", "arg1");
+
+            result.ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_UserEmailer_Quando_LocalizarComCultura_Entao_DeveRetornarChave()
+        {
+            var sut = new TestUserEmailer();
+
+            var result = sut.LocalizeWithCulture("TestKey", new CultureInfo("en-US"));
+
+            result.ShouldBe("TestKey");
+        }
+
+        private class TestUserEmailer : UserEmailer
+        {
+            public TestUserEmailer() : base(
+                Substitute.For<IEmailTemplateProvider>(),
+                Substitute.For<IEmailSender>(),
+                Substitute.For<IRepository<Tenant>>(),
+                Substitute.For<ICurrentUnitOfWorkProvider>(),
+                Substitute.For<IUnitOfWorkManager>(),
+                Substitute.For<IRepository<User, long>>(),
+                Substitute.For<ISettingManager>())
+            {
+            }
+
+            public string LocalizeWithArgs(string name, params object[] args) => L(name, args);
+
+            public string LocalizeWithCulture(string name, CultureInfo culture) => L(name, culture);
         }
     }
 }

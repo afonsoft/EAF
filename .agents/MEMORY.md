@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority54-coverage-audit`
+Last session branch: `feature/devin-20260713-priority55-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -15,6 +15,27 @@ Current coverage (after P51): Line 96.4%, Branch 83.0%, Method 99.3% (4401 tests
 Current coverage (after P52): Line 96.6%, Branch 83.6%, Method 99.3% (4416 tests, 4415 passing, 1 skipped). Build warnings: 159.
 Current coverage (after P53): Line 97.1%, Branch 84.2%, Method 99.4% (4433 tests, 4432 passing, 1 skipped). Build warnings: 163.
 Current coverage (after P54): Line 97.2%, Branch 85.1%, Method 99.5% (4467 tests, 4466 passing, 1 skipped). Build warnings: 127.
+Current coverage (after P55): Line 97.5%, Branch 85.6%, Method 99.6% (4492 tests, 4491 passing, 1 skipped). Build warnings: 129.
+
+## P55 gotchas
+- `UserManager.PasswordValidators` is non-virtual; inject `IPasswordValidator<User>` list into `UserManager` constructor via `CoreManagerTestHelper` overloads to test `TenantManager.CreateWithAdminUserAsync` with a custom validator.
+- `UserEmailer` `L` overloads are protected; use `TestUserEmailer` subclass exposing `L(name, args)` and `L(name, culture)` to cover them.
+- `HostSettingsAppService.GetLoginImpersonatorAsync` uses `ISettingManager.GetSettingValueForApplicationAsync(string)` (single-param overload) through `GetSettingValueForApplicationAsync<bool>`. Mock the one-param string overload and assert the default value `Enabled = true`.
+- `LanguageAppService.GetLanguageTexts` throws `InvalidOperationException` when no default language is found and `UserFriendlyException` when creating a duplicate language. `SkipCount > 0` can be exercised with `GetLanguageTextsInput`.
+- `TenantAppService.GetTenantFeaturesForEdit` uses `IFeatureManager` and `IObjectMapper`; `FeatureDefinition` is not public, so substitute `IFeatureManager` and map to `FlatFeatureDto` with `IObjectMapper`.
+- `FileController.DownloadTempFile`/`DownloadBinaryFile` return `BadRequest(ModelState)` when `ModelState` is invalid; `BadRequest` returns a `SerializableError`, so assert `BadRequestObjectResult.Value` not null.
+- `AboutController.GetAbout` populates `Modules` from `_AbpModuleManager.Modules`; `AbpModuleInfo` constructor requires `(Type, AbpModule, bool)` and `Assembly` is non-virtual, so construct with `Substitute.For<AbpModuleInfo>(typeof(AboutController), Substitute.For<AbpModule>(), false)`.
+- `EafHostBuilderExtensions` (Core and Worker) `UseEafConfiguration`/`UseAbpConfiguration` with `prefix` not null cover `config.AddEnvironmentVariables(prefix: prefix)`. Pass `configureAction: null` to use the default action.
+- `EafServiceCollectionExtensions.AddEaf` uses `AddCastleLogger` when `castleLoggerFactory` is registered; register `CastleLoggerFactory` in the `ServiceCollection` before calling `AddEaf`.
+- `EafOpenTelemetryServiceCollectionExtensions.SetOtlpEnvironmentVariables` catch can be exercised with an OTLP variable key containing `=` (e.g. `OTEL=INVALID`), which makes `Environment.SetEnvironmentVariable` throw `ArgumentException`.
+- `EafSqlServerCache.TryGetValue` `if (cached != null)` and `CompressBytesAsync` catch can be exercised by setting a value and reading it back; stub `GetAsync` to return the bytes captured in `SetAsync`.
+- `RemoteAuthenticationContextExtensions.AddMappedClaims` returns early when `jsonClaimMap` list is empty.
+- `DefaultExternalLoginInfoManager.GetNameAndSurname` returns `(null, null)` when `nameClaim.Value` is empty.
+- `ChatHub.Dispose` returns early when `_isCallByRelease` is true; cover with a second `Dispose` call.
+- `ChatController.GetUploadedObject` throws `UserFriendlyException` when `ModelState` is invalid.
+- `NotificationAppService.DeleteNotification` throws `UserFriendlyException` when the notification belongs to another user.
+- `CoreManagerTestHelper` gained overloads to inject `passwordValidators` and reuse `UserManager`/`TenantManager` creation.
+- `LdapAuthenticationSource`, `MiddlewareWebCoreModule`, `PermissionAppService`, `ServiceBusQueueAppender`, `AzureActiveDirectoryAuthenticationSource`, `EafSqliteCache` and `OpenIdConnectAuthProviderApi` still contain Linux-inaccessible or sealed-builder branches. Document as inalcançáveis.
 
 ## P54 gotchas
 - `ChatMessageManager` overrides `L(string, CultureInfo)` but did not override `L(string, CultureInfo, params object[])`, so the `args` overload fell back to the base `ApplicationService` and ignored the middleware fallback sources. Add `protected override string L(string name, CultureInfo culture, params object[] args)` in `ChatMessageManager` and forward to `MiddlewareLocalizationHelper.Localize`.
