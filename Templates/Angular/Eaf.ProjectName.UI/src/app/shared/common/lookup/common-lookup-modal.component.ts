@@ -28,7 +28,7 @@ export interface ICommonLookupModalOptions {
   templateUrl: './common-lookup-modal.component.html',
 })
 export class CommonLookupModalComponent extends AppComponentBase {
-  static defaultOptions: ICommonLookupModalOptions = {
+  static readonly defaultOptions: ICommonLookupModalOptions = {
     dataSource: undefined,
     canSelect: () => true,
     loadOnStartup: true,
