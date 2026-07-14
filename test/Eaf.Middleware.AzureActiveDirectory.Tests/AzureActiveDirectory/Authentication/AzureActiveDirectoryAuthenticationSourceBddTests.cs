@@ -212,6 +212,19 @@ namespace Eaf.Middleware.AzureActiveDirectory.Tests.AzureActiveDirectory.Authent
         }
 
         [Fact]
+        public async Task Dado_UsuarioComMailSemArroba_Quando_GetUsersAsync_Entao_DeveCompuserEmailComTenant()
+        {
+            var graphUser = CriarUser("user@tenant.onmicrosoft.com", "User Name", "Surname", mail: "usermail");
+            var sut = CriarSut();
+            sut.UsersRequestBuilderToReturn = CriarGraphBuilderComUser(graphUser);
+
+            var result = await sut.GetUsersAsync("user");
+            result.ShouldNotBeEmpty();
+            result[0].UserName.ShouldBe("user");
+            result[0].EmailAddress.ShouldBe("user@tenant.onmicrosoft.com");
+        }
+
+        [Fact]
         public async Task Dado_UserNameVazio_Quando_GetUsersAsync_Entao_DeveRetornarListaVazia()
         {
             var sut = CriarSut();
@@ -254,6 +267,19 @@ namespace Eaf.Middleware.AzureActiveDirectory.Tests.AzureActiveDirectory.Authent
             user.Surname.ShouldBe("Surname");
             user.EmailAddress.ShouldBe("new@example.com");
             user.IsActive.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComMailSemArroba_Quando_UpdateUserAsync_Entao_DeveCompuserEmailComTenant()
+        {
+            var graphUser = CriarUser("user@tenant.onmicrosoft.com", "New Name", "Surname", "usermail");
+            var sut = CriarSut();
+            sut.UsersRequestBuilderToReturn = CriarGraphBuilderComUser(graphUser);
+
+            var user = new TestUser { UserName = "user", Name = "Old", Surname = "Old", EmailAddress = "old@example.com" };
+            await sut.UpdateUserAsync(user, new TestTenant());
+            user.UserName.ShouldBe("user");
+            user.EmailAddress.ShouldBe("user@tenant.onmicrosoft.com");
         }
 
         [Fact]
@@ -333,6 +359,19 @@ namespace Eaf.Middleware.AzureActiveDirectory.Tests.AzureActiveDirectory.Authent
         public async Task Dado_UsuarioSemArrobaSemMail_Quando_GetUserAsync_Entao_DeveCompuserEmailComTenant()
         {
             var graphUser = CriarUser("user", "User Name", "Surname", mail: null);
+            var sut = CriarSut();
+            sut.UsersRequestBuilderToReturn = CriarGraphBuilderComUser(graphUser);
+
+            var result = await sut.GetUserAsync("user");
+            result.ShouldNotBeNull();
+            result!.UserName.ShouldBe("user");
+            result.EmailAddress.ShouldBe("user@tenant.onmicrosoft.com");
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComMailSemArroba_Quando_GetUserAsync_Entao_DeveCompuserEmailComTenant()
+        {
+            var graphUser = CriarUser("user@tenant.onmicrosoft.com", "User Name", "Surname", mail: "usermail");
             var sut = CriarSut();
             sut.UsersRequestBuilderToReturn = CriarGraphBuilderComUser(graphUser);
 

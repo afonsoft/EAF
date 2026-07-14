@@ -138,5 +138,55 @@ namespace Eaf.MiddlewareCore.Tests.Configuration
             result.ShouldBeSameAs(hostBuilder);
             hostBuilder.Received(1).ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, IConfigurationBuilder>>());
         }
+
+        [Fact]
+        public void Dado_HostBuilderReal_Quando_UsarEafConfigurationComActionNulaEPrefixo_Entao_DeveCriarHost()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+            var originalDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string>()))
+                    .UseEafConfiguration(configureLogger: null, prefix: "EAF_");
+
+                using var host = builder.Build();
+
+                host.ShouldNotBeNull();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        [Fact]
+        public void Dado_HostBuilderReal_Quando_UsarEafConfigurationComPrefixoVazio_Entao_DeveCriarHost()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDirectory);
+            var originalDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Directory.SetCurrentDirectory(tempDirectory);
+                var builder = new HostBuilder()
+                    .ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string>()))
+                    .UseEafConfiguration(prefix: string.Empty);
+
+                using var host = builder.Build();
+
+                host.ShouldNotBeNull();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                try { Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
     }
 }

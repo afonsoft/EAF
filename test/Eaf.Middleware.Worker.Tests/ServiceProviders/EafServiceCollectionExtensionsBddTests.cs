@@ -96,5 +96,15 @@ namespace Eaf.Middleware.Worker.Tests.ServiceProviders
             serviceProvider.ShouldNotBeNull();
             serviceProvider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>().ShouldNotBeNull();
         }
+
+        [Fact]
+        public void Dado_ColecoesDeServicos_Quando_AdicionarEafSemOptions_Entao_DeveRetornarServiceProviderConfigurado()
+        {
+            var services = CreateServices();
+
+            var serviceProvider = services.AddEaf<WorkerModuleTestDependenciesModule>();
+
+            serviceProvider.ShouldNotBeNull();
+        }
     }
 }
