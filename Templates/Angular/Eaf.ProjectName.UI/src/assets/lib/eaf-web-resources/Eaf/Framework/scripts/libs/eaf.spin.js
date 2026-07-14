@@ -50,7 +50,7 @@
             $('body').spin(eaf.libs.spinjs.spinner_config);
         } else {
             var $elm = $(elm); // NOSONAR
-            var $busyIndicator = $elm.find('.eaf-busy-indicator'); //TODO@Halil: What if  more than one element. What if there are nested elements? // NOSONAR
+            let $busyIndicator = $elm.find('.eaf-busy-indicator');
             if ($busyIndicator.length) {
                 $busyIndicator.spin(eaf.libs.spinjs.spinner_config_inner_busy_indicator);
             } else {
@@ -76,7 +76,6 @@
     };
 
     eaf.ui.clearBusy = function (elm) {
-        //TODO@Halil: Maybe better to do not call unblock if it's not blocked by setBusy // NOSONAR
         if (!elm) {
             eaf.ui.unblock();
             $('body').spin(false);

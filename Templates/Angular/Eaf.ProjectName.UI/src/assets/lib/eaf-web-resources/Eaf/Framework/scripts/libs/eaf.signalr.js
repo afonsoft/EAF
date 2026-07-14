@@ -26,10 +26,10 @@
     //Connect to the server
     eaf.signalr.connect = function() {
         $.connection.hub.start().done(function () {
-            eaf.log.debug('Connected to SignalR server!'); //TODO: Remove log // NOSONAR
+            eaf.log.debug('Connected to SignalR server!');
             eaf.event.trigger('eaf.signalr.connected');
             commonHub.server.register().done(function () {
-                eaf.log.debug('Registered to the SignalR server!'); //TODO: Remove log // NOSONAR
+                eaf.log.debug('Registered to the SignalR server!');
             });
         });
     };

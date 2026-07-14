@@ -38,7 +38,7 @@
             eaf.utils.setCookieValue(
               eaf.multiTenancy.tenantIdCookieName,
               tenantId.toString(),
-              new Date(new Date().getTime() + 5 * 365 * 86400000), //5 years // NOSONAR
+              new Date(Date.now() + 5 * 365 * 86400000), // 5 years
               eaf.appPath,
               eaf.domain
             );
