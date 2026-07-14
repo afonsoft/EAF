@@ -345,7 +345,7 @@ jobs:
 
       - name: 🏗️ Build UI
         working-directory: Templates/Angular/Eaf.ProjectName.UI
-        run: npx ng build --configuration=production
+        run: npm run build
 
       - name: 🔧 Replace configs for production
         run: cp -f Templates/ReplaceConfigs/UI/assets/*.json Templates/Angular/Eaf.ProjectName.UI/dist/assets/

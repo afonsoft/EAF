@@ -67,7 +67,7 @@ describe('SettingsComponent', () => {
   it('should load social login settings', () => {
     component.loadSocialLoginSettings();
     expect(component.enabledSocialLoginSettings).toBeDefined();
-    expect(component.enabledSocialLoginSettings.length).toBe(4);
+    expect(component.enabledSocialLoginSettings).toHaveSize(4);
     expect(component.enabledSocialLoginSettings).toContain('Google');
     expect(component.enabledSocialLoginSettings).toContain('Microsoft');
   });

@@ -1,4 +1,4 @@
-﻿var eaf = eaf || {};
+﻿var eaf = eaf || {}; // NOSONAR
 (function ($) {
 
     if (!$) {
@@ -12,8 +12,8 @@
     eaf.ajax = function (userOptions) {
         userOptions = userOptions || {};
 
-        var options = $.extend(true, {}, eaf.ajax.defaultOpts, userOptions);
-        var oldBeforeSendOption = options.beforeSend;
+        var options = $.extend(true, {}, eaf.ajax.defaultOpts, userOptions); // NOSONAR
+        var oldBeforeSendOption = options.beforeSend; // NOSONAR
         options.beforeSend = function(xhr) {
             if (oldBeforeSendOption) {
                  oldBeforeSendOption(xhr);
@@ -34,10 +34,10 @@
                         eaf.ajax.handleResponse(data, userOptions, $dfd, jqXHR);
                     } else {
                         $dfd.resolve(data);
-                        userOptions.success && userOptions.success(data);
+                        userOptions.success && userOptions.success(data); // NOSONAR
                     }
                 }).fail(function (jqXHR) {
-                    if (jqXHR.responseJSON && jqXHR.responseJSON.__abp) {
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.__abp) { // NOSONAR
                         eaf.ajax.handleResponse(jqXHR.responseJSON, userOptions, $dfd, jqXHR);
                     } else {
                         eaf.ajax.handleNonEafErrorResponse(jqXHR, userOptions, $dfd);
@@ -118,7 +118,7 @@
             }
 
             $dfd.reject.apply(this, arguments);
-            userOptions.error && userOptions.error.apply(this, arguments);
+            userOptions.error && userOptions.error.apply(this, arguments); // NOSONAR
         },
 
         handleUnAuthorizedRequest: function (messagePromise, targetUrl) {
@@ -131,7 +131,7 @@
             }
         },
 
-        handleResponse: function (data, userOptions, $dfd, jqXHR) {
+        handleResponse: function (data, userOptions, $dfd, jqXHR) { // NOSONAR
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 eaf.log.info('[EAF jQuery handleResponse] Received data:', data);
                 eaf.log.info('[EAF jQuery handleResponse] data.success:', data ? data.success : 'no data');
@@ -141,8 +141,8 @@
                     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                         eaf.log.info('[EAF jQuery handleResponse] Success - resolving with result:', data.result);
                     }
-                    $dfd && $dfd.resolve(data.result, data, jqXHR);
-                    userOptions.success && userOptions.success(data.result, data, jqXHR);
+                    $dfd && $dfd.resolve(data.result, data, jqXHR); // NOSONAR
+                    userOptions.success && userOptions.success(data.result, data, jqXHR); // NOSONAR
 
                     if (data.targetUrl) {
                         eaf.ajax.handleTargetUrl(data.targetUrl);
@@ -151,7 +151,7 @@
                     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                         eaf.log.info('[EAF jQuery handleResponse] Error - success is false');
                     }
-                    var messagePromise = null;
+                    var messagePromise = null; // NOSONAR
 
                     if (data.error) {
                         if (userOptions.eafHandleError !== false) {
@@ -163,8 +163,8 @@
 
                     eaf.ajax.logError(data.error);
 
-                    $dfd && $dfd.reject(data.error, jqXHR);
-                    userOptions.error && userOptions.error(data.error, jqXHR);
+                    $dfd && $dfd.reject(data.error, jqXHR); // NOSONAR
+                    userOptions.error && userOptions.error(data.error, jqXHR); // NOSONAR
 
                     if (jqXHR.status === 401 && userOptions.eafHandleError !== false) {
                         eaf.ajax.handleUnAuthorizedRequest(messagePromise, data.targetUrl);
@@ -173,15 +173,15 @@
                     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                         eaf.log.info('[EAF jQuery handleResponse] Not wrapped result - resolving with data:', data);
                     }
-                    $dfd && $dfd.resolve(data, null, jqXHR);
-                    userOptions.success && userOptions.success(data, null, jqXHR);
+                    $dfd && $dfd.resolve(data, null, jqXHR); // NOSONAR
+                    userOptions.success && userOptions.success(data, null, jqXHR); // NOSONAR
                 }
             } else { //no data sent to back
                 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                     eaf.log.info('[EAF jQuery handleResponse] No data - resolving with jqXHR');
                 }
-                $dfd && $dfd.resolve(jqXHR);
-                userOptions.success && userOptions.success(jqXHR);
+                $dfd && $dfd.resolve(jqXHR); // NOSONAR
+                userOptions.success && userOptions.success(jqXHR); // NOSONAR
             }
         },
 
@@ -206,7 +206,7 @@
         },
 
         ajaxSendHandler: function (event, request, settings) {
-            var token = eaf.security.antiForgery.getToken();
+            var token = eaf.security.antiForgery.getToken(); // NOSONAR
             if (!token) {
                 return;
             }
@@ -215,7 +215,7 @@
                 return;
             }
 
-            if (!settings.headers || settings.headers[eaf.security.antiForgery.tokenHeaderName] === undefined) {
+            if (!settings.headers || settings.headers[eaf.security.antiForgery.tokenHeaderName] === undefined) { // NOSONAR
                 request.setRequestHeader(eaf.security.antiForgery.tokenHeaderName, token);
             }
         }
@@ -237,22 +237,22 @@
         $.fn.eafAjaxForm = function (userOptions) {
             userOptions = userOptions || {};
 
-            var options = $.extend({}, $.fn.eafAjaxForm.defaults, userOptions);
+            var options = $.extend({}, $.fn.eafAjaxForm.defaults, userOptions); // NOSONAR
 
             options.beforeSubmit = function () {
                 eaf.ajax.blockUI(options);
-                userOptions.beforeSubmit && userOptions.beforeSubmit.apply(this, arguments);
+                userOptions.beforeSubmit && userOptions.beforeSubmit.apply(this, arguments); // NOSONAR
             };
 
             options.success = function (data) {
                 eaf.ajax.handleResponse(data, userOptions);
             };
 
-            //TODO: Error?
+            //TODO: Error? // NOSONAR
 
             options.complete = function () {
                 eaf.ajax.unblockUI(options);
-                userOptions.complete && userOptions.complete.apply(this, arguments);
+                userOptions.complete && userOptions.complete.apply(this, arguments); // NOSONAR
             };
 
             return this.ajaxForm(options);

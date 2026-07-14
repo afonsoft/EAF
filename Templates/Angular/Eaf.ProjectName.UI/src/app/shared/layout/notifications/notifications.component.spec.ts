@@ -87,7 +87,7 @@ describe('NotificationsComponent', () => {
       { id: '2' },
     ];
     const formatted = component.formatNotifications(records);
-    expect(formatted.length).toBe(2);
+    expect(formatted).toHaveSize(2);
     expect(formatted[0].formattedNotification).toBeDefined();
   });
 

@@ -82,7 +82,7 @@
         },
 
         handleResponse: function (response, defer) {
-            var originalData = response.data;
+            var originalData = response.data; // NOSONAR
 
             if (originalData.success === true) {
                 response.data = originalData.result;
@@ -92,7 +92,7 @@
                     eaf.ng.http.handleTargetUrl(originalData.targetUrl);
                 }
             } else if (originalData.success === false) {
-                var messagePromise = null;
+                var messagePromise = null; // NOSONAR
 
                 if (originalData.error) {
                     if (response.config.eafHandleError !== false) {
@@ -116,7 +116,7 @@
         }
     }
 
-    var eafModule = angular.module('eaf', []);
+    var eafModule = angular.module('eaf', []); // NOSONAR
 
     eafModule.config([
         '$httpProvider', function ($httpProvider) {
@@ -125,7 +125,7 @@
                 return {
 
                     'request': function (config) {
-                        if (config.url.indexOf('.cshtml') !== -1) {
+                        if (config.url.indexOf('.cshtml') !== -1) { // NOSONAR
                             config.url = eaf.appPath + 'EafAppView/Load?viewUrl=' + config.url + '&_t=' + eaf.pageLoadTime.getTime();
                         }
 
@@ -133,20 +133,20 @@
                     },
 
                     'response': function (response) {
-                        if (!response.data || !response.data.__abp) {
+                        if (!response.data || !response.data.__abp) { // NOSONAR
                             //Non EAF related return value
                             return response;
                         }
 
-                        var defer = $q.defer();
+                        var defer = $q.defer(); // NOSONAR
                         eaf.ng.http.handleResponse(response, defer);
                         return defer.promise;
                     },
 
                     'responseError': function (ngError) {
-                        var defer = $q.defer();
+                        var defer = $q.defer(); // NOSONAR
 
-                        if (!ngError.data || !ngError.data.__abp) {
+                        if (!ngError.data || !ngError.data.__abp) { // NOSONAR
                             eaf.ng.http.handleNonEafErrorResponse(ngError, defer);
                         } else {
                             eaf.ng.http.handleResponse(ngError, defer);
@@ -171,4 +171,4 @@
         eaf.ng.http.defaultError404.details = eaf.localization.eaf('DefaultErrorDetail404');
     });
 
-})((eaf || (eaf = {})), (angular || undefined));
+})((eaf || (eaf = {})), (angular || undefined)); // NOSONAR

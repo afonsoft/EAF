@@ -669,6 +669,8 @@ jobs:
           merge-multiple: true
 
       - name: "📝 Combine Summaries with Commit Info"
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           {
             echo "## 🚀 Pull Request Automática"
@@ -676,7 +678,7 @@ jobs:
             echo "### 📋 Commit Information"
             echo "- **Branch:** \`${{ github.ref_name }}\`"
             echo "- **Commit:** \`${{ github.sha }}\`"
-            echo "- **Message:** ${{ github.event.head_commit.message }}"
+            echo "- **Message:** $COMMIT_MESSAGE"
             echo "- **Author:** \`${{ github.actor }}\`"
             echo "- **Date:** ${{ github.event.head_commit.timestamp }}"
             echo ""

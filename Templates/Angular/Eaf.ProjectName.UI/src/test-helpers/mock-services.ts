@@ -3,8 +3,7 @@
  * These mocks replicate the pattern used in app.component.spec.ts.
  */
 
-import { Injector, Pipe, PipeTransform } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { Pipe, PipeTransform } from '@angular/core';
 
 // ===== EAF Framework Mocks =====
 
@@ -33,9 +32,15 @@ export class MockMessageService {
   info(message: string): Promise<any> {
     return Promise.resolve();
   }
-  success(message: string): void {}
-  warn(message: string): void {}
-  error(message: string): void {}
+  success(message: string): void {
+    // no-op
+  }
+  warn(message: string): void {
+    // no-op
+  }
+  error(message: string): void {
+    // no-op
+  }
   confirm(message: string, title?: string, callback?: (result: boolean) => void): void {
     if (callback) {
       callback(true);
@@ -44,10 +49,18 @@ export class MockMessageService {
 }
 
 export class MockNotifyService {
-  info(message: string): void {}
-  success(message: string): void {}
-  warn(message: string): void {}
-  error(message: string): void {}
+  info(message: string): void {
+    // no-op
+  }
+  success(message: string): void {
+    // no-op
+  }
+  warn(message: string): void {
+    // no-op
+  }
+  error(message: string): void {
+    // no-op
+  }
 }
 
 export class MockSettingService {
@@ -95,14 +108,18 @@ export class MockAppSessionService {
       footer: {},
     },
   };
-  init(): void {}
+  init(): void {
+    // no-op
+  }
   getShownLoginName(): string {
     return 'testuser';
   }
 }
 
 export class MockAppUiCustomizationService {
-  init(): void {}
+  init(): void {
+    // no-op
+  }
   getUiCustomizationSettings(): any {
     return {};
   }
@@ -116,19 +133,31 @@ export class MockAppUrlService {
 }
 
 export class MockChatSignalrService {
-  configureConnection(connection: any): void {}
+  configureConnection(connection: any): void {
+    // no-op
+  }
   isChatConnected = false;
   sendMessage(data: any, callback: () => void): void {
     if (callback) callback();
   }
-  init(): void {}
+  init(): void {
+    // no-op
+  }
 }
 
 export class MockUserNotificationHelper {
-  info(message: string): void {}
-  success(message: string): void {}
-  warn(message: string): void {}
-  error(message: string): void {}
+  info(message: string): void {
+    // no-op
+  }
+  success(message: string): void {
+    // no-op
+  }
+  warn(message: string): void {
+    // no-op
+  }
+  error(message: string): void {
+    // no-op
+  }
   format(record: any, truncate: boolean): any {
     return { text: '', state: 'READ' };
   }
@@ -138,7 +167,9 @@ export class MockUserNotificationHelper {
   setAllAsRead(callback: () => void): void {
     if (callback) callback();
   }
-  openSettingsModal(): void {}
+  openSettingsModal(): void {
+    // no-op
+  }
 }
 
 export class MockAppAuthenticationService {
@@ -148,7 +179,9 @@ export class MockAppAuthenticationService {
 }
 
 export class MockAppAuthService {
-  logout(): void {}
+  logout(): void {
+    // no-op
+  }
 }
 
 export class MockCookieService {
@@ -158,8 +191,12 @@ export class MockCookieService {
 }
 
 export class MockGoogleTagManagerService {
-  addGtmToDom(): void {}
-  pushTag(item: any): void {}
+  addGtmToDom(): void {
+    // no-op
+  }
+  pushTag(item: any): void {
+    // no-op
+  }
 }
 
 export class MockAppLocalizationService {
@@ -370,19 +407,27 @@ export class MockAirplanesServiceProxy {
 // ===== Utility Mocks =====
 
 export class MockFileDownloadService {
-  downloadTempFile(file: any): void {}
+  downloadTempFile(file: any): void {
+    // no-op
+  }
 }
 
 export class MockLocalStorageService {
   getItem(key: string, callback: (err: any, value: any) => void): void {
     callback(null, null);
   }
-  setItem(key: string, value: any): void {}
+  setItem(key: string, value: any): void {
+    // no-op
+  }
 }
 
 export class MockImpersonationService {
-  impersonate(userId: number, tenantId?: number): void {}
-  backToImpersonator(): void {}
+  impersonate(userId: number, tenantId?: number): void {
+    // no-op
+  }
+  backToImpersonator(): void {
+    // no-op
+  }
 }
 
 export class MockDateTimeService {
@@ -429,8 +474,7 @@ export class MockLocalizePipe implements PipeTransform {
 // ===== Global `eaf` Mock Setup =====
 
 export function setupEafGlobals(): void {
-  {
-    (window as any).eaf = {
+  (window as any).eaf = {
       session: {
         tenantId: null,
         userId: 1,
@@ -500,7 +544,6 @@ export function setupEafGlobals(): void {
         },
       },
     };
-  }
 }
 
 // Initialize eaf globals when this module is imported

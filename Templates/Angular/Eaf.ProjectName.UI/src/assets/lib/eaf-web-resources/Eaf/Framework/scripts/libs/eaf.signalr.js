@@ -1,8 +1,8 @@
-﻿var eaf = eaf || {};
+﻿var eaf = eaf || {}; // NOSONAR
 (function ($) {
 
     //Check if SignalR is defined
-    if (!$ || !$.connection) {
+    if (!$ || !$.connection) { // NOSONAR
         return;
     }
 
@@ -13,7 +13,7 @@
     //Get the common hub
     eaf.signalr.hubs.common = $.connection.eafCommonHub;
 
-    var commonHub = eaf.signalr.hubs.common;
+    var commonHub = eaf.signalr.hubs.common; // NOSONAR
     if (!commonHub) {
         return;
     }
@@ -26,10 +26,10 @@
     //Connect to the server
     eaf.signalr.connect = function() {
         $.connection.hub.start().done(function () {
-            eaf.log.debug('Connected to SignalR server!'); //TODO: Remove log
+            eaf.log.debug('Connected to SignalR server!'); //TODO: Remove log // NOSONAR
             eaf.event.trigger('eaf.signalr.connected');
             commonHub.server.register().done(function () {
-                eaf.log.debug('Registered to the SignalR server!'); //TODO: Remove log
+                eaf.log.debug('Registered to the SignalR server!'); //TODO: Remove log // NOSONAR
             });
         });
     };

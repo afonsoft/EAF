@@ -155,8 +155,9 @@ jobs:
           git config --global user.email "actions@github.com"
 
       - name: "🗑️ Delete release branch"
+        env:
+          RELEASE_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
-          RELEASE_BRANCH="${{ github.event.pull_request.head.ref }}"
           echo "Deleting release branch: $RELEASE_BRANCH"
-          git push origin --delete $RELEASE_BRANCH
+          git push origin --delete "$RELEASE_BRANCH"
           echo "Branch $RELEASE_BRANCH deleted successfully"

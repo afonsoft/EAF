@@ -68,6 +68,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAIN_SHA: ${{ github.sha }}
           MAIN_MESSAGE: ${{ github.event.head_commit.message }}
+          MAIN_AUTHOR: ${{ github.event.head_commit.author.name }}
+          MAIN_AUTHOR_USERNAME: ${{ github.event.head_commit.author.username }}
         run: |
           IFS=' ' read -ra BRANCH_ARRAY <<< "${{ steps.branches.outputs.branches }}"
 
@@ -94,7 +96,7 @@ jobs:
                 
                 **Commit:** [$MAIN_SHA](${{ github.server_url }}/${{ github.repository }}/commit/$MAIN_SHA)
                 **Message:** $MAIN_MESSAGE
-                **Author:** ${{ github.event.head_commit.author.name }}
+                **Author:** $MAIN_AUTHOR
                 
                 ---
                 
@@ -128,7 +130,7 @@ jobs:
                     --body "$PR_BODY" \
                     --base $branch \
                     --head $TEMP_BRANCH \
-                    --assignee ${{ github.event.head_commit.author.username }} || {
+                    --assignee "$MAIN_AUTHOR_USERNAME" || {
                     echo "PR creation failed, might already exist"
                     # Tenta criar PR na direção oposta se o anterior falhar
                     gh pr create \
@@ -136,7 +138,7 @@ jobs:
                       --body "$PR_BODY" \
                       --base main \
                       --head $branch \
-                      --assignee ${{ github.event.head_commit.author.username }} || echo "PR already exists or creation failed"
+                      --assignee "$MAIN_AUTHOR_USERNAME" || echo "PR already exists or creation failed"
                   }
                   
                   # Deleta a branch temporária se o PR foi criado com sucesso
@@ -172,7 +174,7 @@ jobs:
                   --body "$PR_BODY" \
                   --base $branch \
                   --head $TEMP_BRANCH \
-                  --assignee ${{ github.event.head_commit.author.username }} || echo "Conflict PR already exists"
+                  --assignee "$MAIN_AUTHOR_USERNAME" || echo "Conflict PR already exists"
                 
                 # Não deleta a branch temporária de conflitos para que o usuário possa resolver
               fi
@@ -184,12 +186,15 @@ jobs:
           done
 
       - name: 📧 Notification Summary
+        env:
+          MAIN_MESSAGE: ${{ github.event.head_commit.message }}
+          MAIN_AUTHOR: ${{ github.event.head_commit.author.name }}
         run: |
           echo "## 🔄 Auto-PR Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Triggered by:** ${{ github.event.head_commit.message }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** $MAIN_MESSAGE" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
-          echo "**Author:** ${{ github.event.head_commit.author.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Author:** $MAIN_AUTHOR" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Target Branches:** ${{ steps.branches.outputs.branches }}" >> $GITHUB_STEP_SUMMARY
           echo "**Status:** ✅ PR creation process completed" >> $GITHUB_STEP_SUMMARY
