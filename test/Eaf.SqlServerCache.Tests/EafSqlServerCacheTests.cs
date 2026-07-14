@@ -4,6 +4,7 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -624,6 +625,48 @@ namespace Eaf.SqlServerCache.Tests
             // Assert
             result.ShouldBeTrue();
             retrievedValue.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void TryGetValue_WhenDistributedCacheThrows_ShouldReturnFalse()
+        {
+            // Arrange
+            var key = "test-key-throws";
+            _distributedCache.GetAsync(Arg.Is<string>(k => k.Contains(key)), Arg.Any<CancellationToken>())
+                .Returns(Task.FromException<byte[]?>(new Exception("cache error")));
+
+            // Act
+            var result = _cache.TryGetValue(key, out var value);
+
+            // Assert
+            result.ShouldBeFalse();
+            value.ShouldBeNull();
+        }
+
+        [Fact]
+        public void TryGetValue_WhenDistributedCacheReturnsEmptyBytes_ShouldReturnFalse()
+        {
+            // Arrange
+            var key = "test-key-empty";
+            _distributedCache.GetAsync(Arg.Is<string>(k => k.Contains(key)), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult<byte[]?>(Array.Empty<byte>()));
+
+            // Act
+            var result = _cache.TryGetValue(key, out var value);
+
+            // Assert
+            result.ShouldBeFalse();
+            value.ShouldBeNull();
+        }
+
+        [Fact]
+        public void ByteArrayToObject_ComNuloOuVazio_DeveRetornarDefault()
+        {
+            var method = typeof(EafSqlServerCache).GetMethod("ByteArrayToObject", BindingFlags.NonPublic | BindingFlags.Static);
+            method.ShouldNotBeNull();
+
+            method.Invoke(null, new object?[] { null }).ShouldBeNull();
+            method.Invoke(null, new object?[] { Array.Empty<byte>() }).ShouldBeNull();
         }
     }
 }

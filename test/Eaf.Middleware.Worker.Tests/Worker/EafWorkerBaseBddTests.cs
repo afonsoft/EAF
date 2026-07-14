@@ -252,6 +252,38 @@ namespace Eaf.Middleware.Worker.Tests.Worker
         }
 
         [Fact]
+        public void Dado_Worker_Quando_LComArgsVazio_Entao_DeveRetornarChaveSemFormatar()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            source.GetStringOrNull("Hello", Arg.Any<System.Globalization.CultureInfo>()).Returns("Hello {0}");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("Hello", Array.Empty<object>());
+
+            result.ShouldBe("Hello {0}");
+        }
+
+        [Fact]
+        public void Dado_Worker_Quando_LComCulturaEArgsVazio_Entao_DeveRetornarChaveSemFormatar()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            source.GetStringOrNull("Hello", System.Globalization.CultureInfo.GetCultureInfo("en-US")).Returns("Hello {0}");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("Hello", System.Globalization.CultureInfo.GetCultureInfo("en-US"), Array.Empty<object>());
+
+            result.ShouldBe("Hello {0}");
+        }
+
+        [Fact]
         public void Dado_LocalizationManagerNuloEChaveNaoVazia_Quando_L_Entao_DeveRetornarChave()
         {
             var worker = new TestWorker();

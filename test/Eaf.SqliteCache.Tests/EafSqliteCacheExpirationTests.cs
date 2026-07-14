@@ -240,6 +240,39 @@ namespace Eaf.SqliteCache.Tests
 
         #endregion
 
+        #region Default Absolute Expiration
+
+        [Fact]
+        public void Dado_DefaultAbsoluteExpireTime_Quando_SetEGet_Entao_DeveRetornarItem()
+        {
+            using var cache = CreateInMemoryCache();
+            cache.DefaultAbsoluteExpireTime = DateTimeOffset.UtcNow.AddHours(1);
+            var key = "default-absolute-key";
+
+            cache.Set(key, "valor-default-absolute");
+            var found = cache.TryGetValue(key, out var result);
+
+            found.ShouldBeTrue();
+            result.ShouldBe("valor-default-absolute");
+        }
+
+        [Fact]
+        public void Dado_DefaultAbsoluteExpireTimeComSliding_Quando_SetEGet_Entao_DeveRetornarItem()
+        {
+            using var cache = CreateInMemoryCache();
+            cache.DefaultAbsoluteExpireTime = DateTimeOffset.UtcNow.AddHours(1);
+            var key = "default-absolute-sliding-key";
+            var sliding = TimeSpan.FromMinutes(5);
+
+            cache.Set(key, "valor", slidingExpireTime: sliding);
+            var found = cache.TryGetValue(key, out var result);
+
+            found.ShouldBeTrue();
+            result.ShouldBe("valor");
+        }
+
+        #endregion
+
         #region RemoveExpired
 
         [Fact]

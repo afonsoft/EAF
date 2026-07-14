@@ -1,9 +1,13 @@
 using Eaf.Castle.Logging.SerilogIntegration;
+using NSubstitute;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using Shouldly;
 using System;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace Eaf.Castle.Serilog.Tests
@@ -310,6 +314,52 @@ namespace Eaf.Castle.Serilog.Tests
             // Assert
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
+        }
+
+        [Fact]
+        public void Dado_LoggerDesabilitado_Quando_InvocarTodosOsMetodosDeLog_Entao_NaoDeveChamarLogger()
+        {
+            // Arrange — logger real com nível Off para simular todos os IsEnabled falsos
+            var levelSwitch = new LoggingLevelSwitch(LevelAlias.Off);
+            var disabledSerilogLogger = new LoggerConfiguration()
+                .MinimumLevel.ControlledBy(levelSwitch)
+                .CreateLogger();
+            var factory = new SerilogLoggerFactory(disabledSerilogLogger);
+            var logger = new SerilogLogger(disabledSerilogLogger, factory);
+
+            var methods = typeof(SerilogLogger)
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(m => m.ReturnType == typeof(void) &&
+                            (m.Name.StartsWith("Debug") || m.Name.StartsWith("Info") ||
+                             m.Name.StartsWith("Warn") || m.Name.StartsWith("Error") ||
+                             m.Name.StartsWith("Fatal") || m.Name.StartsWith("Trace")))
+                .ToList();
+
+            methods.ShouldNotBeEmpty();
+
+            foreach (var method in methods)
+            {
+                var args = method.GetParameters()
+                    .Select(p => GetDefaultValueForLogMethodParameter(p.ParameterType))
+                    .ToArray();
+
+                Should.NotThrow(() => method.Invoke(logger, args));
+            }
+        }
+
+        private static object GetDefaultValueForLogMethodParameter(Type type)
+        {
+            if (type == typeof(string))
+                return "test";
+            if (type == typeof(Exception))
+                return new Exception("test");
+            if (type == typeof(Func<string>))
+                return (Func<string>)(() => "test");
+            if (type == typeof(IFormatProvider))
+                return CultureInfo.InvariantCulture;
+            if (type == typeof(object[]))
+                return new object[] { "test" };
+            return null;
         }
     }
 }

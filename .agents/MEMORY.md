@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority57-coverage-audit`
+Last session branch: `feature/devin-20260713-priority58-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -18,6 +18,17 @@ Current coverage (after P54): Line 97.2%, Branch 85.1%, Method 99.5% (4467 tests
 Current coverage (after P55): Line 97.5%, Branch 85.6%, Method 99.6% (4492 tests, 4491 passing, 1 skipped). Build warnings: 129.
 Current coverage (after P56): Line 97.6%, Branch 87.2%, Method 99.6% (4516 tests, 4515 passing, 1 skipped). Build warnings: 154.
 Current coverage (after P57): Line 97.7%, Branch 87.5%, Method 99.6% (4533 tests, 4532 passing, 1 skipped). Build warnings: 154.
+Current coverage (after P58): Line 97.7%, Branch 89.1%, Method 99.7% (4555 tests, 4554 passing, 1 skipped). Build warnings: 159.
+
+## P58 gotchas
+- `SerilogLogger` disabled branches are best covered with a real Serilog logger configured with `LevelAlias.Off`; `NSubstitute.For<Serilog.ILogger>()` fails at runtime because `ILogger` contains default interface methods that Castle DynamicProxy cannot route.
+- `ChatMessageManager.Delete(sharedMessageId)` always calls `_chatMessageRepository.Delete(...)` (with an empty `ids` array when no messages match), so assert `Received(1)` rather than `DidNotReceive`.
+- `HostSettingsAppService.UpdateAllSettings` only reaches `UpdateLdapSettingsAsync` when `_ldapModuleConfig.IsEnabled` is `true`; `DeleteAllUsersByAuthSourceAsync` iterates `UserManager.Users`, which can be stubbed through the underlying `UserStore` substitute.
+- `EafWorkerBase.L` has two `params object[] args` overloads; passing `Array.Empty<object>()` covers the `args.Length > 0` false branch and returns the raw localized key.
+- `UserAppService.CreateUsersByActiveDirectory` keeps `Name`, `Surname`, `EmailAddress` when the Azure AD user already has them and strips the domain only when `UserName` contains `@`.
+- `EafSqliteCache.DefaultAbsoluteExpireTime` can be set per instance and combined with `slidingExpireTime`; `ObjectToByteArray(null)` returns an empty byte array and `ByteArrayToObject(null/empty)` returns `default`.
+- `EafSqlServerCache.TryGetValue` catch branch is reached when `IDistributedCache.GetAsync` throws; `ByteArrayToObject(null)` and `ByteArrayToObject(Array.Empty<byte>())` cover the null/empty branches.
+- `PermissionAppService`, `RoleAppService`, `MiddlewareAppServiceBase`, `TenantAppService`, `LdapAuthenticationSource`, `LdapSettings`, `ChatHub`, `TokenAuthController`, `MiddlewareWebCoreModule`, `EafHangfireApplicationBuilderExtensions`, `EafHangfireAuthorizationFilter`, `ServiceBusQueueAppender` and `OpenIdConnectAuthProviderApi` still contain Linux/infrastructure-limited or sealed-builder branches; document as inalcançáveis for P59.
 
 ## P57 gotchas
 - `NSubstitute` returns `string.Empty` for unconfigured `string` members, which makes `MiddlewareAppServiceBase.L` and `EafWorkerBase.L` return empty strings when `GetStringOrNull` is not explicitly set. Use `NullLocalizationManager.Instance` or configure `GetStringOrNull` to return `null` so the fallback key is used.
