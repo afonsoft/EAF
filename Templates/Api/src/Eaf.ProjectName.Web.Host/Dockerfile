@@ -24,10 +24,23 @@ COPY ["src/Eaf.ProjectName.Core/Eaf.ProjectName.Core.csproj", "src/Eaf.ProjectNa
 RUN dotnet restore "src/Eaf.ProjectName.Web.Host/Eaf.ProjectName.Web.Host.csproj"
 COPY . .
 WORKDIR "/src/src/Eaf.ProjectName.Web.Host"
-RUN dotnet build "Eaf.ProjectName.Web.Host.csproj" -c Release -o /app/build --no-restore -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=true -p:PublishReadyToRunComposite=true
+RUN dotnet build "Eaf.ProjectName.Web.Host.csproj" \
+    -c Release \
+    -o /app/build \
+    --no-restore \
+    -p:PublishTrimmed=false \
+    -p:PublishSingleFile=false \
+    -p:PublishReadyToRun=true \
+    -p:PublishReadyToRunComposite=true
 
 FROM build AS publish
-RUN dotnet publish "Eaf.ProjectName.Web.Host.csproj" -c Release -o /app/publish /p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=true -p:PublishReadyToRunComposite=true
+RUN dotnet publish "Eaf.ProjectName.Web.Host.csproj" \
+    -c Release \
+    -o /app/publish \
+    -p:PublishTrimmed=false \
+    -p:PublishSingleFile=false \
+    -p:PublishReadyToRun=true \
+    -p:PublishReadyToRunComposite=true
 
 FROM base AS final
 WORKDIR /app
@@ -36,9 +49,14 @@ COPY --from=publish /app/publish .
 ENV TZ="America/Sao_Paulo"
 
 RUN apt-get update && \
-    apt-get install -yq tzdata libc6-dev libgdiplus zlib1g-dev && \
+    apt-get install -yq --no-install-recommends \
+        libc6-dev \
+        libgdiplus \
+        tzdata \
+        zlib1g-dev && \
     ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata
+    dpkg-reconfigure -f noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 USER app
 

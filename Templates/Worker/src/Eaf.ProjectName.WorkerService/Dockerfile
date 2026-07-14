@@ -21,9 +21,14 @@ COPY --from=publish /app/publish .
 ENV TZ="America/Sao_Paulo"
 
 RUN apt-get update && \
-    apt-get install -yq tzdata libc6-dev libgdiplus zlib1g-dev && \
+    apt-get install -yq --no-install-recommends \
+        libc6-dev \
+        libgdiplus \
+        tzdata \
+        zlib1g-dev && \
     ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata
+    dpkg-reconfigure -f noninteractive tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
 USER app
 
