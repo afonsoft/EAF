@@ -180,7 +180,7 @@ export class FeatureTreeComponent extends AppComponentBase {
   private validateNumericValue(validator: any, value: string): boolean {
     const numValue = Number.parseInt(value);
 
-    if (isNaN(numValue)) {
+    if (Number.isNaN(numValue)) {
       return false;
     }
 

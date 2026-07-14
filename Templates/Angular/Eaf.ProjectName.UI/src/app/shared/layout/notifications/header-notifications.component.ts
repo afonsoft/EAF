@@ -68,32 +68,32 @@ export class HeaderNotificationsComponent extends AppComponentBase implements On
       });
     });
 
-    function onNotificationsRefresh() {
-      this.loadNotifications();
-    }
-
     eaf.event.on('app.notifications.refresh', () => {
       this._zone.run(() => {
-        onNotificationsRefresh();
+        this.onNotificationsRefresh();
       });
     });
-
-    function onNotificationsRead(userNotificationId) {
-      for (const notification of this.notifications) {
-        if (notification.userNotificationId === userNotificationId) {
-          notification.state = 'READ';
-          notification.isUnread = false;
-        }
-      }
-
-      this.unreadNotificationCount -= 1;
-    }
 
     eaf.event.on('app.notifications.read', userNotificationId => {
       this._zone.run(() => {
-        onNotificationsRead(userNotificationId);
+        this.onNotificationsRead(userNotificationId);
       });
     });
+  }
+
+  private onNotificationsRefresh(): void {
+    this.loadNotifications();
+  }
+
+  private onNotificationsRead(userNotificationId): void {
+    for (const notification of this.notifications) {
+      if (notification.userNotificationId === userNotificationId) {
+        notification.state = 'READ';
+        notification.isUnread = false;
+      }
+    }
+
+    this.unreadNotificationCount -= 1;
   }
 
   setAllNotificationsAsRead(): void {

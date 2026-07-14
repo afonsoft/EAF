@@ -49,7 +49,7 @@ export class AppPreBootstrap {
       const currentOrigin = window.location.origin;
       let appBaseUrl = result.appBaseUrl;
 
-      if (appBaseUrl && appBaseUrl.includes('localhost') && !currentOrigin.includes('localhost')) {
+      if (appBaseUrl?.includes('localhost') && !currentOrigin.includes('localhost')) {
         appBaseUrl = currentOrigin;
       }
 
