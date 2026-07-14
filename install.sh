@@ -6,43 +6,50 @@ installation_failed=()
 
 # Função para verificar se um comando existe
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+    local cmd="$1"
+    command -v "$cmd" >/dev/null 2>&1
+    return 0
 }
 
 # Função para verificar se um pacote npm global está instalado
 npm_global_package_exists() {
-    npm list -g --depth=0 "$1" >/dev/null 2>&1
+    local package="$1"
+    npm list -g --depth=0 "$package" >/dev/null 2>&1
+    return 0
 }
 
 # Função para verificar se uma ferramenta dotnet global está instalada
 dotnet_tool_exists() {
-    dotnet tool list -g | grep -q "$1"
+    local tool="$1"
+    dotnet tool list -g | grep -q "$tool"
+    return 0
 }
 
 # --- Funções de Instalação ---
 
 install_nvm() {
     echo "ℹ️ Verificando NVM..."
-    if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
         echo "✅ NVM já está instalado."
         export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+        [[ -s "$NVM_DIR/bash_completion" ]] && \. "$NVM_DIR/bash_completion"
         installed_successfully+=("NVM")
     else
         echo "⏳ Instalando NVM..."
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-        if [ $? -eq 0 ]; then
+        if [[ $? -eq 0 ]]; then
             echo "✅ NVM instalado com sucesso."
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"
+            [[ -s "$NVM_DIR/bash_completion" ]] && \. "$NVM_DIR/bash_completion"
             installed_successfully+=("NVM")
         else
             echo "❌ Erro ao instalar NVM."
             installation_failed+=("NVM")
         fi
     fi
+    return 0
 }
 
 install_node() {
@@ -55,7 +62,7 @@ install_node() {
     else
         echo "⏳ Instalando Node.js versão $version via NVM..."
         nvm install "$version"
-        if [ $? -eq 0 ]; then
+        if [[ $? -eq 0 ]]; then
             echo "✅ Node.js versão $version instalado com sucesso."
             nvm use "$version"
             installed_successfully+=("Node.js $version")
@@ -64,6 +71,7 @@ install_node() {
             installation_failed+=("Node.js $version")
         fi
     fi
+    return 0
 }
 
 install_angular_cli() {
@@ -76,7 +84,7 @@ install_angular_cli() {
     else
         echo "⏳ Instalando Angular CLI versão $version..."
         npm install -g "$full_package_name"
-        if [ $? -eq 0 ]; then
+        if [[ $? -eq 0 ]]; then
             echo "✅ Angular CLI $version instalado com sucesso."
             installed_successfully+=("Angular CLI $version")
         else
@@ -84,6 +92,7 @@ install_angular_cli() {
             installation_failed+=("Angular CLI $version")
         fi
     fi
+    return 0
 }
 
 install_dotnet_sdk() {
@@ -102,7 +111,7 @@ install_dotnet_sdk() {
             apt-get update
         fi
         apt-get install -y "dotnet-sdk-${version}"
-        if [ $? -eq 0 ]; then
+        if [[ $? -eq 0 ]]; then
             echo "✅ .NET SDK $version instalado com sucesso."
             installed_successfully+=(".NET SDK $version")
         else
@@ -110,6 +119,7 @@ install_dotnet_sdk() {
             installation_failed+=(".NET SDK $version")
         fi
     fi
+    return 0
 }
 
 install_reportgenerator() {
@@ -121,7 +131,7 @@ install_reportgenerator() {
     else
         echo "⏳ Instalando ReportGenerator..."
         dotnet tool install --global "$tool_name"
-        if [ $? -eq 0 ]; then
+        if [[ $? -eq 0 ]]; then
             echo "✅ ReportGenerator instalado com sucesso."
             if [[ ":$PATH:" != *":$HOME/.dotnet/tools:"* ]]; then
                 echo "🔧 Adicionando diretório de ferramentas dotnet ao PATH..."
@@ -134,6 +144,7 @@ install_reportgenerator() {
             installation_failed+=("ReportGenerator")
         fi
     fi
+    return 0
 }
 
 # --- Execução ---
@@ -169,14 +180,14 @@ fi
 echo ""
 echo "--- Resumo da Instalação ---"
 
-if [ ${#installed_successfully[@]} -gt 0 ]; then
+if [[ ${#installed_successfully[@]} -gt 0 ]]; then
     echo "✅ Instalados com sucesso:"
     for item in "${installed_successfully[@]}"; do
         echo "  - $item"
     done
 fi
 
-if [ ${#installation_failed[@]} -gt 0 ]; then
+if [[ ${#installation_failed[@]} -gt 0 ]]; then
     echo "❌ Falha na instalação:"
     for item in "${installation_failed[@]}"; do
         echo "  - $item"
