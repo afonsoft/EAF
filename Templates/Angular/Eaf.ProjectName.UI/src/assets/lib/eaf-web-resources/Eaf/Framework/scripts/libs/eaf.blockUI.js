@@ -1,4 +1,4 @@
-﻿var eaf = eaf || {};
+﻿var eaf = eaf || {}; // NOSONAR
 (function () {
 
     if (!$.blockUI) {

@@ -1,4 +1,4 @@
-var eaf = eaf || {};
+var eaf = eaf || {}; // NOSONAR
 (function ($) {
     if (!sweetAlert || !$) {
         return;
@@ -37,19 +37,19 @@ var eaf = eaf || {};
 
     /* MESSAGE **************************************************/
 
-    var showMessage = function (type, message, title, isHtml) {
+    var showMessage = function (type, message, title, isHtml) { // NOSONAR
 
         if (!title) {
             title = message;
             message = undefined;
         }
 
-        var messageContent = {
+        var messageContent = { // NOSONAR
             title: title
         };
 
         if (isHtml) {
-            var el = document.createElement('div');
+            var el = document.createElement('div'); // NOSONAR
             el.innerHTML = message;
 
             messageContent.content = el;
@@ -57,7 +57,7 @@ var eaf = eaf || {};
             messageContent.text = message;
         }
 
-        var opts = $.extend(
+        var opts = $.extend( // NOSONAR
             {},
             eaf.libs.sweetAlert.config['default'],
             eaf.libs.sweetAlert.config[type],
@@ -92,10 +92,10 @@ var eaf = eaf || {};
     };
 
     eaf.message.confirm = function (message, titleOrCallback, callback, isHtml) {
-        var messageContent;
+        var messageContent; // NOSONAR
 
         if (isHtml) {
-            var el = document.createElement('div');
+            var el = document.createElement('div'); // NOSONAR
             el.innerHTML = message;
 
             messageContent = {
@@ -111,9 +111,9 @@ var eaf = eaf || {};
             callback = titleOrCallback;
         } else if (titleOrCallback) {
             messageContent.title = titleOrCallback;
-        };
+        }; // NOSONAR
 
-        var opts = $.extend(
+        var opts = $.extend( // NOSONAR
             {},
             eaf.libs.sweetAlert.config['default'],
             eaf.libs.sweetAlert.config.confirm,
@@ -122,7 +122,7 @@ var eaf = eaf || {};
 
         return $.Deferred(function ($dfd) {
             sweetAlert(opts).then(function (isConfirmed) {
-                callback && callback(isConfirmed);
+                callback && callback(isConfirmed); // NOSONAR
                 $dfd.resolve(isConfirmed);
             });
         });

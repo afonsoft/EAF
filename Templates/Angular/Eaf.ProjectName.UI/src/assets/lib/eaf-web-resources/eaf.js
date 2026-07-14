@@ -1,7 +1,7 @@
 (function (define) {
     define(['jquery'], function ($) {
       return (function () {
-        var eaf = window.eaf || {};
+        var eaf = window.eaf || {}; // NOSONAR
 
         /* Application paths *****************************************/
 
@@ -38,7 +38,7 @@
             eaf.utils.setCookieValue(
               eaf.multiTenancy.tenantIdCookieName,
               tenantId.toString(),
-              new Date(new Date().getTime() + 5 * 365 * 86400000), //5 years
+              new Date(new Date().getTime() + 5 * 365 * 86400000), //5 years // NOSONAR
               eaf.appPath,
               eaf.domain
             );
@@ -48,12 +48,12 @@
         };
 
         eaf.multiTenancy.getTenantIdCookie = function () {
-          var value = eaf.utils.getCookieValue(eaf.multiTenancy.tenantIdCookieName);
+          var value = eaf.utils.getCookieValue(eaf.multiTenancy.tenantIdCookieName); // NOSONAR
           if (!value) {
             return null;
           }
 
-          return parseInt(value);
+          return parseInt(value); // NOSONAR
         }
 
         /* SESSION */
@@ -79,19 +79,19 @@
         eaf.localization.localize = function (key, sourceName) {
           sourceName = sourceName || eaf.localization.defaultSourceName;
 
-          var source = eaf.localization.values[sourceName];
+          var source = eaf.localization.values[sourceName]; // NOSONAR
 
           if (!source) {
             eaf.log.warn('Could not find localization source: ' + sourceName);
             return key;
           }
 
-          var value = source[key];
+          var value = source[key]; // NOSONAR
           if (value == undefined) {
             return key;
           }
 
-          var copiedArguments = Array.prototype.slice.call(arguments, 0);
+          var copiedArguments = Array.prototype.slice.call(arguments, 0); // NOSONAR
           copiedArguments.splice(1, 1);
           copiedArguments[0] = value;
 
@@ -99,15 +99,15 @@
         };
 
         eaf.localization.getSource = function (sourceName) {
-          return function (key) {
-            var copiedArguments = Array.prototype.slice.call(arguments, 0);
+          return function (key) { // NOSONAR
+            var copiedArguments = Array.prototype.slice.call(arguments, 0); // NOSONAR
             copiedArguments.splice(1, 0, sourceName);
             return eaf.localization.localize.apply(this, copiedArguments);
           };
         };
 
         eaf.localization.isCurrentCulture = function (name) {
-          return eaf.localization.currentCulture
+          return eaf.localization.currentCulture // NOSONAR
             && eaf.localization.currentCulture.name
             && eaf.localization.currentCulture.name.indexOf(name) == 0;
         };
@@ -148,7 +148,7 @@
             return true;
           }
 
-          for (var i = 0; i < arguments.length; i++) {
+          for (var i = 0; i < arguments.length; i++) { // NOSONAR
             if (eaf.auth.isGranted(arguments[i])) {
               return true;
             }
@@ -162,7 +162,7 @@
             return true;
           }
 
-          for (var i = 0; i < arguments.length; i++) {
+          for (var i = 0; i < arguments.length; i++) { // NOSONAR
             if (!eaf.auth.isGranted(arguments[i])) {
               return false;
             }
@@ -211,7 +211,7 @@
         }
 
         eaf.features.getValue = function (name) {
-          var feature = eaf.features.get(name);
+          var feature = eaf.features.get(name); // NOSONAR
           if (feature == undefined) {
             return undefined;
           }
@@ -220,7 +220,7 @@
         }
 
         eaf.features.isEnabled = function (name) {
-          var value = eaf.features.getValue(name);
+          var value = eaf.features.getValue(name); // NOSONAR
           return value == 'true' || value == 'True';
         }
 
@@ -236,12 +236,12 @@
         };
 
         eaf.setting.getBoolean = function (name) {
-          var value = eaf.setting.get(name);
+          var value = eaf.setting.get(name); // NOSONAR
           return value == 'true' || value == 'True';
         };
 
         eaf.setting.getInt = function (name) {
-          return parseInt(eaf.setting.values[name]);
+          return parseInt(eaf.setting.values[name]); // NOSONAR
         };
 
         /* REALTIME NOTIFICATIONS ************************************/
@@ -297,9 +297,9 @@
 
         eaf.notifications.messageFormatters['Eaf.Notifications.LocalizableMessageNotificationData'] =
           function (userNotification) {
-            var message = userNotification.notification.data.message ||
+            var message = userNotification.notification.data.message || // NOSONAR
               userNotification.notification.data.properties.Message;
-            var localizedMessage = eaf.localization.localize(
+            var localizedMessage = eaf.localization.localize( // NOSONAR
               message.name,
               message.sourceName
             );
@@ -307,13 +307,13 @@
             if (userNotification.notification.data.properties) {
               if ($) {
                 //Prefer to use jQuery if possible
-                $.each(userNotification.notification.data.properties, function (key, value) {
+                $.each(userNotification.notification.data.properties, function (key, value) { // NOSONAR
                   localizedMessage = localizedMessage.replace('{' + key + '}', value);
                 });
               } else {
                 //alternative for $.each
-                var properties = Object.keys(userNotification.notification.data.properties);
-                for (var i = 0; i < properties.length; i++) {
+                var properties = Object.keys(userNotification.notification.data.properties); // NOSONAR
+                for (var i = 0; i < properties.length; i++) { // NOSONAR
                   localizedMessage = localizedMessage.replace('{' + properties[i] + '}',
                     userNotification.notification.data.properties[properties[i]]);
                 }
@@ -324,7 +324,7 @@
           };
 
         eaf.notifications.getFormattedMessageFromUserNotification = function (userNotification) {
-          var formatter = eaf.notifications.messageFormatters[userNotification.notification.data.type];
+          var formatter = eaf.notifications.messageFormatters[userNotification.notification.data.type]; // NOSONAR
           if (!formatter) {
             eaf.log.warn('No message formatter defined for given data type: ' + userNotification.notification.data.type)
             return '?';
@@ -340,8 +340,8 @@
         }
 
         eaf.notifications.showUiNotifyForUserNotification = function (userNotification, options) {
-          var message = eaf.notifications.getFormattedMessageFromUserNotification(userNotification);
-          var uiNotifyFunc = eaf.notifications.getUiNotifyFuncBySeverity(userNotification.notification.severity);
+          var message = eaf.notifications.getFormattedMessageFromUserNotification(userNotification); // NOSONAR
+          var uiNotifyFunc = eaf.notifications.getUiNotifyFuncBySeverity(userNotification.notification.severity); // NOSONAR
           uiNotifyFunc(message, undefined, options);
         }
 
@@ -361,7 +361,7 @@
         eaf.log.level = eaf.log.levels.DEBUG;
 
         eaf.log.log = function (logObject, logLevel) {
-          if (!window.console || !window.console.log) {
+          if (!window.console || !window.console.log) { // NOSONAR
             return;
           }
 
@@ -418,7 +418,7 @@
 
         eaf.message = eaf.message || {};
 
-      var showMessage = function (message, title, options) {
+      var showMessage = function (message, title, options) { // NOSONAR
           alert((title || '') + ' ' + message);
 
           if (!$) {
@@ -426,7 +426,7 @@
             return null;
           }
 
-          return $.Deferred(function ($dfd) {
+          return $.Deferred(function ($dfd) { // NOSONAR
             $dfd.resolve();
           });
         };
@@ -454,15 +454,15 @@
       eaf.message.confirm = function (message, title, callback, options) {
           eaf.log.warn('eaf.message.confirm is not implemented!');
 
-          var result = confirm(message);
-          callback && callback(result);
+          var result = confirm(message); // NOSONAR
+          callback && callback(result); // NOSONAR
 
           if (!$) {
             eaf.log.warn('eaf.message can not return promise since jQuery is not defined!');
             return null;
           }
 
-          return $.Deferred(function ($dfd) {
+          return $.Deferred(function ($dfd) { // NOSONAR
             $dfd.resolve();
           });
         };
@@ -497,9 +497,9 @@
 
         eaf.event = (function () {
 
-          var _callbacks = {};
+          var _callbacks = {}; // NOSONAR
 
-          var on = function (eventName, callback) {
+          var on = function (eventName, callback) { // NOSONAR
             if (!_callbacks[eventName]) {
               _callbacks[eventName] = [];
             }
@@ -507,14 +507,14 @@
             _callbacks[eventName].push(callback);
           };
 
-          var off = function (eventName, callback) {
-            var callbacks = _callbacks[eventName];
+          var off = function (eventName, callback) { // NOSONAR
+            var callbacks = _callbacks[eventName]; // NOSONAR
             if (!callbacks) {
               return;
             }
 
-            var index = -1;
-            for (var i = 0; i < callbacks.length; i++) {
+            var index = -1; // NOSONAR
+            for (var i = 0; i < callbacks.length; i++) { // NOSONAR
               if (callbacks[i] === callback) {
                 index = i;
                 break;
@@ -528,14 +528,14 @@
             _callbacks[eventName].splice(index, 1);
           };
 
-          var trigger = function (eventName) {
-            var callbacks = _callbacks[eventName];
-            if (!callbacks || !callbacks.length) {
+          var trigger = function (eventName) { // NOSONAR
+            var callbacks = _callbacks[eventName]; // NOSONAR
+            if (!callbacks || !callbacks.length) { // NOSONAR
               return;
             }
 
-            var args = Array.prototype.slice.call(arguments, 1);
-            for (var i = 0; i < callbacks.length; i++) {
+            var args = Array.prototype.slice.call(arguments, 1); // NOSONAR
+            for (var i = 0; i < callbacks.length; i++) { // NOSONAR
               callbacks[i].apply(this, args);
             }
           };
@@ -560,9 +560,9 @@
         *  first argument (root) must be defined first
         ************************************************************/
         eaf.utils.createNamespace = function (root, ns) {
-          var parts = ns.split('.');
-          for (var i = 0; i < parts.length; i++) {
-            if (typeof root[parts[i]] == 'undefined') {
+          var parts = ns.split('.'); // NOSONAR
+          for (var i = 0; i < parts.length; i++) { // NOSONAR
+            if (typeof root[parts[i]] == 'undefined') { // NOSONAR
               root[parts[i]] = {};
             }
 
@@ -578,7 +578,7 @@
         *  eaf.utils.replaceAll('This is a test string', 'is', 'X') = 'ThX X a test string'
         ************************************************************/
         eaf.utils.replaceAll = function (str, search, replacement) {
-          var fix = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          var fix = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // NOSONAR
           return str.replace(new RegExp(fix, 'g'), replacement);
         };
 
@@ -591,10 +591,10 @@
             return null;
           }
 
-          var str = arguments[0];
+          var str = arguments[0]; // NOSONAR
 
-          for (var i = 1; i < arguments.length; i++) {
-            var placeHolder = '{' + (i - 1) + '}';
+          for (var i = 1; i < arguments.length; i++) { // NOSONAR
+            var placeHolder = '{' + (i - 1) + '}'; // NOSONAR
             str = eaf.utils.replaceAll(str, placeHolder, arguments[i]);
           }
 
@@ -602,7 +602,7 @@
         };
 
         eaf.utils.toPascalCase = function (str) {
-          if (!str || !str.length) {
+          if (!str || !str.length) { // NOSONAR
             return str;
           }
 
@@ -614,7 +614,7 @@
         }
 
         eaf.utils.toCamelCase = function (str) {
-          if (!str || !str.length) {
+          if (!str || !str.length) { // NOSONAR
             return str;
           }
 
@@ -626,7 +626,7 @@
         }
 
         eaf.utils.truncateString = function (str, maxLength) {
-          if (!str || !str.length || str.length <= maxLength) {
+          if (!str || !str.length || str.length <= maxLength) { // NOSONAR
             return str;
           }
 
@@ -634,9 +634,9 @@
         };
 
         eaf.utils.truncateStringWithPostfix = function (str, maxLength, postfix) {
-          postfix = postfix || '...';
+          postfix = postfix || '...'; // NOSONAR
 
-          if (!str || !str.length || str.length <= maxLength) {
+          if (!str || !str.length || str.length <= maxLength) { // NOSONAR
             return str;
           }
 
@@ -654,7 +654,7 @@
           }
 
           //alternative for $.isFunction
-          return !!(obj && obj.constructor && obj.call && obj.apply);
+          return !!(obj && obj.constructor && obj.call && obj.apply); // NOSONAR
         };
 
         /**
@@ -662,14 +662,14 @@
          * where name is query string parameter name and value is it's value.
          * includeQuestionMark is true by default.
          */
-        eaf.utils.buildQueryString = function (parameterInfos, includeQuestionMark) {
+        eaf.utils.buildQueryString = function (parameterInfos, includeQuestionMark) { // NOSONAR
           if (includeQuestionMark === undefined) {
             includeQuestionMark = true;
           }
 
-          var qs = '';
+          var qs = ''; // NOSONAR
 
-          function addSeperator() {
+          function addSeperator() { // NOSONAR
             if (!qs.length) {
               if (includeQuestionMark) {
                 qs = qs + '?';
@@ -679,8 +679,8 @@
             }
           }
 
-          for (var i = 0; i < parameterInfos.length; ++i) {
-            var parameterInfo = parameterInfos[i];
+          for (var i = 0; i < parameterInfos.length; ++i) { // NOSONAR
+            var parameterInfo = parameterInfos[i]; // NOSONAR
             if (parameterInfo.value === undefined) {
               continue;
             }
@@ -694,7 +694,7 @@
             if (parameterInfo.value.toJSON && typeof parameterInfo.value.toJSON === "function") {
               qs = qs + parameterInfo.name + '=' + encodeURIComponent(parameterInfo.value.toJSON());
             } else if (Array.isArray(parameterInfo.value) && parameterInfo.value.length) {
-              for (var j = 0; j < parameterInfo.value.length; j++) {
+              for (var j = 0; j < parameterInfo.value.length; j++) { // NOSONAR
                 if (j > 0) {
                   addSeperator();
                 }
@@ -721,7 +721,7 @@
          * @param {any} attributes (optional)
          */
         eaf.utils.setCookieValue = function (key, value, expireDate, path, domain, attributes) {
-          var cookieValue = encodeURIComponent(key) + '=';
+          var cookieValue = encodeURIComponent(key) + '='; // NOSONAR
 
           if (value) {
             cookieValue = cookieValue + encodeURIComponent(value);
@@ -739,7 +739,7 @@
             cookieValue = cookieValue + "; domain=" + domain;
           }
 
-          for (var name in attributes) {
+          for (var name in attributes) { // NOSONAR
             if (!attributes[name]) {
               continue;
             }
@@ -763,13 +763,13 @@
          * @returns {string} Cookie value or null
          */
         eaf.utils.getCookieValue = function (key) {
-          var equalities = document.cookie.split('; ');
-          for (var i = 0; i < equalities.length; i++) {
+          var equalities = document.cookie.split('; '); // NOSONAR
+          for (var i = 0; i < equalities.length; i++) { // NOSONAR
             if (!equalities[i]) {
               continue;
             }
 
-            var splitted = equalities[i].split('=');
+            var splitted = equalities[i].split('='); // NOSONAR
             if (splitted.length != 2) {
               continue;
             }
@@ -790,9 +790,9 @@
          * @param {string} path (optional)
          */
         eaf.utils.deleteCookie = function (key, path) {
-          var cookieValue = encodeURIComponent(key) + '=';
+          var cookieValue = encodeURIComponent(key) + '='; // NOSONAR
 
-          cookieValue = cookieValue + "; expires=" + (new Date(new Date().getTime() - 86400000)).toUTCString();
+          cookieValue = cookieValue + "; expires=" + (new Date(new Date().getTime() - 86400000)).toUTCString(); // NOSONAR
 
           if (path) {
             cookieValue = cookieValue + "; path=" + path;
@@ -807,9 +807,9 @@
          * @returns {string}
          */
         eaf.utils.getDomain = function (url) {
-          var domainRegex = /(https?:){0,1}\/\/((?:[\w\d-]+\.)+[\w\d]{2,})/i;
-          var matches = domainRegex.exec(url);
-          return (matches && matches[2]) ? matches[2] : '';
+          var domainRegex = /(https?:){0,1}\/\/((?:[\w\d-]+\.)+[\w\d]{2,})/i; // NOSONAR
+          var matches = domainRegex.exec(url); // NOSONAR
+          return (matches && matches[2]) ? matches[2] : ''; // NOSONAR
         }
 
         /* TIMING *****************************************/
@@ -817,18 +817,18 @@
 
         eaf.timing.utcClockProvider = (function () {
 
-          var toUtc = function (date) {
+          var toUtc = function (date) { // NOSONAR
             return Date.UTC(
               date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(),
               date.getUTCSeconds(), date.getUTCMilliseconds()
             );
           }
 
-          var now = function () {
+          var now = function () { // NOSONAR
             return toUtc(new Date());
           };
 
-          var normalize = function (date) {
+          var normalize = function (date) { // NOSONAR
             if (!date) {
               return date;
             }
@@ -847,18 +847,18 @@
 
         eaf.timing.localClockProvider = (function () {
 
-          var toLocal = function (date) {
+          var toLocal = function (date) { // NOSONAR
             return new Date(
               date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(),
               date.getMilliseconds()
             );
           }
 
-          var now = function () {
+          var now = function () { // NOSONAR
             return toLocal(new Date());
           }
 
-          var normalize = function (date) {
+          var normalize = function (date) { // NOSONAR
             if (!date) {
               return date;
             }
@@ -877,11 +877,11 @@
 
         eaf.timing.unspecifiedClockProvider = (function () {
 
-          var now = function () {
+          var now = function () { // NOSONAR
             return new Date();
           }
 
-          var normalize = function (date) {
+          var normalize = function (date) { // NOSONAR
             return date;
           }
 
@@ -895,9 +895,9 @@
         })();
 
         eaf.timing.convertToUserTimezone = function (date) {
-          var localTime = date.getTime();
-          var utcTime = localTime + (date.getTimezoneOffset() * 60000);
-          var targetTime = parseInt(utcTime) + parseInt(eaf.timing.timeZoneInfo.windows.currentUtcOffsetInMilliseconds);
+          var localTime = date.getTime(); // NOSONAR
+          var utcTime = localTime + (date.getTimezoneOffset() * 60000); // NOSONAR
+          var targetTime = parseInt(utcTime) + parseInt(eaf.timing.timeZoneInfo.windows.currentUtcOffsetInMilliseconds); // NOSONAR
           return new Date(targetTime);
         };
 

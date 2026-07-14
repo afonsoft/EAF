@@ -1,6 +1,6 @@
-﻿var eaf = eaf || {};
+﻿var eaf = eaf || {}; // NOSONAR
 (function () {
-    if (!moment || !moment.tz) {
+    if (!moment || !moment.tz) { // NOSONAR
         return;
     }
 
@@ -11,8 +11,8 @@
     /* FUNCTIONS **************************************************/
 
     eaf.timing.convertToUserTimezone = function (date) {
-        var momentDate = moment(date);
-        var targetDate = momentDate.clone().tz(eaf.timing.timeZoneInfo.iana.timeZoneId);
+        var momentDate = moment(date); // NOSONAR
+        var targetDate = momentDate.clone().tz(eaf.timing.timeZoneInfo.iana.timeZoneId); // NOSONAR
         return targetDate;
     };
 

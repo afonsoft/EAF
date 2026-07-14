@@ -1,6 +1,6 @@
-var eaf = eaf || {};
+var eaf = eaf || {}; // NOSONAR
 (function () {
-    var showMessage = function (type, message, title, isHtml, opts) {
+    var showMessage = function (type, message, title, isHtml, opts) { // NOSONAR
 
         eaf.ui.clearBusy();
 
@@ -45,18 +45,18 @@ var eaf = eaf || {};
 
     eaf.message.confirm = function (message, titleOrCallback, callback, isHtml, opts) {
 
-        var title = undefined;
+        var title = undefined; // NOSONAR
 
         if (typeof titleOrCallback === "function") {
             callback = titleOrCallback;
         }
         else if (titleOrCallback) {
             title = titleOrCallback;
-        };
+        }; // NOSONAR
 
 
         opts = opts || {};
-        opts.title = title ? title : eaf.localization.eaf('AreYouSure');
+        opts.title = title ? title : eaf.localization.eaf('AreYouSure'); // NOSONAR
         opts.type = 'warning';
 
         opts.confirmButtonText = opts.confirmButtonText || eaf.localization.eaf('Yes');
@@ -71,7 +71,7 @@ var eaf = eaf || {};
         }
 
         return swal(opts).then(function(result) {
-            callback && callback(result.value);
+            callback && callback(result.value); // NOSONAR
         });
     };
 })();

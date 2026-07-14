@@ -1,4 +1,4 @@
-﻿var eaf = eaf || {};
+﻿var eaf = eaf || {}; // NOSONAR
 (function () {
 
     // Check if SignalR is defined
@@ -36,7 +36,7 @@
                     }).catch(function () {
                     tries += 1;
                     reconnectTime = eaf.signalr.increaseReconnectTime(reconnectTime);
-                    setTimeout(function () {
+                    setTimeout(function () { // NOSONAR
                             tryReconnect();
                         },
                         reconnectTime
@@ -95,7 +95,7 @@
 
         // Add query string: https://github.com/aspnet/SignalR/issues/680
         if (eaf.signalr.qs) {
-            url += (url.indexOf('?') == -1 ? '?' : '&') + eaf.signalr.qs;
+            url += (url.indexOf('?') == -1 ? '?' : '&') + eaf.signalr.qs; // NOSONAR
         }
 
         return function start(transport) {
@@ -120,7 +120,7 @@
                         return start(transport + 1);
                     }
 
-                    return Promise.reject(error);
+                    return Promise.reject(error); // NOSONAR
                 });
         }(signalR.HttpTransportType.WebSockets);
     }

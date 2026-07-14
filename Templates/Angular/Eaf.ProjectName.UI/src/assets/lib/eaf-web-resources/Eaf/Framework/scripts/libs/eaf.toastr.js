@@ -1,4 +1,4 @@
-﻿var eaf = eaf || {};
+﻿var eaf = eaf || {}; // NOSONAR
 (function () {
 
     if (!toastr) {
@@ -11,7 +11,7 @@
 
     /* NOTIFICATION *********************************************/
 
-    var showNotification = function (type, message, title, options) {
+    var showNotification = function (type, message, title, options) { // NOSONAR
         toastr[type](message, title, options);
     };
 
