@@ -258,11 +258,28 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             tenantManager.FindByIdAsync(1).Returns((Tenant)null!);
 
             _sut.TenantManager = tenantManager;
-            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+            _sut.LocalizationManager = Abp.Localization.NullLocalizationManager.Instance;
 
             // Quando / Então
             await Should.ThrowAsync<UserFriendlyException>(async () =>
                 await _sut.Impersonate(new ImpersonateInput { UserId = 10, TenantId = 1 }));
+        }
+
+        [Fact]
+        public async Task Dado_TenantInativo_Quando_Impersonate_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            var tenant = new Tenant("tenant1", "Tenant One") { Id = 1, IsActive = false };
+            tenantManager.FindByIdAsync(1).Returns(tenant);
+
+            _sut.TenantManager = tenantManager;
+            _sut.LocalizationManager = Abp.Localization.NullLocalizationManager.Instance;
+
+            // Quando / Então
+            var ex = await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.Impersonate(new ImpersonateInput { UserId = 10, TenantId = 1 }));
+            ex.Message.ShouldContain("TenantIdIsNotActive");
         }
 
         #endregion

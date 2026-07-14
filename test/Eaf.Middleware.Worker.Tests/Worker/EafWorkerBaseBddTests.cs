@@ -236,6 +236,50 @@ namespace Eaf.Middleware.Worker.Tests.Worker
         }
 
         [Fact]
+        public void Dado_Worker_Quando_LComArgsNulo_Entao_DeveRetornarChaveSemFormatar()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            source.GetStringOrNull("Hello", Arg.Any<System.Globalization.CultureInfo>()).Returns("Hello {0}");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("Hello", (object[])null!);
+
+            result.ShouldBe("Hello {0}");
+        }
+
+        [Fact]
+        public void Dado_LocalizationManagerNuloEChaveNaoVazia_Quando_L_Entao_DeveRetornarChave()
+        {
+            var worker = new TestWorker();
+            worker.LocalizationManager = null;
+
+            var result = worker.PublicL("TestKey");
+
+            result.ShouldBe("TestKey");
+        }
+
+        [Fact]
+        public void Dado_LocalizationSourceJaCarregada_Quando_AcessarDuasVezes_Entao_DeveRetornarMesmaInstancia()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var first = worker.PublicLocalizationSource;
+            var second = worker.PublicLocalizationSource;
+
+            first.ShouldBeSameAs(second);
+            localizationManager.Received(1).GetSource("EafCore");
+        }
+
+        [Fact]
         public void Dado_EafWorkerBase_Quando_Instanciar_Entao_DeveImplementarIEafWorkerBase()
         {
             var worker = new TestWorker();

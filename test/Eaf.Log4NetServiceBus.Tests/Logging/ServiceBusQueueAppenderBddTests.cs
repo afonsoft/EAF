@@ -349,6 +349,35 @@ namespace Eaf.Log4NetServiceBus.Tests.Logging
             Should.NotThrow(() => sendBufferMethod!.Invoke(appender, new object[] { events }));
         }
 
+        [Fact]
+        public void Dado_StorageTypeVazio_Quando_SendBufferComEvento_Entao_NaoDeveEnviarMensagem()
+        {
+            // Dado
+            var appender = new ServiceBusQueueAppender
+            {
+                ApplicationName = "TestApp",
+                ConnectionString = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+                QueueName = "log-queue",
+                StorageType = "",
+                Layout = new PatternLayout("%message")
+            };
+
+            var sendBufferMethod = typeof(ServiceBusQueueAppender)
+                .GetMethod("SendBuffer", BindingFlags.NonPublic | BindingFlags.Instance);
+            sendBufferMethod.ShouldNotBeNull();
+
+            var events = new[]
+            {
+                new log4net.Core.LoggingEvent(new log4net.Core.LoggingEventData
+                {
+                    Message = "INFO | server | event | message | json"
+                })
+            };
+
+            // Quando & Então
+            Should.NotThrow(() => sendBufferMethod!.Invoke(appender, new object[] { events }));
+        }
+
         #region OnClose
 
         [Fact]

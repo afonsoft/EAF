@@ -269,6 +269,32 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
             result.FeatureValues.ShouldNotBeNull();
         }
 
+        [Fact]
+        public async Task Dado_FeaturesComEscoposDiferentes_Quando_GetTenantFeaturesForEdit_Entao_DeveFiltrarApenasTenantScope()
+        {
+            // Dado
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.GetFeatureValuesAsync(1).Returns(new List<NameValue>());
+
+            var featureManager = Substitute.For<IFeatureManager>();
+            featureManager.GetAll().Returns(new List<Feature>
+            {
+                new Feature("TenantFeature", "true", scope: FeatureScopes.Tenant),
+                new Feature("EditionFeature", "true", scope: FeatureScopes.Edition)
+            });
+
+            _sut.TenantManager = tenantManager;
+            _sut.FeatureManager = featureManager;
+            _sut.ObjectMapper = CreateObjectMapper();
+
+            // Quando
+            var result = await _sut.GetTenantFeaturesForEdit(new EntityDto(1));
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Features.Count.ShouldBe(1);
+        }
+
         #endregion
 
         #region UpdateTenantFeatures
@@ -463,7 +489,17 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
             });
             objectMapper.Map<TenantEditDto>(Arg.Any<object>()).Returns(new TenantEditDto());
             objectMapper.Map<TenantEditDto, Tenant>(Arg.Any<TenantEditDto>(), Arg.Any<Tenant>()).Returns(tenant => tenant.Arg<Tenant>());
-            objectMapper.Map<List<FlatFeatureDto>>(Arg.Any<object>()).Returns(new List<FlatFeatureDto>());
+            objectMapper.Map<List<FlatFeatureDto>>(Arg.Any<object>()).Returns(ci =>
+            {
+                var source = ci.Arg<object>();
+                var count = source is System.Collections.IEnumerable e ? e.Cast<object>().Count() : 1;
+                var list = new List<FlatFeatureDto>();
+                for (int i = 0; i < count; i++)
+                {
+                    list.Add(new FlatFeatureDto());
+                }
+                return list;
+            });
             return objectMapper;
         }
     }

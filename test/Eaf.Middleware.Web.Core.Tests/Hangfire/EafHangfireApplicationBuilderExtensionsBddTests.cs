@@ -134,5 +134,16 @@ namespace Eaf.Middleware.Tests.WebCore.Hangfire
             app.Received(1).New();
             app.Received(1).Use(Arg.Any<Func<RequestDelegate, RequestDelegate>>());
         }
+
+        [Fact]
+        public void Dado_JobExecutionHabilitado_Quando_UseEafHangfireSemOptions_Entao_DeveConfigurarDashboardEServer()
+        {
+            var app = CreateApplicationBuilder();
+
+            app.UseEafHangfire();
+
+            app.Received(1).New();
+            app.Received(1).Use(Arg.Any<Func<RequestDelegate, RequestDelegate>>());
+        }
     }
 }

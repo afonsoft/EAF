@@ -168,6 +168,33 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Roles
             result.Items.Count.ShouldBe(1);
         }
 
+        [Fact]
+        public async Task Dado_RolesCadastradasComFiltroPermissao_Quando_GetRoles_Entao_DeveRetornarResultadoFiltrado()
+        {
+            // Dado
+            var role = new Role(1, "Admin") { Id = 1, Name = "Admin" };
+            role.Permissions = new List<RolePermissionSetting>
+            {
+                new RolePermissionSetting { Name = "Pages.Admin", IsGranted = true }
+            };
+
+            var otherRole = new Role(1, "User") { Id = 2, Name = "User" };
+            otherRole.Permissions = new List<RolePermissionSetting>();
+
+            _roleManager.Roles.Returns(new List<Role> { role, otherRole }.AsAsyncQueryable());
+
+            _sut.ObjectMapper = CreateObjectMapper();
+
+            var input = new GetRolesInput { Filter = "Pages.Admin", Sorting = "Name" };
+
+            // Quando
+            var result = await _sut.GetRoles(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Items.Count.ShouldBe(1);
+        }
+
         #endregion
 
         #region DeleteRole
@@ -193,6 +220,27 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Roles
 
             // Então
             await userManager.Received(1).RemoveFromRoleAsync(user, role.Name);
+            await _roleManager.Received(1).DeleteAsync(role);
+        }
+
+        [Fact]
+        public async Task Dado_RoleSemUsuario_Quando_DeleteRole_Entao_DeveDeletarRole()
+        {
+            // Dado
+            var role = new Role(1, "Admin") { Id = 1, Name = "Admin" };
+
+            _roleManager.GetRoleByIdAsync(1).Returns(role);
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUsersInRoleAsync(role.Name).Returns(new List<User>());
+            _sut.UserManager = userManager;
+            _roleManager.DeleteAsync(role).Returns(IdentityResult.Success);
+
+            // Quando
+            await _sut.DeleteRole(new EntityDto(1));
+
+            // Então
+            await userManager.DidNotReceive().RemoveFromRoleAsync(Arg.Any<User>(), Arg.Any<string>());
             await _roleManager.Received(1).DeleteAsync(role);
         }
 

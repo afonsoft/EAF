@@ -198,5 +198,31 @@ namespace Eaf.OpenTelemetry.Tests
             result.ShouldNotBeNull();
             Environment.GetEnvironmentVariable("OTEL=INVALID").ShouldBeNull();
         }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetrySemOptions_Entao_DeveRetornarOpenTelemetryBuilderComDefaults()
+        {
+            var services = new ServiceCollection();
+
+            var result = services.AddEafOpenTelemetry();
+
+            result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetrySemConsoleExporterSemOtlpEndpoint_Entao_DeveConfigurarExportersSemOpcoesAdicionais()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.ConsoleExporter = false;
+                options.OtlpEndpoint = null;
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
+        }
     }
 }

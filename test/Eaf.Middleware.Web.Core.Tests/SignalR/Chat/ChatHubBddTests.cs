@@ -267,6 +267,68 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
         }
 
         [Fact]
+        public async Task Dado_MensagemEncontradaSemSharedMessageId_Quando_DeleteMessage_Entao_DeveRetornarMensagemDeNaoEncontrado()
+        {
+            var (chatHub, chatMessageManager, _) = CriarChatHubCompleto();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var message = new ChatMessage(
+                new UserIdentifier(1, 1),
+                new UserIdentifier(1, 2),
+                ChatSide.Sender,
+                "mensagem",
+                ChatMessageReadState.Unread,
+                Guid.Empty,
+                ChatMessageReadState.Unread);
+            message.SharedMessageId = null;
+
+            chatMessageManager.FindMessageAsync(10, 1).Returns(Task.FromResult<ChatMessage?>(message));
+
+            var result = await chatHub.DeleteMessage(10);
+
+            result.ShouldContain("Could not find chat message 10");
+        }
+
+        [Fact]
+        public async Task Dado_UserIdZero_Quando_SendMessage_Entao_DeveRetornarInternalServerError()
+        {
+            var chatHub = CriarChatHub();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                UserId = 0,
+                TenantId = 1,
+                Message = "Hello"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("InternalServerError");
+        }
+
+        [Fact]
+        public async Task Dado_GroupIdZero_Quando_SendMessage_Entao_DeveRetornarInternalServerError()
+        {
+            var chatHub = CriarChatHub();
+            var context = CriarContextoComUsuario(1, 1);
+            chatHub.Context = context;
+
+            var input = new SendChatMessageInput
+            {
+                GroupId = 0,
+                TenantId = 1,
+                Message = "Hello group"
+            };
+
+            var result = await chatHub.SendMessage(input);
+
+            result.ShouldBe("InternalServerError");
+        }
+
+        [Fact]
         public void Dado_ChatHub_Quando_Dispose_Entao_DeveLiberarViaWindsorContainer()
         {
             var (chatHub, _, windsorContainer) = CriarChatHubCompleto();
