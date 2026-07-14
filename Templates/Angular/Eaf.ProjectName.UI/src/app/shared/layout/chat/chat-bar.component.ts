@@ -468,20 +468,20 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   loadLastState(): void {
-    const self = this;
 
-    self._localStorageService.getItem('app.chat.isOpen', (err, isOpen) => {
-      self.isOpen = isOpen;
 
-      self._localStorageService.getItem('app.chat.pinned', (err, pinned) => {
-        self.pinned = pinned;
+    this._localStorageService.getItem('app.chat.isOpen', (err, isOpen) => {
+      this.isOpen = isOpen;
+
+      this._localStorageService.getItem('app.chat.pinned', (err, pinned) => {
+        this.pinned = pinned;
       });
 
       if (isOpen) {
         this.showChat();
-        self._localStorageService.getItem('app.chat.selectedUser', (err, selectedUser) => {
+        this._localStorageService.getItem('app.chat.selectedUser', (err, selectedUser) => {
           if (selectedUser && selectedUser.friendUserId) {
-            self.selectFriend(selectedUser);
+            this.selectFriend(selectedUser);
           }
         });
       }
@@ -590,10 +590,10 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   registerEvents(): void {
-    const self = this;
 
-    function onMessageReceived(message) {
-      const user = self.getFriendOrNull(message.targetUserId, message.targetTenantId);
+
+    const onMessageReceived = (message) => {
+      const user = this.getFriendOrNull(message.targetUserId, message.targetTenantId);
       if (!user) {
         return;
       }
@@ -603,62 +603,62 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       if (message.side === ChatSide.Receiver) {
         user.unreadMessageCount += 1;
         message.readState = ChatMessageReadState.Unread;
-        self.triggerUnreadMessageCountChangeEvent();
+        this.triggerUnreadMessageCountChangeEvent();
 
         if (
-          self.isOpen &&
-          self.selectedUser !== null &&
-          user.friendTenantId === self.selectedUser.friendTenantId &&
-          user.friendUserId === self.selectedUser.friendUserId
+          this.isOpen &&
+          this.selectedUser !== null &&
+          user.friendTenantId === this.selectedUser.friendTenantId &&
+          user.friendUserId === this.selectedUser.friendUserId
         ) {
-          self.markAllUnreadMessagesOfUserAsRead(user);
+          this.markAllUnreadMessagesOfUserAsRead(user);
         } else {
-          self.notify.info(eaf.utils.formatString('{0}: {1}', user.friendUserName, eaf.utils.truncateString(message.message, 100)), null, {
-            onclick() {
+          this.notify.info(eaf.utils.formatString('{0}: {1}', user.friendUserName, eaf.utils.truncateString(message.message, 100)), null, {
+            onclick: () => {
               if (!document.body.className.includes('offcanvas-on')) {
-                self.showChatPanel();
-                self.isOpen = true;
+                this.showChatPanel();
+                this.isOpen = true;
               }
 
-              self.selectFriend(user);
-              self.pinned = true;
+              this.selectFriend(user);
+              this.pinned = true;
             },
           });
         }
       }
 
-      self.scrollToBottom();
+      this.scrollToBottom();
     }
 
     eaf.event.on('app.chat.messageReceived', message => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onMessageReceived(message);
       });
     });
 
     eaf.event.on('app.chat.addFriendSelected', friend => {
-      self._zone.run(() => {
-        self.addFriendSelected(friend);
+      this._zone.run(() => {
+        this.addFriendSelected(friend);
       });
     });
 
-    function onFriendshipRequestReceived(data, isOwnRequest) {
+    const onFriendshipRequestReceived = (data, isOwnRequest) => {
       if (!isOwnRequest) {
-        eaf.notify.info(self.l('UserSendYouAFriendshipRequest', data.friendUserName));
+        eaf.notify.info(this.l('UserSendYouAFriendshipRequest', data.friendUserName));
       }
-      if (!_filter(self.friends, f => f.friendUserId === data.friendUserId && f.friendTenantId === data.friendTenantId).length) {
-        self.friends.push(data);
+      if (!_filter(this.friends, f => f.friendUserId === data.friendUserId && f.friendTenantId === data.friendTenantId).length) {
+        this.friends.push(data);
       }
     }
 
     eaf.event.on('app.chat.friendshipRequestReceived', (data, isOwnRequest) => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onFriendshipRequestReceived(data, isOwnRequest);
       });
     });
 
-    function onUserConnectionStateChanged(data) {
-      const user = self.getFriendOrNull(data.friend.userId, data.friend.tenantId);
+    const onUserConnectionStateChanged = (data) => {
+      const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
       }
@@ -667,13 +667,13 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     }
 
     eaf.event.on('app.chat.userConnectionStateChanged', data => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onUserConnectionStateChanged(data);
       });
     });
 
-    function onUserStateChanged(data) {
-      const user = self.getFriendOrNull(data.friend.userId, data.friend.tenantId);
+    const onUserStateChanged = (data) => {
+      const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
       }
@@ -682,29 +682,29 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     }
 
     eaf.event.on('app.chat.userStateChanged', data => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onUserStateChanged(data);
       });
     });
 
-    function onAllUnreadMessagesOfUserRead(data) {
-      const user = self.getFriendOrNull(data.friend.userId, data.friend.tenantId);
+    const onAllUnreadMessagesOfUserRead = (data) => {
+      const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
       }
 
       user.unreadMessageCount = 0;
-      self.triggerUnreadMessageCountChangeEvent();
+      this.triggerUnreadMessageCountChangeEvent();
     }
 
     eaf.event.on('app.chat.allUnreadMessagesOfUserRead', data => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onAllUnreadMessagesOfUserRead(data);
       });
     });
 
-    function onReadStateChange(data) {
-      const user = self.getFriendOrNull(data.friend.userId, data.friend.tenantId);
+    const onReadStateChange = (data) => {
+      const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
       }
@@ -715,21 +715,21 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     }
 
     eaf.event.on('app.chat.readStateChange', data => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onReadStateChange(data);
       });
     });
 
-    function onConnected() {
-      self.getFriendsAndSettings(() => {
+    const onConnected = () => {
+      this.getFriendsAndSettings(() => {
         DomHelper.waitUntilElementIsReady('#kt_quick_sidebar', () => {
-          self.loadLastState();
+          this.loadLastState();
         });
       });
     }
 
     eaf.event.on('app.chat.connected', () => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onConnected();
       });
     });

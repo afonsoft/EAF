@@ -109,9 +109,9 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   findFeatureByName(featureName: string): FlatFeatureDto {
-    const self = this;
 
-    const feature = _.find(self._editData.features, f => f.name === featureName);
+
+    const feature = _.find(this._editData.features, f => f.name === featureName);
 
     if (!feature) {
       eaf.log.warn('Could not find a feature by name: ' + featureName);
@@ -121,13 +121,13 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   findFeatureValueByName(featureName: string) {
-    const self = this;
-    const feature = self.findFeatureByName(featureName);
+
+    const feature = this.findFeatureByName(featureName);
     if (!feature) {
       return '';
     }
 
-    const featureValue = _.find(self._editData.featureValues, f => f.name === featureName);
+    const featureValue = _.find(this._editData.featureValues, f => f.name === featureName);
     if (!featureValue) {
       return feature.defaultValue;
     }
@@ -136,8 +136,8 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   isFeatureValueValid(featureName: string, value: string): boolean {
-    const self = this;
-    const feature = self.findFeatureByName(featureName);
+
+    const feature = this.findFeatureByName(featureName);
     if (!feature || !feature.inputType || !feature.inputType.validator) {
       return true;
     }
@@ -232,8 +232,8 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   isFeatureEnabled(featureName: string): boolean {
-    const self = this;
-    const value = self.findFeatureValueByName(featureName);
+
+    const value = this.findFeatureValueByName(featureName);
     return value.toLowerCase() === 'true';
   }
 

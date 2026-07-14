@@ -49,15 +49,15 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
   }
 
   show(record: EntityChangeListDto): void {
-    const self = this;
-    self.active = true;
-    self.entityChange = record;
+
+    this.active = true;
+    this.entityChange = record;
 
     this._auditLogService.getEntityPropertyChanges(record.id).subscribe(result => {
-      self.entityPropertyChanges = result;
+      this.entityPropertyChanges = result;
     });
 
-    self.modal.show();
+    this.modal.show();
   }
 
   close(): void {

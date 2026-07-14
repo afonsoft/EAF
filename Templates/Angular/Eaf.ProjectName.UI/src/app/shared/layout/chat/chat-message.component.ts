@@ -28,14 +28,14 @@ export class ChatMessageComponent implements OnInit {
   }
 
   private setChatMessageType(): void {
-    const self = this;
-    const encryptedAuthToken = self._storageService.getCookieValue(AppConsts.authorization.encrptedAuthTokenName);
 
-    if (self.message.message.startsWith('[image]')) {
-      self.chatMessageType = 'image';
+    const encryptedAuthToken = this._storageService.getCookieValue(AppConsts.authorization.encrptedAuthTokenName);
 
-      const image = JSON.parse(self.message.message.substring('[image]'.length));
-      self.chatMessage =
+    if (this.message.message.startsWith('[image]')) {
+      this.chatMessageType = 'image';
+
+      const image = JSON.parse(this.message.message.substring('[image]'.length));
+      this.chatMessage =
         AppConsts.remoteServiceBaseUrl +
         '/api/services/app/Chat/GetUploadedObject?fileId=' +
         image.id +
@@ -47,11 +47,11 @@ export class ChatMessageComponent implements OnInit {
         AppConsts.authorization.encrptedAuthTokenName +
         '=' +
         encodeURIComponent(encryptedAuthToken);
-    } else if (self.message.message.startsWith('[file]')) {
-      self.chatMessageType = 'file';
+    } else if (this.message.message.startsWith('[file]')) {
+      this.chatMessageType = 'file';
 
-      const file = JSON.parse(self.message.message.substring('[file]'.length));
-      self.chatMessage =
+      const file = JSON.parse(this.message.message.substring('[file]'.length));
+      this.chatMessage =
         AppConsts.remoteServiceBaseUrl +
         '/api/services/app/Chat/GetUploadedObject?fileId=' +
         file.id +
@@ -64,14 +64,14 @@ export class ChatMessageComponent implements OnInit {
         '=' +
         encodeURIComponent(encryptedAuthToken);
 
-      self.fileName = file.name;
-    } else if (self.message.message.startsWith('[link]')) {
-      self.chatMessageType = 'link';
-      const linkMessage = JSON.parse(self.message.message.substring('[link]'.length));
-      self.chatMessage = linkMessage.message ?? '';
+      this.fileName = file.name;
+    } else if (this.message.message.startsWith('[link]')) {
+      this.chatMessageType = 'link';
+      const linkMessage = JSON.parse(this.message.message.substring('[link]'.length));
+      this.chatMessage = linkMessage.message ?? '';
     } else {
-      self.chatMessageType = 'text';
-      self.chatMessage = self.message.message;
+      this.chatMessageType = 'text';
+      this.chatMessage = this.message.message;
     }
   }
 }

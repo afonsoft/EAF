@@ -34,9 +34,9 @@ export class TimeZoneComboComponent extends AppComponentBase implements OnInit, 
   }
 
   ngOnInit(): void {
-    const self = this;
-    self._timingService.getTimezones(this.defaultTimezoneScope).subscribe(result => {
-      self.timeZones = result.items;
+
+    this._timingService.getTimezones(this.defaultTimezoneScope).subscribe(result => {
+      this.timeZones = result.items;
     });
   }
 

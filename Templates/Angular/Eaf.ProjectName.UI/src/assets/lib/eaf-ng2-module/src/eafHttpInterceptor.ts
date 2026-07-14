@@ -77,32 +77,32 @@ export class EafHttpConfiguration {
   }
 
   handleUnAuthorizedRequest(messagePromise: any, targetUrl?: string) {
-    const self = this;
+
 
     if (messagePromise) {
       messagePromise.done(() => {
         this.handleTargetUrl(targetUrl || '/');
       });
     } else {
-      self.handleTargetUrl(targetUrl || '/');
+      this.handleTargetUrl(targetUrl || '/');
     }
   }
 
   handleNonEafErrorResponse(response: HttpResponse<any>) {
-    const self = this;
+
 
     switch (response.status) {
       case 401:
-        self.handleUnAuthorizedRequest(self.showError(self.defaultError401), '/');
+        this.handleUnAuthorizedRequest(this.showError(this.defaultError401), '/');
         break;
       case 403:
-        self.showError(self.defaultError403);
+        this.showError(this.defaultError403);
         break;
       case 404:
-        self.showError(self.defaultError404);
+        this.showError(this.defaultError404);
         break;
       default:
-        self.showError(self.defaultError);
+        this.showError(this.defaultError);
         break;
     }
   }
@@ -261,21 +261,21 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   protected handleSuccessResponse(event: HttpEvent<any>, interceptObservable: Subject<HttpEvent<any>>): void {
-    const self = this;
+
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
     if (event instanceof HttpResponse) {
       if (event.body instanceof Blob && event.body.type && event.body.type.indexOf('application/json') >= 0) {
         const clonedResponse = event.clone();
 
-        self.configuration.blobToText(event.body).subscribe(json => {
+        this.configuration.blobToText(event.body).subscribe(json => {
           const responseBody = json == 'null' ? {} : JSON.parse(json);
 
           if (isLocalhost) {
             (window as any).eaf.log.info('[EafHttpInterceptor] Blob JSON parsed: ' + JSON.stringify(responseBody));
           }
 
-          const modifiedResponse = self.configuration.handleResponse(
+          const modifiedResponse = this.configuration.handleResponse(
             event.clone({
               body: responseBody,
             }),

@@ -39,11 +39,11 @@ export class SettingsComponent extends AppComponentBase implements OnInit {
   }
 
   loadHostSettings(): void {
-    const self = this;
-    self._hostSettingService.getAllSettings().subscribe(setting => {
-      self.hostSettings = setting;
-      self.initialTimeZone = setting.general.timezone;
-      self.usingDefaultTimeZone = setting.general.timezoneForComparison === self.setting.get('Eaf.Timing.TimeZone');
+
+    this._hostSettingService.getAllSettings().subscribe(setting => {
+      this.hostSettings = setting;
+      this.initialTimeZone = setting.general.timezone;
+      this.usingDefaultTimeZone = setting.general.timezoneForComparison === this.setting.get('Eaf.Timing.TimeZone');
       this.openIdConnectClaimMappings = this.hostSettings.externalLoginProviderSettings.openIdConnectClaimsMapping.map(item => {
         return {
           key: item.key,
@@ -54,95 +54,95 @@ export class SettingsComponent extends AppComponentBase implements OnInit {
   }
 
   init(): void {
-    const self = this;
-    self.testEmailAddress = self.appSession.user.emailAddress;
-    self.showTimezoneSelection = eaf.clock.provider.supportsMultipleTimezone;
-    self.loadHostSettings();
-    self.loadSocialLoginSettings();
+
+    this.testEmailAddress = this.appSession.user.emailAddress;
+    this.showTimezoneSelection = eaf.clock.provider.supportsMultipleTimezone;
+    this.loadHostSettings();
+    this.loadSocialLoginSettings();
   }
 
   ngOnInit(): void {
-    const self = this;
-    self.init();
+
+    this.init();
   }
 
   sendTestEmail(): void {
-    const self = this;
+
     const input = new SendTestEmailInput();
-    input.emailAddress = self.testEmailAddress;
-    self._hostSettingService.sendTestEmail(input).subscribe(result => {
-      self.notify.success(self.l('TestEmailSentSuccessfully'));
+    input.emailAddress = this.testEmailAddress;
+    this._hostSettingService.sendTestEmail(input).subscribe(result => {
+      this.notify.success(this.l('TestEmailSentSuccessfully'));
     });
   }
 
   saveAll(): void {
-    const self = this;
-    self.loading = true;
-    self._hostSettingService.updateAllSettings(self.hostSettings).subscribe(
+
+    this.loading = true;
+    this._hostSettingService.updateAllSettings(this.hostSettings).subscribe(
       result => {
-        self.loading = false;
-        self.notify.success(self.l('SavedSuccessfully'));
+        this.loading = false;
+        this.notify.success(this.l('SavedSuccessfully'));
 
         AppConsts.appActiveDirectoryEnabled =
-          self.hostSettings.azureActiveDirectory.isModuleEnabled && self.hostSettings.azureActiveDirectory.isEnabled;
+          this.hostSettings.azureActiveDirectory.isModuleEnabled && this.hostSettings.azureActiveDirectory.isEnabled;
 
-        AppConsts.appLdapEnabled = self.hostSettings.ldap.isModuleEnabled && self.hostSettings.ldap.isEnabled;
+        AppConsts.appLdapEnabled = this.hostSettings.ldap.isModuleEnabled && this.hostSettings.ldap.isEnabled;
 
         if (
           eaf.clock.provider.supportsMultipleTimezone &&
-          self.usingDefaultTimeZone &&
-          self.initialTimeZone !== self.hostSettings.general.timezone
+          this.usingDefaultTimeZone &&
+          this.initialTimeZone !== this.hostSettings.general.timezone
         ) {
-          self.message.info(self.l('TimeZoneSettingChangedRefreshPageNotification')).then(() => {
+          this.message.info(this.l('TimeZoneSettingChangedRefreshPageNotification')).then(() => {
             window.location.reload();
           });
         }
       },
       err => {
-        self.loading = false;
+        this.loading = false;
         (window as any).eaf.log.error(err);
       },
     );
   }
 
   loadSocialLoginSettings(): void {
-    const self = this;
-    self.enabledSocialLoginSettings = ['Google', 'Microsoft', 'OpenId', 'Auth0'];
+
+    this.enabledSocialLoginSettings = ['Google', 'Microsoft', 'OpenId', 'Auth0'];
   }
 
   clearAdSettings(): void {
-    const self = this;
 
-    if (self.hostSettings.azureActiveDirectory.isEnabled) {
+
+    if (this.hostSettings.azureActiveDirectory.isEnabled) {
       this.message.confirm(this.l('UserActiveDirectoryDeleteAllWarningMessage'), this.l('AreYouSure'), isConfirmed => {
         if (isConfirmed) {
-          self.hostSettings.azureActiveDirectory.clientId = '';
-          self.hostSettings.azureActiveDirectory.clientSecret = '';
-          self.hostSettings.azureActiveDirectory.tenant = '';
+          this.hostSettings.azureActiveDirectory.clientId = '';
+          this.hostSettings.azureActiveDirectory.clientSecret = '';
+          this.hostSettings.azureActiveDirectory.tenant = '';
 
-          self.hostSettings.userManagement.isRegisterRequiredForLogin = false;
-          self.hostSettings.userManagement.storeExternalTokenInformation = true;
+          this.hostSettings.userManagement.isRegisterRequiredForLogin = false;
+          this.hostSettings.userManagement.storeExternalTokenInformation = true;
         } else {
-          self.hostSettings.azureActiveDirectory.isEnabled = true;
+          this.hostSettings.azureActiveDirectory.isEnabled = true;
         }
       });
     }
   }
 
   clearLdapSettings(): void {
-    const self = this;
 
-    if (self.hostSettings.ldap.isEnabled) {
+
+    if (this.hostSettings.ldap.isEnabled) {
       this.message.confirm(this.l('UserLdapDeleteAllWarningMessage'), this.l('AreYouSure'), isConfirmed => {
         if (isConfirmed) {
-          self.hostSettings.ldap.domain = '';
-          self.hostSettings.ldap.userName = '';
-          self.hostSettings.ldap.password = '';
+          this.hostSettings.ldap.domain = '';
+          this.hostSettings.ldap.userName = '';
+          this.hostSettings.ldap.password = '';
 
-          self.hostSettings.userManagement.isRegisterRequiredForLogin = false;
-          self.hostSettings.userManagement.storeExternalTokenInformation = true;
+          this.hostSettings.userManagement.isRegisterRequiredForLogin = false;
+          this.hostSettings.userManagement.storeExternalTokenInformation = true;
         } else {
-          self.hostSettings.ldap.isEnabled = true;
+          this.hostSettings.ldap.isEnabled = true;
         }
       });
     }

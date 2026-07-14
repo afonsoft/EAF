@@ -26,49 +26,49 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
   }
 
   getCaches(): void {
-    const self = this;
-    self.loading = true;
-    self._cacheService
+
+    this.loading = true;
+    this._cacheService
       .getAllCaches()
       .pipe(
         finalize(() => {
-          self.loading = false;
+          this.loading = false;
         }),
       )
       .subscribe(result => {
-        self.caches = result.items;
+        this.caches = result.items;
       });
   }
 
   clearCache(cacheName): void {
-    const self = this;
+
     const input = new EntityDtoOfString();
     input.id = cacheName;
 
-    self._cacheService.clearCache(input).subscribe(() => {
-      self.notify.success(self.l('CacheSuccessfullyCleared'));
+    this._cacheService.clearCache(input).subscribe(() => {
+      this.notify.success(this.l('CacheSuccessfullyCleared'));
     });
   }
 
   clearAllCaches(): void {
-    const self = this;
-    self._cacheService.clearAllCaches().subscribe(() => {
-      self.notify.success(self.l('AllCachesSuccessfullyCleared'));
+
+    this._cacheService.clearAllCaches().subscribe(() => {
+      this.notify.success(this.l('AllCachesSuccessfullyCleared'));
     });
   }
 
   getWebLogs(): void {
-    const self = this;
-    self._webLogService.getLatestWebLogs().subscribe(result => {
-      self.logs = result.latestWebLogLines;
-      self.fixWebLogsPanelHeight();
+
+    this._webLogService.getLatestWebLogs().subscribe(result => {
+      this.logs = result.latestWebLogLines;
+      this.fixWebLogsPanelHeight();
     });
   }
 
-  downloadWebLogs = function () {
-    const self = this;
-    self._webLogService.downloadWebLogs().subscribe(result => {
-      self._fileDownloadService.downloadTempFile(result);
+  downloadWebLogs = () => {
+
+    this._webLogService.downloadWebLogs().subscribe(result => {
+      this._fileDownloadService.downloadTempFile(result);
     });
   };
 
@@ -139,8 +139,8 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
   }
 
   ngOnInit(): void {
-    const self = this;
-    self.getCaches();
-    self.getWebLogs();
+
+    this.getCaches();
+    this.getWebLogs();
   }
 }

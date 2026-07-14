@@ -20,31 +20,31 @@ export class AuditLogDetailModalComponent extends AppComponentBase {
   }
 
   getExecutionTime(): string {
-    const self = this;
-    return moment(self.auditLog.executionTime).fromNow() + ' (' + moment(self.auditLog.executionTime).format('YYYY-MM-DD HH:mm:ss') + ')';
+
+    return moment(this.auditLog.executionTime).fromNow() + ' (' + moment(this.auditLog.executionTime).format('YYYY-MM-DD HH:mm:ss') + ')';
   }
 
   getDurationAsMs(): string {
-    const self = this;
-    return self.l('Xms', self.auditLog.executionDuration);
+
+    return this.l('Xms', this.auditLog.executionDuration);
   }
 
   getFormattedParameters(): string {
-    const self = this;
+
     try {
-      const json = JSON.parse(self.auditLog.parameters);
+      const json = JSON.parse(this.auditLog.parameters);
       return JSON.stringify(json, null, 4);
     } catch (e) {
-      return self.auditLog.parameters;
+      return this.auditLog.parameters;
     }
   }
 
   show(record: AuditLogListDto): void {
-    const self = this;
-    self.active = true;
-    self.auditLog = record;
 
-    self.modal.show();
+    this.active = true;
+    this.auditLog = record;
+
+    this.modal.show();
   }
 
   close(): void {

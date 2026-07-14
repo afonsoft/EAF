@@ -28,13 +28,13 @@ export class CreateOrEditRoleModalComponent extends AppComponentBase {
   }
 
   show(roleId?: number): void {
-    const self = this;
-    self.active = true;
 
-    self._roleService.getRoleForEdit(roleId).subscribe(result => {
-      self.role = result.role;
+    this.active = true;
+
+    this._roleService.getRoleForEdit(roleId).subscribe(result => {
+      this.role = result.role;
       this.permissionTree.editData = result;
-      self.modal.show();
+      this.modal.show();
     });
   }
 
@@ -43,11 +43,11 @@ export class CreateOrEditRoleModalComponent extends AppComponentBase {
   }
 
   save(): void {
-    const self = this;
+
 
     const input = new CreateOrUpdateRoleInput();
-    input.role = self.role;
-    input.grantedPermissionNames = self.permissionTree.getGrantedPermissionNames();
+    input.role = this.role;
+    input.grantedPermissionNames = this.permissionTree.getGrantedPermissionNames();
 
     this.saving = true;
     this._roleService

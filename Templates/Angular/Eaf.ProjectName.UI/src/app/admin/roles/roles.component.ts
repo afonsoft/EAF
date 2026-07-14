@@ -72,8 +72,8 @@ export class RolesComponent extends AppComponentBase implements OnInit {
   }
 
   deleteRole(role: RoleListDto): void {
-    const self = this;
-    self.message.confirm(self.l('RoleDeleteWarningMessage', role.displayName), this.l('AreYouSure'), isConfirmed => {
+
+    this.message.confirm(this.l('RoleDeleteWarningMessage', role.displayName), this.l('AreYouSure'), isConfirmed => {
       if (isConfirmed) {
         this._roleService.deleteRole(role.id).subscribe(() => {
           this.getRoles();
