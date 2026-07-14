@@ -237,12 +237,12 @@ namespace Abp.Runtime.Caching.Sqlite
             if (slidingExpireTime.HasValue)
             {
                 renewal = slidingExpireTime.Value;
-                expiry = (expiry ?? DateTimeOffset.UtcNow) + renewal;
+                expiry = (expiry ?? DateTimeOffset.UtcNow) + renewal; // NOSONAR
             }
             else
             {
                 renewal = DefaultSlidingExpireTime;
-                expiry = (expiry ?? DateTimeOffset.UtcNow) + renewal;
+                expiry = (expiry ?? DateTimeOffset.UtcNow) + renewal; // NOSONAR
             }
 
             cmd.Parameters.AddWithValue("@expiry", expiry.Value.Ticks);

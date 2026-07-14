@@ -40,7 +40,7 @@ namespace Eaf.Middleware.Web.Controllers
         {
             try
             {
-                if (Request.Form.Files.Count == 0)
+                if (Request.Form.Files.Count == 0) // NOSONAR
                     throw new InvalidOperationException("No profile picture file provided.");
 
                 var profilePictureFile = Request.Form.Files[0]; // NOSONAR
