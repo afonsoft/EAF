@@ -139,7 +139,7 @@ export class EafHttpConfiguration {
   }
 
   getEafAjaxResponseOrNull(response: HttpResponse<any>): IAjaxResponse | null {
-    if (!response || !response.headers) {
+    if (!response?.headers) {
       return null;
     }
 

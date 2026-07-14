@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 export class TreeDataHelperService {
   findNode(data, selector): any {
     const nodes = _.filter(data, selector);
-    if (nodes && nodes.length === 1) {
+    if (nodes?.length === 1) {
       return nodes[0];
     }
 

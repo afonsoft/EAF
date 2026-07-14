@@ -110,7 +110,7 @@ export class AppSessionService {
 
     if (!tenantId && this.tenant) {
       return false;
-    } else if (tenantId && (!this.tenant || this.tenant.id !== tenantId)) {
+    } else if (tenantId && this.tenant?.id !== tenantId) {
       return false;
     }
 

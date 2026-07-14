@@ -164,7 +164,7 @@ export function convertEafLocaleToAngularLocale(locale: string): string {
   }
 
   const localeMapings = _.filter(AppConsts.localeMappings, { from: locale });
-  if (localeMapings && localeMapings.length) {
+  if (localeMapings?.length) {
     return localeMapings[0]['to'];
   }
 

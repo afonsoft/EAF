@@ -65,7 +65,7 @@ export class PermissionTreeComponent extends AppComponentBase {
   }
 
   getGrantedPermissionNames(): string[] {
-    if (!this.selectedPermissions || !this.selectedPermissions.length) {
+    if (!this.selectedPermissions?.length) {
       return [];
     }
 

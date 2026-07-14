@@ -62,7 +62,7 @@ export class FeatureTreeComponent extends AppComponentBase {
   setSelectedNodes(val: FeatureTreeEditModel) {
     _.forEach(val.features, feature => {
       const items = _.filter(val.featureValues, { name: feature.name });
-      if (items && items.length === 1) {
+      if (items?.length === 1) {
         const item = items[0];
         this.setSelectedNode(item.name, item.value);
       } else {
@@ -138,7 +138,7 @@ export class FeatureTreeComponent extends AppComponentBase {
   isFeatureValueValid(featureName: string, value: string): boolean {
 
     const feature = this.findFeatureByName(featureName);
-    if (!feature || !feature.inputType || !feature.inputType.validator) {
+    if (!feature?.inputType?.validator) {
       return true;
     }
 
@@ -211,7 +211,7 @@ export class FeatureTreeComponent extends AppComponentBase {
     const nodes = _.filter(this.selectedFeatures, function (o) {
       return o.data.name == name;
     });
-    return nodes && nodes.length === 1;
+    return nodes?.length === 1;
   }
 
   getFeatureValueByName(featureName: string): string {

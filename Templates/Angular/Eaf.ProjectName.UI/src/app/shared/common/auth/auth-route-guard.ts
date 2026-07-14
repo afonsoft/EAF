@@ -18,7 +18,7 @@ export class AppRouteGuard implements CanActivate, CanActivateChild, CanLoad {
       return false;
     }
 
-    if (!data || !data['permission']) {
+    if (!data?.['permission']) {
       return true;
     }
 

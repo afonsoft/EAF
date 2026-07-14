@@ -53,8 +53,7 @@ export class UsersComponent extends AppComponentBase implements OnInit {
   private setIsEntityHistoryEnabled(): void {
     const customSettings = (eaf as any).custom;
     this.entityHistoryEnabled =
-      customSettings.EntityHistory &&
-      customSettings.EntityHistory.isEnabled &&
+      customSettings.EntityHistory?.isEnabled &&
       _.filter(customSettings.EntityHistory.enabledEntities, entityType => entityType === this._entityTypeFullName).length === 1;
   }
 

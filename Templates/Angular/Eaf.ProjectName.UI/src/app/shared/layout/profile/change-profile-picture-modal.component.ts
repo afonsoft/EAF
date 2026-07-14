@@ -86,7 +86,7 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
         )
         .toPromise();
 
-      if (response && response.success) {
+      if (response?.success) {
         this.updateProfilePicture(response.result.fileToken);
       } else {
         this.message.error(response?.error?.message || this.l('UploadFailed'));

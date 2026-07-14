@@ -172,7 +172,7 @@ export class CreateOrEditUserModalComponent extends AppComponentBase {
       this.profilePicture = this.appRootUrl() + 'assets/common/images/nopicture.png';
     } else {
       this._profileService.getProfilePictureById(profilePictureId).subscribe(result => {
-        if (result && result.profilePicture) {
+        if (result?.profilePicture) {
           this.profilePicture = 'data:image/jpeg;base64,' + result.profilePicture;
         } else {
           this.profilePicture = this.appRootUrl() + 'assets/common/images/nopicture.png';

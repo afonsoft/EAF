@@ -115,7 +115,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
 
   getProfilePicture(): void {
     this._profileServiceProxy.getProfilePicture().subscribe(result => {
-      if (result && result.profilePicture) {
+      if (result?.profilePicture) {
         this.profilePicture = 'data:image/jpeg;base64,' + result.profilePicture;
       }
     });

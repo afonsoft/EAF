@@ -42,7 +42,7 @@ export class AppNavigationService {
     for (const subMenuItem of menuItem.items) {
       if (subMenuItem.permissionName && this._permissionCheckerService.isGranted(subMenuItem.permissionName)) {
         return true;
-      } else if (subMenuItem.items && subMenuItem.items.length) {
+      } else if (subMenuItem.items?.length) {
         return this.checkChildMenuItemPermission(subMenuItem);
       }
     }
@@ -65,7 +65,7 @@ export class AppNavigationService {
       hideMenuItem = true;
     }
 
-    if (!hideMenuItem && menuItem.items && menuItem.items.length) {
+    if (!hideMenuItem && menuItem.items?.length) {
       return this.checkChildMenuItemPermission(menuItem);
     }
 

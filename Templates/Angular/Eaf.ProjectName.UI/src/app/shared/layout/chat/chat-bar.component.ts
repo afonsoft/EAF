@@ -295,7 +295,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
 
   getProfilePicture(): void {
     this._profileService.getProfilePicture().subscribe(result => {
-      if (result && result.profilePicture) {
+      if (result?.profilePicture) {
         this.profilePicture = 'data:image/jpeg;base64,' + result.profilePicture;
       }
     });
@@ -357,7 +357,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     this.loadingPreviousUserMessages = true;
 
     let minMessageId;
-    if (user.messages && user.messages.length) {
+    if (user.messages?.length) {
       minMessageId = _min(_map(user.messages, m => m.id));
     }
 
@@ -480,7 +480,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       if (isOpen) {
         this.showChat();
         this._localStorageService.getItem('app.chat.selectedUser', (err, selectedUser) => {
-          if (selectedUser && selectedUser.friendUserId) {
+          if (selectedUser?.friendUserId) {
             this.selectFriend(selectedUser);
           }
         });
