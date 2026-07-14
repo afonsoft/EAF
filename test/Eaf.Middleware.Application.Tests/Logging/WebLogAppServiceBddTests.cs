@@ -100,6 +100,36 @@ namespace Eaf.Middleware.Application.Tests.Logging
 
         #endregion
 
+        [Fact]
+        public void Dado_ArquivoComMaisDeCemLinhas_Quando_GetLatestWebLogs_Entao_DevePararNoLimite()
+        {
+            // Dado
+            var tempDir = Path.Combine(Path.GetTempPath(), "WebLogTest_" + System.Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var logFile = Path.Combine(tempDir, "app.txt");
+                var lines = new List<string>();
+                for (int i = 0; i < 101; i++)
+                {
+                    lines.Add($"INFO log line {i}");
+                }
+                File.WriteAllLines(logFile, lines);
+                _appFolders.WebLogsFolder.Returns(tempDir);
+
+                // Quando
+                var result = _sut.GetLatestWebLogs();
+
+                // Então
+                result.ShouldNotBeNull();
+                result.LatestWebLogLines.Count.ShouldBeLessThanOrEqualTo(100);
+            }
+            finally
+            {
+                Directory.Delete(tempDir, true);
+            }
+        }
+
         #region DownloadWebLogs
 
         [Fact]

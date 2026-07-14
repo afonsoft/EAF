@@ -169,6 +169,85 @@ namespace Eaf.Middleware.Application.Tests.Chat
             result.Friends[1].IsOnline.ShouldBeTrue();
         }
 
+        [Fact]
+        public async Task Dado_UsuarioLogadoSemTenant_Quando_GetUserChatFriendsWithSettings_Entao_DeveRetornarApenasAmigos()
+        {
+            var userIdentifier = new UserIdentifier(null, 42);
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var friend = new FriendCacheItem
+            {
+                FriendTenantId = null,
+                FriendUserId = 10,
+                FriendUserName = "amigo",
+                Name = "Amigo",
+                Surname = "Teste"
+            };
+
+            var cacheItem = new UserWithFriendsCacheItem
+            {
+                Friends = new List<FriendCacheItem> { friend }
+            };
+            _userFriendsCache.GetCacheItem(userIdentifier).Returns(cacheItem);
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<FriendshipDto>>(Arg.Any<object>())
+                .Returns(callInfo =>
+                {
+                    var source = callInfo.Arg<object>();
+                    var items = (source as IEnumerable<FriendCacheItem>)!;
+                    return items.Select(x => new FriendshipDto
+                    {
+                        FriendTenantId = x.FriendTenantId,
+                        FriendUserId = x.FriendUserId,
+                        FriendUserName = x.FriendUserName,
+                        Name = x.Name,
+                        Surname = x.Surname
+                    }).ToList();
+                });
+            _sut.ObjectMapper = objectMapper;
+
+            _onlineClientManager
+                .GetAllByUserIdAsync(Arg.Any<IUserIdentifier>())
+                .Returns(Task.FromResult<IReadOnlyList<IOnlineClient>>(new List<IOnlineClient>()));
+
+            var result = await _sut.GetUserChatFriendsWithSettingsAsync();
+
+            result.ShouldNotBeNull();
+            result.Friends.Count.ShouldBe(1);
+            result.Friends[0].FriendUserId.ShouldBe(10);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioLogadoComAmigosNulos_Quando_GetUserChatFriendsWithSettings_Entao_DeveRetornarListaVazia()
+        {
+            var userIdentifier = new UserIdentifier(1, 42);
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(42L);
+            _sut.AbpSession = abpSession;
+
+            var cacheItem = new UserWithFriendsCacheItem { Friends = new List<FriendCacheItem> { new FriendCacheItem() } };
+            _userFriendsCache.GetCacheItem(userIdentifier).Returns(cacheItem);
+
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<List<FriendshipDto>>(Arg.Any<object>()).Returns((List<FriendshipDto>?)null);
+            _sut.ObjectMapper = objectMapper;
+
+            var featureChecker = Substitute.For<Abp.Application.Features.IFeatureChecker>();
+            featureChecker.IsEnabledAsync(1, AppFeatures.GroupChatFeature).Returns(false);
+            _sut.FeatureChecker = featureChecker;
+
+            var result = await _sut.GetUserChatFriendsWithSettingsAsync();
+
+            result.ShouldNotBeNull();
+            result.Friends.ShouldNotBeNull();
+            result.Friends.Count.ShouldBe(0);
+        }
+
         #endregion
 
         #region GetUserChatMessages
@@ -577,6 +656,112 @@ namespace Eaf.Middleware.Application.Tests.Chat
         }
 
         [Fact]
+        public async Task Dado_UsuarioComMensagensNaoLidasDeUsuarioSemResposta_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveMarcarSemMensagensReversas()
+        {
+            var userId = 42L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(userId);
+            abpSession.TenantId.Returns(tenantId);
+            _sut.AbpSession = abpSession;
+
+            var messageReceived = new ChatMessage(
+                new UserIdentifier(tenantId, userId),
+                new UserIdentifier(tenantId, 10),
+                ChatSide.Sender,
+                "Ola",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage> { messageReceived }.AsAsyncQueryable());
+
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var input = new MarkAllUnreadMessagesOfUserAsReadInput
+            {
+                TenantId = tenantId,
+                UserId = 10
+            };
+
+            await _sut.MarkAllUnreadMessagesOfUserAsRead(input);
+
+            messageReceived.ReadState.ShouldBe(ChatMessageReadState.Read);
+            _chatMessageRepository.DidNotReceiveWithAnyArgs().Update(null);
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioComMensagensNaoLidasEAmigoOffline_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveMarcarComoLidaSemNotificarAmigo()
+        {
+            var userId = 42L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(userId);
+            abpSession.TenantId.Returns(tenantId);
+            _sut.AbpSession = abpSession;
+
+            var messageReceived = new ChatMessage(
+                new UserIdentifier(tenantId, userId),
+                new UserIdentifier(tenantId, 10),
+                ChatSide.Sender,
+                "Ola",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            var messageSent = new ChatMessage(
+                new UserIdentifier(tenantId, 10),
+                new UserIdentifier(tenantId, userId),
+                ChatSide.Receiver,
+                "Resposta",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage> { messageReceived, messageSent }.AsAsyncQueryable());
+
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var onlineClient = Substitute.For<IOnlineClient>();
+            _onlineClientManager
+                .GetAllByUserIdAsync(Arg.Any<IUserIdentifier>())
+                .Returns(ci =>
+                {
+                    var userIdArg = ci.Arg<IUserIdentifier>().UserId;
+                    return Task.FromResult<IReadOnlyList<IOnlineClient>>(userIdArg == userId ? new List<IOnlineClient> { onlineClient } : new List<IOnlineClient>());
+                });
+
+            var input = new MarkAllUnreadMessagesOfUserAsReadInput
+            {
+                TenantId = tenantId,
+                UserId = 10
+            };
+
+            await _sut.MarkAllUnreadMessagesOfUserAsRead(input);
+
+            messageReceived.ReadState.ShouldBe(ChatMessageReadState.Read);
+            messageSent.ReceiverReadState.ShouldBe(ChatMessageReadState.Read);
+            await _chatCommunicator.Received(1).SendAllUnreadMessagesOfUserReadToClients(
+                Arg.Is<IReadOnlyList<IOnlineClient>>(list => list.Count == 1),
+                new UserIdentifier(tenantId, 10));
+            await _chatCommunicator.DidNotReceive().SendReadStateChangeToClients(
+                Arg.Any<IReadOnlyList<IOnlineClient>>(),
+                Arg.Any<UserIdentifier>());
+        }
+
+        [Fact]
         public async Task Dado_UsuarioComMensagensNaoLidasDeGrupo_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveMarcarComoLida()
         {
             // Dado
@@ -617,6 +802,97 @@ namespace Eaf.Middleware.Application.Tests.Chat
 
             // Então
             message.ReadState.ShouldBe(ChatMessageReadState.Read);
+            await _chatCommunicator.DidNotReceive().SendAllUnreadMessagesOfUserReadToClients(
+                Arg.Any<IReadOnlyList<IOnlineClient>>(),
+                Arg.Any<UserIdentifier>());
+        }
+
+        [Fact]
+        public async Task Dado_UsuarioOfflineComAmigoOnline_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveNotificarApenasAmigo()
+        {
+            var userId = 42L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(userId);
+            abpSession.TenantId.Returns(tenantId);
+            _sut.AbpSession = abpSession;
+
+            var messageReceived = new ChatMessage(
+                new UserIdentifier(tenantId, userId),
+                new UserIdentifier(tenantId, 10),
+                ChatSide.Sender,
+                "Ola",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            var messageSent = new ChatMessage(
+                new UserIdentifier(tenantId, 10),
+                new UserIdentifier(tenantId, userId),
+                ChatSide.Receiver,
+                "Resposta",
+                ChatMessageReadState.Unread,
+                Guid.NewGuid(),
+                ChatMessageReadState.Unread);
+
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage> { messageReceived, messageSent }.AsAsyncQueryable());
+
+            var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
+
+            var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            unitOfWorkManager.Current.Returns(activeUnitOfWork);
+            _sut.UnitOfWorkManager = unitOfWorkManager;
+
+            var onlineClient = Substitute.For<IOnlineClient>();
+            _onlineClientManager
+                .GetAllByUserIdAsync(Arg.Any<IUserIdentifier>())
+                .Returns(ci =>
+                {
+                    var userIdArg = ci.Arg<IUserIdentifier>().UserId;
+                    return Task.FromResult<IReadOnlyList<IOnlineClient>>(userIdArg == 10 ? new List<IOnlineClient> { onlineClient } : new List<IOnlineClient>());
+                });
+
+            var input = new MarkAllUnreadMessagesOfUserAsReadInput
+            {
+                TenantId = tenantId,
+                UserId = 10
+            };
+
+            await _sut.MarkAllUnreadMessagesOfUserAsRead(input);
+
+            messageReceived.ReadState.ShouldBe(ChatMessageReadState.Read);
+            messageSent.ReceiverReadState.ShouldBe(ChatMessageReadState.Read);
+            await _chatCommunicator.DidNotReceive().SendAllUnreadMessagesOfUserReadToClients(
+                Arg.Any<IReadOnlyList<IOnlineClient>>(),
+                Arg.Any<UserIdentifier>());
+            await _chatCommunicator.Received(1).SendReadStateChangeToClients(
+                Arg.Is<IReadOnlyList<IOnlineClient>>(list => list.Count == 1),
+                new UserIdentifier(tenantId, userId));
+        }
+
+        [Fact]
+        public async Task Dado_GrupoSemMensagensNaoLidas_Quando_MarkAllUnreadMessagesOfUserAsRead_Entao_DeveRetornarSemAlteracoes()
+        {
+            var userId = 42L;
+            var tenantId = 1;
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.UserId.Returns(userId);
+            abpSession.TenantId.Returns(tenantId);
+            _sut.AbpSession = abpSession;
+
+            _chatMessageRepository.GetAll().Returns(new List<ChatMessage>().AsAsyncQueryable());
+
+            var input = new MarkAllUnreadMessagesOfUserAsReadInput
+            {
+                TenantId = tenantId,
+                GroupId = 1
+            };
+
+            await _sut.MarkAllUnreadMessagesOfUserAsRead(input);
+
             await _chatCommunicator.DidNotReceive().SendAllUnreadMessagesOfUserReadToClients(
                 Arg.Any<IReadOnlyList<IOnlineClient>>(),
                 Arg.Any<UserIdentifier>());
