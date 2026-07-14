@@ -68,7 +68,7 @@ describe('AuditLogsComponent', () => {
 
   it('should have date range initialized', () => {
     expect(component.dateRange).toBeDefined();
-    expect(component.dateRange.length).toBe(2);
+    expect(component.dateRange).toHaveSize(2);
   });
 
   it('should truncate string with postfix', () => {

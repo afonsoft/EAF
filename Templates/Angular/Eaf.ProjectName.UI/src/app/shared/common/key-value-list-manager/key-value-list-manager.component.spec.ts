@@ -62,13 +62,13 @@ describe('KeyValueListManagerComponent', () => {
     component.addOrEditKey = 'testKey';
     component.addOrEditValue = 'testValue';
     component.addOrEdit();
-    expect(component.items.length).toBe(1);
+    expect(component.items).toHaveSize(1);
     expect(component.items[0].key).toBe('testKey');
   });
 
   it('should remove an item', () => {
     component.items = [{ key: 'test', value: 'value' }];
     component.removeItem({ key: 'test', value: 'value' });
-    expect(component.items.length).toBe(0);
+    expect(component.items).toHaveSize(0);
   });
 });
