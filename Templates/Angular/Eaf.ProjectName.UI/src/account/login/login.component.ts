@@ -31,10 +31,10 @@ export class LoginComponent extends AppComponentBase implements OnInit {
   constructor(
     injector: Injector,
     public loginService: LoginService,
-    private _sessionService: EafSessionService,
-    private _accountService: AccountServiceProxy,
-    private _sessionAppService: SessionServiceProxy,
-    private _reCaptchaV3Service: ReCaptchaV3Service,
+    private readonly _sessionService: EafSessionService,
+    private readonly _accountService: AccountServiceProxy,
+    private readonly _sessionAppService: SessionServiceProxy,
+    private readonly _reCaptchaV3Service: ReCaptchaV3Service,
   ) {
     super(injector);
   }
@@ -61,7 +61,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
         const initialReturnUrl = UrlHelper.getReturnUrl();
         const returnUrl =
           initialReturnUrl +
-          (initialReturnUrl.indexOf('?') >= 0 ? '&' : '?') +
+          (initialReturnUrl.includes('?') ? '&' : '?') +
           'accessToken=' +
           result.signInToken +
           '&userId=' +
@@ -92,7 +92,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     const state = UrlHelper.getQueryParametersUsingHash().state;
     const parameters = UrlHelper.getQueryParameters();
     this.submitting = true;
-    if ((state && state.indexOf('openIdConnect') >= 0) || parameters['openIdConnect'] !== undefined) {
+    if ((state && state.includes('openIdConnect')) || parameters['openIdConnect'] !== undefined) {
       this.loginService.openIdConnectLoginCallback();
     }
   }

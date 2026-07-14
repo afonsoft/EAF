@@ -150,17 +150,17 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   constructor(
-    private el: ElementRef,
+    private readonly el: ElementRef,
     injector: Injector,
-    private layoutRefService: LayoutRefService,
-    private _friendshipService: FriendshipServiceProxy,
-    private _chatService: ChatServiceProxy,
-    private _commonLookupService: CommonLookupServiceProxy,
-    private _localStorageService: LocalStorageService,
-    private _chatSignalrService: ChatSignalrService,
-    private _profileService: ProfileServiceProxy,
-    private _httpClient: HttpClient,
-    private _dateTimeService: DateTimeService,
+    private readonly layoutRefService: LayoutRefService,
+    private readonly _friendshipService: FriendshipServiceProxy,
+    private readonly _chatService: ChatServiceProxy,
+    private readonly _commonLookupService: CommonLookupServiceProxy,
+    private readonly _localStorageService: LocalStorageService,
+    private readonly _chatSignalrService: ChatSignalrService,
+    private readonly _profileService: ProfileServiceProxy,
+    private readonly _httpClient: HttpClient,
+    private readonly _dateTimeService: DateTimeService,
     public _zone: NgZone,
   ) {
     super(injector);
@@ -279,8 +279,8 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   getShownUserName(selectUser: ChatFriendDto): string {
-    const name = selectUser.name != null ? selectUser.name : selectUser.friendUserName;
-    const surname = selectUser.surname != null ? selectUser.surname : '';
+    const name = selectUser.name ?? selectUser.friendUserName;
+    const surname = selectUser.surname ?? '';
     if (!this.isMultiTenancyEnabled) {
       return name + ' ' + surname;
     }
@@ -288,8 +288,8 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     return (selectUser.friendTenancyName ? selectUser.friendTenancyName : '.') + '\\' + name;
   }
   getShowTitle(selectUser: ChatFriendDto): string {
-    const name = selectUser.name != null ? selectUser.name : selectUser.friendUserName;
-    const surname = selectUser.surname != null ? selectUser.surname : '';
+    const name = selectUser.name ?? selectUser.friendUserName;
+    const surname = selectUser.surname ?? '';
     return name + ' ' + surname + ' <' + selectUser.email + '>';
   }
 
@@ -340,7 +340,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
 
     this._chatService.markAllUnreadMessagesOfUserAsRead(input).subscribe(() => {
       _forEach(user.messages, message => {
-        if (unreadMessageIds.indexOf(message.id) >= 0) {
+        if (unreadMessageIds.includes(message.id)) {
           message.readState = ChatMessageReadState.Read;
         }
       });
@@ -390,7 +390,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   addFriendSelected(item: NameValueDto): void {
     const userId = item.value;
     const input = new CreateFriendshipRequestInput();
-    input.userId = parseInt(userId);
+    input.userId = Number.parseInt(userId);
     input.tenantId = this.appSession.tenant ? this.appSession.tenant.id : null;
 
     this._friendshipService.createFriendshipRequest(input).subscribe(() => {
@@ -401,7 +401,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   search(): void {
     const input = new CreateFriendshipRequestByUserNameInput();
 
-    if (this.userNameFilter.indexOf('\\') === -1) {
+    if (!this.userNameFilter.includes('\\')) {
       input.userName = this.userNameFilter;
     } else {
       const tenancyAndUserNames = this.userNameFilter.split('\\');
@@ -431,7 +431,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     const foundFriends = _filter(
       this.friends,
       friend =>
-        friend.state === state && this.getShownUserName(friend).toLocaleLowerCase().indexOf(userNameFilter.toLocaleLowerCase()) >= 0,
+        friend.state === state && this.getShownUserName(friend).toLocaleLowerCase().includes(userNameFilter.toLocaleLowerCase()),
     );
 
     return foundFriends;
@@ -615,7 +615,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
         } else {
           self.notify.info(eaf.utils.formatString('{0}: {1}', user.friendUserName, eaf.utils.truncateString(message.message, 100)), null, {
             onclick() {
-              if (document.body.className.indexOf('offcanvas-on') < 0) {
+              if (!document.body.className.includes('offcanvas-on')) {
                 self.showChatPanel();
                 self.isOpen = true;
               }

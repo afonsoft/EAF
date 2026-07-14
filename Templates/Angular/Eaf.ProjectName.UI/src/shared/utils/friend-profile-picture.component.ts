@@ -13,7 +13,7 @@ export class FriendProfilePictureComponent implements AfterViewInit {
   @Input() cssClass = 'media-object';
   profilePicture = AppConsts.appBaseUrl + '/assets/common/images/nopicture.png';
 
-  constructor(private _profileService: ProfileServiceProxy) {}
+  constructor(private readonly _profileService: ProfileServiceProxy) {}
 
   ngAfterViewInit(): void {
     this.setProfileImage();

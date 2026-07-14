@@ -6,7 +6,7 @@
 })
 export class MenuAsideToggleDirective implements AfterViewInit {
   toggle: any;
-  constructor(private el: ElementRef) {}
+  constructor(private readonly el: ElementRef) {}
 
   ngAfterViewInit(): void {
     this.toggle = new mToggle(this.el.nativeElement, {

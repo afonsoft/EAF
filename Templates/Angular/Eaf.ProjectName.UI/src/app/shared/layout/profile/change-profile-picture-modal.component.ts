@@ -19,7 +19,7 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
   public active = false;
   public temporaryPictureUrl: string;
   public saving = false;
-  private input = new UpdateProfilePictureInput();
+  private readonly input = new UpdateProfilePictureInput();
   public selectedFile: File | null = null;
 
   public maxProfilPictureBytesUserFriendlyValue = 50;
@@ -27,9 +27,9 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _profileService: ProfileServiceProxy,
-    private _tokenService: TokenService,
-    private _http: HttpClient,
+    private readonly _profileService: ProfileServiceProxy,
+    private readonly _tokenService: TokenService,
+    private readonly _http: HttpClient,
   ) {
     super(injector);
   }

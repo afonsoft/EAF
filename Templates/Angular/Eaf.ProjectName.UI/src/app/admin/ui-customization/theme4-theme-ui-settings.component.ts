@@ -15,7 +15,7 @@ export class Theme4ThemeUiSettingsComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _uiCustomizationService: UiCustomizationSettingsServiceProxy,
+    private readonly _uiCustomizationService: UiCustomizationSettingsServiceProxy,
   ) {
     super(injector);
   }

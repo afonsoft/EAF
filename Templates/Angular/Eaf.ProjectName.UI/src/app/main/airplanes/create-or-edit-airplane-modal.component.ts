@@ -20,7 +20,7 @@ export class CreateOrEditAirplaneModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _airplanesServiceProxy: AirplanesServiceProxy,
+    private readonly _airplanesServiceProxy: AirplanesServiceProxy,
   ) {
     super(injector);
   }

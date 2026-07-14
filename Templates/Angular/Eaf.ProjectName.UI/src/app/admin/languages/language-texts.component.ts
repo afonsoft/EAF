@@ -39,9 +39,9 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
 
   constructor(
     injector: Injector,
-    private _languageService: LanguageServiceProxy,
-    private _router: Router,
-    private _activatedRoute: ActivatedRoute,
+    private readonly _languageService: LanguageServiceProxy,
+    private readonly _router: Router,
+    private readonly _activatedRoute: ActivatedRoute,
   ) {
     super(injector);
   }
@@ -127,9 +127,9 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
   }
 
   refreshTextValueFromModal(): void {
-    for (let i = 0; i < this.dataTableHelper.records.length; i++) {
-      if (this.dataTableHelper.records[i].key === this.editTextModal.model.key) {
-        this.dataTableHelper.records[i].targetValue = this.editTextModal.model.value;
+    for (const record of this.dataTableHelper.records) {
+      if (record.key === this.editTextModal.model.key) {
+        record.targetValue = this.editTextModal.model.value;
         return;
       }
     }

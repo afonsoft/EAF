@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Injector, OnInit, forwardRef } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { FlatPermissionWithLevelDto, PermissionServiceProxy } from '@shared/service-proxies/service-proxies';
 import * as _ from 'lodash';
@@ -27,7 +27,7 @@ export class PermissionComboComponent extends AppComponentBase implements OnInit
   onTouched: any = () => {};
 
   constructor(
-    private _permissionService: PermissionServiceProxy,
+    private readonly _permissionService: PermissionServiceProxy,
     injector: Injector,
   ) {
     super(injector);

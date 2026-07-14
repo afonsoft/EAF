@@ -22,9 +22,7 @@ export class LocalizePipe implements PipeTransform {
   }
 
   l(key: string, ...args: any[]): string {
-    args.unshift(key);
-    args.unshift(this.localizationSourceName);
-    return this.ls.apply(this, args);
+    return this.ls(this.localizationSourceName, key, ...args);
   }
 
   ls(sourcename: string, key: string, ...args: any[]): string {

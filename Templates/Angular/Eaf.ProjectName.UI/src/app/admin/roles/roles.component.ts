@@ -27,7 +27,7 @@ export class RolesComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _roleService: RoleServiceProxy,
+    private readonly _roleService: RoleServiceProxy,
   ) {
     super(injector);
   }

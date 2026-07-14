@@ -33,7 +33,7 @@ export class SettingsComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _hostSettingService: HostSettingsServiceProxy,
+    private readonly _hostSettingService: HostSettingsServiceProxy,
   ) {
     super(injector);
   }

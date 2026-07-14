@@ -1,7 +1,7 @@
-﻿import { Injector, ElementRef, Component, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+﻿import { Injector, ElementRef, Component, ViewChild, AfterViewInit } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service';
-import { UrlHelper } from '@shared/helpers/UrlHelper';
+
 import { AppComponentBase } from '@shared/common/app-component-base';
 
 @Component({
@@ -15,7 +15,7 @@ export class Theme4LayoutComponent extends AppComponentBase implements AfterView
 
   constructor(
     injector: Injector,
-    private layoutRefService: LayoutRefService,
+    private readonly layoutRefService: LayoutRefService,
   ) {
     super(injector);
   }

@@ -19,7 +19,7 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _auditLogService: AuditLogServiceProxy,
+    private readonly _auditLogService: AuditLogServiceProxy,
   ) {
     super(injector);
   }

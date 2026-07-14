@@ -3,7 +3,7 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { CachingServiceProxy, EntityDtoOfString, WebLogServiceProxy } from '@shared/service-proxies/service-proxies';
 import { FileDownloadService } from '@shared/utils/file-download.service';
-import * as _ from 'lodash';
+
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -18,9 +18,9 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _cacheService: CachingServiceProxy,
-    private _webLogService: WebLogServiceProxy,
-    private _fileDownloadService: FileDownloadService,
+    private readonly _cacheService: CachingServiceProxy,
+    private readonly _webLogService: WebLogServiceProxy,
+    private readonly _fileDownloadService: FileDownloadService,
   ) {
     super(injector);
   }

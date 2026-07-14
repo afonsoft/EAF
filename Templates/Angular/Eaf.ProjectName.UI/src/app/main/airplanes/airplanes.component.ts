@@ -31,8 +31,8 @@ export class AirplanesComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _airplanesServiceProxy: AirplanesServiceProxy,
-    private _fileDownloadService: FileDownloadService,
+    private readonly _airplanesServiceProxy: AirplanesServiceProxy,
+    private readonly _fileDownloadService: FileDownloadService,
   ) {
     super(injector);
   }

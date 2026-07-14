@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Injector, OnInit, forwardRef } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { RoleListDto, RoleServiceProxy } from '@shared/service-proxies/service-proxies';
 import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -26,7 +26,7 @@ export class RoleComboComponent extends AppComponentBase implements OnInit, Cont
   onTouched: any = () => {};
 
   constructor(
-    private _roleService: RoleServiceProxy,
+    private readonly _roleService: RoleServiceProxy,
     injector: Injector,
   ) {
     super(injector);

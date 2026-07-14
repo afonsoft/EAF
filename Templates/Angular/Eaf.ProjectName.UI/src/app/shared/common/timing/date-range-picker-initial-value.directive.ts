@@ -1,4 +1,4 @@
-﻿import { AfterViewInit, Directive, ElementRef, EventEmitter, Injector, Input, Output } from '@angular/core';
+﻿import { AfterViewInit, Directive, ElementRef, Injector, Input } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import * as moment from 'moment';
 
@@ -12,7 +12,7 @@ export class DateRangePickerInitialValueSetterDirective extends AppComponentBase
 
   constructor(
     injector: Injector,
-    private _element: ElementRef,
+    private readonly _element: ElementRef,
   ) {
     super(injector);
     this.hostElement = _element;

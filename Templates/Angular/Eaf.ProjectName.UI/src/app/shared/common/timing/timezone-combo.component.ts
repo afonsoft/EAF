@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, forwardRef } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { NameValueDto, TimingServiceProxy, SettingScopes } from '@shared/service-proxies/service-proxies';
 import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -27,7 +27,7 @@ export class TimeZoneComboComponent extends AppComponentBase implements OnInit, 
   onTouched: any = () => {};
 
   constructor(
-    private _timingService: TimingServiceProxy,
+    private readonly _timingService: TimingServiceProxy,
     injector: Injector,
   ) {
     super(injector);

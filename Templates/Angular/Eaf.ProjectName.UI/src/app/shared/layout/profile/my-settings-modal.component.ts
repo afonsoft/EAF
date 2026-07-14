@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
+﻿import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppConsts } from '@shared/AppConsts';
 import { AppTimezoneScope } from '@shared/AppEnums';
 import { AppComponentBase } from '@shared/common/app-component-base';
@@ -25,7 +25,7 @@ export class MySettingsModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _profileService: ProfileServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }

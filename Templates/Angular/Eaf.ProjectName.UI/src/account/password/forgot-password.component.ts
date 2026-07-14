@@ -18,9 +18,9 @@ export class ForgotPasswordComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _accountService: AccountServiceProxy,
-    private _appUrlService: AppUrlService,
-    private _router: Router,
+    private readonly _accountService: AccountServiceProxy,
+    private readonly _appUrlService: AppUrlService,
+    private readonly _router: Router,
   ) {
     super(injector);
   }

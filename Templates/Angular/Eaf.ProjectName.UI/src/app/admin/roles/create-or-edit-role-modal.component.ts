@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
+﻿import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { CreateOrUpdateRoleInput, RoleEditDto, RoleServiceProxy } from '@shared/service-proxies/service-proxies';
 import { ModalDirective } from 'ngx-bootstrap/modal';
@@ -22,7 +22,7 @@ export class CreateOrEditRoleModalComponent extends AppComponentBase {
   role: RoleEditDto = new RoleEditDto();
   constructor(
     injector: Injector,
-    private _roleService: RoleServiceProxy,
+    private readonly _roleService: RoleServiceProxy,
   ) {
     super(injector);
   }

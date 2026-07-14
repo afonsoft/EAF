@@ -22,7 +22,7 @@ export class EditUserPermissionsModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _userService: UserServiceProxy,
+    private readonly _userService: UserServiceProxy,
   ) {
     super(injector);
   }

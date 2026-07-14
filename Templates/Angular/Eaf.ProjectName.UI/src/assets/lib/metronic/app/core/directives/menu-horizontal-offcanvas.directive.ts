@@ -7,7 +7,7 @@
 export class MenuHorizontalOffcanvasDirective implements AfterViewInit {
   menuOffcanvas: any;
 
-  constructor(private el: ElementRef) {}
+  constructor(private readonly el: ElementRef) {}
 
   ngAfterViewInit(): void {
     // init the mOffcanvas plugin

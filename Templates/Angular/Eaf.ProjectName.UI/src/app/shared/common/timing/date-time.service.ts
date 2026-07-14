@@ -4,7 +4,7 @@ import * as moment from 'moment';
 
 @Injectable()
 export class DateTimeService {
-  constructor(private _appLocalizationService: AppLocalizationService) {}
+  constructor(private readonly _appLocalizationService: AppLocalizationService) {}
 
   createDateRangePickerOptions(): any {
     const options = {

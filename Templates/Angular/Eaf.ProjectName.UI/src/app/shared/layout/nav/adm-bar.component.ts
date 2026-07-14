@@ -15,7 +15,7 @@ export class AdmBarComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _appNavigationService: AppNavigationService,
+    private readonly _appNavigationService: AppNavigationService,
   ) {
     super(injector);
   }

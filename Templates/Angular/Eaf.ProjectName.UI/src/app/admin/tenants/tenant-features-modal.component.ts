@@ -25,7 +25,7 @@ export class TenantFeaturesModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _tenantService: TenantServiceProxy,
+    private readonly _tenantService: TenantServiceProxy,
   ) {
     super(injector);
   }

@@ -24,7 +24,7 @@ export class UserNotificationHelper extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _notificationService: NotificationServiceProxy,
+    private readonly _notificationService: NotificationServiceProxy,
   ) {
     super(injector);
   }

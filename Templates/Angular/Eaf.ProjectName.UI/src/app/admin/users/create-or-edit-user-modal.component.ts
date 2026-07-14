@@ -1,4 +1,4 @@
-﻿import { AfterViewChecked, Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
+﻿import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppConsts } from '@shared/AppConsts';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import {
@@ -79,17 +79,17 @@ export class CreateOrEditUserModalComponent extends AppComponentBase {
     let valid = false;
 
     valid =
-      (this.userType == 'system' && this.systemRoles.filter(role => role.isAssigned).length > 0) ||
-      (this.userType == 'activedirectory' && this.activeDirectoryRoles.filter(role => role.isAssigned).length > 0) ||
-      (this.userType == 'ldap' && this.ldapRoles.filter(role => role.isAssigned).length > 0);
+      (this.userType == 'system' && this.systemRoles.some(role => role.isAssigned)) ||
+      (this.userType == 'activedirectory' && this.activeDirectoryRoles.some(role => role.isAssigned)) ||
+      (this.userType == 'ldap' && this.ldapRoles.some(role => role.isAssigned));
 
     return valid;
   }
 
   constructor(
     injector: Injector,
-    private _userService: UserServiceProxy,
-    private _profileService: ProfileServiceProxy,
+    private readonly _userService: UserServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }

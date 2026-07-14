@@ -1,13 +1,12 @@
 ﻿import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import {
-  CommonLookupServiceProxy,
   CreateTenantInput,
   PasswordComplexitySetting,
   ProfileServiceProxy,
   TenantServiceProxy,
 } from '@shared/service-proxies/service-proxies';
-import * as _ from 'lodash';
+
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
@@ -30,8 +29,8 @@ export class CreateTenantModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _tenantService: TenantServiceProxy,
-    private _profileService: ProfileServiceProxy,
+    private readonly _tenantService: TenantServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }

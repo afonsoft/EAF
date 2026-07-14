@@ -7,7 +7,7 @@
 export class MenuHorizontalDirective implements AfterViewInit {
   menu: any;
 
-  constructor(private el: ElementRef) {}
+  constructor(private readonly el: ElementRef) {}
 
   ngAfterViewInit(): void {
     // init the mMenu plugin

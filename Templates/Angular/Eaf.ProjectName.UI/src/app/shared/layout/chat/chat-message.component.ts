@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ChatMessageDto, ChatServiceProxy } from '@shared/service-proxies/service-proxies';
 import { AppConsts } from 'shared/AppConsts';
-import { LocalStorageService } from '@shared/utils/local-storage.service';
+
 import { StorageService } from '@eaf/utils/storage.service';
 
 @Component({
@@ -19,8 +19,8 @@ export class ChatMessageComponent implements OnInit {
   fileContentType: string;
 
   constructor(
-    private _chatService: ChatServiceProxy,
-    private _storageService: StorageService,
+    private readonly _chatService: ChatServiceProxy,
+    private readonly _storageService: StorageService,
   ) {}
 
   ngOnInit(): void {
@@ -68,7 +68,7 @@ export class ChatMessageComponent implements OnInit {
     } else if (self.message.message.startsWith('[link]')) {
       self.chatMessageType = 'link';
       const linkMessage = JSON.parse(self.message.message.substring('[link]'.length));
-      self.chatMessage = linkMessage.message == null ? '' : linkMessage.message;
+      self.chatMessage = linkMessage.message ?? '';
     } else {
       self.chatMessageType = 'text';
       self.chatMessage = self.message.message;

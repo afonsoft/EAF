@@ -9,12 +9,11 @@
 
     const checkExist = setInterval(() => {
       let foundElementCount = 0;
-      for (let i = 0; i < selectors.length; i++) {
-        const selector = selectors[i].trim();
-        if (selector[0] === '#') {
+      for (const selector of selectors.map(s => s.trim())) {
+        if (selector.startsWith('#')) {
           const idSelector = selector.replace('#', '');
           foundElementCount = foundElementCount + (document.getElementById(idSelector) ? 1 : 0);
-        } else if (selector[0] === '.') {
+        } else if (selector.startsWith('.')) {
           const classSelector = selector.replace('.', '');
           foundElementCount = foundElementCount + (document.getElementsByClassName(classSelector) ? 1 : 0);
         }
@@ -29,8 +28,7 @@
 
   static createElement(tag: string, attributes: any[]): any {
     const el = document.createElement(tag);
-    for (let i = 0; i < attributes.length; i++) {
-      const attribute = attributes[i];
+    for (const attribute of attributes) {
       el.setAttribute(attribute.key, attribute.value);
     }
 
@@ -43,8 +41,7 @@
       return undefined;
     }
 
-    for (let i = 0; i < els.length; i++) {
-      const el = els[i];
+    for (const el of Array.from(els)) {
       if (el.getAttribute(attribute) === value) {
         return el;
       }

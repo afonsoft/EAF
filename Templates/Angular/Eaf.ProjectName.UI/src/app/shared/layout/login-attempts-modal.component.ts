@@ -19,8 +19,8 @@ export class LoginAttemptsModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _userLoginService: UserLoginServiceProxy,
-    private _profileService: ProfileServiceProxy,
+    private readonly _userLoginService: UserLoginServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }

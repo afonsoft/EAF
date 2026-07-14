@@ -1,4 +1,4 @@
-﻿import { Injector, ElementRef, Component, OnInit, AfterViewInit, ViewChild, HostBinding } from '@angular/core';
+﻿import { Injector, ElementRef, Component, AfterViewInit, ViewChild, HostBinding } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service';
 import { MenuAsideOffcanvasDirective } from '@metronic/app/core/directives/menu-aside-offcanvas.directive';
@@ -17,7 +17,7 @@ export class DefaultLayoutComponent extends AppComponentBase implements AfterVie
 
   constructor(
     injector: Injector,
-    private layoutRefService: LayoutRefService,
+    private readonly layoutRefService: LayoutRefService,
   ) {
     super(injector);
   }

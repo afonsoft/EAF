@@ -3,7 +3,7 @@ import { AppLocalizationService } from '@app/shared/common/localization/app-loca
 
 @Injectable()
 export class CookieConsentService {
-  constructor(private _appLocalizationService: AppLocalizationService) {}
+  constructor(private readonly _appLocalizationService: AppLocalizationService) {}
 
   public init() {
     if (eaf.setting.getBoolean('App.UserManagement.IsCookieConsentEnabled')) {

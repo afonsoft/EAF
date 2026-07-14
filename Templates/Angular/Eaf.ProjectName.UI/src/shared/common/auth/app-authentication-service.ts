@@ -4,7 +4,7 @@ import { AppConsts } from 'shared/AppConsts';
 
 @Injectable()
 export class AppAuthenticationService {
-  constructor(private _hostSettingService: HostSettingsServiceProxy) {}
+  constructor(private readonly _hostSettingService: HostSettingsServiceProxy) {}
 
   init(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {

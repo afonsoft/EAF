@@ -61,21 +61,19 @@ export class LoginService {
 
   constructor(
     injector: Injector,
-    private _tokenAuthService: TokenAuthServiceProxy,
-    private _router: Router,
-    private _storageService: StorageService,
-    private _tokenService: TokenService,
-    private _logService: LogService,
-    private oauthService: OAuthService,
+    private readonly _tokenAuthService: TokenAuthServiceProxy,
+    private readonly _router: Router,
+    private readonly _storageService: StorageService,
+    private readonly _tokenService: TokenService,
+    private readonly _logService: LogService,
+    private readonly oauthService: OAuthService,
   ) {
     this.clear();
     this.localization = injector.get(LocalizationService);
   }
 
   l(key: string, ...args: any[]): string {
-    args.unshift(key);
-    args.unshift(this.localizationSourceName);
-    return this.ls.apply(this, args);
+    return this.ls(this.localizationSourceName, key, ...args);
   }
 
   ls(sourcename: string, key: string, ...args: any[]): string {

@@ -16,7 +16,7 @@ export class Theme3BrandComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    @Inject(DOCUMENT) private document: Document,
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {
     super(injector);
   }

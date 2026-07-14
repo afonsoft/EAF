@@ -36,13 +36,13 @@ export class ValidationMessagesComponent {
   ];
 
   get errorDefsInternal(): ErrorDef[] {
-    const standarts = _.filter(this.standartErrorDefs, ed => !_.find(this._errorDefs, edC => edC.error === ed.error));
+    const standarts = _.filter(this.standartErrorDefs, ed => !_.some(this._errorDefs, edC => edC.error === ed.error));
     const all = <ErrorDef[]>_.concat(standarts, this._errorDefs);
 
     return all;
   }
 
-  constructor(private appLocalizationService: AppLocalizationService) {}
+  constructor(private readonly appLocalizationService: AppLocalizationService) {}
 
   getErrorDefinitionIsInValid(errorDef: ErrorDef): boolean {
     return !!this.formCtrl.errors[errorDef.error];

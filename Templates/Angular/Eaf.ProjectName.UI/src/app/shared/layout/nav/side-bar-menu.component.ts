@@ -7,7 +7,6 @@ import {
   AfterViewInit,
   ViewEncapsulation,
   Inject,
-  HostBinding,
   ChangeDetectionStrategy,
   DestroyRef,
   inject,
@@ -29,7 +28,7 @@ import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SideBarMenuComponent extends AppComponentBase implements OnInit, AfterViewInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   menu: AppMenu = null;
 
   currentRouteUrl = '';
@@ -38,12 +37,12 @@ export class SideBarMenuComponent extends AppComponentBase implements OnInit, Af
 
   constructor(
     injector: Injector,
-    private el: ElementRef,
-    private router: Router,
-    private layoutRefService: LayoutRefService,
+    private readonly el: ElementRef,
+    private readonly router: Router,
+    private readonly layoutRefService: LayoutRefService,
     public permission: PermissionCheckerService,
-    private _appNavigationService: AppNavigationService,
-    @Inject(DOCUMENT) private document: Document,
+    private readonly _appNavigationService: AppNavigationService,
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {
     super(injector);
   }

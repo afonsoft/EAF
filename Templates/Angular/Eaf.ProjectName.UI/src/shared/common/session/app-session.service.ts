@@ -17,8 +17,8 @@ export class AppSessionService {
   private _theme: UiCustomizationSettingsDto;
 
   constructor(
-    private _sessionService: SessionServiceProxy,
-    private _eafMultiTenancyService: EafMultiTenancyService,
+    private readonly _sessionService: SessionServiceProxy,
+    private readonly _eafMultiTenancyService: EafMultiTenancyService,
   ) {}
 
   get application(): ApplicationInfoDto {

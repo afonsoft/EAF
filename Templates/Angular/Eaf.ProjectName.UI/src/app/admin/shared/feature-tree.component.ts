@@ -25,8 +25,8 @@ export class FeatureTreeComponent extends AppComponentBase {
   selectedFeatures: TreeNode[] = [];
 
   constructor(
-    private _arrayToTreeConverterService: ArrayToTreeConverterService,
-    private _treeDataHelperService: TreeDataHelperService,
+    private readonly _arrayToTreeConverterService: ArrayToTreeConverterService,
+    private readonly _treeDataHelperService: TreeDataHelperService,
     injector: Injector,
   ) {
     super(injector);
@@ -91,9 +91,9 @@ export class FeatureTreeComponent extends AppComponentBase {
 
     const features: NameValueDto[] = [];
 
-    for (let i = 0; i < this._editData.features.length; i++) {
+    for (const f of this._editData.features) {
       const feature = new NameValueDto();
-      feature.name = this._editData.features[i].name;
+      feature.name = f.name;
       feature.value = this.getFeatureValueByName(feature.name);
 
       features.push(feature);
@@ -164,7 +164,7 @@ export class FeatureTreeComponent extends AppComponentBase {
         return new RegExp(validator.regularExpression).test(value);
       }
     } else if (validator.name === 'NUMERIC') {
-      const numValue = parseInt(value);
+      const numValue = Number.parseInt(value);
 
       if (isNaN(numValue)) {
         return false;

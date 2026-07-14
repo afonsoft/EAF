@@ -24,7 +24,7 @@ export class NotificationSettingsModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _notificationService: NotificationServiceProxy,
+    private readonly _notificationService: NotificationServiceProxy,
   ) {
     super(injector);
   }

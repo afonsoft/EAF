@@ -104,12 +104,12 @@ export class FormattedStringValueExtracter {
 
       if (currentToken.Type === FormatStringTokenType.ConstantText) {
         if (i === 0) {
-          if (str.indexOf(currentToken.Text) !== 0) {
+          if (!str.startsWith(currentToken.Text)) {
             result.IsMatch = false;
             return result;
           }
 
-          str = str.substr(currentToken.Text.length, str.length - currentToken.Text.length);
+          str = str.substring(currentToken.Text.length, str.length);
         } else {
           const matchIndex = str.indexOf(currentToken.Text);
           if (matchIndex < 0) {
@@ -117,7 +117,7 @@ export class FormattedStringValueExtracter {
             return result;
           }
 
-          result.Matches.push({ name: previousToken.Text, value: str.substr(0, matchIndex) });
+          result.Matches.push({ name: previousToken.Text, value: str.substring(0, matchIndex) });
           str = str.substring(0, matchIndex + currentToken.Text.length);
         }
       }
@@ -138,8 +138,8 @@ export class FormattedStringValueExtracter {
     }
 
     const values = [];
-    for (let i = 0; i < result.Matches.length; i++) {
-      values.push(result.Matches[i].value);
+    for (const match of result.Matches) {
+      values.push(match.value);
     }
 
     return values;

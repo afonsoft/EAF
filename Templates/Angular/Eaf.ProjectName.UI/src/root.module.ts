@@ -191,7 +191,7 @@ export function getBaseHref(platformLocation: PlatformLocation): string {
 function handleLogoutRequest(authService: AppAuthService) {
   const currentUrl = UrlHelper.initialUrl;
   const returnUrl = UrlHelper.getReturnUrl();
-  if (currentUrl.indexOf('account/logout') >= 0 && returnUrl) {
+  if (currentUrl.includes('account/logout') && returnUrl) {
     authService.logout(true, returnUrl);
   }
 }

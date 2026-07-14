@@ -12,7 +12,7 @@ import {
   TenantListDto,
   TenantServiceProxy,
 } from '@shared/service-proxies/service-proxies';
-import * as moment from 'moment';
+
 import { LazyLoadEvent } from 'primeng/api';
 import { Paginator } from 'primeng/paginator';
 import { Table } from 'primeng/table';
@@ -47,10 +47,10 @@ export class TenantsComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _tenantService: TenantServiceProxy,
-    private _activatedRoute: ActivatedRoute,
-    private _commonLookupService: CommonLookupServiceProxy,
-    private _impersonationService: ImpersonationService,
+    private readonly _tenantService: TenantServiceProxy,
+    private readonly _activatedRoute: ActivatedRoute,
+    private readonly _commonLookupService: CommonLookupServiceProxy,
+    private readonly _impersonationService: ImpersonationService,
   ) {
     super(injector);
   }
@@ -144,6 +144,6 @@ export class TenantsComponent extends AppComponentBase implements OnInit {
   }
 
   impersonateUser(item: NameValueDto): void {
-    this._impersonationService.impersonate(parseInt(item.value), this.impersonateUserLookupModal.tenantId);
+    this._impersonationService.impersonate(Number.parseInt(item.value), this.impersonateUserLookupModal.tenantId);
   }
 }

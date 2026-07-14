@@ -7,7 +7,7 @@ import { Router, NavigationEnd } from '@angular/router';
 export class LayoutConfigService {
   public onLayoutConfigUpdated$: BehaviorSubject<any>;
 
-  constructor(private router: Router) {
+  constructor(private readonly router: Router) {
     // register on config changed event and set default config
     this.onLayoutConfigUpdated$ = new BehaviorSubject(null);
 

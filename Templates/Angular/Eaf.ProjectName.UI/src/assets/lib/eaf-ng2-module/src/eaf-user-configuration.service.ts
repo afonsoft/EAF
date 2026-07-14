@@ -8,7 +8,7 @@ declare let eaf: any;
   providedIn: 'root',
 })
 export class EafUserConfigurationService {
-  constructor(private _http: HttpClient) {}
+  constructor(private readonly _http: HttpClient) {}
 
   initialize(): void {
     this._http.get('/AbpUserConfiguration/GetAll').subscribe(result => {

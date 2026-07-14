@@ -44,8 +44,8 @@ export class AuditLogsComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _auditLogService: AuditLogServiceProxy,
-    private _fileDownloadService: FileDownloadService,
+    private readonly _auditLogService: AuditLogServiceProxy,
+    private readonly _fileDownloadService: FileDownloadService,
   ) {
     super(injector);
   }
@@ -120,8 +120,7 @@ export class AuditLogsComponent extends AppComponentBase {
   }
 
   exportToExcel(): void {
-    const self = this;
-    self._auditLogService
+    this._auditLogService
       .getAuditLogsToExcel(
         this.browserInfo,
         moment(this.dateRange[1]),
@@ -137,10 +136,10 @@ export class AuditLogsComponent extends AppComponentBase {
         0,
       )
       .subscribe(result => {
-        self._fileDownloadService.downloadTempFile(result);
+        this._fileDownloadService.downloadTempFile(result);
       });
 
-    self._auditLogService
+    this._auditLogService
       .getEntityChangesToExcel(
         moment(this.dateRange[1]),
         this.entityTypeFullName,
@@ -151,7 +150,7 @@ export class AuditLogsComponent extends AppComponentBase {
         0,
       )
       .subscribe(result => {
-        self._fileDownloadService.downloadTempFile(result);
+        this._fileDownloadService.downloadTempFile(result);
       });
   }
 

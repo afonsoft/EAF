@@ -15,7 +15,7 @@ export class BusyIfDirective implements OnChanges {
     this.refreshState(isBusy);
   }
 
-  constructor(private _element: ElementRef) {}
+  constructor(private readonly _element: ElementRef) {}
 
   refreshState(isBusy: boolean): void {
     if (isBusy === undefined) {

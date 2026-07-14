@@ -34,12 +34,12 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _eafSessionService: EafSessionService,
-    private _eafMultiTenancyService: EafMultiTenancyService,
-    private _profileServiceProxy: ProfileServiceProxy,
-    private _authService: AppAuthService,
-    private _impersonationService: ImpersonationService,
-    private _storageService: StorageService,
+    private readonly _eafSessionService: EafSessionService,
+    private readonly _eafMultiTenancyService: EafMultiTenancyService,
+    private readonly _profileServiceProxy: ProfileServiceProxy,
+    private readonly _authService: AppAuthService,
+    private readonly _impersonationService: ImpersonationService,
+    private readonly _storageService: StorageService,
   ) {
     super(injector);
   }

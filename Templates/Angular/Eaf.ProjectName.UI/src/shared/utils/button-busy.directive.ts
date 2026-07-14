@@ -16,8 +16,8 @@ export class ButtonBusyDirective implements OnInit, AfterViewInit {
   private _originalButtonInnerHtml: any;
 
   constructor(
-    private _element: ElementRef,
-    private _appLocalizationService: AppLocalizationService,
+    private readonly _element: ElementRef,
+    private readonly _appLocalizationService: AppLocalizationService,
   ) {}
 
   ngOnInit(): void {

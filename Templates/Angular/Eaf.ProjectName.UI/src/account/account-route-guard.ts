@@ -6,9 +6,9 @@ import { AppSessionService } from '@shared/common/session/app-session.service';
 @Injectable()
 export class AccountRouteGuard implements CanActivate {
   constructor(
-    private _permissionChecker: PermissionCheckerService,
-    private _router: Router,
-    private _sessionService: AppSessionService,
+    private readonly _permissionChecker: PermissionCheckerService,
+    private readonly _router: Router,
+    private readonly _sessionService: AppSessionService,
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {

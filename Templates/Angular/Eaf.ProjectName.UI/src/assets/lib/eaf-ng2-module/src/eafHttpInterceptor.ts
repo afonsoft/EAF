@@ -1,7 +1,7 @@
 ﻿import { HttpEvent, HttpHandler, HttpHeaders, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable, Optional } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
+import { timeout } from 'rxjs/operators';
 
 import { TokenService } from './auth/token.service';
 import { LogService } from './log/log.service';
@@ -32,8 +32,8 @@ export interface IAjaxResponse {
 @Injectable()
 export class EafHttpConfiguration {
   constructor(
-    private _messageService: MessageService,
-    private _logService: LogService,
+    private readonly _messageService: MessageService,
+    private readonly _logService: LogService,
   ) {}
 
   defaultError = <IErrorInfo>{
@@ -195,8 +195,8 @@ export class EafHttpInterceptor implements HttpInterceptor {
 
   constructor(
     configuration: EafHttpConfiguration,
-    private _storageService: StorageService,
-    private _tokenService: TokenService,
+    private readonly _storageService: StorageService,
+    private readonly _tokenService: TokenService,
   ) {
     this.configuration = configuration;
   }
@@ -335,8 +335,8 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   private itemExists<T>(items: T[], predicate: (item: T) => boolean): boolean {
-    for (let i = 0; i < items.length; i++) {
-      if (predicate(items[i])) {
+    for (const item of items) {
+      if (predicate(item)) {
         return true;
       }
     }
@@ -407,7 +407,7 @@ export class EafHttpInterceptor implements HttpInterceptor {
       authorizationHeaders = [];
     }
 
-    if (!this.itemExists(authorizationHeaders, (item: string) => item.indexOf('Bearer ') == 0)) {
+    if (!this.itemExists(authorizationHeaders, (item: string) => item.startsWith('Bearer '))) {
       const token = this._tokenService.getToken();
       if (headers && token) {
         headers = headers.set('Authorization', 'Bearer ' + token);

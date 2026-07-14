@@ -19,7 +19,7 @@ import { DOCUMENT } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TopBarMenuComponent extends AppComponentBase implements OnInit, AfterViewInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   @Input() isTabMenuUsed?: boolean;
 
   menu: AppMenu = null;
@@ -33,10 +33,10 @@ export class TopBarMenuComponent extends AppComponentBase implements OnInit, Aft
 
   constructor(
     injector: Injector,
-    private router: Router,
+    private readonly router: Router,
     public permission: PermissionCheckerService,
-    private _appNavigationService: AppNavigationService,
-    @Inject(DOCUMENT) private document: Document,
+    private readonly _appNavigationService: AppNavigationService,
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {
     super(injector);
   }

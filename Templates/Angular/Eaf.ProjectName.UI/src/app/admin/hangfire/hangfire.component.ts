@@ -15,7 +15,7 @@ export class HangfireComponent extends AppComponentBase implements OnInit {
   }
 
   constructor(
-    private _location: Location,
+    private readonly _location: Location,
     injector: Injector,
   ) {
     super(injector);

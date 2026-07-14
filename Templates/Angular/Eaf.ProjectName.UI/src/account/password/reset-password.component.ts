@@ -31,13 +31,13 @@ export class ResetPasswordComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _accountService: AccountServiceProxy,
-    private _router: Router,
-    private _activatedRoute: ActivatedRoute,
-    private _loginService: LoginService,
-    private _appUrlService: AppUrlService,
-    private _profileService: ProfileServiceProxy,
-    private _reCaptchaV3Service: ReCaptchaV3Service,
+    private readonly _accountService: AccountServiceProxy,
+    private readonly _router: Router,
+    private readonly _activatedRoute: ActivatedRoute,
+    private readonly _loginService: LoginService,
+    private readonly _appUrlService: AppUrlService,
+    private readonly _profileService: ProfileServiceProxy,
+    private readonly _reCaptchaV3Service: ReCaptchaV3Service,
   ) {
     super(injector);
   }
@@ -105,6 +105,6 @@ export class ResetPasswordComponent extends AppComponentBase implements OnInit {
   }
 
   parseTenantId(tenantIdAsStr?: string): number {
-    return !tenantIdAsStr ? undefined : parseInt(tenantIdAsStr);
+    return !tenantIdAsStr ? undefined : Number.parseInt(tenantIdAsStr);
   }
 }

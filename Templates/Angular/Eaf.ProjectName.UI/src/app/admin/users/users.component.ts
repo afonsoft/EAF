@@ -38,9 +38,9 @@ export class UsersComponent extends AppComponentBase implements OnInit {
   constructor(
     injector: Injector,
     public _impersonationService: ImpersonationService,
-    private _userServiceProxy: UserServiceProxy,
-    private _fileDownloadService: FileDownloadService,
-    private _activatedRoute: ActivatedRoute,
+    private readonly _userServiceProxy: UserServiceProxy,
+    private readonly _fileDownloadService: FileDownloadService,
+    private readonly _activatedRoute: ActivatedRoute,
   ) {
     super(injector);
   }
@@ -104,12 +104,12 @@ export class UsersComponent extends AppComponentBase implements OnInit {
   getRolesAsString(roles): string {
     let roleNames = '';
 
-    for (let j = 0; j < roles.length; j++) {
+    for (const role of roles) {
       if (roleNames.length) {
         roleNames = roleNames + ', ';
       }
 
-      roleNames = roleNames + roles[j].roleName;
+      roleNames = roleNames + role.roleName;
     }
 
     return roleNames;

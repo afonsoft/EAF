@@ -1,8 +1,7 @@
 ﻿import { PermissionCheckerService } from '@eaf/auth/permission-checker.service';
 import { AppSessionService } from '@shared/common/session/app-session.service';
-import { Injector } from '@angular/core';
+import { Injector, Injectable } from '@angular/core';
 import { LocalizationService } from '@eaf/localization/localization.service';
-import { Injectable } from '@angular/core';
 import { AppMenu } from './app-menu';
 import { AppMenuItem } from './app-menu-item';
 
@@ -11,8 +10,8 @@ export class AppNavigationService {
   localization: LocalizationService;
   constructor(
     injector: Injector,
-    private _permissionCheckerService: PermissionCheckerService,
-    private _appSessionService: AppSessionService,
+    private readonly _permissionCheckerService: PermissionCheckerService,
+    private readonly _appSessionService: AppSessionService,
   ) {
     this.localization = injector.get(LocalizationService);
   }
@@ -40,9 +39,7 @@ export class AppNavigationService {
   }
 
   checkChildMenuItemPermission(menuItem): boolean {
-    for (let i = 0; i < menuItem.items.length; i++) {
-      const subMenuItem = menuItem.items[i];
-
+    for (const subMenuItem of menuItem.items) {
       if (subMenuItem.permissionName && this._permissionCheckerService.isGranted(subMenuItem.permissionName)) {
         return true;
       } else if (subMenuItem.items && subMenuItem.items.length) {

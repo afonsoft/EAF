@@ -23,7 +23,7 @@ export class ChangePasswordModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _profileService: ProfileServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }

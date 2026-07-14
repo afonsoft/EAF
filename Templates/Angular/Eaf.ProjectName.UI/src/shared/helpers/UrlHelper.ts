@@ -21,7 +21,7 @@
 
   static getQueryParametersUsingHash(): any {
     return document.location.hash
-      .substr(1, document.location.hash.length - 1)
+      .substring(1, document.location.hash.length)
       .replace(/(^\?)/, '')
       .split('&')
       .map(
@@ -34,7 +34,7 @@
   static getInitialUrlParameters(): any {
     const questionMarkIndex = UrlHelper.initialUrl.indexOf('?');
     if (questionMarkIndex >= 0) {
-      return UrlHelper.initialUrl.substr(questionMarkIndex, UrlHelper.initialUrl.length - questionMarkIndex);
+      return UrlHelper.initialUrl.substring(questionMarkIndex, UrlHelper.initialUrl.length);
     }
 
     return '';

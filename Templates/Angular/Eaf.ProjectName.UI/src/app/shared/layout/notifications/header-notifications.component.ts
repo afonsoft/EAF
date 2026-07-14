@@ -19,8 +19,8 @@ export class HeaderNotificationsComponent extends AppComponentBase implements On
 
   constructor(
     injector: Injector,
-    private _notificationService: NotificationServiceProxy,
-    private _userNotificationHelper: UserNotificationHelper,
+    private readonly _notificationService: NotificationServiceProxy,
+    private readonly _userNotificationHelper: UserNotificationHelper,
     public _zone: NgZone,
   ) {
     super(injector);
@@ -79,10 +79,10 @@ export class HeaderNotificationsComponent extends AppComponentBase implements On
     });
 
     function onNotificationsRead(userNotificationId) {
-      for (let i = 0; i < self.notifications.length; i++) {
-        if (self.notifications[i].userNotificationId === userNotificationId) {
-          self.notifications[i].state = 'READ';
-          self.notifications[i].isUnread = false;
+      for (const notification of self.notifications) {
+        if (notification.userNotificationId === userNotificationId) {
+          notification.state = 'READ';
+          notification.isUnread = false;
         }
       }
 

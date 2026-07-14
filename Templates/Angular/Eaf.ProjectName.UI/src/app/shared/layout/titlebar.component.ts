@@ -1,7 +1,7 @@
 ﻿import { Component, Injector } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 
-import * as _ from 'lodash';
+
 
 @Component({
   standalone: false,
