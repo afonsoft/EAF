@@ -487,6 +487,43 @@ namespace Eaf.Middleware.AzureActiveDirectory.Tests.AzureActiveDirectory.Authent
         }
 
         [Fact]
+        public async Task Dado_GetUserLancandoAbpException_Quando_CreateUserAsync_Entao_DeveCapturarERetornarUsuario()
+        {
+            var sut = CriarSut();
+            var request = Substitute.For<IGraphServiceUsersCollectionRequest>();
+            request.Filter(Arg.Any<string>()).Returns(request);
+            request.GetAsync().Returns(Task.FromException<IGraphServiceUsersCollectionPage>(new AbpException("graph error")));
+
+            var builder = Substitute.For<IGraphServiceUsersCollectionRequestBuilder>();
+            builder.Request().Returns(request);
+            sut.UsersRequestBuilderToReturn = builder;
+
+            var user = await sut.CreateUserAsync("user", new TestTenant());
+
+            user.ShouldNotBeNull();
+            user.UserName.ShouldBe("user");
+            user.IsActive.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task Dado_GetUserLancandoAbpException_Quando_UpdateUserAsync_Entao_DeveCapturarELogar()
+        {
+            var sut = CriarSut();
+            var request = Substitute.For<IGraphServiceUsersCollectionRequest>();
+            request.Filter(Arg.Any<string>()).Returns(request);
+            request.GetAsync().Returns(Task.FromException<IGraphServiceUsersCollectionPage>(new AbpException("graph error")));
+
+            var builder = Substitute.For<IGraphServiceUsersCollectionRequestBuilder>();
+            builder.Request().Returns(request);
+            sut.UsersRequestBuilderToReturn = builder;
+
+            var user = new TestUser { UserName = "user", Name = "Old", EmailAddress = "old@example.com" };
+            await sut.UpdateUserAsync(user, new TestTenant());
+
+            user.Name.ShouldBe("Old");
+        }
+
+        [Fact]
         public async Task Dado_CheckIsEnabledComModuloDesabilitado_Quando_Executar_Entao_DeveLancarAbpException()
         {
             var sut = CriarSut(isEnabled: false);

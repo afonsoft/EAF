@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority56-coverage-audit`
+Last session branch: `feature/devin-20260713-priority57-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -17,6 +17,23 @@ Current coverage (after P53): Line 97.1%, Branch 84.2%, Method 99.4% (4433 tests
 Current coverage (after P54): Line 97.2%, Branch 85.1%, Method 99.5% (4467 tests, 4466 passing, 1 skipped). Build warnings: 127.
 Current coverage (after P55): Line 97.5%, Branch 85.6%, Method 99.6% (4492 tests, 4491 passing, 1 skipped). Build warnings: 129.
 Current coverage (after P56): Line 97.6%, Branch 87.2%, Method 99.6% (4516 tests, 4515 passing, 1 skipped). Build warnings: 154.
+Current coverage (after P57): Line 97.7%, Branch 87.5%, Method 99.6% (4533 tests, 4532 passing, 1 skipped). Build warnings: 154.
+
+## P57 gotchas
+- `NSubstitute` returns `string.Empty` for unconfigured `string` members, which makes `MiddlewareAppServiceBase.L` and `EafWorkerBase.L` return empty strings when `GetStringOrNull` is not explicitly set. Use `NullLocalizationManager.Instance` or configure `GetStringOrNull` to return `null` so the fallback key is used.
+- `AccountAppService.Impersonate` throws `UserFriendlyException` for inactive tenants; set `TenantManager` and `LocalizationManager` and assert the exception message contains `TenantIdIsNotActive`.
+- `RoleAppService.GetRoles` filters by permission name using `r.Permissions.Any(...)`; ensure every `Role` in the mocked `Roles` query has a non-null `Permissions` collection.
+- `RoleAppService.DeleteRole` removes users from the role before deleting; when `GetUsersInRoleAsync` returns an empty list, `RemoveFromRoleAsync` is not called.
+- `TenantAppService.GetTenantFeaturesForEdit` filters features by `FeatureScopes.Tenant`; mock `FeatureManager.GetAll()` with mixed `Tenant` and `Edition` features and fix `ObjectMapper.Map<List<FlatFeatureDto>>` to return one item per source element.
+- `AzureActiveDirectoryAuthenticationSource.CreateUserAsync` and `UpdateUserAsync` catch `AbpException` from Graph `GetAsync()` and fall back to creating/updating a basic user with `IsActive = true`.
+- `ProfileControllerBase.GetProfilePictureByUser` validates `ModelState`; add a model error to cover the `InvalidRequest` branch.
+- `EafHangfireApplicationBuilderExtensions.UseEafHangfire()` without an `optionsAction` still registers the dashboard and server when `EafHangfireOptions.JobExecutionEnabled` is true.
+- `ChatHub.DeleteMessage` returns a `Could not find chat message` string when the found `ChatMessage.SharedMessageId` is null.
+- `ChatHub.SendMessage` returns `InternalServerError` when either `UserId` or `GroupId` is zero for non-group/user messages.
+- `EafWorkerBase.L(string, params object[])` returns the raw key when `args` is null; `LocalizationSource` property caches the resolved `ILocalizationSource` so `GetSource` is called once.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry()` without options and with `ConsoleExporter=false`/`OtlpEndpoint=null` returns a configured `IOpenTelemetryBuilder`.
+- `ServiceBusQueueAppender.SendBuffer` skips sending when `StorageType` is empty, returning without invoking the broker.
+- `LdapAuthenticationSource`, `MiddlewareWebCoreModule`, `PermissionAppService`, `EafSqliteCache`, `EafSqlServerCache`, `LdapSettings`, `EafHangfireAuthorizationFilter`, `TokenAuthController` and `OpenIdConnectAuthProviderApi` still contain branches infeasible on Linux or dependent on real infrastructure (LDAP, Redis, Hangfire/SignalR, MSAL). Document them as inalcançáveis for P58.
 
 ## P56 gotchas
 - `HostSettingsAppService.UpdateAllSettings` has many branches around null sub-DTOs (`UserManagement`, `Email`, `Security`, `ExternalLoginProvider`, `LogDeleter`, `LoginImpersonator`), empty JSON, `IsNullOrWhiteSpace` ternaries, timezone validation and external-login provider toggles/JSON/claims mapping. Use a full `UpdateAllSettingsInput` with valid JSON for Google/Microsoft/OpenIdConnect/AuthZero and OpenIdConnect claims mapping to exercise them.

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Abp;
+using Abp.UI;
 using Abp.Web.Models;
 using NSubstitute;
 using Shouldly;
@@ -98,6 +99,18 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             // Então
             result.ShouldNotBeNull();
             result.ShouldBeAssignableTo<FileResult>();
+        }
+
+        [Fact]
+        public async Task Dado_ModelStateInvalido_Quando_GetProfilePictureByUser_Entao_DeveLancarUserFriendlyException()
+        {
+            // Dado
+            var sut = CreateController(_tempFileCacheManager, _profileAppService);
+            sut.ModelState.AddModelError("userId", "Invalid");
+
+            // Quando / Então
+            var ex = await Should.ThrowAsync<UserFriendlyException>(async () => await sut.GetProfilePictureByUser(1));
+            ex.Message.ShouldContain("InvalidRequest");
         }
 
         [Fact]
