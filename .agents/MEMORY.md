@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260713-priority58-coverage-audit`
+Last session branch: `feature/devin-20260714-priority59-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -19,6 +19,19 @@ Current coverage (after P55): Line 97.5%, Branch 85.6%, Method 99.6% (4492 tests
 Current coverage (after P56): Line 97.6%, Branch 87.2%, Method 99.6% (4516 tests, 4515 passing, 1 skipped). Build warnings: 154.
 Current coverage (after P57): Line 97.7%, Branch 87.5%, Method 99.6% (4533 tests, 4532 passing, 1 skipped). Build warnings: 154.
 Current coverage (after P58): Line 97.7%, Branch 89.1%, Method 99.7% (4555 tests, 4554 passing, 1 skipped). Build warnings: 159.
+Current coverage (after P59): Line 97.7%, Branch 90.0%, Method 99.8% (4585 tests, 4584 passing, 1 skipped). Build warnings: 161.
+
+## P59 gotchas
+- `IRepository<UserToken, long>` configured with `NSubstitute` `Returns` expects `Task<UserToken>`; cast `EafUserToken` to `UserToken` before wrapping with `Task.FromResult`.
+- The `BinaryObject` constructor prefixes `FileName` with `{Id}_`; assertions on `FileContentResult.FileDownloadName` must use `binaryObject.FileName` when the controller's `fileName` parameter is `null`.
+- `EafOpenTelemetryOptions` constructor reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL` and `OTEL_SERVICE_NAME` environment variables into `OtlpVariables`.
+- `ImpersonationManager.GetImpersonatedUserAndIdentity` reconstructs the cache item from `UserToken` repository on cache miss; test `Value` containing `"{impersonatorTenantId}-{impersonatorUserId}"` and `Value` null.
+- `WebLogAppService.GetLatestWebLogs` matches level prefixes `IMF`, `DBG`, `WRN`, `ERR`, `FAT`, `FTL`, uppercase names and no-prefix lines.
+- `AuditLogListExcelExporter.ExportToFile` uses `_.Exception.IsNullOrEmpty() ? L("Success") : _.Exception`; exercise the `false` branch with a non-empty `Exception`.
+- `LanguageAppService.GetLanguages` returns `DefaultLanguageName = null` when no default language is configured.
+- `DefaultExternalLoginInfoManager.GetNameAndSurname` falls back to `nameClaim.Value` when `givenName`/`surname` are empty and trims trailing spaces.
+- `EafWebhookReceiver` caches `LocalizationSource` per culture; changing `SourceName` invalidates the cached source.
+- `LdapAuthenticationSource`, `MiddlewareWebCoreModule`, `PermissionAppService`, `EafHangfireApplicationBuilderExtensions`, `EafHangfireAuthorizationFilter`, `ChatHub`, `TokenAuthController`, `EafSqlServerCache`, `EafSqliteCache` and `ServiceBusQueueAppender` still contain Linux/infrastructure-limited branches; document as inalcançáveis for P60.
 
 ## P58 gotchas
 - `SerilogLogger` disabled branches are best covered with a real Serilog logger configured with `LevelAlias.Off`; `NSubstitute.For<Serilog.ILogger>()` fails at runtime because `ILogger` contains default interface methods that Castle DynamicProxy cannot route.

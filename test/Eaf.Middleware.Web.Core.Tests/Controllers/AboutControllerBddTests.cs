@@ -155,6 +155,28 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             result.Modules[0].ShouldContain("Eaf.Middleware.Web.Core");
         }
 
+        [Fact]
+        public void Dado_VariaveisDeAmbiente_Quando_GetAbout_Entao_DeveFiltrarPorPrefixosAceitos()
+        {
+            var originalEaf = Environment.GetEnvironmentVariable("EAF_TEST_ACCEPT");
+            var originalOther = Environment.GetEnvironmentVariable("SOME_OTHER_VAR_NOT_ACCEPT");
+            try
+            {
+                Environment.SetEnvironmentVariable("EAF_TEST_ACCEPT", "accepted");
+                Environment.SetEnvironmentVariable("SOME_OTHER_VAR_NOT_ACCEPT", "rejected");
+
+                var result = _sut.GetAbout();
+
+                result.Environments.ShouldContainKey("EAF_TEST_ACCEPT");
+                result.Environments.ShouldNotContainKey("SOME_OTHER_VAR_NOT_ACCEPT");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("EAF_TEST_ACCEPT", originalEaf);
+                Environment.SetEnvironmentVariable("SOME_OTHER_VAR_NOT_ACCEPT", originalOther);
+            }
+        }
+
         #endregion
     }
 }

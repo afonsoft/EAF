@@ -140,6 +140,19 @@ namespace Eaf.Middleware.Tests.LocalizationTests
         }
 
         [Fact]
+        public void Dado_SourceComChave_Quando_LocalizeComArgsNulo_Entao_DeveRetornarTextoSemFormatar()
+        {
+            var manager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetStringOrNull("WelcomeMessage", Arg.Any<CultureInfo>()).Returns("Olá, {0}!");
+            manager.GetSource("EafCore").Returns(source);
+
+            var result = MiddlewareLocalizationHelper.Localize(manager, "WelcomeMessage", (object[])null);
+
+            result.ShouldBe("Olá, {0}!");
+        }
+
+        [Fact]
         public void Dado_MiddlewareLocalizationHelper_Quando_VerificarSourceNames_Entao_DeveConterSourcesCorretos()
         {
             MiddlewareLocalizationHelper.SourceNames.Length.ShouldBe(6);

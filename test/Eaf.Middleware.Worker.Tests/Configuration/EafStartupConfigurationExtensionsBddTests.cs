@@ -50,6 +50,27 @@ namespace Eaf.Middleware.Worker.Tests.Configuration
         }
 
         [Fact]
+        public void Dado_SecaoNula_Quando_SetConfiguration_Entao_NaoDeveChamarSet()
+        {
+            var configuration = Substitute.For<IAbpStartupConfiguration>();
+
+            configuration.SetConfiguration((IConfigurationSection)null);
+
+            configuration.DidNotReceive().Set(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>());
+        }
+
+        [Fact]
+        public void Dado_ColecaoComSecaoNula_Quando_SetConfiguration_Entao_NaoDeveChamarSet()
+        {
+            var configuration = Substitute.For<IAbpStartupConfiguration>();
+            var section = CriarSecao("Section1", new Dictionary<string, string> { { "Section1:Key", "Value" } });
+
+            configuration.SetConfiguration(new List<IConfigurationSection> { section, null });
+
+            configuration.Received(1).Set(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>());
+        }
+
+        [Fact]
         public void Dado_SecaoSemFilhos_Quando_SetConfiguration_Entao_NaoDeveChamarSet()
         {
             var configuration = Substitute.For<IAbpStartupConfiguration>();

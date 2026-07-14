@@ -108,6 +108,55 @@ namespace Eaf.Middleware.Web.Core.Tests.Authentication
             result.surname.ShouldBeNull();
         }
 
+        [Fact]
+        public void Dado_ClaimsComGivenNameVazioESurname_Quando_GetNameAndSurname_Entao_DeveUsarNameClaim()
+        {
+            var options = new IdentityOptions();
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.GivenName, string.Empty),
+                new Claim(ClaimTypes.Surname, "Silva"),
+                new Claim(options.ClaimsIdentity.UserNameClaimType, "Afonso Silva")
+            };
+
+            var result = _sut.GetNameAndSurnameFromClaims(claims, options);
+
+            result.name.ShouldBe("Afonso");
+            result.surname.ShouldBe(" Silva");
+        }
+
+        [Fact]
+        public void Dado_ClaimsComGivenNameESurnameVazio_Quando_GetNameAndSurname_Entao_DeveUsarNameClaim()
+        {
+            var options = new IdentityOptions();
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.GivenName, "Afonso"),
+                new Claim(ClaimTypes.Surname, string.Empty),
+                new Claim(options.ClaimsIdentity.UserNameClaimType, "Afonso Silva")
+            };
+
+            var result = _sut.GetNameAndSurnameFromClaims(claims, options);
+
+            result.name.ShouldBe("Afonso");
+            result.surname.ShouldBe(" Silva");
+        }
+
+        [Fact]
+        public void Dado_ClaimsComNameClaimEspacoNoFinal_Quando_GetNameAndSurname_Entao_DeveRetornarMesmoValor()
+        {
+            var options = new IdentityOptions();
+            var claims = new List<Claim>
+            {
+                new Claim(options.ClaimsIdentity.UserNameClaimType, "Afonso ")
+            };
+
+            var result = _sut.GetNameAndSurnameFromClaims(claims, options);
+
+            result.name.ShouldBe("Afonso ");
+            result.surname.ShouldBe("Afonso ");
+        }
+
         #endregion
 
         #region GetUserNameFromClaims

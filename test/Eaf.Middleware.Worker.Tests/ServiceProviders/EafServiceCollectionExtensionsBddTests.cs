@@ -52,6 +52,15 @@ namespace Eaf.Middleware.Worker.Tests.ServiceProviders
         }
 
         [Fact]
+        public void Dado_CastleLoggerFactoryRegistrado_Quando_AdicionarEafSemRetornarServiceProvider_Entao_DeveAdicionarCastleLogger()
+        {
+            var services = CreateServices();
+            services.AddSingleton(Substitute.For<Castle.Core.Logging.ILoggerFactory>());
+
+            Should.NotThrow(() => services.AddEafWithoutCreatingServiceProvider<WorkerModuleTestDependenciesModule>(BootstrapperOptions));
+        }
+
+        [Fact]
         public void Dado_ColecoesDeServicos_Quando_AdicionarEafComOptions_Entao_DeveAplicarConfiguration()
         {
             var services = CreateServices();

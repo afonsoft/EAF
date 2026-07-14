@@ -98,6 +98,43 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
         }
 
         [Fact]
+        public void Dado_RedisIsRedisEnabledHabilitado_Quando_Configure_Entao_DeveConfigurarRedis()
+        {
+            var (configuration, iocManager) = CriarDependencias();
+            var appConfiguration = CriarAppConfiguration(new Dictionary<string, string?>
+            {
+                { "RedisCache:IsRedisEnabled", "true" },
+                { "RedisCache:ConnectionString", "localhost:6379" },
+                { "RedisCache:DatabaseId", "1" }
+            });
+
+            var cacheOptions = Substitute.For<ICacheOptions>();
+            configuration.Caching.ConfigureAll(Arg.Do<Action<ICacheOptions>>(action => action(cacheOptions)));
+
+            CacheConfigurer.Configure(configuration, appConfiguration, iocManager);
+
+            iocManager.IsRegistered<Abp.Runtime.Caching.Redis.AbpRedisCacheOptions>().ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_SqlServerIsSqlEnabledHabilitado_Quando_Configure_Entao_DeveConfigurarSqlServerCache()
+        {
+            var (configuration, iocManager) = CriarDependencias();
+            configuration.DefaultNameOrConnectionString.Returns("Server=.;Database=EafDefault;");
+            var appConfiguration = CriarAppConfiguration(new Dictionary<string, string?>
+            {
+                { "SqlServer:IsSqlEnabled", "true" }
+            });
+
+            var cacheOptions = Substitute.For<ICacheOptions>();
+            configuration.Caching.ConfigureAll(Arg.Do<Action<ICacheOptions>>(action => action(cacheOptions)));
+
+            CacheConfigurer.Configure(configuration, appConfiguration, iocManager);
+
+            iocManager.Resolve<SqlServerCacheOptions>().ConnectionString.ShouldBe("Server=.;Database=EafDefault;");
+        }
+
+        [Fact]
         public void Dado_RedisESqlServerHabilitados_Quando_Configure_Entao_DeveConfigurarAmbos()
         {
             var (configuration, iocManager) = CriarDependencias();

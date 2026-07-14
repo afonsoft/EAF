@@ -389,6 +389,23 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users.Profile
             result.ProfilePicture.ShouldBe(string.Empty);
         }
 
+        [Fact]
+        public async Task Dado_AmigoSemFoto_Quando_GetFriendProfilePictureById_Entao_DeveRetornarVazio()
+        {
+            var profilePictureId = Guid.NewGuid();
+            var user = new User { Id = 2, UserName = "friend", ProfilePictureId = null };
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.GetUserByIdAsync(2).Returns(user);
+
+            _sut.UserManager = userManager;
+
+            var result = await _sut.GetFriendProfilePictureById(profilePictureId, 2, 1);
+
+            result.ShouldNotBeNull();
+            result.ProfilePicture.ShouldBe(string.Empty);
+        }
+
         #endregion
 
         #region GetFriendProfilePicture
