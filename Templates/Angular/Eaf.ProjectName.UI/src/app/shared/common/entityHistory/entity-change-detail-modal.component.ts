@@ -28,7 +28,7 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
     if (!propertyChangeValue) {
       return propertyChangeValue;
     }
-    propertyChangeValue = propertyChangeValue.replace(/^['"]+/, '').replace(/['"]+$/, '');
+    propertyChangeValue = this.trimQuotes(propertyChangeValue);
     if (this.isDate(propertyChangeValue, propertyTypeFullName)) {
       return moment(propertyChangeValue).format('YYYY-MM-DD HH:mm:ss');
     }
@@ -41,7 +41,7 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
   }
 
   isDate(date, propertyTypeFullName): boolean {
-    return propertyTypeFullName.includes('DateTime') && !isNaN(Date.parse(date).valueOf());
+    return propertyTypeFullName.includes('DateTime') && !Number.isNaN(Date.parse(date).valueOf());
   }
 
   isUpdated(): boolean {
@@ -63,5 +63,17 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
   close(): void {
     this.active = false;
     this.modal.hide();
+  }
+
+  private trimQuotes(value: string): string {
+    let start = 0;
+    let end = value.length;
+    while (start < end && (value[start] === '"' || value[start] === "'")) {
+      start++;
+    }
+    while (end > start && (value[end - 1] === '"' || value[end - 1] === "'")) {
+      end--;
+    }
+    return value.substring(start, end);
   }
 }

@@ -18,33 +18,33 @@ export class PasswordComplexityValidator implements Validator {
     let validationResult = null;
 
     const requireDigit = this.requireDigit;
-    if (requireDigit && givenPassword && !/[0-9]/.test(givenPassword)) {
-      validationResult = validationResult || {};
+    if (requireDigit && givenPassword && !/\d/.test(givenPassword)) {
+      validationResult = validationResult ?? {};
       validationResult.requireDigit = true;
     }
 
     const requireUppercase = this.requireUppercase;
     if (requireUppercase && givenPassword && !/[A-Z]/.test(givenPassword)) {
-      validationResult = validationResult || {};
+      validationResult = validationResult ?? {};
       validationResult.requireUppercase = true;
     }
 
     const requireLowercase = this.requireLowercase;
     if (requireLowercase && givenPassword && !/[a-z]/.test(givenPassword)) {
-      validationResult = validationResult || {};
+      validationResult = validationResult ?? {};
       validationResult.requireLowercase = true;
     }
 
     const requiredLength = this.requiredLength;
     if (requiredLength && givenPassword && givenPassword.length < requiredLength) {
-      validationResult = validationResult || {};
+      validationResult = validationResult ?? {};
       validationResult.requiredLength = true;
     }
 
     // use upperCaseLetters
     const requireNonAlphanumeric = this.requireNonAlphanumeric;
-    if (requireNonAlphanumeric && givenPassword && /^[0-9a-zA-Z]+$/.test(givenPassword)) {
-      validationResult = validationResult || {};
+    if (requireNonAlphanumeric && givenPassword && /^[\da-zA-Z]+$/.test(givenPassword)) {
+      validationResult = validationResult ?? {};
       validationResult.requireNonAlphanumeric = true;
     }
 

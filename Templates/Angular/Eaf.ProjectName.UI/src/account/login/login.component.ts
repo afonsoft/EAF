@@ -92,7 +92,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     const state = UrlHelper.getQueryParametersUsingHash().state;
     const parameters = UrlHelper.getQueryParameters();
     this.submitting = true;
-    if ((state && state.includes('openIdConnect')) || parameters['openIdConnect'] !== undefined) {
+    if (state?.includes('openIdConnect') || parameters['openIdConnect'] !== undefined) {
       this.loginService.openIdConnectLoginCallback();
     }
   }

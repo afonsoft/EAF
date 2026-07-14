@@ -1,7 +1,7 @@
 ﻿<!-- BEGIN: Topbar -->
 <div id="m_header_topbar" class="m-topbar  m-stack m-stack--ver m-stack--general header-{{ currentTheme.baseSettings.header.headerSkin }}">
   <nav class="m-stack__item m-topbar__nav-wrapper" [attr.aria-label]="l('TopMenu')">
-    <ul class="m-topbar__nav m-nav m-nav--inline" aria-label="TopMenu" role="menubar">
+    <ul class="m-topbar__nav m-nav m-nav--inline" aria-label="TopMenu">
       <li
         *ngIf="languages.length > 1"
         class="m-nav__item m-topbar__languages m-dropdown m-dropdown--small m-dropdown--arrow m-dropdown--align-right m-dropdown--mobile-full-width m-dropdown--skin-{{
@@ -132,15 +132,12 @@
             </div>
             <div class="m-dropdown__body">
               <nav class="m-dropdown__content" [attr.aria-label]="l('UserAccount')">
-                <ul class="m-nav m-nav--skin-light" [attr.aria-label]="l('UserAccount')" role="menu">
+                <ul class="m-nav m-nav--skin-light" [attr.aria-label]="l('UserAccount')">
                   <li *ngIf="isImpersonatedLogin" class="m-nav__item">
                     <a
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="backToMyAccount()"
-                      role="menuitem"
-                      aria-haspopup="true"
-                      aria-expanded="false"
                       tabindex="-1"
                     >
                       <i class="m-nav__link-icon fa fa-reply m--font-danger"></i>
@@ -164,9 +161,6 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="changePassword()"
-                      role="menuitem"
-                      aria-haspopup="true"
-                      aria-expanded="false"
                       tabindex="-1"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-more-v6"></i>
@@ -184,9 +178,6 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="showLoginAttempts()"
-                      role="menuitem"
-                      aria-haspopup="true"
-                      aria-expanded="false"
                       tabindex="-1"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-list"></i>
@@ -204,9 +195,6 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="changeProfilePicture()"
-                      role="menuitem"
-                      aria-haspopup="true"
-                      aria-expanded="false"
                       tabindex="-1"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-profile-1"></i>
@@ -224,9 +212,6 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="changeMySettings()"
-                      role="menuitem"
-                      aria-haspopup="true"
-                      aria-expanded="false"
                       tabindex="-1"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-cogwheel"></i>
@@ -245,9 +230,6 @@
                       href="javascript:;"
                       (click)="logout()"
                       class="btn m-btn--pill btn-primary m-btn m-btn--custom m-btn--label-brand m-btn--bolder"
-                      role="menuitem"
-                      aria-haspopup="true"
-                      aria-expanded="false"
                       tabindex="-1"
                       >{{ 'Logout' | localize }}</a
                     >

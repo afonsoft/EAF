@@ -125,7 +125,7 @@
                 </span>
 
                 <div [hidden]="!hostSettings.azureActiveDirectory.isEnabled" class="form-group">
-                  <label for="AzurectiveDirectoryTenant">
+                  <label for="AzureActiveDirectoryTenant">
                     {{ 'AzureTenant' | localize }}
                   </label>
                   <input
@@ -261,8 +261,8 @@
                   <label>
                     <input
                       [(ngModel)]="hostSettings.userManagement.isRegisterRequiredForLogin"
-                      id="Settings_IsRegisterRequiredForLogin"
-                      name="IsRegisterRequiredForLogin"
+                      id="Settings_Ldap_IsRegisterRequiredForLogin"
+                      name="LdapIsRegisterRequiredForLogin"
                       type="checkbox"
                     />
                     <span></span>
@@ -277,8 +277,8 @@
                   <label>
                     <input
                       [(ngModel)]="hostSettings.userManagement.storeAdTokenInformation"
-                      id="Settings_StoreAdTokenInformation"
-                      name="StoreAdTokenInformation"
+                      id="Settings_Ldap_StoreAdTokenInformation"
+                      name="LdapStoreAdTokenInformation"
                       type="checkbox"
                     />
                     <span></span>

@@ -23,8 +23,8 @@
           <h4>{{ 'ReceiveNotifications' | localize }}</h4>
           <div>
             <span class="m-switch m-switch--icon-check">
-              <label>
-                <input type="checkbox" name="ReceiveNotifications" value="true" [(ngModel)]="settings.receiveNotifications" />
+              <label [attr.aria-label]="l('ReceiveNotifications')">
+                <input id="ReceiveNotifications" type="checkbox" name="ReceiveNotifications" value="true" [(ngModel)]="settings.receiveNotifications" />
                 <span></span>
               </label>
             </span>

@@ -57,8 +57,8 @@ export class PermissionComboComponent extends AppComponentBase implements OnInit
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void { // NOSONAR ControlValueAccessor interface requires a boolean flag
-    if (isDisabled) {
+  setDisabledState?(isDisabled: boolean): void { //NOSONAR ControlValueAccessor interface requires a boolean flag
+    if (isDisabled) { //NOSONAR ControlValueAccessor interface requires a boolean flag
       this.selectedPermission.disable();
     } else {
       this.selectedPermission.enable();

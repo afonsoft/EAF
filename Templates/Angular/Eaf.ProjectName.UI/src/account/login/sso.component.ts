@@ -30,9 +30,9 @@ export class SsoComponent extends AppComponentBase implements OnInit {
     const state = UrlHelper.getQueryParametersUsingHash().state;
     const parameters = UrlHelper.getQueryParameters();
     this.submitting = true;
-    if ((state && state.includes('openIdConnect')) || parameters['openIdConnect'] !== undefined) {
+    if (state?.includes('openIdConnect') || parameters['openIdConnect'] !== undefined) {
       this.loginService.openIdConnectLoginCallback();
-    } else if (state && state.includes('state') && state.includes('code')) {
+    } else if (state?.includes('state') && state?.includes('code')) {
       this.loginService.SSO_AuthZero_Callback();
     } else if (state) {
       this.loginService.SSO_Microsoft_Callback();
