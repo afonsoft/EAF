@@ -131,7 +131,7 @@ input[type="tel"] {
 
 /* Fix for issue #407 */
 br {
-    font-family: Verdana;
+    font-family: Verdana, sans-serif;
 }
 
 
@@ -179,7 +179,7 @@ br {
 }
 
 .primeng-datatable-container .ui-table th {
-    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay';
+    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay', sans-serif;
     border: none !important;
     padding: 10px 0px 10px 10px !important;
     text-align: left;
@@ -187,7 +187,7 @@ br {
 }
 
 .primeng-datatable-container .ui-table td {
-    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay';
+    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay', sans-serif;
     border: none !important;
     padding: 8px 10px !important;
 }
@@ -211,7 +211,7 @@ br {
 
 .primeng-datatable-container .ui-table table thead tr th {
     font-size: 13px;
-    font-family: AfonsoftSansText;
+    font-family: AfonsoftSansText, sans-serif;
     font-weight: 300;
     line-height: 21px;
     vertical-align: middle;
@@ -231,6 +231,7 @@ br {
 
 .primeng-datatable-container .primeng-paging-container {
     border-top: 0;
+    margin-top: 10px
 }
 
 .primeng-datatable-container .primeng-paging-container .ui-paginator {
@@ -382,7 +383,7 @@ br {
 
 .primeng-datatable-container table tbody tr.ui-state-highlight {
     background-color: #FF7020 !important;
-    color: #fff !important;
+    color: #000 !important;
 }
 
 .primeng-datatable-container table tbody tr.ui-table-even.ui-state-highlight {
@@ -395,7 +396,7 @@ br {
 
 .primeng-paging-container .ui-paginator span a.ui-state-active {
     background-color: #FF7020 !important;
-    color: #fff !important;
+    color: #000 !important;
 }
 
 .primeng-paging-container .ui-paginator span a:hover {
@@ -404,11 +405,14 @@ br {
 
 .primeng-paging-container .ui-paginator span a:hover.ui-state-active {
     background-color: #918bd9;
+    background-color: #e95d0f !important;
+    border-color: #e95d0f !important;
 }
 
 .primeng-paging-container .ui-paginator a {
     background-color: #dedede;
-    color: #fff !important;
+    color: #333 !important;
+    background-color: #efefef !important;
 }
 
 .primeng-paging-container .ui-paginator a:hover {
@@ -417,7 +421,7 @@ br {
 
 .primeng-paging-container .ui-paginator a:hover.ui-state-active {
     background-color: #918bd9;
-    color: #fff !important;
+    color: #000 !important;
 }
 
 .primeng-paging-container .ui-paginator a span {
@@ -447,10 +451,6 @@ br {
 
 .margin-top-15 {
     margin-top: 15px !important;
-}
-
-.margin-bottom-5 {
-    margin-bottom: 5px !important;
 }
 
 .margin-bottom-5 {
@@ -534,11 +534,11 @@ body.swal2-height-auto {
     box-shadow: 0 0 0.625em #d9d9d9;
     overflow-y: hidden;
     font-size: 15px;
-    font-family: AfonsoftSansDisplay;
+    font-family: AfonsoftSansDisplay, sans-serif;
 }
 
 .ui-dropdown-item.ui-state-highlight {
-    color: #ffffff;
+    color: #000;
     background-color: #FF7020 !important;
 }
 
@@ -564,24 +564,12 @@ body.swal2-height-auto {
 
 
 .swal2-popup .swal2-styled.swal2-confirm {
-    color: #ffffff;
+    color: #000;
     background-color: #FF7020 !important;
 
 }
 
-.primeng-paging-container .ui-paginator a {
-    background-color: #efefef !important;
-    color: #fff !important;
-}
 
-.primeng-datatable-container .primeng-paging-container {
-    margin-top: 10px
-}
-
-.primeng-paging-container .ui-paginator span a:hover.ui-state-active {
-    background-color: #e95d0f !important;
-    border-color: #e95d0f !important;
-}
 
 .primeng-paging-container .ui-paginator a:hover,
 .primeng-paging-container .ui-paginator span a:hover {
@@ -640,10 +628,12 @@ html[dir=rtl] .input-group span.input-group-btn button {
     font-size: 16px;
     margin-top: 5px;
     margin-bottom: 10px;
+    color: #333;
 }
 
 .easy-pie-chart .title:hover {
     text-decoration: none;
+    color: #666;
 }
 
 .easy-pie-chart .title>i {
@@ -680,6 +670,7 @@ html[dir=rtl] .input-group span.input-group-btn button {
 
 .m-messenger__message.m-messenger__message--out .m-messenger__message-body .m-messenger__message-text {
     text-align: right;
+    color: #fff !important;
 }
 
 .m-checkbox>input:disabled~span {
@@ -722,8 +713,9 @@ td label.m-checkbox span {
 }
 
 .m-card-user .m-card-user__details .m-card-user__name {
-    word-break: break-word;
+    overflow-wrap: break-word;
     font-size: 1.1rem;
+    color: #fff !important;
 }
 
 .form-control-feedback {
@@ -804,13 +796,7 @@ app-root>ng-component {
 }
 
 
-.easy-pie-chart .title {
-    color: #333;
-}
 
-.easy-pie-chart .title:hover {
-    color: #666;
-}
 
 .m--border-top-primary {
     border-top-color: #FF7020 !important;
@@ -828,9 +814,7 @@ app-root>ng-component {
     color: #ececec;
 }
 
-.m-messenger__message.m-messenger__message--out .m-messenger__message-body .m-messenger__message-text {
-    color: #fff !important;
-}
+
 
 .m-messenger__message.m-messenger__message--out .m-messenger__message-body .m-messenger__message-text span {
     color: #fff;
@@ -958,9 +942,7 @@ div.btn-group label.btn-secondary.active {
     color: #999999 !important;
 }
 
-.m-card-user .m-card-user__details .m-card-user__name {
-    color: #fff !important;
-}
+
 
 .form-control[readonly] {
     background-color: #f3f3f3 !important;
@@ -1015,7 +997,6 @@ div.btn-group label.btn-secondary.active {
 
 .m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__heading .m-menu__link-text,
 .m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__link .m-menu__link-icon,
-.m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__heading .m-menu__link-text,
 .m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__link .m-menu__link-text,
 .m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item.m-menu__item--active>.m-menu__heading .m-menu__link-icon,
 .m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item.m-menu__item--active>.m-menu__link .m-menu__link-icon,
@@ -1033,7 +1014,6 @@ div.btn-group label.btn-secondary.active {
 .m-header-menu.m-header-menu--submenu-skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu>.m-menu__subnav>.m-menu__item>.m-menu__link .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__heading .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__link .m-menu__link-icon,
-.m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__heading .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item>.m-menu__link .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item.m-menu__item--active>.m-menu__heading .m-menu__link-icon,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item .m-menu__submenu .m-menu__item.m-menu__item--active>.m-menu__link .m-menu__link-icon,
@@ -1042,18 +1022,10 @@ div.btn-group label.btn-secondary.active {
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__heading .m-menu__ver-arrow,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__link .m-menu__ver-arrow,
 .m-aside-left--minimize .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item:hover>.m-menu__link>.m-menu__link-icon,
-.m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__link .m-menu__link-icon,
-.m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__link .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__heading .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__link .m-menu__link-text,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__heading .m-menu__link-icon,
 .m-aside-menu.m-aside-menu--skin-dark .m-menu__nav>.m-menu__item>.m-menu__link .m-menu__link-icon,
-.m-dropdown__arrow-light,
-.m-dropdown__arrow-dark,
-.m-brand--skin-color .m-topbar .m-topbar__nav.m-nav>.m-nav__item>.m-nav__link *,
-.m-brand--skin-dark .m-topbar .m-topbar__nav.m-nav>.m-nav__item>.m-nav__link *,
-.m-brand.m-brand--skin-dark .m-brand__tools .m-brand__icon>i,
-.m-brand.m-brand--skin-color .m-brand__tools .m-brand__icon>i,
 .m-dropdown__arrow-light,
 .m-dropdown__arrow-dark,
 .m-brand--skin-color .m-topbar .m-topbar__nav.m-nav>.m-nav__item>.m-nav__link *,
@@ -1153,7 +1125,6 @@ body .ui-paginator .ui-paginator-pages .ui-paginator-page,
 .m-wrapper,
 .m-content--skin-light .m-body {
     background: #f5f5f5;
-    ;
 }
 
 body .ui-table .ui-table-tbody>tr:nth-child(even) {
@@ -1176,8 +1147,7 @@ body .ui-table .ui-table-tbody>tr {
 .header-dark,
 .m-header-head.m-brand--skin-dark,
 .m-brand.m-brand--skin-dark,
-.m-header__top.m-header__top--skin-dark,
-.m-header-head.m-brand--skin-dark {
+.m-header__top.m-header__top--skin-dark {
     background-color: #37322D !important;
 }
 
@@ -1232,7 +1202,7 @@ body .ui-table .ui-table-tbody>tr {
 
 .ngx-picker button {
     background-color: #ff7020;
-    color: white;
+    color: #000;
 }
 
 .ngx-picker .calendar--days-of-week {
@@ -1272,7 +1242,7 @@ body .ui-table .ui-table-tbody>tr {
 
 .ngx-picker .calendar--day__selected {
     background-color: #ff7020;
-    color: #fff;
+    color: #000;
     display: block;
     margin: 0 auto;
     font-size: 13px;
@@ -1310,25 +1280,6 @@ body .ui-table .ui-table-tbody>tr {
 .ng-select .ng-select-container .ng-value-container .ng-value {
     background-color: #e95d0f !important;
     border-color: #e95d0f !important;
-}
-
-.cal-month-view .cal-open-day-events {
-    background-color: #e8e8e8 !important;
-    color: #545874;
-    box-shadow: none;
-    text-align: left;
-}
-
-.cal-week-view .cal-event,
-.cal-month-view .cal-event {
-    background-color: #d1e8ff;
-    border-color: #e95d0f;
-    color: #545874;
-}
-
-.cal-month-view .cal-day-badge {
-    background-color: #e95d0f;
-    margin-left: -40%;
 }
 
 .m-aside-right--offcanvas-default {
@@ -1385,7 +1336,7 @@ body .ui-table .ui-table-tbody>tr {
     background-color: #FF7020;
     min-width: 10px;
     padding: 1px 7px;
-    color: #fff !important;
+    color: #000 !important;
 }
 
 .read-notification {
@@ -1396,17 +1347,15 @@ body .ui-table .ui-table-tbody>tr {
     background-color: #FF7020;
     min-width: 10px;
     padding: 1px 7px;
-    color: #fff !important;
+    color: #000 !important;
 }
 
 .chat-online {
-    border-color: green;
     border-radius: 50%;
     border: solid 1px green;
 }
 
 .chat-offline {
-    border-color: red;
     border-radius: 50%;
     border: solid 1px red;
 }
@@ -1439,7 +1388,7 @@ body .ui-table .ui-table-tbody>tr {
     border-width: 1px !important;
     border-color: #FF7020 !important;
     text-transform: uppercase;
-    color: gray !important;
+    color: #666 !important;
     background-color: #fff;
     padding: 0px;
     min-width: 250px;
@@ -1958,7 +1907,9 @@ body .ui-table .ui-table-tbody>tr {
     padding: .6rem 0 .4rem 0;
     margin: 0 0 .5rem 0;
     background-color: transparent;
-    border-radius: 0
+    border-radius: 0;
+    -webkit-box-sizing: border-box !important;
+    box-sizing: border-box !important
 }
 
 .md-form .form-control:focus {
@@ -2001,19 +1952,6 @@ body .ui-table .ui-table-tbody>tr {
     margin-bottom: 2.5rem
 }
 
-.md-form label {
-    font-size: 1rem
-}
-
-.md-form label.active {
-    font-size: 1rem
-}
-
-.md-form .prefix {
-    top: .25rem;
-    font-size: 1.75rem
-}
-
 .md-form .prefix~input,
 .md-form .prefix~textarea {
     width: calc(100% - 2.5rem);
@@ -2046,12 +1984,15 @@ body .ui-table .ui-table-tbody>tr {
 }
 
 .md-form label.active {
+    font-size: 1rem;
     -webkit-transform: translateY(-14px) scale(0.8);
     transform: translateY(-14px) scale(0.8)
 }
 
 .md-form .prefix {
     position: absolute;
+    top: .25rem;
+    font-size: 1.75rem;
     -webkit-transition: color .2s;
     transition: color .2s
 }
@@ -2422,13 +2363,6 @@ body .ui-table .ui-table-tbody>tr {
     transform-origin: 0 0
 }
 
-@-webkit-keyframes autofill {
-    to {
-        color: #495057;
-        background: transparent
-    }
-}
-
 @keyframes autofill {
     to {
         color: #495057;
@@ -2437,9 +2371,7 @@ body .ui-table .ui-table-tbody>tr {
 }
 
 .md-form.md-outline input:-webkit-autofill {
-    -webkit-animation-name: autofill;
     animation-name: autofill;
-    -webkit-animation-fill-mode: both;
     animation-fill-mode: both
 }
 
@@ -2716,10 +2648,7 @@ body .ui-table .ui-table-tbody>tr {
     text-overflow: ellipsis
 }
 
-.md-form .form-control {
-    -webkit-box-sizing: border-box !important;
-    box-sizing: border-box !important
-}
+
 
 .md-form .form-control.valid+label,
 .md-form .form-control.invalid+label {
@@ -2797,7 +2726,7 @@ body .ui-table .ui-table-tbody>tr {
 
 .m-switch input:checked~span:after {
     background-color: #FF7020;
-    color: #FFFFFF;
+    color: #000;
 }
 
 
@@ -2814,7 +2743,7 @@ body .ui-table .ui-table-tbody>tr {
 
 /* ---------- Table (p-table) ---------- */
 .p-datatable .p-datatable-thead > tr > th {
-    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay';
+    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay', sans-serif;
     border: none !important;
     padding: 10px 0px 10px 10px !important;
     font-size: 13px;
@@ -2825,7 +2754,7 @@ body .ui-table .ui-table-tbody>tr {
 }
 
 .p-datatable .p-datatable-tbody > tr > td {
-    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay';
+    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay', sans-serif;
     border: none !important;
     padding: 8px 10px !important;
     overflow-wrap: break-word;
@@ -2888,19 +2817,19 @@ body .ui-table .ui-table-tbody>tr {
 
 /* ---------- Input (p-inputtext) ---------- */
 .p-inputtext {
-    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay';
+    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay', sans-serif;
 }
 
 /* ---------- Button (p-button) ---------- */
 .p-button {
-    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay';
+    font-family: 'AfonsoftSansText', 'AfonsoftSansDisplay', sans-serif;
 }
 
 
 
 /* ---------- Dialog (p-dialog) ---------- */
 .p-dialog .p-dialog-header {
-    font-family: 'AfonsoftSansDisplay', 'AfonsoftSansText';
+    font-family: 'AfonsoftSansDisplay', 'AfonsoftSansText', sans-serif;
     border-bottom: 1px solid #ebedf2;
     padding: 1rem;
 }
@@ -2911,7 +2840,7 @@ body .ui-table .ui-table-tbody>tr {
 
 /* ---------- Panel (p-panel) ---------- */
 .p-panel .p-panel-header {
-    font-family: 'AfonsoftSansDisplay', 'AfonsoftSansText';
+    font-family: 'AfonsoftSansDisplay', 'AfonsoftSansText', sans-serif;
     background-color: #f4f3f8;
     border: 1px solid #ebedf2;
     padding: 0.75rem 1rem;
@@ -2960,21 +2889,21 @@ body .ui-table .ui-table-tbody>tr {
 /* ---------- Toast (p-toast) ---------- */
 .p-toast .p-toast-message.p-toast-message-success {
     background-color: #34bfa3;
-    color: #fff;
+    color: #000;
 }
 
 .p-toast .p-toast-message.p-toast-message-warn {
     background-color: #ffb822;
-    color: #fff;
+    color: #000;
 }
 
 .p-toast .p-toast-message.p-toast-message-error {
     background-color: #f4516c;
-    color: #fff;
+    color: #000;
 }
 
 .p-toast .p-toast-message.p-toast-message-info {
-    color: #ff7020;
+    color: #000;
     background-color: rgba(255, 112, 32, 0.15);
 }
 

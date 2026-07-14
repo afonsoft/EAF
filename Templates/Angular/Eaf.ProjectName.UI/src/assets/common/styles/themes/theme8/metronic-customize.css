@@ -37,12 +37,6 @@ ul.menu-nav > li > a.menu-link > i.menu-hor-arrow {
   height: 50px;
 }
 
-.unread-chat-message-count {
-    position: absolute;
-    top: -6px;
-    left: 13px;
-}
-
 .subscription-warning * {
     color: #fff;
 }
@@ -51,15 +45,11 @@ ul.menu-nav > li > a.menu-link > i.menu-hor-arrow {
     background-color: #f9f9fc;
 }
 
-.menuSearchBarInput{
-    height: 50px;
-}
-
 menu-search-bar {
     min-width: 100px !important;
 }
 
-p-autoComplete{
+p-autocomplete{
     padding: 10px;
 }
 

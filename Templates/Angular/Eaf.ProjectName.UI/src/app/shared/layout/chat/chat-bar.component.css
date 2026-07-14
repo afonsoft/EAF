@@ -18,6 +18,7 @@
 
 #kt_quick_sidebar .quick-panel-actions {
     text-align: right;
+    padding-right: 10px;
 }
 
 span.flaticon2-website.icon-lg{
@@ -35,7 +36,7 @@ span.flaticon2-website.icon-lg{
     padding: 5px;
     background-color: #625dbb;
     display: block;
-    color: #d9d9d9;
+    color: #fff;
 }
 
 .chat-file-preview  i.la-file {
@@ -63,7 +64,7 @@ span.flaticon2-website.icon-lg{
     text-align: left;
     padding: 5px;
     background-color: #6bc0f9;
-    color: #f7f7f7;
+    color: #000;
 }
 
 .card {
@@ -104,10 +105,6 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
     top: 38% !important
 }
 
-#chatMessageForm .p-fileupload-choose{
-    margin:0px !important;
-}
-
 #chatMessageForm .p-fileupload-choose .p-focus{
     box-shadow: none;
 }
@@ -117,6 +114,7 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
 }
 
 #chatMessageForm .p-fileupload-choose {
+    margin: 0px !important;
     border: none !important;
     height: 40px !important;
     width: 40px !important;
@@ -124,10 +122,6 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
 
 #chatMessageForm .ui-fileupload-content{
     display: none;
-}
-
-#kt_quick_sidebar .quick-panel-actions {
-    padding-right: 10px;
 }
 
 .ui-fileupload .ui-fileupload-buttonbar {
@@ -141,13 +135,11 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
     background-color: rgba(0,0,0,0.03);
 }
 .ui-button-text .ui-clickable {
-    font-family: "AfonsoftSansText" !important;
+    font-family: "AfonsoftSansText", sans-serif !important;
     -webkit-box-shadow: none !important;
     box-shadow: none !important;
     cursor: pointer;
-    border-radius: 0;
 	background-color: #FF7020;
-    border-color: #FF7020;
 	padding: .45rem .8rem;
     font-size: .875rem;
     line-height: 1.5;
@@ -158,7 +150,7 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
     white-space: nowrap;
     vertical-align: middle;
 	user-select: none;
-    border: 1px solid transparent;
+    border: 1px solid #FF7020;
     outline: none !important;
 	-webkit-appearance: button;
 }
@@ -192,7 +184,4 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
 .scroll-pull{
     padding-left: 10px;
 }
-.quick-sidebar-back:hover{
-    /* background-color: #fff;
-    border-color: #fff; */
-}
+

@@ -88,7 +88,7 @@ app-root > ng-component {
 .m-header-menu.m-header-menu--skin-dark .m-menu__nav>.m-menu__item.m-menu__item--tabs.m-menu__item--hover>.m-menu__link
 {
   background-color: #afafb2;
-  color:  #fff !important;
+  color:  #000 !important;
 }
 
 .m-header-menu .m-menu__nav>.m-menu__item.m-menu__item--tabs>.m-menu__submenu>.m-menu__subnav>.m-menu__item:hover:not(.m-menu__item--actions)>.m-menu__link, 

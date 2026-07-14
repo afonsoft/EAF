@@ -19,8 +19,8 @@ theme9-brand {
   }
   
   .header-menu .menu-nav > .menu-item > .menu-link {
-  
     flex-direction: row;
+    border-right: none;
   }
   
   .unread-notification-count {
@@ -33,10 +33,6 @@ theme9-brand {
     position: absolute;
     top: -6px;
     left: 13px;
-  }
-  
-  .header-menu .menu-nav > .menu-item > .menu-link{
-      border-right: none;
   }
   
   .subscription-warning * {
@@ -56,7 +52,7 @@ menu-search-bar {
     min-width: 100px !important;
 }
 
-p-autoComplete{
+p-autocomplete{
     padding: 10px;
 }
 
