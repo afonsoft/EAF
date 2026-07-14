@@ -48,7 +48,7 @@ for build in "${passed_builds[@]}"; do
     echo "   - $build"
 done
 #
-if [ ${#failed_builds[@]} -gt 0 ]; then
+if [[ ${#failed_builds[@]} -gt 0 ]]; then
     echo ""
     echo "❌ Builds que falharam: ${#failed_builds[@]}"
     for build in "${failed_builds[@]}"; do

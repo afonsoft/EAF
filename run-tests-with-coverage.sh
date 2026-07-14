@@ -58,7 +58,7 @@ for test in "${passed_tests[@]}"; do
     echo "   - $test"
 done
 #
-if [ ${#failed_tests[@]} -gt 0 ]; then
+if [[ ${#failed_tests[@]} -gt 0 ]]; then
     echo ""
     echo "❌ Testes que falharam: ${#failed_tests[@]}"
     for test in "${failed_tests[@]}"; do

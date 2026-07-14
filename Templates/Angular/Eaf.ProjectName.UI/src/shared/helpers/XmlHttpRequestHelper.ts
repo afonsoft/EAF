@@ -13,7 +13,7 @@
       }
     };
 
-    url += (url.includes('?') ? '&' : '?') + 'd=' + new Date().getTime();
+    url += (url.includes('?') ? '&' : '?') + 'd=' + Date.now();
     xhr.open(type, url, true);
 
     for (const property in customHeaders) {

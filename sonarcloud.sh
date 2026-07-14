@@ -86,7 +86,7 @@ done
 # Merge coverage reports
 echo ""
 echo "📊 Merging coverage reports..."
-if [ -f "$HOME/.dotnet/tools/coverlet" ]; then
+if [[ -f "$HOME/.dotnet/tools/coverlet" ]]; then
     # Merge all coverage files
     find resultTest/ -name "coverage.cobertura.xml" -exec cat {} \; > coverage.opencover.xml 2>/dev/null || true
 fi

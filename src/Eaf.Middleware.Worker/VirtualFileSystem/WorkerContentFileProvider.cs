@@ -28,7 +28,7 @@ namespace Eaf.Middleware.Worker.VirtualFileSystem
         {
             _hostingEnvironment = hostingEnvironment;
 
-            _fileProvider = new Lazy<IFileProvider>(CreateFileProvider);
+            _fileProvider = new Lazy<IFileProvider>(CreateFileProvider); // NOSONAR
         }
 
         /// <summary>

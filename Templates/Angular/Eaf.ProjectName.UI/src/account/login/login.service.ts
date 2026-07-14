@@ -153,8 +153,8 @@ export class LoginService {
     redirectUrl?: string,
   ): void {
     const tokenExpireDate = rememberMe
-      ? new Date(new Date().getTime() + 10000 * expireInSeconds)
-      : new Date(new Date().getTime() + 1000 * expireInSeconds);
+      ? new Date(Date.now() + 10000 * expireInSeconds)
+      : new Date(Date.now() + 1000 * expireInSeconds);
 
     this._tokenService.setToken(accessToken, tokenExpireDate);
 

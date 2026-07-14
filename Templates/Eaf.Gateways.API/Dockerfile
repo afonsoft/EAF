@@ -25,11 +25,11 @@ COPY ["src/Eaf.Gateways.API.csproj", "src/"]
 RUN dotnet restore "src/Eaf.Gateways.API.csproj"
 COPY . .
 WORKDIR /src
-RUN dotnet build "src/Eaf.Gateways.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Eaf.Gateways.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "src/Eaf.Gateways.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Eaf.Gateways.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
@@ -38,10 +38,15 @@ COPY --from=publish /app/publish .
 ENV TZ="America/Sao_Paulo"
 
 RUN apt-get update && \
-    apt-get install -yq tzdata libc6-dev libgdiplus zlib1g-dev && \
+    apt-get install -yq --no-install-recommends \
+        libc6-dev \
+        libgdiplus \
+        tzdata \
+        zlib1g-dev && \
     ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
-	&& chown -R app:app /app
+    rm -rf /var/lib/apt/lists/* && \
+    chown -R app:app /app
 
 # set to use the non-root USER here
 USER app 

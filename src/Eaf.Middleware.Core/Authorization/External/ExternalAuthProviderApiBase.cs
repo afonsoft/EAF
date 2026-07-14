@@ -52,7 +52,7 @@ namespace Eaf.Middleware.Core.Authentication.External
         /// </summary>
         /// <param name="httpClientFactory">Fábrica de HttpClient.</param>
         /// <returns>HttpClient configurado.</returns>
-        protected HttpClient CreateExternalAuthClient(IHttpClientFactory httpClientFactory)
+        protected static HttpClient CreateExternalAuthClient(IHttpClientFactory httpClientFactory)
         {
             var client = httpClientFactory.CreateClient("ExternalAuth");
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
@@ -87,7 +87,7 @@ namespace Eaf.Middleware.Core.Authentication.External
         /// <param name="url">URL do recurso.</param>
         /// <param name="accessCode">Token de acesso (opcional).</param>
         /// <returns>Bytes do recurso.</returns>
-        protected async Task<byte[]> GetUserBytesAsync(HttpClient client, string url, string accessCode = null)
+        protected static async Task<byte[]> GetUserBytesAsync(HttpClient client, string url, string accessCode = null)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             if (!string.IsNullOrEmpty(accessCode))
