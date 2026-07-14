@@ -159,6 +159,38 @@ namespace Eaf.Middleware.Application.Tests.Localization
         #region GetLanguages
 
         [Fact]
+        public async Task Dado_IdiomasExistentesSemPadrao_Quando_GetLanguages_Entao_DeveRetornarComDefaultLanguageNameNulo()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var languages = new List<ApplicationLanguage>
+            {
+                new ApplicationLanguage(null, "pt-BR", "Português (Brasil)"),
+                new ApplicationLanguage(null, "en", "English")
+            };
+            _applicationLanguageManager.GetLanguagesAsync(null).Returns(languages);
+            _applicationLanguageManager.GetDefaultLanguageOrNullAsync(null).Returns((ApplicationLanguage)null!);
+
+            var objectMapper = Substitute.For<Abp.ObjectMapping.IObjectMapper>();
+            objectMapper.Map<List<ApplicationLanguageListDto>>(Arg.Any<object>())
+                .Returns(new List<ApplicationLanguageListDto>
+                {
+                    new ApplicationLanguageListDto { Name = "pt-BR" },
+                    new ApplicationLanguageListDto { Name = "en" }
+                });
+            _sut.ObjectMapper = objectMapper;
+
+            var input = new GetLanguagesInput { Sorting = "Name" };
+
+            var result = await _sut.GetLanguages(input);
+
+            result.ShouldNotBeNull();
+            result.DefaultLanguageName.ShouldBeNull();
+        }
+
+        [Fact]
         public async Task Dado_IdiomasExistentes_Quando_GetLanguages_Entao_DeveRetornarComIdiomaPadrao()
         {
             // Dado

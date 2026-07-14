@@ -29,6 +29,36 @@ namespace Eaf.OpenTelemetry.Tests
         }
 
         [Fact]
+        public void Constructor_ShouldReadEnvironmentVariables_WhenAvailable()
+        {
+            var endpoint = "http://otel-collector:4317";
+            var protocol = "grpc";
+            var serviceName = "CustomService";
+            var originalEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+            var originalProtocol = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL");
+            var originalServiceName = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME");
+
+            try
+            {
+                Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", endpoint);
+                Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL", protocol);
+                Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", serviceName);
+
+                var options = new EafOpenTelemetryOptions();
+
+                options.OtlpVariables["OTEL_EXPORTER_OTLP_ENDPOINT"].ShouldBe(endpoint);
+                options.OtlpVariables["OTEL_EXPORTER_OTLP_PROTOCOL"].ShouldBe(protocol);
+                options.OtlpVariables["OTEL_SERVICE_NAME"].ShouldBe(serviceName);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", originalEndpoint);
+                Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL", originalProtocol);
+                Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", originalServiceName);
+            }
+        }
+
+        [Fact]
         public void ServiceName_WhenSet_ShouldUpdateOtlpVariables()
         {
             // Arrange

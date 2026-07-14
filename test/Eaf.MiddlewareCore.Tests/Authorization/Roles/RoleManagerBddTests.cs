@@ -127,6 +127,54 @@ namespace Eaf.Middleware.Tests.Authorization.Roles
         }
 
         [Fact]
+        public async Task Dado_RoleAdminApenasComPermissaoUsuario_Quando_SetGrantedPermissionsAsync_Entao_DeveLancarExcecao()
+        {
+            var roleStore = Substitute.For<RoleStore>(
+                Substitute.For<IUnitOfWorkManager>(),
+                Substitute.For<IRepository<Role>>(),
+                Substitute.For<IRepository<RolePermissionSetting, long>>()
+            );
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var localizationSource = Substitute.For<ILocalizationSource>();
+            localizationSource.GetString(Arg.Any<string>()).Returns("test");
+            localizationManager.GetSource("EafCore").Returns(localizationSource);
+
+            var roleManager = Substitute.For<RoleManager>(new object[]
+            {
+                roleStore,
+                new List<IRoleValidator<Role>>(),
+                Substitute.For<ILookupNormalizer>(),
+                new IdentityErrorDescriber(),
+                Substitute.For<ILogger<RoleManager>>(),
+                Substitute.For<IPermissionManager>(),
+                Substitute.For<IRoleManagementConfig>(),
+                Substitute.For<ICacheManager>(),
+                Substitute.For<IUnitOfWorkManager>(),
+                localizationManager,
+                Substitute.For<IRepository<OrganizationUnit, long>>(),
+                Substitute.For<IRepository<OrganizationUnitRole, long>>()
+            });
+
+            roleManager.When(x => x.SetGrantedPermissionsAsync(
+                Arg.Any<Role>(),
+                Arg.Any<IEnumerable<Permission>>()
+            )).CallBase();
+
+            var adminRole = new Role(null, "Admin", "Admin");
+            var permissions = new List<Permission>
+            {
+                new Permission(MiddlewarePermissions.Pages_Administration_Users_ChangePermissions, displayName: null)
+            };
+
+            var exception = await Should.ThrowAsync<UserFriendlyException>(() =>
+                roleManager.SetGrantedPermissionsAsync(adminRole, permissions)
+            );
+
+            exception.ShouldNotBeNull();
+        }
+
+        [Fact]
         public async Task Dado_RoleNaoAdmin_Quando_SetGrantedPermissionsAsync_Entao_DevePermitirSemValidacao()
         {
             // Dado

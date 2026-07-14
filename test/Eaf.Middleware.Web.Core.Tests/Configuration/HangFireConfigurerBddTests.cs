@@ -58,6 +58,19 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
             services.ShouldNotContain(s => s.ServiceType.FullName != null && s.ServiceType.FullName.Contains("Hangfire"));
         }
 
+        [Fact]
+        public void Dado_HangfireNaoConfigurado_Quando_Configure_Entao_NaoDeveRegistrarHangfire()
+        {
+            var services = new ServiceCollection();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>())
+                .Build();
+
+            HangFireConfigurer.Configure(services, configuration);
+
+            services.ShouldNotContain(s => s.ServiceType.FullName != null && s.ServiceType.FullName.Contains("Hangfire"));
+        }
+
         [Theory]
         [InlineData("SqlServer", HangfireStorageType.SqlServer)]
         [InlineData("MSSQL", HangfireStorageType.SqlServer)]

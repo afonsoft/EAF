@@ -71,5 +71,81 @@ namespace Eaf.Middleware.Tests.Configuration
 
             config.ShouldNotBeNull();
         }
+
+        [Fact]
+        public void Dado_AspNetCoreEnvironmentSetado_Quando_Get_Entao_DeveUsarValor()
+        {
+            var original = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            try
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Staging");
+                Environment.SetEnvironmentVariable("EAF_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("ASPNET_ENV", null);
+
+                var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")[..8]);
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, "appsettings.json"), "{}");
+
+                var config = AppConfigurations.Get(dir, null);
+
+                config.ShouldNotBeNull();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", original);
+            }
+        }
+
+        [Fact]
+        public void Dado_EafEnvironmentSetado_Quando_Get_Entao_DeveUsarValor()
+        {
+            var original = Environment.GetEnvironmentVariable("EAF_ENVIRONMENT");
+            try
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("EAF_ENVIRONMENT", "Production");
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("ASPNET_ENV", null);
+
+                var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")[..8]);
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, "appsettings.json"), "{}");
+
+                var config = AppConfigurations.Get(dir, null);
+
+                config.ShouldNotBeNull();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("EAF_ENVIRONMENT", original);
+            }
+        }
+
+        [Fact]
+        public void Dado_DotNetEnvironmentSetado_Quando_Get_Entao_DeveUsarValor()
+        {
+            var original = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+            try
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("EAF_ENVIRONMENT", null);
+                Environment.SetEnvironmentVariable("Hosting:Environment", null);
+                Environment.SetEnvironmentVariable("ASPNET_ENV", null);
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
+
+                var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")[..8]);
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, "appsettings.json"), "{}");
+
+                var config = AppConfigurations.Get(dir, null);
+
+                config.ShouldNotBeNull();
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", original);
+            }
+        }
     }
 }

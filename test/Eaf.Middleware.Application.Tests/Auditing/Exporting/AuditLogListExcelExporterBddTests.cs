@@ -78,6 +78,41 @@ namespace Eaf.Middleware.Tests.Application.Auditing.Exporting
         }
 
         [Fact]
+        public void Dado_ListaDeAuditLogsComErro_Quando_ExportarAuditLogs_Entao_DeveRetornarArquivoExcelEPersistirNoCache()
+        {
+            _abpSession.TenantId.Returns(1);
+            _abpSession.UserId.Returns(42);
+            _timeZoneConverter
+                .Convert(Arg.Any<DateTime?>(), Arg.Any<int?>(), Arg.Any<long>())
+                .Returns(DateTime.UtcNow);
+
+            var executionTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+            var auditLogs = new List<AuditLogListDto>
+            {
+                new AuditLogListDto
+                {
+                    Id = 1,
+                    UserName = "john",
+                    ServiceName = "MyApp.Service",
+                    MethodName = "MyMethod",
+                    Parameters = "{}",
+                    ExecutionDuration = 100,
+                    ExecutionTime = executionTime,
+                    ClientIpAddress = "127.0.0.1",
+                    ClientName = "Client",
+                    BrowserInfo = "Chrome",
+                    Exception = "NullReferenceException"
+                }
+            };
+
+            var result = _sut.ExportToFile(auditLogs);
+
+            result.ShouldNotBeNull();
+            result.FileName.ShouldBe("AuditLogs.xlsx");
+            _tempFileCacheManager.Received(1).SetFile(result.FileToken, Arg.Is<byte[]>(b => b.Length > 0));
+        }
+
+        [Fact]
         public void Dado_ListaDeEntityChanges_Quando_ExportarEntityChanges_Entao_DeveRetornarArquivoExcelEPersistirNoCache()
         {
             // Dado

@@ -85,6 +85,30 @@ namespace Eaf.Middleware.Application.Tests.Friendships
         }
 
         [Fact]
+        public async Task Dado_AmizadeComTenantDiferente_Quando_CreateFriendshipAsync_Entao_DeveInserirNoRepositorio()
+        {
+            var repository = Substitute.For<IRepository<Friendship, long>>();
+            var sut = CriarSut(repository, friendshipToReturn: null);
+            var friendship = CriarFriendship(userId: 1, tenantId: 1, friendUserId: 1, friendTenantId: 2);
+
+            await sut.CreateFriendshipAsync(friendship);
+
+            await repository.Received(1).InsertAsync(Arg.Is<Friendship>(f => f.UserId == 1 && f.FriendUserId == 1));
+        }
+
+        [Fact]
+        public async Task Dado_AmizadeComUsuarioDiferenteEMesmoTenant_Quando_CreateFriendshipAsync_Entao_DeveInserirNoRepositorio()
+        {
+            var repository = Substitute.For<IRepository<Friendship, long>>();
+            var sut = CriarSut(repository, friendshipToReturn: null);
+            var friendship = CriarFriendship(userId: 1, tenantId: 1, friendUserId: 2, friendTenantId: 1);
+
+            await sut.CreateFriendshipAsync(friendship);
+
+            await repository.Received(1).InsertAsync(Arg.Is<Friendship>(f => f.UserId == 1 && f.FriendUserId == 2));
+        }
+
+        [Fact]
         public async Task Dado_AmizadeExistente_Quando_AcceptFriendshipRequestAsync_Entao_DeveAlterarEstadoParaAccepted()
         {
             var friendship = CriarFriendship(state: FriendshipState.Blocked);

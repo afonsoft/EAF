@@ -5,12 +5,12 @@
 **[English](README.md)** | Português
 
 ![Line Coverage](https://img.shields.io/badge/Line%20Coverage-97.7%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-89.1%25-brightgreen)
-![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.7%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.0%25-brightgreen)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.8%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4555-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4554-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-159-yellow)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4585-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4584-brightgreen)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-161-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -382,22 +382,22 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.Castle.Serilog** | 72 | 98.9% | ✅ Excelente |
 | **Eaf.SqlServerCache** | 99 | 98.1% | ✅ Excelente |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
-| **Eaf.Middleware.Application** | 1496 | 99.7% | ✅ Excelente |
-| **Eaf.Middleware.Core** | 1250 | 99.7% | ✅ Excelente |
-| **Eaf.Middleware.Web.Core** | 757 | 96.9% | ✅ Excelente |
-| **Eaf.Middleware.Worker** | 186 | 99.5% | ✅ Excelente |
+| **Eaf.Middleware.Application** | 1502 | 99.7% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1258 | 99.8% | ✅ Excelente |
+| **Eaf.Middleware.Web.Core** | 767 | 96.9% | ✅ Excelente |
+| **Eaf.Middleware.Worker** | 191 | 100% | ✅ Excelente |
 | **Eaf.SqliteCache** | 161 | 98.0% | ✅ Excelente |
-| **Eaf.OpenTelemetry** | 64 | 99.5% | ✅ Excelente |
+| **Eaf.OpenTelemetry** | 65 | 100% | ✅ Excelente |
 | **Eaf.KeyVault** | 243 | 100% | ✅ Excelente |
 | **Eaf.Log4NetServiceBus** | 52 | 96.0% | ✅ Boa |
 | **Eaf.Middleware.AzureActiveDirectory** | 66 | 95.3% | ✅ Excelente |
 | **Eaf.Middleware.Ldap** | 99 | 66.3% | ⚠️ Precisa melhorar |
-| **TOTAL** | **4555** | **97.7%** | ✅ Em progresso |
+| **TOTAL** | **4585** | **97.7%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 97.7% linha, 89.1% branch, 99.7% método
-- **Testes Backend**: 4555 total, 4554 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Atual**: 97.7% linha, 90.0% branch, 99.8% método
+- **Testes Backend**: 4585 total, 4584 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
 - **Próximos passos**: P59 coverage audit — continuar melhorando cobertura de branch/método nas classes restantes, priorizando PermissionAppService, RoleAppService, MiddlewareAppServiceBase, TenantAppService, LdapAuthenticationSource, LdapSettings, ChatHub, TokenAuthController, MiddlewareWebCoreModule, EafHangfireApplicationBuilderExtensions, EafHangfireAuthorizationFilter e ServiceBusQueueAppender, e documentar ramos inacessíveis no Linux.

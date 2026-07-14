@@ -209,5 +209,44 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
 
             receiver.CurrentUnitOfWorkProperty.ShouldBeSameAs(uow);
         }
+
+        [Fact]
+        public void Dado_LocalizationSourceJaCarregada_Quando_AcessarNovamente_Entao_DeveRetornarMesmaInstancia()
+        {
+            var receiver = new TestWebhookReceiver();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var localizationSource = Substitute.For<ILocalizationSource>();
+            localizationSource.Name.Returns(MiddlewareLocalizationHelper.DefaultSourceName);
+            localizationManager.GetSource(MiddlewareLocalizationHelper.DefaultSourceName).Returns(localizationSource);
+
+            receiver.LocalizationManager = localizationManager;
+
+            var source1 = receiver.LocalizationSourceProperty;
+            var source2 = receiver.LocalizationSourceProperty;
+
+            source1.ShouldBeSameAs(source2);
+            localizationManager.Received(1).GetSource(MiddlewareLocalizationHelper.DefaultSourceName);
+        }
+
+        [Fact]
+        public void Dado_LocalizationSourceNameMudado_Quando_Acessar_Entao_DeveAtualizarSource()
+        {
+            var receiver = new TestWebhookReceiver();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var eafSource = Substitute.For<ILocalizationSource>();
+            eafSource.Name.Returns(MiddlewareLocalizationHelper.DefaultSourceName);
+            var abpSource = Substitute.For<ILocalizationSource>();
+            abpSource.Name.Returns("Abp");
+
+            localizationManager.GetSource(MiddlewareLocalizationHelper.DefaultSourceName).Returns(eafSource);
+            localizationManager.GetSource("Abp").Returns(abpSource);
+
+            receiver.LocalizationManager = localizationManager;
+
+            _ = receiver.LocalizationSourceProperty;
+            receiver.LocalizationSourceNameOverride = "Abp";
+
+            receiver.LocalizationSourceProperty.ShouldBeSameAs(abpSource);
+        }
     }
 }

@@ -73,6 +73,29 @@ namespace Eaf.Middleware.Application.Tests.Logging
         }
 
         [Fact]
+        public void Dado_DiretorioComArquivoLogComTodosOsNiveis_Quando_GetLatestWebLogs_Entao_DeveRetornarLinhas()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "WebLogTest_" + System.Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                var logFile = Path.Combine(tempDir, "app.txt");
+                File.WriteAllText(logFile, "[IMF] Info\n[DBG] Debug\n[WRN] Warn\n[ERR] Error\n[FAT] Fatal\n[FTL] Fatal2\nINFO no-prefix\nDEBUG no-prefix\nWARNING no-prefix\nERROR no-prefix\nFATAL no-prefix\nnothing\n");
+                _appFolders.WebLogsFolder.Returns(tempDir);
+
+                var result = _sut.GetLatestWebLogs();
+
+                result.ShouldNotBeNull();
+                result.LatestWebLogLines.ShouldNotBeNull();
+                result.LatestWebLogLines.Count.ShouldBeGreaterThan(0);
+            }
+            finally
+            {
+                Directory.Delete(tempDir, true);
+            }
+        }
+
+        [Fact]
         public void Dado_DiretorioComArquivoLog_Quando_GetLatestWebLogs_Entao_DeveRetornarLinhas()
         {
             // Dado

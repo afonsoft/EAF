@@ -150,6 +150,22 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         }
 
         [Fact]
+        public async Task Dado_BinaryFileExistenteSemNomeInformado_Quando_DownloadBinaryFile_Entao_DeveUsarNomeDoObjeto()
+        {
+            var id = Guid.NewGuid();
+            var bytes = new byte[] { 13, 14, 15 };
+            var binaryObject = new BinaryObject(null, bytes, "image/png", "image.png");
+            _binaryObjectManager.GetOrNullAsync(id).Returns(Task.FromResult(binaryObject));
+
+            var resultado = await _sut.DownloadBinaryFile(id, "image/png", null);
+
+            var fileResult = resultado.ShouldBeOfType<FileContentResult>();
+            fileResult.ContentType.ShouldBe("image/png");
+            fileResult.FileDownloadName.ShouldBe(binaryObject.FileName);
+            fileResult.FileContents.ShouldBe(bytes);
+        }
+
+        [Fact]
         public async Task Dado_BinaryFileNaoEncontradoPorNome_Quando_DownloadBinaryFile_Entao_DeveRetornarNotFound()
         {
             var id = Guid.NewGuid();

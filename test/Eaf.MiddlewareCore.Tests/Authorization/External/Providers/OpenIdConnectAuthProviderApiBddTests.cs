@@ -500,6 +500,17 @@ namespace Eaf.Middleware.Tests.Authorization.External.Providers
             }
         }
 
+        [Fact]
+        public void Dado_ValidateTokenResult_Quando_InstanciarViaReflexao_Entao_DeveInicializarPropriedadesNulas()
+        {
+            var nestedType = typeof(OpenIdConnectAuthProviderApi)
+                .GetNestedType("ValidateTokenResult", System.Reflection.BindingFlags.NonPublic);
+
+            var instance = Activator.CreateInstance(nestedType!, true);
+
+            instance.ShouldNotBeNull();
+        }
+
         private static OpenIdConnectAuthProviderApi CriarSut(Dictionary<string, string> additionalParams = null)
         {
             var sut = new OpenIdConnectAuthProviderApi(NullLogger.Instance);

@@ -138,6 +138,66 @@ namespace Eaf.Middleware.Tests.Authorization
         }
 
         [Fact]
+        public async Task Dado_TokenNoRepositorioComImpersonator_Quando_GetImpersonatedUserAndIdentity_Entao_DeveRetornarUsuarioEIdentidade()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(1L);
+
+            var sut = CoreManagerTestHelper.CreateImpersonationManager(abpSession);
+            var token = Guid.NewGuid().ToString();
+            var userToken = new EafUserToken
+            {
+                TenantId = 1,
+                UserId = 2,
+                Name = token,
+                LoginProvider = "TokenValidAdminLogin",
+                ExpireDate = DateTime.UtcNow.AddHours(1),
+                Value = "1-1"
+            };
+
+            var userTokenRepository = (IRepository<UserToken, long>)typeof(ImpersonationManager)
+                .GetField("_userTokenRepository", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetValue(sut);
+            userTokenRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<UserToken, bool>>>()).Returns(Task.FromResult((UserToken)userToken));
+
+            var result = await sut.GetImpersonatedUserAndIdentity(token);
+
+            result.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_TokenNoRepositorioSemImpersonator_Quando_GetImpersonatedUserAndIdentity_Entao_DeveRetornarUsuarioEIdentidade()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            abpSession.UserId.Returns(2L);
+
+            var sut = CoreManagerTestHelper.CreateImpersonationManager(abpSession);
+            var token = Guid.NewGuid().ToString();
+            var userToken = new EafUserToken
+            {
+                TenantId = 1,
+                UserId = 1,
+                Name = token,
+                LoginProvider = "TokenValidAdminLogin",
+                ExpireDate = DateTime.UtcNow.AddHours(1),
+                Value = null
+            };
+
+            var userTokenRepository = (IRepository<UserToken, long>)typeof(ImpersonationManager)
+                .GetField("_userTokenRepository", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetValue(sut);
+            userTokenRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<UserToken, bool>>>()).Returns(Task.FromResult((UserToken)userToken));
+
+            var result = await sut.GetImpersonatedUserAndIdentity(token);
+
+            result.ShouldNotBeNull();
+            result.User.ShouldNotBeNull();
+        }
+
+        [Fact]
         public void Dado_TokenInvalido_Quando_GetImpersonatedUserAndIdentity_Entao_DeveLancarExcecao()
         {
             // Dado

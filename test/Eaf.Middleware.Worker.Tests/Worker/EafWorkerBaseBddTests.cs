@@ -318,5 +318,32 @@ namespace Eaf.Middleware.Worker.Tests.Worker
 
             worker.ShouldBeAssignableTo<IEafWorkerBase>();
         }
+
+        [Fact]
+        public void Dado_IocManager_Quando_SetarEAcessar_Entao_DeveRetornarMesmaInstancia()
+        {
+            var worker = new TestWorker();
+            var iocManager = Substitute.For<Abp.Dependency.IIocManager>();
+
+            worker.IocManager = iocManager;
+
+            worker.IocManager.ShouldBeSameAs(iocManager);
+        }
+
+        [Fact]
+        public void Dado_Worker_Quando_LComCulturaEArgsNulo_Entao_DeveRetornarChaveSemFormatar()
+        {
+            var worker = new TestWorker();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafCore");
+            source.GetStringOrNull("Hello", System.Globalization.CultureInfo.GetCultureInfo("en-US")).Returns("Hello {0}");
+            localizationManager.GetSource("EafCore").Returns(source);
+            worker.LocalizationManager = localizationManager;
+
+            var result = worker.PublicL("Hello", System.Globalization.CultureInfo.GetCultureInfo("en-US"), (object[])null!);
+
+            result.ShouldBe("Hello {0}");
+        }
     }
 }
