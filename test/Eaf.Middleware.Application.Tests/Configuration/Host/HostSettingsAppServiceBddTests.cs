@@ -624,6 +624,106 @@ namespace Eaf.Middleware.Application.Tests.Configuration.Host
             await settingManager.Received(1).ChangeSettingForApplicationAsync(TimingSettingNames.TimeZone, "America/Sao_Paulo");
         }
 
+        [Fact]
+        public async Task Dado_AzureActiveDirectoryComClientIdVazio_Quando_UpdateAllSettings_Entao_DeveDefinirNulo()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _, out _, out var azureConfig, out _);
+            azureConfig.IsEnabled.Returns(true);
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.Users.Returns(new List<User>().AsQueryable());
+            sut.UserManager = userManager;
+
+            var input = CreateValidInput();
+            input.AzureActiveDirectory = new AzureActiveDirectorySettingsEditDto
+            {
+                IsEnabled = false,
+                ClientId = "",
+                Tenant = "tenant",
+                ClientSecret = "secret"
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AzureActiveDirectorySettingNames.ClientId, Arg.Is<string>(v => v == null));
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AzureActiveDirectorySettingNames.Tenant, "tenant");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(AzureActiveDirectorySettingNames.ClientSecret, "secret");
+        }
+
+        [Fact]
+        public async Task Dado_GoogleComAnalyticsVazio_Quando_UpdateAllSettings_Entao_DeveDefinirNulo()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.Google = new GoogleSettingsEditDto
+            {
+                Analytics = "",
+                Tag = "GTM-123",
+                RecaptchaSiteKey = "key"
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.Google.Analytics, Arg.Is<string>(v => v == null));
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.Google.TagManager, "GTM-123");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.Google.RecaptchaSiteKey, "key");
+        }
+
+        [Fact]
+        public async Task Dado_LdapComCamposPreenchidos_Quando_UpdateAllSettings_Entao_DeveDefinirValores()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _, out _, out _, out var ldapConfig);
+            ldapConfig.IsEnabled.Returns(true);
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.Users.Returns(new List<User>().AsQueryable());
+            sut.UserManager = userManager;
+
+            var input = CreateValidInput();
+            input.Ldap = new LdapSettingsEditDto
+            {
+                IsEnabled = false,
+                Domain = "domain.local",
+                UserName = "admin",
+                Password = "password"
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(LdapSettingNames.Domain, "domain.local");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(LdapSettingNames.UserName, "admin");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(LdapSettingNames.Password, "password");
+        }
+
+        [Fact]
+        public async Task Dado_LogDeleterComValoresPreenchidos_Quando_UpdateAllSettings_Entao_DeveDefinirValores()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.LogDeleter = new ExpiredEntityLogDeleterSettingsEditDto
+            {
+                DeletedQuantity = 100,
+                Enabled = false,
+                ExpiredDays = 7
+            };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LogDeleter.ExpiredDays, "7");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LogDeleter.DeletedQuantity, "100");
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LogDeleter.IsEnabled, "false");
+        }
+
+        [Fact]
+        public async Task Dado_LoginImpersonatorEnabledFalse_Quando_UpdateAllSettings_Entao_DeveDefinirFalse()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.LoginImpersonator = new ExpiredEntityLoginImpersonatorSettingsEditDto { Enabled = false };
+
+            await sut.UpdateAllSettings(input);
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(EafMiddlewareSettingNames.LoginImpersonator.IsEnabled, "false");
+        }
+
         private static HostSettingsEditDto CreateValidInput()
         {
             return new HostSettingsEditDto

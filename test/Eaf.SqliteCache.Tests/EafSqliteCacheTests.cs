@@ -4,6 +4,7 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -854,6 +855,22 @@ namespace Eaf.SqliteCache.Tests
             cache.Dispose();
 
             Should.NotThrow(() => cache.RemoveExpired());
+        }
+
+        [Fact]
+        public void Serializacao_ComNuloOuVazio_DeveRetornarValoresPadrao()
+        {
+            var objectToByteArray = typeof(EafSqliteCache).GetMethod("ObjectToByteArray", BindingFlags.NonPublic | BindingFlags.Static);
+            objectToByteArray.ShouldNotBeNull();
+            var byteArrayToObject = typeof(EafSqliteCache).GetMethod("ByteArrayToObject", BindingFlags.NonPublic | BindingFlags.Static);
+            byteArrayToObject.ShouldNotBeNull();
+
+            var emptyBytes = (byte[])objectToByteArray.Invoke(null, new object[] { null });
+            emptyBytes.ShouldNotBeNull();
+            emptyBytes.Length.ShouldBe(0);
+
+            byteArrayToObject.Invoke(null, new object[] { null }).ShouldBeNull();
+            byteArrayToObject.Invoke(null, new object[] { Array.Empty<byte>() }).ShouldBeNull();
         }
 
         #endregion

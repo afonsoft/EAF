@@ -5,12 +5,12 @@
 **[English](README.md)** | Português
 
 ![Line Coverage](https://img.shields.io/badge/Line%20Coverage-97.7%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-87.5%25-brightgreen)
-![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.6%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-89.1%25-brightgreen)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.7%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4533-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4532-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-154-yellow)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4555-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4554-brightgreen)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-159-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -379,30 +379,38 @@ Este exemplo demonstra vários recursos do EAF:
 
 | Módulo | Testes | Cobertura de Linha | Status |
 |--------|--------|-------------------|--------|
-| **Eaf.Castle.Serilog** | 71 | 98.9% | ✅ Excelente |
-| **Eaf.SqlServerCache** | 96 | 98.1% | ✅ Excelente |
+| **Eaf.Castle.Serilog** | 72 | 98.9% | ✅ Excelente |
+| **Eaf.SqlServerCache** | 99 | 98.1% | ✅ Excelente |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
-| **Eaf.Middleware.Application** | 1484 | 99.7% | ✅ Excelente |
-| **Eaf.Middleware.Core** | 1249 | 99.7% | ✅ Excelente |
+| **Eaf.Middleware.Application** | 1496 | 99.7% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1250 | 99.7% | ✅ Excelente |
 | **Eaf.Middleware.Web.Core** | 757 | 96.9% | ✅ Excelente |
-| **Eaf.Middleware.Worker** | 184 | 99.5% | ✅ Excelente |
-| **Eaf.SqliteCache** | 158 | 97.1% | ✅ Excelente |
-| **Eaf.OpenTelemetry** | 64 | 100% | ✅ Excelente |
+| **Eaf.Middleware.Worker** | 186 | 99.5% | ✅ Excelente |
+| **Eaf.SqliteCache** | 161 | 98.0% | ✅ Excelente |
+| **Eaf.OpenTelemetry** | 64 | 99.5% | ✅ Excelente |
 | **Eaf.KeyVault** | 243 | 100% | ✅ Excelente |
 | **Eaf.Log4NetServiceBus** | 52 | 96.0% | ✅ Boa |
 | **Eaf.Middleware.AzureActiveDirectory** | 66 | 95.3% | ✅ Excelente |
 | **Eaf.Middleware.Ldap** | 99 | 66.3% | ⚠️ Precisa melhorar |
-| **TOTAL** | **4533** | **97.7%** | ✅ Em progresso |
+| **TOTAL** | **4555** | **97.7%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 97.7% linha, 87.5% branch, 99.6% método
-- **Testes Backend**: 4533 total, 4532 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Atual**: 97.7% linha, 89.1% branch, 99.7% método
+- **Testes Backend**: 4555 total, 4554 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
-- **Próximos passos**: P58 coverage audit — continuar melhorando cobertura de branch nas classes restantes, incluindo SerilogLogger, ServiceBusQueueAppender, PermissionAppService, RoleAppService, UserAppService, ChatMessageManager, HostSettingsAppService, MiddlewareAppServiceBase, TenantAppService, AzureActiveDirectoryAuthenticationSource, OpenIdConnectAuthProviderApi, TenantAddress, LdapAuthenticationSource, LdapSettings, ChatHub, TokenAuthController, MiddlewareWebCoreModule, EafHangfireApplicationBuilderExtensions, EafHangfireAuthorizationFilter, EafServiceCollectionExtensions (Worker), EafWorkerBase, EafSqliteCache e EafSqlServerCache
+- **Próximos passos**: P59 coverage audit — continuar melhorando cobertura de branch/método nas classes restantes, priorizando PermissionAppService, RoleAppService, MiddlewareAppServiceBase, TenantAppService, LdapAuthenticationSource, LdapSettings, ChatHub, TokenAuthController, MiddlewareWebCoreModule, EafHangfireApplicationBuilderExtensions, EafHangfireAuthorizationFilter e ServiceBusQueueAppender, e documentar ramos inacessíveis no Linux.
 
 ### Melhorias Implementadas
+- **Expansão de Testes (Julho 2026)**: P58 coverage audit — testes BDD para SerilogLogger, TenantAddress, EafWorkerBase, UserAppService, ChatMessageManager, HostSettingsAppService, EafSqliteCache e EafSqlServerCache
+  - **Eaf.Castle.Serilog**: +teste BDD para `SerilogLogger` com logger desabilitado (invoca todos os métodos de log sem chamar o sink)
+  - **Eaf.MiddlewareCore**: +teste BDD para `TenantAddress.Tenant` (setter do navigation property)
+  - **Eaf.Middleware.Worker**: +testes BDD para `EafWorkerBase.L` com `args` vazio nas duas sobrecargas
+  - **Eaf.Middleware.Application**: +testes BDD para `UserAppService` (Azure AD com campos preenchidos e username sem domínio; LDAP com `TenantId`) e `ChatMessageManager` (delete sem mensagens, send com tenants nulos, atualização parcial de amizade)
+  - **Eaf.Middleware.Application**: +testes BDD para `HostSettingsAppService.UpdateAllSettings` (Azure AD ClientId vazio, Google Analytics vazio, LDAP com valores, LogDeleter/LoginImpersonator preenchidos)
+  - **Eaf.SqliteCache**: +testes BDD para expiração absoluta padrão e serialização com nulo/vazio
+  - **Eaf.SqlServerCache**: +testes BDD para `TryGetValue` quando cache distribuído lança ou retorna bytes vazios e `ByteArrayToObject` com nulo/vazio
 - **Expansão de Testes (Julho 2026)**: P57 coverage audit — testes BDD para AccountAppService, RoleAppService, TenantAppService, AzureActiveDirectoryAuthenticationSource, ProfileControllerBase, EafHangfireApplicationBuilderExtensions, ChatHub, EafWorkerBase, EafOpenTelemetryServiceCollectionExtensions e ServiceBusQueueAppender
   - **Eaf.Middleware.Application**: +testes BDD para AccountAppService (impersonate com tenant inativo), RoleAppService (filtro por permissão e delete sem usuários) e TenantAppService (features com escopo Tenant e mapper de FlatFeatureDto)
   - **Eaf.Middleware.AzureActiveDirectory**: +testes BDD para AzureActiveDirectoryAuthenticationSource (create/update com AbpException do Graph)
@@ -413,14 +421,14 @@ Este exemplo demonstra vários recursos do EAF:
 - **KeyVault**: 241 testes BDD implementados (100% sucesso, 95.4% cobertura)
 - **Documentação XML**: Summaries em português adicionados
 - **Padrão BDD**: Dado/Quando/Então implementado
-- **Castle.Serilog**: 71 testes BDD implementados (100% sucesso, 98.9% cobertura)
-- **OpenTelemetry**: 62/62 testes passando (100% sucesso, 98.1% cobertura)
-- **SqlServerCache**: 96/96 testes passando (100% sucesso, 98.1% cobertura)
-- **SqliteCache**: 158/158 testes passando (100% sucesso, 97.1% cobertura)
-- **Worker**: 181/181 testes passando (100% sucesso, 99.5% cobertura)
-- **Middleware.Application**: 1480/1480 testes passando (100% sucesso, 99.3% cobertura)
-- **Middleware.Web.Core**: 752/752 testes passando (100% sucesso, 96.8% cobertura)
-- **Middleware.Core**: 1249/1249 testes passando (100% sucesso, 99.6% cobertura)
+- **Castle.Serilog**: 72 testes BDD implementados (100% sucesso, 98.9% cobertura)
+- **OpenTelemetry**: 64/64 testes passando (100% sucesso, 99.5% cobertura)
+- **SqlServerCache**: 99/99 testes passando (100% sucesso, 98.1% cobertura)
+- **SqliteCache**: 161/161 testes passando (100% sucesso, 98.0% cobertura)
+- **Worker**: 186/186 testes passando (100% sucesso, 99.5% cobertura)
+- **Middleware.Application**: 1496/1496 testes passando (100% sucesso, 99.7% cobertura)
+- **Middleware.Web.Core**: 757/757 testes passando (100% sucesso, 96.9% cobertura)
+- **Middleware.Core**: 1250/1250 testes passando (100% sucesso, 99.7% cobertura)
 - **Expansão de Testes (Julho 2026)**: P56 coverage audit — testes BDD para HostSettingsAppService, ChatAppService, EafHostBuilderExtensions (Core/Worker), EafServiceCollectionExtensions (Worker), AzureActiveDirectoryAuthenticationSource e EafHangfireApplicationBuilderExtensions
   - **Eaf.Middleware.Application**: +testes BDD para HostSettingsAppService (UpdateAllSettings com sub-DTOs nulos, timezone, LogDeleter, LoginImpersonator, Google vazio, Azure AD/LDAP habilitados com valores em branco, external-login providers com JSON/mapeamentos de claims) e ChatAppService (lado das mensagens de grupo, marcação de mensagens não lidas com tenants distintos)
   - **Eaf.Middleware.AzureActiveDirectory**: +testes BDD para AzureActiveDirectoryAuthenticationSource (e-mail sem `@` em `Mail`/`UserPrincipalName` para `GetUserAsync`/`GetUsersAsync`/`UpdateUserAsync`)
@@ -510,15 +518,15 @@ Este exemplo demonstra vários recursos do EAF:
 
 | Assembly | Cobertura de Linha | Testes | Status |
 |----------|-------------------|--------|--------|
-| **Eaf.Castle.Serilog** | 98.9% | 71 | ✅ |
-| **Eaf.SqlServerCache** | 98.1% | 95 | ✅ |
+| **Eaf.Castle.Serilog** | 98.9% | 72 | ✅ |
+| **Eaf.SqlServerCache** | 98.1% | 99 | ✅ |
 | **Eaf.KeyVault.AspNetCore** | 100% | 10 | ✅ |
-| **Eaf.Middleware.Application** | 99.3% | 1480 | ✅ |
-| **Eaf.Middleware.Core** | 99.6% | 1249 | ✅ |
-| **Eaf.Middleware.Web.Core** | 96.8% | 752 | ✅ |
-| **Eaf.Middleware.Worker** | 99.5% | 181 | ✅ |
-| **Eaf.SqliteCache** | 97.1% | 158 | ✅ |
-| **Eaf.OpenTelemetry** | 98.1% | 62 | ✅ |
+| **Eaf.Middleware.Application** | 99.7% | 1496 | ✅ |
+| **Eaf.Middleware.Core** | 99.7% | 1250 | ✅ |
+| **Eaf.Middleware.Web.Core** | 96.9% | 757 | ✅ |
+| **Eaf.Middleware.Worker** | 99.5% | 186 | ✅ |
+| **Eaf.SqliteCache** | 98.0% | 161 | ✅ |
+| **Eaf.OpenTelemetry** | 99.5% | 64 | ✅ |
 | **Eaf.KeyVault** | 100% | 243 | ✅ |
 | **Eaf.Log4NetServiceBus** | 96.0% | 51 | ✅ |
 | **Eaf.Middleware.AzureActiveDirectory** | 95.3% | 64 | ✅ |
@@ -528,19 +536,19 @@ Este exemplo demonstra vários recursos do EAF:
 
 | Projeto | Status | Testes | Cobertura de Linha | Notas |
 |---------|--------|--------|-------------------|-------|
-| **Eaf.Castle.Serilog.Tests** | ✅ Passando | 71 | 98.9% | BDD em português |
-| **Eaf.KeyVault.Tests** | ✅ Passando | 242 | 99.6% | Padrão BDD |
+| **Eaf.Castle.Serilog.Tests** | ✅ Passando | 72 | 98.9% | BDD em português |
+| **Eaf.KeyVault.Tests** | ✅ Passando | 242 | 100% | Padrão BDD |
 | **Eaf.KeyVault.AspNetCore.Tests** | ✅ Passando | 10 | 100% | Excelente cobertura |
-| **Eaf.Log4NetServiceBus.Tests** | ✅ Passando | 51 | 96.0% | Boa cobertura |
-| **Eaf.Middleware.Application.Tests** | ✅ Passando | 1480 | 99.3% | Maior suíte de testes |
-| **Eaf.Middleware.AzureActiveDirectory.Tests** | ✅ Passando | 64 | 95.3% | Cobertura básica |
+| **Eaf.Log4NetServiceBus.Tests** | ✅ Passando | 52 | 96.0% | Boa cobertura |
+| **Eaf.Middleware.Application.Tests** | ✅ Passando | 1496 | 99.7% | Maior suíte de testes |
+| **Eaf.Middleware.AzureActiveDirectory.Tests** | ✅ Passando | 66 | 95.3% | Cobertura básica |
 | **Eaf.Middleware.Ldap.Tests** | ✅ Passando | 99 | 66.3% | Cobertura básica |
-| **Eaf.Middleware.Worker.Tests** | ✅ Passando | 181 | 99.5% | Lifecycle, Background jobs |
-| **Eaf.Middleware.Web.Core.Tests** | ✅ Passando | 752 | 96.8% | Swagger, TokenAuth, Impersonation |
-| **Eaf.MiddlewareCore.Tests** | ✅ Passando | 1249 | 99.6% | Core, SampleApp, DDD |
-| **Eaf.OpenTelemetry.Tests** | ✅ Passando | 62 | 98.1% | Boa cobertura |
-| **Eaf.SqliteCache.Tests** | ✅ Passando | 158 | 97.1% | +14 testes de expiração |
-| **Eaf.SqlServerCache.Tests** | ✅ Passando | 96 | 98.1% | Excelente cobertura |
+| **Eaf.Middleware.Worker.Tests** | ✅ Passando | 186 | 99.5% | Lifecycle, Background jobs |
+| **Eaf.Middleware.Web.Core.Tests** | ✅ Passando | 757 | 96.9% | Swagger, TokenAuth, Impersonation |
+| **Eaf.MiddlewareCore.Tests** | ✅ Passando | 1250 | 99.7% | Core, SampleApp, DDD |
+| **Eaf.OpenTelemetry.Tests** | ✅ Passando | 64 | 99.5% | Boa cobertura |
+| **Eaf.SqliteCache.Tests** | ✅ Passando | 161 | 98.0% | +14 testes de expiração |
+| **Eaf.SqlServerCache.Tests** | ✅ Passando | 99 | 98.1% | Excelente cobertura |
 
 ### Testes Template Angular
 

@@ -566,6 +566,39 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             await userManager.Received(1).CreateAsync(Arg.Any<User>());
         }
 
+        [Fact]
+        public async Task Dado_UserNameNovoDoAzureADComCamposPreenchidos_Quando_CreateUsersByActiveDirectory_Entao_DeveManterValoresPadrao()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns((int?)null);
+            _sut.AbpSession = abpSession;
+
+            var userManager = ManagerTestHelper.CreateUserManager(out var userRepository);
+            userRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<User, bool>>>()).Returns((User)null);
+            userManager.CreateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            _appAzureActiveDirectoryAuthenticationSource.GetUserAsync("user")
+                .Returns(new User { UserName = "user", Name = "John", Surname = "Doe", EmailAddress = "john@example.com" });
+
+            var input = new CreateActiveDirectoryUserInput
+            {
+                UserNames = new[] { "user" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            // Quando
+            await _sut.CreateUsersByActiveDirectory(input);
+
+            // Então
+            await _appAzureActiveDirectoryAuthenticationSource.Received(1).GetUserAsync("user");
+            await userManager.Received(1).CreateAsync(Arg.Any<User>());
+        }
+
         #endregion
 
         #region CreateUsersByLdap
@@ -618,6 +651,39 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             await _sut.CreateUsersByLdap(input);
 
             await _appLdapAuthenticationSource.Received(1).CreateUserAsync("john", Arg.Any<Tenant>());
+            await userManager.Received(1).CreateAsync(user);
+        }
+
+        [Fact]
+        public async Task Dado_UserNamesLdapValidosComTenant_Quando_CreateUsersByLdap_Entao_DeveCriarUsuariosComTenant()
+        {
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            _sut.AbpSession = abpSession;
+
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.GetByIdAsync(1).Returns(new Tenant("acme", "Acme") { Id = 1 });
+            _sut.TenantManager = tenantManager;
+
+            var user = new User { Id = 1, UserName = "john", Name = "John", Surname = "User", EmailAddress = "john@example.com" };
+            _appLdapAuthenticationSource.CreateUserAsync("john", Arg.Any<Tenant>()).Returns(user);
+
+            var userManager = ManagerTestHelper.CreateUserManager();
+            userManager.CreateAsync(user).Returns(IdentityResult.Success);
+            _sut.UserManager = userManager;
+
+            _roleManager.GetRoleByNameAsync("admin").Returns(new Role(null, "admin", "Admin") { Id = 1 });
+
+            var input = new CreateLdapUserInput
+            {
+                UserNames = new[] { "john" },
+                AssignedRoleNames = new[] { "admin" },
+                IsActive = true
+            };
+
+            await _sut.CreateUsersByLdap(input);
+
+            await _appLdapAuthenticationSource.Received(1).CreateUserAsync("john", Arg.Is<Tenant>(t => t.Id == 1));
             await userManager.Received(1).CreateAsync(user);
         }
 

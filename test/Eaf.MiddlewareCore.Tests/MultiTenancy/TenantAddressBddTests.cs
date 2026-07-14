@@ -208,6 +208,18 @@ namespace Eaf.Middleware.Tests.MultiTenancy
             tenant.Addresses.ShouldBeNull();
         }
 
+        [Fact]
+        public void Dado_TenantAddress_Quando_DefinirTenant_Entao_DevePersistir()
+        {
+            var tenant = new Tenant("acme", "Acme Corp") { Id = 1 };
+            var address = new TenantAddress();
+
+            address.Tenant = tenant;
+
+            address.Tenant.ShouldNotBeNull();
+            address.Tenant.Id.ShouldBe(1);
+        }
+
         #endregion
     }
 }
