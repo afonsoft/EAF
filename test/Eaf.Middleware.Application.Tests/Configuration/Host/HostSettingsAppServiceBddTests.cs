@@ -288,6 +288,44 @@ namespace Eaf.Middleware.Application.Tests.Configuration.Host
             );
         }
 
+        [Fact]
+        public async Task Dado_ErroNoLoginImpersonator_Quando_GetAllSettings_Entao_DeveRetornarValorPadrao()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            settingManager.GetSettingValueForApplicationAsync(EafMiddlewareSettingNames.LoginImpersonator.IsEnabled)
+                .ThrowsAsync(new Exception("fail"));
+
+            var result = await sut.GetAllSettings();
+
+            result.ShouldNotBeNull();
+            result.LoginImpersonator.ShouldNotBeNull();
+            result.LoginImpersonator.Enabled.ShouldBe(true);
+        }
+
+        [Fact]
+        public async Task Dado_TimezonePreenchido_Quando_UpdateAllSettings_Entao_DeveUsarTimezoneFornecido()
+        {
+            var sut = CreateSut(out var settingManager, out _, out _);
+            var input = CreateValidInput();
+            input.General.Timezone = "America/Sao_Paulo";
+
+            var originalProvider = Clock.Provider;
+            var clockProvider = Substitute.For<IClockProvider>();
+            clockProvider.SupportsMultipleTimezone.Returns(true);
+            Clock.Provider = clockProvider;
+
+            try
+            {
+                await sut.UpdateAllSettings(input);
+            }
+            finally
+            {
+                Clock.Provider = originalProvider;
+            }
+
+            await settingManager.Received(1).ChangeSettingForApplicationAsync(TimingSettingNames.TimeZone, "America/Sao_Paulo");
+        }
+
         private static HostSettingsEditDto CreateValidInput()
         {
             return new HostSettingsEditDto

@@ -64,7 +64,17 @@ namespace Eaf.Middleware.Tests.Helpers
             return CreateUserManager(out _);
         }
 
+        public static UserManager CreateUserManager(IEnumerable<IPasswordValidator<User>> passwordValidators)
+        {
+            return CreateUserManager(out _, passwordValidators);
+        }
+
         public static UserManager CreateUserManager(out IRepository<User, long> userRepository)
+        {
+            return CreateUserManager(out userRepository, Array.Empty<IPasswordValidator<User>>());
+        }
+
+        public static UserManager CreateUserManager(out IRepository<User, long> userRepository, IEnumerable<IPasswordValidator<User>> passwordValidators)
         {
             userRepository = Substitute.For<IRepository<User, long>, ISupportsExplicitLoading<User, long>>();
             userRepository.GetAll().Returns(new List<User>().AsQueryable());
@@ -75,7 +85,7 @@ namespace Eaf.Middleware.Tests.Helpers
             var optionsAccessor = Options.Create(new IdentityOptions());
             var passwordHasher = Substitute.For<IPasswordHasher<User>>();
             var userValidators = Array.Empty<IUserValidator<User>>();
-            var passwordValidators = Array.Empty<IPasswordValidator<User>>();
+            var passwordValidatorsList = passwordValidators;
             var keyNormalizer = Substitute.For<ILookupNormalizer>();
             var errors = Substitute.For<IdentityErrorDescriber>();
             var services = Substitute.For<IServiceProvider>();
@@ -93,7 +103,7 @@ namespace Eaf.Middleware.Tests.Helpers
 
             var userManager = Substitute.For<UserManager>(new object[]
             {
-                userStore, userRepository, optionsAccessor, passwordHasher, userValidators, passwordValidators,
+                userStore, userRepository, optionsAccessor, passwordHasher, userValidators, passwordValidatorsList,
                 keyNormalizer, errors, services, logger, roleManager, permissionManager, unitOfWorkManager,
                 cacheManager, settingManager, localizationManager, organizationUnitRepository,
                 userOrganizationUnitRepository, organizationUnitSettings, userLoginRepository
@@ -210,6 +220,11 @@ namespace Eaf.Middleware.Tests.Helpers
 
         public static TenantManager CreateTenantManager(out UserManager userManager, out RoleManager roleManager, out IPasswordHasher<User> passwordHasher, out IRepository<Tenant> tenantRepository, out IPermissionManager permissionManager)
         {
+            return CreateTenantManager(null, out userManager, out roleManager, out passwordHasher, out tenantRepository, out permissionManager);
+        }
+
+        public static TenantManager CreateTenantManager(IEnumerable<IPasswordValidator<User>> passwordValidators, out UserManager userManager, out RoleManager roleManager, out IPasswordHasher<User> passwordHasher, out IRepository<Tenant> tenantRepository, out IPermissionManager permissionManager)
+        {
             tenantRepository = Substitute.For<IRepository<Tenant>>();
             tenantRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Tenant, bool>>>()).Returns((Tenant)null);
             tenantRepository.InsertAsync(Arg.Any<Tenant>()).Returns(t =>
@@ -229,7 +244,7 @@ namespace Eaf.Middleware.Tests.Helpers
             var userEmailer = Substitute.For<IUserEmailer>();
             userEmailer.SendEmailActivationLinkAsync(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.CompletedTask);
 
-            userManager = CreateUserManager();
+            userManager = passwordValidators != null ? CreateUserManager(passwordValidators) : CreateUserManager();
             userManager.CreateAsync(Arg.Any<User>()).Returns(t =>
             {
                 var user = (User)t[0];

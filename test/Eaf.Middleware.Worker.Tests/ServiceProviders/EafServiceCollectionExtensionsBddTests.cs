@@ -84,5 +84,17 @@ namespace Eaf.Middleware.Worker.Tests.ServiceProviders
 
             Should.NotThrow(() => services.AddEafWithoutCreatingServiceProvider<WorkerModuleTestDependenciesModule>(BootstrapperOptions, removeConventionalInterceptors: false));
         }
+
+        [Fact]
+        public void Dado_CastleLoggerFactoryRegistrado_Quando_AdicionarEaf_Entao_DeveRetornarServiceProviderConfigurado()
+        {
+            var services = CreateServices();
+            services.AddSingleton(Substitute.For<Castle.Core.Logging.ILoggerFactory>());
+
+            var serviceProvider = services.AddEaf<WorkerModuleTestDependenciesModule>(BootstrapperOptions);
+
+            serviceProvider.ShouldNotBeNull();
+            serviceProvider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>().ShouldNotBeNull();
+        }
     }
 }

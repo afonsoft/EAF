@@ -138,6 +138,23 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             result.CurrentDirectory.ShouldNotBeNullOrEmpty();
         }
 
+        [Fact]
+        public void Dado_ModulosRegistrados_Quando_GetAbout_Entao_ModulesDeveConterFullName()
+        {
+            // Dado
+            var moduleInstance = Substitute.For<AbpModule>();
+            var moduleInfo = Substitute.For<AbpModuleInfo>(typeof(AboutController), moduleInstance, false);
+            _moduleManager.Modules.Returns(new List<AbpModuleInfo> { moduleInfo });
+
+            // Quando
+            var result = _sut.GetAbout();
+
+            // Entao
+            result.Modules.ShouldNotBeNull();
+            result.Modules.Length.ShouldBe(1);
+            result.Modules[0].ShouldContain("Eaf.Middleware.Web.Core");
+        }
+
         #endregion
     }
 }

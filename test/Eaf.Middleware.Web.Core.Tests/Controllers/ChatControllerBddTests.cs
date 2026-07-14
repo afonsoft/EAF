@@ -98,5 +98,17 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             // Quando & Então
             await Should.ThrowAsync<Abp.AbpException>(async () => await sut.GetUploadedObject(fileId, "doc.txt", "text/plain", string.Empty));
         }
+
+        [Fact]
+        public async Task Dado_ModelStateInvalido_Quando_GetUploadedObject_Entao_DeveLancarUserFriendlyException()
+        {
+            // Dado
+            var fileId = Guid.NewGuid();
+            var sut = CreateController();
+            sut.ModelState.AddModelError("fileId", "Required");
+
+            // Quando & Então
+            await Should.ThrowAsync<Abp.UI.UserFriendlyException>(async () => await sut.GetUploadedObject(fileId, "doc.txt", "text/plain", "token"));
+        }
     }
 }

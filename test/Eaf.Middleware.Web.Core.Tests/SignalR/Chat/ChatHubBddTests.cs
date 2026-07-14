@@ -32,7 +32,7 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
         [Fact]
         public void Dado_Tipo_Quando_VerificarHeranca_Entao_DeveHerdarDeOnlineClientHubBase()
         {
-            typeof(ChatHub).BaseType.Name.ShouldBe("OnlineClientHubBase");
+            typeof(ChatHub).BaseType.ShouldBe(typeof(OnlineClientHubBase));
         }
 
         [Fact]
@@ -271,6 +271,17 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
         {
             var (chatHub, _, windsorContainer) = CriarChatHubCompleto();
 
+            chatHub.Dispose();
+
+            windsorContainer.Received(1).Release(chatHub);
+        }
+
+        [Fact]
+        public void Dado_ChatHub_Quando_DisposeDuasVezes_Entao_DeveLiberarApenasUmaVez()
+        {
+            var (chatHub, _, windsorContainer) = CriarChatHubCompleto();
+
+            chatHub.Dispose();
             chatHub.Dispose();
 
             windsorContainer.Received(1).Release(chatHub);

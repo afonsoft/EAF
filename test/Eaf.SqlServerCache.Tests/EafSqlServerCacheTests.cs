@@ -599,5 +599,31 @@ namespace Eaf.SqlServerCache.Tests
         }
 
         #endregion
+
+        [Fact]
+        public void Set_And_TryGetValue_ShouldReturnValue()
+        {
+            // Arrange
+            var key = "test-key";
+            var value = "test-value";
+            byte[]? capturedBytes = null;
+
+            _distributedCache.When(x => x.SetAsync(
+                    Arg.Is<string>(k => k == "test-cache_test-key"),
+                    Arg.Any<byte[]>(),
+                    Arg.Any<DistributedCacheEntryOptions>(),
+                    Arg.Any<CancellationToken>()))
+                .Do(call => capturedBytes = call.ArgAt<byte[]>(1));
+
+            // Act
+            _cache.Set(key, value);
+            _distributedCache.GetAsync("test-cache_test-key").Returns(Task.FromResult<byte[]?>(capturedBytes));
+
+            var result = _cache.TryGetValue(key, out var retrievedValue);
+
+            // Assert
+            result.ShouldBeTrue();
+            retrievedValue.ShouldNotBeNull();
+        }
     }
 }

@@ -90,6 +90,24 @@ namespace Eaf.Middleware.Web.Core.Tests.Authentication
             result.surname.ShouldBeNull();
         }
 
+        [Fact]
+        public void Dado_ClaimsComNameClaimVazio_Quando_GetNameAndSurname_Entao_DeveRetornarNull()
+        {
+            // Dado
+            var options = new IdentityOptions();
+            var claims = new List<Claim>
+            {
+                new Claim(options.ClaimsIdentity.UserNameClaimType, string.Empty)
+            };
+
+            // Quando
+            var result = _sut.GetNameAndSurnameFromClaims(claims, options);
+
+            // Entao
+            result.name.ShouldBeNull();
+            result.surname.ShouldBeNull();
+        }
+
         #endregion
 
         #region GetUserNameFromClaims

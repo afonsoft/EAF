@@ -125,5 +125,18 @@ namespace Eaf.MiddlewareCore.Tests.Configuration
                 try { Directory.Delete(tempDirectory, true); } catch { }
             }
         }
+
+        [Fact]
+        public void Dado_HostBuilderComPrefixoEActionNula_Quando_UsarEafConfiguration_Entao_DeveRetornarMesmoBuilder()
+        {
+            var hostBuilder = Substitute.For<IHostBuilder>();
+            hostBuilder.ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, IConfigurationBuilder>>())
+                .Returns(hostBuilder);
+
+            var result = hostBuilder.UseEafConfiguration(null, "EAF_");
+
+            result.ShouldBeSameAs(hostBuilder);
+            hostBuilder.Received(1).ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, IConfigurationBuilder>>());
+        }
     }
 }

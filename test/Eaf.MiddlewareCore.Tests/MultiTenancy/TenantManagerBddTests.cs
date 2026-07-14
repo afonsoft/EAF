@@ -1,7 +1,11 @@
+using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.Tests.Helpers;
+using Microsoft.AspNetCore.Identity;
+using NSubstitute;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -65,6 +69,37 @@ namespace Eaf.MiddlewareCore.Tests.MultiTenancy
 
             // Então
             tenantId.ShouldBeGreaterThan(0);
+        }
+
+        [Fact]
+        public async Task Dado_SenhaComValidador_Quando_CreateWithAdminUserAsync_Entao_DeveCriarTenant()
+        {
+            // Dado
+            var tenantManager = CoreManagerTestHelper.CreateTenantManager(
+                new List<IPasswordValidator<User>> { new FakePasswordValidator() },
+                out var userManager, out _, out _, out _, out _);
+
+            // Quando
+            var tenantId = await tenantManager.CreateWithAdminUserAsync(
+                "tenant1",
+                "Tenant One",
+                "password123",
+                "admin@tenant1.com",
+                isActive: true,
+                shouldChangePasswordOnNextLogin: false,
+                sendActivationEmail: false,
+                emailActivationLink: null);
+
+            // Então
+            tenantId.ShouldBeGreaterThan(0);
+        }
+
+        private class FakePasswordValidator : IPasswordValidator<User>
+        {
+            public Task<IdentityResult> ValidateAsync(UserManager<User> manager, User user, string password)
+            {
+                return Task.FromResult(IdentityResult.Success);
+            }
         }
     }
 }

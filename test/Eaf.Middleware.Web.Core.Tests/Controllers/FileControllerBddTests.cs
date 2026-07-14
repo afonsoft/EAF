@@ -31,7 +31,7 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
 
             var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
             var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
-            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns((IDisposable)null);
+            activeUnitOfWork.SetTenantId(Arg.Any<int?>()).Returns(Substitute.For<IDisposable>());
             unitOfWorkManager.Current.Returns(activeUnitOfWork);
             _sut.UnitOfWorkManager = unitOfWorkManager;
         }
@@ -78,7 +78,7 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             var token = Guid.NewGuid().ToString();
             var bytes = new byte[] { 4, 5, 6 };
             var binaryObject = new BinaryObject(null, bytes, "application/pdf", "doc.pdf");
-            _tempFileCacheManager.GetFile(token).Returns((byte[])null);
+            _tempFileCacheManager.GetFile(token).Returns((byte[])null!);
             _binaryObjectManager.GetOrNullAsync(new Guid(token)).Returns(Task.FromResult(binaryObject));
 
             var resultado = await _sut.DownloadTempFile(new FileDto { FileToken = token, FileType = "application/pdf", FileName = "doc.pdf" });
@@ -93,13 +93,24 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         public async Task Dado_ArquivoNaoEncontrado_Quando_DownloadTempFile_Entao_DeveRetornarNotFound()
         {
             var token = Guid.NewGuid().ToString();
-            _tempFileCacheManager.GetFile(token).Returns((byte[])null);
-            _binaryObjectManager.GetOrNullAsync(Arg.Any<Guid>()).Returns(Task.FromResult<BinaryObject>(null));
-            _binaryObjectManager.GetOrNullAsync(Arg.Any<string>()).Returns(Task.FromResult<BinaryObject>(null));
+            _tempFileCacheManager.GetFile(token).Returns((byte[])null!);
+            _binaryObjectManager.GetOrNullAsync(Arg.Any<Guid>()).Returns(Task.FromResult<BinaryObject>(null!));
+            _binaryObjectManager.GetOrNullAsync(Arg.Any<string>()).Returns(Task.FromResult<BinaryObject>(null!));
 
             var resultado = await _sut.DownloadTempFile(new FileDto { FileToken = token, FileType = "text/plain", FileName = "missing.txt" });
 
             resultado.ShouldBeOfType<NotFoundObjectResult>();
+        }
+
+        [Fact]
+        public async Task Dado_ModelStateInvalido_Quando_DownloadTempFile_Entao_DeveRetornarBadRequest()
+        {
+            _sut.ModelState.AddModelError("FileToken", "Required");
+
+            var resultado = await _sut.DownloadTempFile(new FileDto());
+
+            var badRequest = resultado.ShouldBeOfType<BadRequestObjectResult>();
+            badRequest.Value.ShouldNotBeNull();
         }
 
         #endregion
@@ -128,7 +139,7 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
             var id = Guid.NewGuid();
             var bytes = new byte[] { 10, 11, 12 };
             var binaryObject = new BinaryObject(null, bytes, "image/jpeg", "foto.jpg");
-            _binaryObjectManager.GetOrNullAsync(id).Returns(Task.FromResult<BinaryObject>(null));
+            _binaryObjectManager.GetOrNullAsync(id).Returns(Task.FromResult<BinaryObject>(null!));
             _binaryObjectManager.GetOrNullAsync("foto.jpg").Returns(Task.FromResult(binaryObject));
 
             var resultado = await _sut.DownloadBinaryFile(id, null, "foto.jpg");
@@ -142,12 +153,23 @@ namespace Eaf.Middleware.Tests.Web.Core.Controllers
         public async Task Dado_BinaryFileNaoEncontradoPorNome_Quando_DownloadBinaryFile_Entao_DeveRetornarNotFound()
         {
             var id = Guid.NewGuid();
-            _binaryObjectManager.GetOrNullAsync(id).Returns(Task.FromResult<BinaryObject>(null));
-            _binaryObjectManager.GetOrNullAsync("missing.jpg").Returns(Task.FromResult<BinaryObject>(null));
+            _binaryObjectManager.GetOrNullAsync(id).Returns(Task.FromResult<BinaryObject>(null!));
+            _binaryObjectManager.GetOrNullAsync("missing.jpg").Returns(Task.FromResult<BinaryObject>(null!));
 
             var resultado = await _sut.DownloadBinaryFile(id, null, "missing.jpg");
 
             resultado.ShouldBeOfType<NotFoundObjectResult>();
+        }
+
+        [Fact]
+        public async Task Dado_ModelStateInvalido_Quando_DownloadBinaryFile_Entao_DeveRetornarBadRequest()
+        {
+            _sut.ModelState.AddModelError("id", "Required");
+
+            var resultado = await _sut.DownloadBinaryFile(Guid.Empty, null, null);
+
+            var badRequest = resultado.ShouldBeOfType<BadRequestObjectResult>();
+            badRequest.Value.ShouldNotBeNull();
         }
 
         #endregion

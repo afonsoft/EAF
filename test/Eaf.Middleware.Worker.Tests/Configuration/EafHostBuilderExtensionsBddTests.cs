@@ -58,5 +58,18 @@ namespace Eaf.Middleware.Worker.Tests.Configuration
             host.ShouldNotBeNull();
             host.Services.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)).ShouldNotBeNull();
         }
+
+        [Fact]
+        public void Dado_HostBuilderComPrefixoEActionNula_Quando_UsarAbpConfiguration_Entao_DeveRetornarMesmoBuilder()
+        {
+            var hostBuilder = Substitute.For<IHostBuilder>();
+            hostBuilder.ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, Microsoft.Extensions.Configuration.IConfigurationBuilder>>())
+                .Returns(hostBuilder);
+
+            var result = Eaf.Middleware.Configuration.EafHostBuilderExtensions.UseAbpConfiguration(hostBuilder, null, "EAF_");
+
+            result.ShouldBeSameAs(hostBuilder);
+            hostBuilder.Received(1).ConfigureAppConfiguration(Arg.Any<Action<HostBuilderContext, Microsoft.Extensions.Configuration.IConfigurationBuilder>>());
+        }
     }
 }

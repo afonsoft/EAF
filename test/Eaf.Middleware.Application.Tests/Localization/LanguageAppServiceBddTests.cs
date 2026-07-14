@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Xunit;
+using Abp.UI;
 
 namespace Eaf.Middleware.Application.Tests.Localization
 {
@@ -362,7 +363,7 @@ namespace Eaf.Middleware.Application.Tests.Localization
             localizationManager.GetSource("EafMiddleware").Returns(source);
             _sut.LocalizationManager = localizationManager;
 
-            _applicationLanguageManager.GetDefaultLanguageOrNullAsync(null).Returns((ApplicationLanguage)null);
+            _applicationLanguageManager.GetDefaultLanguageOrNullAsync(null).Returns((ApplicationLanguage)null!);
             _applicationLanguageManager.GetLanguagesAsync(null).Returns(new List<ApplicationLanguage>
             {
                 new ApplicationLanguage(null, "en", "English")
@@ -442,6 +443,99 @@ namespace Eaf.Middleware.Application.Tests.Localization
             result.Items[0].Key.ShouldBe("Hello");
             result.Items[0].BaseValue.ShouldBe("Hello");
             result.Items[0].TargetValue.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_IdiomasDefaultAusentes_Quando_GetLanguageTexts_Entao_DeveLancarInvalidOperationException()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            _sut.AbpSession = abpSession;
+
+            _applicationLanguageManager.GetDefaultLanguageOrNullAsync(Arg.Any<int?>()).Returns((ApplicationLanguage)null!);
+            _applicationLanguageManager.GetLanguagesAsync(Arg.Any<int?>()).Returns(new List<ApplicationLanguage>());
+
+            // Quando & Então
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _sut.GetLanguageTexts(new GetLanguageTextsInput
+            {
+                BaseLanguageName = "",
+                TargetLanguageName = "en-US",
+                SourceName = "EafMiddleware"
+            }));
+        }
+
+        [Fact]
+        public async Task Dado_SkipCountMaiorQueZero_Quando_GetLanguageTexts_Entao_DevePularItens()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            _sut.AbpSession = abpSession;
+
+            _applicationLanguageManager.GetDefaultLanguageOrNullAsync(Arg.Any<int?>()).Returns(new ApplicationLanguage(1, "pt-BR", "Portuguese", "famfamfam-flags br"));
+            _applicationLanguageManager.GetLanguagesAsync(Arg.Any<int?>()).Returns(new List<ApplicationLanguage>
+            {
+                new ApplicationLanguage(1, "pt-BR", "Portuguese", "famfamfam-flags br"),
+                new ApplicationLanguage(2, "en-US", "English", "famfamfam-flags us")
+            });
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.Name.Returns("EafMiddleware");
+            source.GetAllStrings().Returns(new List<LocalizedString>
+            {
+                new LocalizedString("Hello", "Hello", CultureInfo.InvariantCulture),
+                new LocalizedString("World", "World", CultureInfo.InvariantCulture)
+            });
+            localizationManager.GetSource("EafMiddleware").Returns(source);
+            _sut.LocalizationManager = localizationManager;
+
+            var input = new GetLanguageTextsInput
+            {
+                BaseLanguageName = "pt-BR",
+                TargetLanguageName = "en-US",
+                SourceName = "EafMiddleware",
+                MaxResultCount = 10,
+                SkipCount = 1,
+                TargetValueFilter = "EMPTY"
+            };
+
+            // Quando
+            var result = await _sut.GetLanguageTexts(input);
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Items.Count.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_IdiomaJaExistente_Quando_CreateOrUpdateLanguage_Entao_DeveLancarUserFriendlyException()
+        {
+            // Dado
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+            _sut.AbpSession = abpSession;
+
+            _applicationLanguageManager.GetLanguagesAsync(Arg.Any<int?>()).Returns(new List<ApplicationLanguage>
+            {
+                new ApplicationLanguage(1, "pt-BR", "Portuguese", "famfamfam-flags br") { Id = 1 }
+            });
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var source = Substitute.For<ILocalizationSource>();
+            source.GetString(Arg.Any<string>()).Returns("Localized");
+            source.GetStringOrNull(Arg.Any<string>(), Arg.Any<CultureInfo>()).Returns("Localized");
+            localizationManager.GetSource(Arg.Any<string>()).Returns(source);
+            _sut.LocalizationManager = localizationManager;
+
+            var input = new CreateOrUpdateLanguageInput
+            {
+                Language = new ApplicationLanguageEditDto { Name = "pt-BR", Icon = "famfamfam-flags br", IsEnabled = true }
+            };
+
+            // Quando & Então
+            await Should.ThrowAsync<UserFriendlyException>(async () => await _sut.CreateOrUpdateLanguage(input));
         }
 
         #endregion
