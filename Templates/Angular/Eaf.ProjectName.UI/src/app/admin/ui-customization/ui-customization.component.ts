@@ -15,7 +15,7 @@ export class UiCustomizationComponent extends AppComponentBase implements OnInit
 
   constructor(
     injector: Injector,
-    private _uiCustomizationService: UiCustomizationSettingsServiceProxy,
+    private readonly _uiCustomizationService: UiCustomizationSettingsServiceProxy,
   ) {
     super(injector);
   }
@@ -24,7 +24,7 @@ export class UiCustomizationComponent extends AppComponentBase implements OnInit
     this.currentThemeName = this.currentTheme.baseSettings.theme;
     this._uiCustomizationService.getUiManagementSettings().subscribe(settingsResult => {
       this.themeSettings = _.sortBy(settingsResult, setting => {
-        return setting.theme === 'default' ? 0 : parseInt(setting.theme.replace('theme', ''));
+        return setting.theme === 'default' ? 0 : Number.parseInt(setting.theme.replace('theme', ''));
       });
     });
   }

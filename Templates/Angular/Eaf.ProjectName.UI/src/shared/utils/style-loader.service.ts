@@ -5,10 +5,7 @@ export class StyleLoaderService {
   private styles: any = {};
 
   load(...styles: string[]) {
-    this.styles = styles;
-    const promises: any[] = [];
-    styles.forEach(style => promises.push(this.loadStyle(style)));
-    return Promise.all(promises);
+    return this.loadArray(styles);
   }
 
   loadArray(styles: string[]) {

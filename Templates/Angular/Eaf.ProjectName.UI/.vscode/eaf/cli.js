@@ -3,7 +3,6 @@
 // Libs
 const colors = require('colors');
 const shell = require('shelljs');
-const fs = require('fs');
 const args = require('command-line-args');
 const usage = require('command-line-usage');
 
@@ -78,7 +77,7 @@ const commandUsageText = [
 
 // Commands
 function build() {
-    var result = exec('ng build --prod=true --output-hashing=all');
+    const result = exec('ng build --prod=true --output-hashing=all');
     if (result.code != 0) {
         throw new Error('Error on Eaf build');
     }

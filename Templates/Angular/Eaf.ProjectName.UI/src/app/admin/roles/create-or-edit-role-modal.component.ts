@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
+﻿import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { CreateOrUpdateRoleInput, RoleEditDto, RoleServiceProxy } from '@shared/service-proxies/service-proxies';
 import { ModalDirective } from 'ngx-bootstrap/modal';
@@ -22,19 +22,19 @@ export class CreateOrEditRoleModalComponent extends AppComponentBase {
   role: RoleEditDto = new RoleEditDto();
   constructor(
     injector: Injector,
-    private _roleService: RoleServiceProxy,
+    private readonly _roleService: RoleServiceProxy,
   ) {
     super(injector);
   }
 
   show(roleId?: number): void {
-    const self = this;
-    self.active = true;
 
-    self._roleService.getRoleForEdit(roleId).subscribe(result => {
-      self.role = result.role;
+    this.active = true;
+
+    this._roleService.getRoleForEdit(roleId).subscribe(result => {
+      this.role = result.role;
       this.permissionTree.editData = result;
-      self.modal.show();
+      this.modal.show();
     });
   }
 
@@ -43,11 +43,11 @@ export class CreateOrEditRoleModalComponent extends AppComponentBase {
   }
 
   save(): void {
-    const self = this;
+
 
     const input = new CreateOrUpdateRoleInput();
-    input.role = self.role;
-    input.grantedPermissionNames = self.permissionTree.getGrantedPermissionNames();
+    input.role = this.role;
+    input.grantedPermissionNames = this.permissionTree.getGrantedPermissionNames();
 
     this.saving = true;
     this._roleService

@@ -19,7 +19,7 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _auditLogService: AuditLogServiceProxy,
+    private readonly _auditLogService: AuditLogServiceProxy,
   ) {
     super(injector);
   }
@@ -28,7 +28,7 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
     if (!propertyChangeValue) {
       return propertyChangeValue;
     }
-    propertyChangeValue = propertyChangeValue.replace(/^['"]+/g, '').replace(/['"]+$/g, '');
+    propertyChangeValue = propertyChangeValue.replace(/^['"]+/, '').replace(/['"]+$/, '');
     if (this.isDate(propertyChangeValue, propertyTypeFullName)) {
       return moment(propertyChangeValue).format('YYYY-MM-DD HH:mm:ss');
     }
@@ -49,15 +49,15 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
   }
 
   show(record: EntityChangeListDto): void {
-    const self = this;
-    self.active = true;
-    self.entityChange = record;
+
+    this.active = true;
+    this.entityChange = record;
 
     this._auditLogService.getEntityPropertyChanges(record.id).subscribe(result => {
-      self.entityPropertyChanges = result;
+      this.entityPropertyChanges = result;
     });
 
-    self.modal.show();
+    this.modal.show();
   }
 
   close(): void {

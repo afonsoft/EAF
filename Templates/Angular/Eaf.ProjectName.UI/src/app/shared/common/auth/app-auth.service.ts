@@ -5,7 +5,7 @@ import { XmlHttpRequestHelper } from '@shared/helpers/XmlHttpRequestHelper';
 
 @Injectable()
 export class AppAuthService {
-  constructor(private storageService: StorageService) {}
+  constructor(private readonly storageService: StorageService) {}
 
   logout(reload?: boolean, returnUrl?: string): void {
     const customHeaders = {

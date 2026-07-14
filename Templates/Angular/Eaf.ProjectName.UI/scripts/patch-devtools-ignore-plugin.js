@@ -10,8 +10,8 @@
  *   2. Wrap JSON.parse in try/catch for malformed source maps
  *   3. Skip source maps that have no "sources" array
  */
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const pluginPath = path.join(
   __dirname,

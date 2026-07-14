@@ -1193,14 +1193,14 @@ namespace Eaf.Middleware.Web.Controllers
             return true;
         }
 
-        private async Task<AuthenticationResult> GetAccessTokenOnBehalfUserAsync(string idToken,
-            string ClientId,
-            string ClientSecret,
-            string TenantId)
+        private static async Task<AuthenticationResult> GetAccessTokenOnBehalfUserAsync(string idToken,
+            string clientId,
+            string clientSecret,
+            string tenantId)
         {
-            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientId)
-                                            .WithClientSecret(ClientSecret)
-                                            .WithAuthority($"https://login.microsoftonline.com/{TenantId}")
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
+                                            .WithClientSecret(clientSecret)
+                                            .WithAuthority($"https://login.microsoftonline.com/{tenantId}")
                                             .Build();
             UserAssertion assert = new UserAssertion(idToken);
             List<string> scopes = new List<string>

@@ -7,14 +7,14 @@
 export class MenuAsideOffcanvasDirective implements AfterViewInit {
   menuOffcanvas: any;
 
-  constructor(private el: ElementRef) {}
+  constructor(private readonly el: ElementRef) {}
 
   ngAfterViewInit(): void {
     const offcanvasClass = mUtil.hasClass(this.el.nativeElement, 'm-aside-left--offcanvas-default')
       ? 'm-aside-left--offcanvas-default'
       : 'm-aside-left';
 
-    this.menuOffcanvas = new mOffcanvas(this.el.nativeElement, {
+    this.menuOffcanvas = new (mOffcanvas as any)(this.el.nativeElement, {
       baseClass: offcanvasClass,
       overlay: true,
       toggleBy: {

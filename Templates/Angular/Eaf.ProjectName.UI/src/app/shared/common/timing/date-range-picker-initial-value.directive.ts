@@ -1,4 +1,4 @@
-﻿import { AfterViewInit, Directive, ElementRef, EventEmitter, Injector, Input, Output } from '@angular/core';
+﻿import { AfterViewInit, Directive, ElementRef, Injector, Input } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import * as moment from 'moment';
 
@@ -12,14 +12,14 @@ export class DateRangePickerInitialValueSetterDirective extends AppComponentBase
 
   constructor(
     injector: Injector,
-    private _element: ElementRef,
+    private readonly _element: ElementRef,
   ) {
     super(injector);
     this.hostElement = _element;
   }
 
   ngAfterViewInit(): void {
-    if (this.ngModel && this.ngModel[0] && this.ngModel[1]) {
+    if (this.ngModel?.[0] && this.ngModel?.[1]) {
       setTimeout(() => {
         (this.hostElement.nativeElement as any).value = moment(this.ngModel[0]).format('L') + ' - ' + moment(this.ngModel[1]).format('L');
       });

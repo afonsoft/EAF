@@ -7,7 +7,7 @@ import { StorageService } from '@eaf/utils/storage.service';
   providedIn: 'root',
 })
 export class TokenService {
-  constructor(private storageService: StorageService) {}
+  constructor(private readonly storageService: StorageService) {}
 
   getToken(): string {
     return this.storageService.getCookieValue(eaf.auth.tokenCookieName);

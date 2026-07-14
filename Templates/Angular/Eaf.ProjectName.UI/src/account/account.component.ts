@@ -4,7 +4,7 @@ import { StorageService } from '@eaf/utils/storage.service';
 import { AppConsts } from '@shared/AppConsts';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { AppUiCustomizationService } from '@shared/common/ui/app-ui-customization.service';
-import * as _ from 'lodash';
+
 import * as moment from 'moment';
 
 import { LoginService } from './login/login.service';
@@ -16,7 +16,7 @@ import { LoginService } from './login/login.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class AccountComponent extends AppComponentBase implements OnInit {
-  private viewContainerRef: ViewContainerRef;
+  private readonly viewContainerRef: ViewContainerRef;
 
   currentLanguage: eaf.localization.ILanguageInfo;
   languages: eaf.localization.ILanguageInfo[] = [];
@@ -26,11 +26,11 @@ export class AccountComponent extends AppComponentBase implements OnInit {
 
   public constructor(
     injector: Injector,
-    private _router: Router,
-    private _loginService: LoginService,
-    private _uiCustomizationService: AppUiCustomizationService,
+    private readonly _router: Router,
+    private readonly _loginService: LoginService,
+    private readonly _uiCustomizationService: AppUiCustomizationService,
     viewContainerRef: ViewContainerRef,
-    private _storageService: StorageService,
+    private readonly _storageService: StorageService,
   ) {
     super(injector);
 
@@ -53,7 +53,7 @@ export class AccountComponent extends AppComponentBase implements OnInit {
   ngOnInit(): void {
     document.body.className = this._uiCustomizationService.getAccountModuleBodyClass();
 
-    this.languages = _.filter(eaf.localization.languages, l => (<any>l).isDisabled === false);
+    this.languages = eaf.localization.languages?.filter(l => (<any>l).isDisabled === false) || [];
     this.currentLanguage = eaf.localization.currentLanguage;
   }
 

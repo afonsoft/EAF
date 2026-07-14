@@ -1,7 +1,7 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Injector, Input, OnInit, Output, ViewChild, forwardRef } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Injector, OnInit, forwardRef } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { FlatPermissionWithLevelDto, PermissionServiceProxy } from '@shared/service-proxies/service-proxies';
-import * as _ from 'lodash';
+
 import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -27,7 +27,7 @@ export class PermissionComboComponent extends AppComponentBase implements OnInit
   onTouched: any = () => {};
 
   constructor(
-    private _permissionService: PermissionServiceProxy,
+    private readonly _permissionService: PermissionServiceProxy,
     injector: Injector,
   ) {
     super(injector);
@@ -35,8 +35,8 @@ export class PermissionComboComponent extends AppComponentBase implements OnInit
 
   ngOnInit(): void {
     this._permissionService.getAllPermissions().subscribe(result => {
-      _.forEach(result.items, item => {
-        item.displayName = Array(item.level + 1).join('   ') + ' ' + item.displayName;
+      result.items.forEach(item => {
+        item.displayName = new Array(item.level + 1).join('   ') + ' ' + item.displayName;
       });
 
       this.permissions = result.items;
@@ -57,7 +57,7 @@ export class PermissionComboComponent extends AppComponentBase implements OnInit
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void {
+  setDisabledState?(isDisabled: boolean): void { // NOSONAR ControlValueAccessor interface requires a boolean flag
     if (isDisabled) {
       this.selectedPermission.disable();
     } else {

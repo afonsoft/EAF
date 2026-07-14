@@ -9,7 +9,7 @@ import { Table } from 'primeng/table';
 import { EditTextModalComponent } from './edit-text-modal.component';
 import { finalize } from 'rxjs/operators';
 
-import * as _ from 'lodash';
+
 
 @Component({
   standalone: false,
@@ -39,18 +39,18 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
 
   constructor(
     injector: Injector,
-    private _languageService: LanguageServiceProxy,
-    private _router: Router,
-    private _activatedRoute: ActivatedRoute,
+    private readonly _languageService: LanguageServiceProxy,
+    private readonly _router: Router,
+    private readonly _activatedRoute: ActivatedRoute,
   ) {
     super(injector);
   }
 
   ngOnInit(): void {
-    this.sourceNames = _.map(
-      _.filter(eaf.localization.sources, source => source.type === 'MultiTenantLocalizationSource'),
-      value => value.name,
-    );
+    this.sourceNames =
+      eaf.localization.sources
+        ?.filter(source => source.type === 'MultiTenantLocalizationSource')
+        .map(value => value.name) || [];
     this.languages = eaf.localization.languages;
   }
 
@@ -117,8 +117,6 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
 
     if (this.paginator.getPage() !== 0) {
       this.paginator.changePage(0);
-
-      return;
     }
   }
 
@@ -127,9 +125,9 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
   }
 
   refreshTextValueFromModal(): void {
-    for (let i = 0; i < this.dataTableHelper.records.length; i++) {
-      if (this.dataTableHelper.records[i].key === this.editTextModal.model.key) {
-        this.dataTableHelper.records[i].targetValue = this.editTextModal.model.value;
+    for (const record of this.dataTableHelper.records) {
+      if (record.key === this.editTextModal.model.key) {
+        record.targetValue = this.editTextModal.model.value;
         return;
       }
     }

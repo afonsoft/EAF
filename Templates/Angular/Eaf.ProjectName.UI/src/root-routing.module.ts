@@ -18,8 +18,8 @@ const routes: Routes = [
 })
 export class RootRoutingModule {
   constructor(
-    private router: Router,
-    private _uiCustomizationService: AppUiCustomizationService,
+    private readonly router: Router,
+    private readonly _uiCustomizationService: AppUiCustomizationService,
   ) {
     router.events.subscribe((event: NavigationEnd) => {
       setTimeout(() => {
@@ -38,7 +38,7 @@ export class RootRoutingModule {
         }
       }
 
-      if (url.indexOf('/account/') >= 0) {
+      if (url.includes('/account/')) {
         this.setAccountModuleBodyClassInternal();
       } else {
         this.setAppModuleBodyClassInternal();
@@ -50,23 +50,23 @@ export class RootRoutingModule {
     const currentBodyClass = document.body.className;
     let classesToRemember = '';
 
-    if (currentBodyClass.indexOf('m-brand--minimize') >= 0) {
+    if (currentBodyClass.includes('m-brand--minimize')) {
       classesToRemember += ' m-brand--minimize ';
     }
 
-    if (currentBodyClass.indexOf('m-aside-left--minimize') >= 0) {
+    if (currentBodyClass.includes('m-aside-left--minimize')) {
       classesToRemember += ' m-aside-left--minimize';
     }
 
-    if (currentBodyClass.indexOf('m-brand--hide') >= 0) {
+    if (currentBodyClass.includes('m-brand--hide')) {
       classesToRemember += ' m-brand--hide';
     }
 
-    if (currentBodyClass.indexOf('m-aside-left--hide') >= 0) {
+    if (currentBodyClass.includes('m-aside-left--hide')) {
       classesToRemember += ' m-aside-left--hide';
     }
 
-    if (currentBodyClass.indexOf('swal2-toast-shown') >= 0) {
+    if (currentBodyClass.includes('swal2-toast-shown')) {
       classesToRemember += ' swal2-toast-shown';
     }
 
@@ -77,7 +77,7 @@ export class RootRoutingModule {
     const currentBodyClass = document.body.className;
     let classesToRemember = '';
 
-    if (currentBodyClass.indexOf('swal2-toast-shown') >= 0) {
+    if (currentBodyClass.includes('swal2-toast-shown')) {
       classesToRemember += ' swal2-toast-shown';
     }
 

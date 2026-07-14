@@ -10,7 +10,7 @@
   featureDependency: any;
   parameters: {};
 
-  constructor(
+  constructor( // NOSONAR preserving public constructor signature for backward compatibility
     name: string,
     permissionName: string,
     icon: string,
@@ -40,7 +40,7 @@
     if (this.permissionName) {
       this.requiresAuthentication = true;
     } else {
-      this.requiresAuthentication = requiresAuthentication ? requiresAuthentication : false;
+      this.requiresAuthentication = requiresAuthentication ?? false;
     }
   }
 

@@ -6,7 +6,7 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
 import { LazyLoadEvent } from 'primeng/api';
 import { Paginator } from 'primeng/paginator';
 import { Table } from 'primeng/table';
-import * as _ from 'lodash';
+
 import { finalize } from 'rxjs/operators';
 
 export interface IEntityTypeHistoryModalOptions {
@@ -36,7 +36,7 @@ export class EntityTypeHistoryModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _auditLogService: AuditLogServiceProxy,
+    private readonly _auditLogService: AuditLogServiceProxy,
   ) {
     super(injector);
   }

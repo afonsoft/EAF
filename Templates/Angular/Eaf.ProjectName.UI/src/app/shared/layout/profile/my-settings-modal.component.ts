@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
+﻿import { Component, EventEmitter, Injector, OnInit, Output, ViewChild } from '@angular/core';
 import { AppConsts } from '@shared/AppConsts';
 import { AppTimezoneScope } from '@shared/AppEnums';
 import { AppComponentBase } from '@shared/common/app-component-base';
@@ -11,7 +11,7 @@ import { finalize } from 'rxjs/operators';
   selector: 'mySettingsModal',
   templateUrl: './my-settings-modal.component.html',
 })
-export class MySettingsModalComponent extends AppComponentBase {
+export class MySettingsModalComponent extends AppComponentBase implements OnInit {
   @ViewChild('mySettingsModal', { static: true }) modal: ModalDirective;
   @Output() modalSave: EventEmitter<any> = new EventEmitter<any>();
 
@@ -25,7 +25,7 @@ export class MySettingsModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _profileService: ProfileServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }

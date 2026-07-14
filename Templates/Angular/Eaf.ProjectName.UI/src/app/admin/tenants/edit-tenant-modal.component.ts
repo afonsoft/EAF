@@ -1,8 +1,8 @@
 ﻿import { Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { CommonLookupServiceProxy, TenantEditDto, TenantServiceProxy } from '@shared/service-proxies/service-proxies';
-import * as _ from 'lodash';
-import * as moment from 'moment';
+import { TenantEditDto, TenantServiceProxy } from '@shared/service-proxies/service-proxies';
+
+
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
@@ -25,7 +25,7 @@ export class EditTenantModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _tenantService: TenantServiceProxy,
+    private readonly _tenantService: TenantServiceProxy,
   ) {
     super(injector);
   }

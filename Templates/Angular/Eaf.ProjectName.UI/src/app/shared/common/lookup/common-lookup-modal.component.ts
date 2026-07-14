@@ -28,7 +28,7 @@ export interface ICommonLookupModalOptions {
   templateUrl: './common-lookup-modal.component.html',
 })
 export class CommonLookupModalComponent extends AppComponentBase {
-  static defaultOptions: ICommonLookupModalOptions = {
+  static readonly defaultOptions: ICommonLookupModalOptions = {
     dataSource: undefined,
     canSelect: () => true,
     loadOnStartup: true,
@@ -62,7 +62,7 @@ export class CommonLookupModalComponent extends AppComponentBase {
 
   show(): void {
     if (!this.options) {
-      throw Error('Should call CommonLookupModalComponent.configure once before CommonLookupModalComponent.show!');
+      throw new Error('Should call CommonLookupModalComponent.configure once before CommonLookupModalComponent.show!');
     }
 
     this.modal.show();

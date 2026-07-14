@@ -6,7 +6,7 @@ import { MenuHorizontalOffcanvasDirective } from './directives/menu-horizontal-o
 import { MenuHorizontalDirective } from './directives/menu-horizontal.directive';
 import { MenuAsideToggleDirective } from './directives/menu-aside-toggle.directive';
 import { LayoutRefService } from './services/layout-ref.service';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { EafHttpInterceptor } from '@eaf/eafHttpInterceptor';
 
 @NgModule({

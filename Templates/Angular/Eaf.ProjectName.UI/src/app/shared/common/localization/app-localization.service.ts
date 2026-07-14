@@ -5,9 +5,7 @@ import { AppConsts } from '@shared/AppConsts';
 @Injectable()
 export class AppLocalizationService extends LocalizationService {
   l(key: string, ...args: any[]): string {
-    args.unshift(key);
-    args.unshift(AppConsts.localization.defaultLocalizationSourceName);
-    return this.ls.apply(this, args);
+    return this.ls(AppConsts.localization.defaultLocalizationSourceName, key, ...args);
   }
 
   ls(sourcename: string, key: string, ...args: any[]): string {
@@ -25,6 +23,6 @@ export class AppLocalizationService extends LocalizationService {
 
     args.unshift(localizedText);
 
-    return eaf.utils.formatString.apply(this, args);
+    return eaf.utils.formatString.call(null, ...args);
   }
 }

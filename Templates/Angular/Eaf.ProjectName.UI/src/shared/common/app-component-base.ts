@@ -49,9 +49,7 @@ export abstract class AppComponentBase {
   }
 
   l(key: string, ...args: any[]): string {
-    args.unshift(key);
-    args.unshift(this.localizationSourceName);
-    return this.ls.apply(this, args);
+    return this.ls(this.localizationSourceName, key, ...args);
   }
 
   ls(sourcename: string, key: string, ...args: any[]): string {
@@ -68,7 +66,7 @@ export abstract class AppComponentBase {
 
     args.unshift(localizedText);
 
-    return eaf.utils.formatString.apply(this, args);
+    return eaf.utils.formatString.call(null, ...args);
   }
 
   isGranted(permissionName: string): boolean {

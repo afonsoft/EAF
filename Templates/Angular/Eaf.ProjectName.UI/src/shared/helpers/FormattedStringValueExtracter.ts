@@ -1,6 +1,7 @@
 ﻿class ExtractionResult {
   public IsMatch: boolean;
   public Matches: any[];
+  public remainingStr: string;
 
   constructor(isMatch: boolean) {
     this.IsMatch = isMatch;
@@ -25,63 +26,70 @@ class FormatStringToken {
 }
 
 class FormatStringTokenizer {
-  Tokenize(format: string, includeBracketsForDynamicValues = false): FormatStringToken[] {
-    const tokens: FormatStringToken[] = [];
+  private tokens: FormatStringToken[];
+  private currentText: string;
+  private inDynamicValue: boolean;
+  private includeBracketsForDynamicValues: boolean;
 
-    let currentText = '';
-    let inDynamicValue = false;
+  Tokenize(format: string, includeBracketsForDynamicValues = false): FormatStringToken[] {
+    this.tokens = [];
+    this.currentText = '';
+    this.inDynamicValue = false;
+    this.includeBracketsForDynamicValues = includeBracketsForDynamicValues;
 
     for (let i = 0; i < format.length; i++) {
       const c = format[i];
-      switch (c) {
-        case '{':
-          if (inDynamicValue) {
-            throw new Error('Incorrect syntax at char ' + i + '! format string can not contain nested dynamic value expression!');
-          }
-
-          inDynamicValue = true;
-
-          if (currentText.length > 0) {
-            tokens.push(new FormatStringToken(currentText, FormatStringTokenType.ConstantText));
-            currentText = '';
-          }
-
-          break;
-        case '}':
-          if (!inDynamicValue) {
-            throw new Error('Incorrect syntax at char ' + i + '! These is no opening brackets for the closing bracket }.');
-          }
-
-          inDynamicValue = false;
-
-          if (currentText.length <= 0) {
-            throw new Error('Incorrect syntax at char ' + i + '! Brackets does not containt any chars.');
-          }
-
-          let dynamicValue = currentText;
-          if (includeBracketsForDynamicValues) {
-            dynamicValue = '{' + dynamicValue + '}';
-          }
-
-          tokens.push(new FormatStringToken(dynamicValue, FormatStringTokenType.DynamicValue));
-          currentText = '';
-
-          break;
-        default:
-          currentText += c;
-          break;
+      if (c === '{') {
+        this.handleOpenBracket(i);
+      } else if (c === '}') {
+        this.handleCloseBracket(i);
+      } else {
+        this.currentText += c;
       }
     }
 
-    if (inDynamicValue) {
+    if (this.inDynamicValue) {
       throw new Error('There is no closing } char for an opened { char.');
     }
 
-    if (currentText.length > 0) {
-      tokens.push(new FormatStringToken(currentText, FormatStringTokenType.ConstantText));
+    if (this.currentText.length > 0) {
+      this.tokens.push(new FormatStringToken(this.currentText, FormatStringTokenType.ConstantText));
     }
 
-    return tokens;
+    return this.tokens;
+  }
+
+  private handleOpenBracket(index: number): void {
+    if (this.inDynamicValue) {
+      throw new Error('Incorrect syntax at char ' + index + '! format string can not contain nested dynamic value expression!');
+    }
+
+    this.inDynamicValue = true;
+
+    if (this.currentText.length > 0) {
+      this.tokens.push(new FormatStringToken(this.currentText, FormatStringTokenType.ConstantText));
+      this.currentText = '';
+    }
+  }
+
+  private handleCloseBracket(index: number): void {
+    if (!this.inDynamicValue) {
+      throw new Error('Incorrect syntax at char ' + index + '! These is no opening brackets for the closing bracket }.');
+    }
+
+    this.inDynamicValue = false;
+
+    if (this.currentText.length <= 0) {
+      throw new Error('Incorrect syntax at char ' + index + '! Brackets does not containt any chars.');
+    }
+
+    let dynamicValue = this.currentText;
+    if (this.includeBracketsForDynamicValues) {
+      dynamicValue = '{' + dynamicValue + '}';
+    }
+
+    this.tokens.push(new FormatStringToken(dynamicValue, FormatStringTokenType.DynamicValue));
+    this.currentText = '';
   }
 }
 
@@ -100,35 +108,49 @@ export class FormattedStringValueExtracter {
 
     for (let i = 0; i < formatTokens.length; i++) {
       const currentToken = formatTokens[i];
-      const previousToken = i > 0 ? formatTokens[i - 1] : null;
-
       if (currentToken.Type === FormatStringTokenType.ConstantText) {
-        if (i === 0) {
-          if (str.indexOf(currentToken.Text) !== 0) {
-            result.IsMatch = false;
-            return result;
-          }
-
-          str = str.substr(currentToken.Text.length, str.length - currentToken.Text.length);
-        } else {
-          const matchIndex = str.indexOf(currentToken.Text);
-          if (matchIndex < 0) {
-            result.IsMatch = false;
-            return result;
-          }
-
-          result.Matches.push({ name: previousToken.Text, value: str.substr(0, matchIndex) });
-          str = str.substring(0, matchIndex + currentToken.Text.length);
+        const previousToken = i > 0 ? formatTokens[i - 1] : null;
+        if (!this.processConstantText(str, currentToken, i === 0, previousToken, result)) {
+          return result;
         }
+        str = result.remainingStr;
       }
     }
 
-    const lastToken = formatTokens[formatTokens.length - 1];
+    const lastToken = formatTokens.at(-1);
     if (lastToken.Type === FormatStringTokenType.DynamicValue) {
       result.Matches.push({ name: lastToken.Text, value: str });
     }
 
     return result;
+  }
+
+  private processConstantText(
+    str: string,
+    token: FormatStringToken,
+    isFirstToken: boolean,
+    previousToken: FormatStringToken,
+    result: ExtractionResult,
+  ): boolean {
+    if (isFirstToken) {
+      if (!str.startsWith(token.Text)) {
+        result.IsMatch = false;
+        return false;
+      }
+
+      result.remainingStr = str.substring(token.Text.length, str.length);
+      return true;
+    }
+
+    const matchIndex = str.indexOf(token.Text);
+    if (matchIndex < 0) {
+      result.IsMatch = false;
+      return false;
+    }
+
+    result.Matches.push({ name: previousToken.Text, value: str.substring(0, matchIndex) });
+    result.remainingStr = str.substring(0, matchIndex + token.Text.length);
+    return true;
   }
 
   IsMatch(str: string, format: string): string[] {
@@ -138,8 +160,8 @@ export class FormattedStringValueExtracter {
     }
 
     const values = [];
-    for (let i = 0; i < result.Matches.length; i++) {
-      values.push(result.Matches[i].value);
+    for (const match of result.Matches) {
+      values.push(match.value);
     }
 
     return values;

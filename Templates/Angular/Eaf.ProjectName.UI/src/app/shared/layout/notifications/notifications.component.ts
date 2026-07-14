@@ -25,9 +25,9 @@ export class NotificationsComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _notificationService: NotificationServiceProxy,
-    private _userNotificationHelper: UserNotificationHelper,
-    private changeDetectorRef: ChangeDetectorRef,
+    private readonly _notificationService: NotificationServiceProxy,
+    private readonly _userNotificationHelper: UserNotificationHelper,
+    private readonly changeDetectorRef: ChangeDetectorRef,
   ) {
     super(injector);
   }

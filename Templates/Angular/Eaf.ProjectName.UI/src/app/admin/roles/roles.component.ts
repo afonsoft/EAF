@@ -27,7 +27,7 @@ export class RolesComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _roleService: RoleServiceProxy,
+    private readonly _roleService: RoleServiceProxy,
   ) {
     super(injector);
   }
@@ -40,8 +40,7 @@ export class RolesComponent extends AppComponentBase implements OnInit {
   private setIsEntityHistoryEnabled(): void {
     const customSettings = (eaf as any).custom;
     this.entityHistoryEnabled =
-      customSettings.EntityHistory &&
-      customSettings.EntityHistory.isEnabled &&
+      customSettings.EntityHistory?.isEnabled &&
       _.filter(customSettings.EntityHistory.enabledEntities, entityType => entityType === this._entityTypeFullName).length === 1;
   }
 
@@ -72,8 +71,8 @@ export class RolesComponent extends AppComponentBase implements OnInit {
   }
 
   deleteRole(role: RoleListDto): void {
-    const self = this;
-    self.message.confirm(self.l('RoleDeleteWarningMessage', role.displayName), this.l('AreYouSure'), isConfirmed => {
+
+    this.message.confirm(this.l('RoleDeleteWarningMessage', role.displayName), this.l('AreYouSure'), isConfirmed => {
       if (isConfirmed) {
         this._roleService.deleteRole(role.id).subscribe(() => {
           this.getRoles();

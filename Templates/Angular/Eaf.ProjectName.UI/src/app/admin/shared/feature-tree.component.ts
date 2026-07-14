@@ -4,7 +4,7 @@ import { AppComponentBase } from '@shared/common/app-component-base';
 import { FlatFeatureDto, NameValueDto } from '@shared/service-proxies/service-proxies';
 import { ArrayToTreeConverterService } from '@shared/utils/array-to-tree-converter.service';
 import { TreeDataHelperService } from '@shared/utils/tree-data-helper.service';
-import * as _ from 'lodash';
+
 import { TreeNode } from 'primeng/api';
 
 @Component({
@@ -25,8 +25,8 @@ export class FeatureTreeComponent extends AppComponentBase {
   selectedFeatures: TreeNode[] = [];
 
   constructor(
-    private _arrayToTreeConverterService: ArrayToTreeConverterService,
-    private _treeDataHelperService: TreeDataHelperService,
+    private readonly _arrayToTreeConverterService: ArrayToTreeConverterService,
+    private readonly _treeDataHelperService: TreeDataHelperService,
     injector: Injector,
   ) {
     super(injector);
@@ -60,9 +60,9 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   setSelectedNodes(val: FeatureTreeEditModel) {
-    _.forEach(val.features, feature => {
-      const items = _.filter(val.featureValues, { name: feature.name });
-      if (items && items.length === 1) {
+    val.features?.forEach(feature => {
+      const items = val.featureValues?.filter(f => f.name === feature.name) || [];
+      if (items?.length === 1) {
         const item = items[0];
         this.setSelectedNode(item.name, item.value);
       } else {
@@ -91,9 +91,9 @@ export class FeatureTreeComponent extends AppComponentBase {
 
     const features: NameValueDto[] = [];
 
-    for (let i = 0; i < this._editData.features.length; i++) {
+    for (const f of this._editData.features) {
       const feature = new NameValueDto();
-      feature.name = this._editData.features[i].name;
+      feature.name = f.name;
       feature.value = this.getFeatureValueByName(feature.name);
 
       features.push(feature);
@@ -109,9 +109,9 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   findFeatureByName(featureName: string): FlatFeatureDto {
-    const self = this;
 
-    const feature = _.find(self._editData.features, f => f.name === featureName);
+
+    const feature = this._editData.features?.find(f => f.name === featureName);
 
     if (!feature) {
       eaf.log.warn('Could not find a feature by name: ' + featureName);
@@ -121,13 +121,13 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   findFeatureValueByName(featureName: string) {
-    const self = this;
-    const feature = self.findFeatureByName(featureName);
+
+    const feature = this.findFeatureByName(featureName);
     if (!feature) {
       return '';
     }
 
-    const featureValue = _.find(self._editData.featureValues, f => f.name === featureName);
+    const featureValue = this._editData.featureValues?.find(f => f.name === featureName);
     if (!featureValue) {
       return feature.defaultValue;
     }
@@ -136,49 +136,60 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   isFeatureValueValid(featureName: string, value: string): boolean {
-    const self = this;
-    const feature = self.findFeatureByName(featureName);
-    if (!feature || !feature.inputType || !feature.inputType.validator) {
+    const feature = this.findFeatureByName(featureName);
+    if (!feature?.inputType?.validator) {
       return true;
     }
 
     const validator = feature.inputType.validator as any;
     if (validator.name === 'STRING') {
-      if (value === undefined || value === null) {
-        return validator.allowNull;
-      }
+      return this.validateStringValue(validator, value);
+    }
 
-      if (typeof value !== 'string') {
-        return false;
-      }
+    if (validator.name === 'NUMERIC') {
+      return this.validateNumericValue(validator, value);
+    }
 
-      if (validator.minLength > 0 && value.length < validator.minLength) {
-        return false;
-      }
+    return true;
+  }
 
-      if (validator.maxLength > 0 && value.length > validator.maxLength) {
-        return false;
-      }
+  private validateStringValue(validator: any, value: string): boolean {
+    if (value === undefined || value === null) {
+      return validator.allowNull;
+    }
 
-      if (validator.regularExpression) {
-        return new RegExp(validator.regularExpression).test(value);
-      }
-    } else if (validator.name === 'NUMERIC') {
-      const numValue = parseInt(value);
+    if (typeof value !== 'string') {
+      return false;
+    }
 
-      if (isNaN(numValue)) {
-        return false;
-      }
+    if (validator.minLength > 0 && value.length < validator.minLength) {
+      return false;
+    }
 
-      const minValue = validator.minValue;
-      if (minValue > numValue) {
-        return false;
-      }
+    if (validator.maxLength > 0 && value.length > validator.maxLength) {
+      return false;
+    }
 
-      const maxValue = validator.maxValue;
-      if (maxValue > 0 && numValue > maxValue) {
-        return false;
-      }
+    if (validator.regularExpression) {
+      return new RegExp(validator.regularExpression).test(value);
+    }
+
+    return true;
+  }
+
+  private validateNumericValue(validator: any, value: string): boolean {
+    const numValue = Number.parseInt(value);
+
+    if (isNaN(numValue)) {
+      return false;
+    }
+
+    if (validator.minValue > numValue) {
+      return false;
+    }
+
+    if (validator.maxValue > 0 && numValue > validator.maxValue) {
+      return false;
     }
 
     return true;
@@ -187,18 +198,18 @@ export class FeatureTreeComponent extends AppComponentBase {
   areAllValuesValid(): boolean {
     let result = true;
 
-    _.forEach(this._editData.features, feature => {
+    for (const feature of this._editData.features || []) {
       const value = this.getFeatureValueByName(feature.name);
       if (!this.isFeatureValueValid(feature.name, value)) {
         result = false;
       }
-    });
+    }
 
     return result;
   }
 
   setFeatureValueByName(featureName: string, value: string): void {
-    const featureValue = _.find(this._editData.featureValues, f => f.name === featureName);
+    const featureValue = this._editData.featureValues?.find(f => f.name === featureName);
     if (!featureValue) {
       return;
     }
@@ -208,10 +219,8 @@ export class FeatureTreeComponent extends AppComponentBase {
 
   isFeatureSelected(name: string): boolean {
     // let nodes = _.filter(this.selectedFeatures, { data: { name: name } });
-    const nodes = _.filter(this.selectedFeatures, function (o) {
-      return o.data.name == name;
-    });
-    return nodes && nodes.length === 1;
+    const nodes = this.selectedFeatures?.filter(o => o.data.name == name) || [];
+    return nodes?.length === 1;
   }
 
   getFeatureValueByName(featureName: string): string {
@@ -232,8 +241,8 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   isFeatureEnabled(featureName: string): boolean {
-    const self = this;
-    const value = self.findFeatureValueByName(featureName);
+
+    const value = this.findFeatureValueByName(featureName);
     return value.toLowerCase() === 'true';
   }
 

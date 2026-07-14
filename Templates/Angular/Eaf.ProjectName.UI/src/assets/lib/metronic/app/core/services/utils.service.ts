@@ -52,8 +52,7 @@ export class UtilsService {
     return this.mergeDeep(target, ...sources);
   }
 
-  getPath(obj, val, path?) {
-    path = path || '';
+  getPath(obj, val, path = '') {
     let fullpath = '';
     for (const b in obj) {
       if (obj[b] === val) {

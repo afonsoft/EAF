@@ -7,8 +7,8 @@ import { NgControl } from '@angular/forms';
 })
 export class NullDefaultValueDirective {
   constructor(
-    private el: ElementRef,
-    private control: NgControl,
+    private readonly el: ElementRef,
+    private readonly control: NgControl,
   ) {}
 
   @HostListener('input', ['$event.target'])

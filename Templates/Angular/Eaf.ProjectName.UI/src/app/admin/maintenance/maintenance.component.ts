@@ -3,7 +3,7 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { CachingServiceProxy, EntityDtoOfString, WebLogServiceProxy } from '@shared/service-proxies/service-proxies';
 import { FileDownloadService } from '@shared/utils/file-download.service';
-import * as _ from 'lodash';
+
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -18,57 +18,57 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _cacheService: CachingServiceProxy,
-    private _webLogService: WebLogServiceProxy,
-    private _fileDownloadService: FileDownloadService,
+    private readonly _cacheService: CachingServiceProxy,
+    private readonly _webLogService: WebLogServiceProxy,
+    private readonly _fileDownloadService: FileDownloadService,
   ) {
     super(injector);
   }
 
   getCaches(): void {
-    const self = this;
-    self.loading = true;
-    self._cacheService
+
+    this.loading = true;
+    this._cacheService
       .getAllCaches()
       .pipe(
         finalize(() => {
-          self.loading = false;
+          this.loading = false;
         }),
       )
       .subscribe(result => {
-        self.caches = result.items;
+        this.caches = result.items;
       });
   }
 
   clearCache(cacheName): void {
-    const self = this;
+
     const input = new EntityDtoOfString();
     input.id = cacheName;
 
-    self._cacheService.clearCache(input).subscribe(() => {
-      self.notify.success(self.l('CacheSuccessfullyCleared'));
+    this._cacheService.clearCache(input).subscribe(() => {
+      this.notify.success(this.l('CacheSuccessfullyCleared'));
     });
   }
 
   clearAllCaches(): void {
-    const self = this;
-    self._cacheService.clearAllCaches().subscribe(() => {
-      self.notify.success(self.l('AllCachesSuccessfullyCleared'));
+
+    this._cacheService.clearAllCaches().subscribe(() => {
+      this.notify.success(this.l('AllCachesSuccessfullyCleared'));
     });
   }
 
   getWebLogs(): void {
-    const self = this;
-    self._webLogService.getLatestWebLogs().subscribe(result => {
-      self.logs = result.latestWebLogLines;
-      self.fixWebLogsPanelHeight();
+
+    this._webLogService.getLatestWebLogs().subscribe(result => {
+      this.logs = result.latestWebLogLines;
+      this.fixWebLogsPanelHeight();
     });
   }
 
-  downloadWebLogs = function () {
-    const self = this;
-    self._webLogService.downloadWebLogs().subscribe(result => {
-      self._fileDownloadService.downloadTempFile(result);
+  downloadWebLogs = () => {
+
+    this._webLogService.downloadWebLogs().subscribe(result => {
+      this._fileDownloadService.downloadTempFile(result);
     });
   };
 
@@ -98,23 +98,23 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
 
   getLogType(log: string): string {
     if (log.includes('DEBUG') || log.includes('[DBG]')) {
-      return '';
+      return 'DEBUG';
     }
 
     if (log.includes('INFO') || log.includes('[INF]')) {
-      return '';
+      return 'INFO';
     }
 
     if (log.includes('WARN') || log.includes('[WRN]')) {
-      return '';
+      return 'WARN';
     }
 
     if (log.includes('ERROR') || log.includes('[ERR]')) {
-      return '';
+      return 'ERROR';
     }
 
     if (log.includes('FATAL') || log.includes('[FAT]') || log.includes('[FTL]')) {
-      return '';
+      return 'FATAL';
     }
 
     return '';
@@ -139,8 +139,8 @@ export class MaintenanceComponent extends AppComponentBase implements OnInit {
   }
 
   ngOnInit(): void {
-    const self = this;
-    self.getCaches();
-    self.getWebLogs();
+
+    this.getCaches();
+    this.getWebLogs();
   }
 }

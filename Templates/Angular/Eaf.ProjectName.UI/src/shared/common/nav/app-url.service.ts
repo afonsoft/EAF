@@ -4,7 +4,7 @@ import { AppSessionService } from '@shared/common/session/app-session.service';
 
 @Injectable()
 export class AppUrlService {
-  static tenancyNamePlaceHolder = '{TENANCY_NAME}';
+  static readonly tenancyNamePlaceHolder = '{TENANCY_NAME}';
 
   constructor(private readonly _appSessionService: AppSessionService) {}
 
@@ -23,15 +23,15 @@ export class AppUrlService {
     let baseUrl = this.ensureEndsWith(AppConsts.appBaseUrlFormat, '/');
 
     //Add base href if it is not configured in appconfig.json
-    if (baseUrl.indexOf(AppConsts.appBaseHref) < 0) {
+    if (!baseUrl.includes(AppConsts.appBaseHref)) {
       baseUrl = baseUrl + this.removeFromStart(AppConsts.appBaseHref, '/');
     }
 
-    if (baseUrl.indexOf(AppUrlService.tenancyNamePlaceHolder) < 0) {
+    if (!baseUrl.includes(AppUrlService.tenancyNamePlaceHolder)) {
       return baseUrl;
     }
 
-    if (baseUrl.indexOf(AppUrlService.tenancyNamePlaceHolder + '.') >= 0) {
+    if (baseUrl.includes(AppUrlService.tenancyNamePlaceHolder + '.')) {
       baseUrl = baseUrl.replace(AppUrlService.tenancyNamePlaceHolder + '.', AppUrlService.tenancyNamePlaceHolder);
       if (tenancyName) {
         tenancyName = tenancyName + '.';
@@ -46,7 +46,7 @@ export class AppUrlService {
   }
 
   private ensureEndsWith(str: string, c: string) {
-    if (str.charAt(str.length - 1) !== c) {
+    if (!str.endsWith(c)) {
       str = str + c;
     }
 
@@ -54,16 +54,16 @@ export class AppUrlService {
   }
 
   private removeFromEnd(str: string, c: string) {
-    if (str.charAt(str.length - 1) === c) {
-      str = str.substr(0, str.length - 1);
+    if (str.endsWith(c)) {
+      str = str.substring(0, str.length - 1);
     }
 
     return str;
   }
 
   private removeFromStart(str: string, c: string) {
-    if (str.charAt(0) === c) {
-      str = str.substr(1, str.length - 1);
+    if (str.startsWith(c)) {
+      str = str.substring(1, str.length);
     }
 
     return str;

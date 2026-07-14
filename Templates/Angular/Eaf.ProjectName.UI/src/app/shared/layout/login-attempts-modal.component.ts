@@ -19,8 +19,8 @@ export class LoginAttemptsModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _userLoginService: UserLoginServiceProxy,
-    private _profileService: ProfileServiceProxy,
+    private readonly _userLoginService: UserLoginServiceProxy,
+    private readonly _profileService: ProfileServiceProxy,
   ) {
     super(injector);
   }
@@ -29,7 +29,7 @@ export class LoginAttemptsModalComponent extends AppComponentBase {
     this._userLoginService.getRecentUserLoginAttempts().subscribe(result => {
       this.userLoginAttempts = result.items;
       this._profileService.getProfilePicture().subscribe(result => {
-        if (result && result.profilePicture) {
+        if (result?.profilePicture) {
           this.profilePicture = 'data:image/jpeg;base64,' + result.profilePicture;
         }
         this.modal.show();

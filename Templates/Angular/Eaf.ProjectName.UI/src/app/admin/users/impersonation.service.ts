@@ -6,9 +6,9 @@ import { AccountServiceProxy, ImpersonateInput, ImpersonateOutput } from '@share
 @Injectable()
 export class ImpersonationService {
   constructor(
-    private _accountService: AccountServiceProxy,
-    private _appUrlService: AppUrlService,
-    private _authService: AppAuthService,
+    private readonly _accountService: AccountServiceProxy,
+    private readonly _appUrlService: AppUrlService,
+    private readonly _authService: AppAuthService,
   ) {}
 
   impersonate(userId: number, tenantId?: number): void {

@@ -7,7 +7,7 @@ import { StorageService } from '@eaf/utils/storage.service';
 import { AppConsts } from '@shared/AppConsts';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { ChangeUserLanguageDto, ProfileServiceProxy } from '@shared/service-proxies/service-proxies';
-import * as _ from 'lodash';
+
 
 @Component({
   standalone: false,
@@ -34,19 +34,19 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _eafSessionService: EafSessionService,
-    private _eafMultiTenancyService: EafMultiTenancyService,
-    private _profileServiceProxy: ProfileServiceProxy,
-    private _authService: AppAuthService,
-    private _impersonationService: ImpersonationService,
-    private _storageService: StorageService,
+    private readonly _eafSessionService: EafSessionService,
+    private readonly _eafMultiTenancyService: EafMultiTenancyService,
+    private readonly _profileServiceProxy: ProfileServiceProxy,
+    private readonly _authService: AppAuthService,
+    private readonly _impersonationService: ImpersonationService,
+    private readonly _storageService: StorageService,
   ) {
     super(injector);
   }
 
   ngOnInit() {
     this.isMultiTenancyEnabled = this._eafMultiTenancyService.isEnabled;
-    this.languages = _.filter(this.localization.languages, l => l.isDisabled === false);
+    this.languages = this.localization.languages?.filter(l => !l.isDisabled) || [];
 
     this.currentLanguage = this.localization.currentLanguage;
     this.isImpersonatedLogin = this._eafSessionService.impersonatorUserId > 0;
@@ -102,7 +102,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
   }
 
   reloadLanguages(): void {
-    this.languages = _.filter(this.localization.languages, l => (<any>l).isDisabled == false);
+    this.languages = this.localization.languages?.filter(l => !(<any>l).isDisabled) || [];
   }
 
   setCurrentLoginInformations(): void {
@@ -115,7 +115,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
 
   getProfilePicture(): void {
     this._profileServiceProxy.getProfilePicture().subscribe(result => {
-      if (result && result.profilePicture) {
+      if (result?.profilePicture) {
         this.profilePicture = 'data:image/jpeg;base64,' + result.profilePicture;
       }
     });

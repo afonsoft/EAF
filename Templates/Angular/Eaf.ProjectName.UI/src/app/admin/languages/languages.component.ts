@@ -7,7 +7,7 @@ import { Table } from 'primeng/table';
 import { CreateOrEditLanguageModalComponent } from './create-or-edit-language-modal.component';
 import { EafSessionService } from '@eaf/session/eaf-session.service';
 import { finalize } from 'rxjs/operators';
-import * as _ from 'lodash';
+
 
 @Component({
   standalone: false,
@@ -32,10 +32,10 @@ export class LanguagesComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _activatedRoute: ActivatedRoute,
-    private _languageService: LanguageServiceProxy,
-    private _sessionService: EafSessionService,
-    private _router: Router,
+    private readonly _activatedRoute: ActivatedRoute,
+    private readonly _languageService: LanguageServiceProxy,
+    private readonly _sessionService: EafSessionService,
+    private readonly _router: Router,
   ) {
     super(injector);
   }

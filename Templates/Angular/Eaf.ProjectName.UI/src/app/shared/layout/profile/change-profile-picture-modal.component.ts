@@ -19,7 +19,7 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
   public active = false;
   public temporaryPictureUrl: string;
   public saving = false;
-  private input = new UpdateProfilePictureInput();
+  private readonly input = new UpdateProfilePictureInput();
   public selectedFile: File | null = null;
 
   public maxProfilPictureBytesUserFriendlyValue = 50;
@@ -27,9 +27,9 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _profileService: ProfileServiceProxy,
-    private _tokenService: TokenService,
-    private _http: HttpClient,
+    private readonly _profileService: ProfileServiceProxy,
+    private readonly _tokenService: TokenService,
+    private readonly _http: HttpClient,
   ) {
     super(injector);
   }
@@ -86,7 +86,7 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
         )
         .toPromise();
 
-      if (response && response.success) {
+      if (response?.success) {
         this.updateProfilePicture(response.result.fileToken);
       } else {
         this.message.error(response?.error?.message || this.l('UploadFailed'));
@@ -116,13 +116,14 @@ export class ChangeProfilePictureModalComponent extends AppComponentBase {
       });
   }
 
+  private s4(): string {
+    const view = new Uint16Array(1);
+    crypto.getRandomValues(view);
+    return view[0].toString(16).padStart(4, '0');
+  }
+
   guid(): string {
-    function s4() {
-      const view = new Uint16Array(1);
-      crypto.getRandomValues(view);
-      return view[0].toString(16).padStart(4, '0');
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    return this.s4() + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4() + this.s4() + this.s4();
   }
 
   save(): void {

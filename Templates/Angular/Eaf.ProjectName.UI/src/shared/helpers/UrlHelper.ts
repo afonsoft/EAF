@@ -14,19 +14,23 @@
       .split('&')
       .map(
         function (n) {
-          return (n = n.split('=')), (this[n[0]] = n[1]), this;
+          const parts = n.split('=');
+          this[parts[0]] = parts[1];
+          return this;
         }.bind({}),
       )[0];
   }
 
   static getQueryParametersUsingHash(): any {
     return document.location.hash
-      .substr(1, document.location.hash.length - 1)
+      .substring(1, document.location.hash.length)
       .replace(/(^\?)/, '')
       .split('&')
       .map(
         function (n) {
-          return (n = n.split('=')), (this[n[0]] = n[1]), this;
+          const parts = n.split('=');
+          this[parts[0]] = parts[1];
+          return this;
         }.bind({}),
       )[0];
   }
@@ -34,7 +38,7 @@
   static getInitialUrlParameters(): any {
     const questionMarkIndex = UrlHelper.initialUrl.indexOf('?');
     if (questionMarkIndex >= 0) {
-      return UrlHelper.initialUrl.substr(questionMarkIndex, UrlHelper.initialUrl.length - questionMarkIndex);
+      return UrlHelper.initialUrl.substring(questionMarkIndex, UrlHelper.initialUrl.length);
     }
 
     return '';

@@ -18,7 +18,7 @@ import { API_BASE_URL, UiCustomizationSettingsDto } from '@shared/service-proxie
 import { ServiceProxyModule } from '@shared/service-proxies/service-proxy.module';
 import { NgxBootstrapDatePickerConfigService } from 'assets/lib/ngx-bootstrap/ngx-bootstrap-datepicker-config.service';
 import * as localForage from 'localforage';
-import * as _ from 'lodash';
+
 
 import { AppModule } from './app/app.module';
 import { AppPreBootstrap } from './AppPreBootstrap';
@@ -26,31 +26,29 @@ import { RootRoutingModule } from './root-routing.module';
 import { RootComponent } from './root.component';
 
 export function appInitializerFactory(injector: Injector, platformLocation: PlatformLocation, storageService: StorageService) {
-  return () => {
+  return async () => {
     eaf.ui.setBusy();
-    return new Promise<boolean>((resolve, reject) => {
+    await new Promise<boolean>((resolve, reject) => {
       AppConsts.appBaseHref = getBaseHref(platformLocation);
       const appBaseUrl = getDocumentOrigin() + AppConsts.appBaseHref;
       AppPreBootstrap.Init(storageService);
       AppPreBootstrap.run(
         appBaseUrl,
-        () => {
+        async () => {
           handleLogoutRequest(injector.get(AppAuthService));
           initializeLocalForage();
 
           const appSessionService: AppSessionService = injector.get(AppSessionService);
-          appSessionService.init().then(
-            result => {
-              initializeAppCssClasses(injector, result);
-              initializeTenantResources(injector);
-              initializeCookieConsent(injector);
-              registerLocales(resolve, reject);
-            },
-            err => {
-              eaf.ui.clearBusy();
-              reject(err);
-            },
-          );
+          try {
+            const result = await appSessionService.init();
+            initializeAppCssClasses(injector, result);
+            initializeTenantResources(injector);
+            initializeCookieConsent(injector);
+            registerLocales(resolve, reject);
+          } catch (err) {
+            eaf.ui.clearBusy();
+            reject(err);
+          }
         },
         resolve,
         reject,
@@ -163,8 +161,8 @@ export function convertEafLocaleToAngularLocale(locale: string): string {
     return locale;
   }
 
-  const localeMapings = _.filter(AppConsts.localeMappings, { from: locale });
-  if (localeMapings && localeMapings.length) {
+  const localeMapings = AppConsts.localeMappings?.filter(m => m.from === locale) || [];
+  if (localeMapings?.length) {
     return localeMapings[0]['to'];
   }
 
@@ -191,7 +189,7 @@ export function getBaseHref(platformLocation: PlatformLocation): string {
 function handleLogoutRequest(authService: AppAuthService) {
   const currentUrl = UrlHelper.initialUrl;
   const returnUrl = UrlHelper.getReturnUrl();
-  if (currentUrl.indexOf('account/logout') >= 0 && returnUrl) {
+  if (currentUrl.includes('account/logout') && returnUrl) {
     authService.logout(true, returnUrl);
   }
 }

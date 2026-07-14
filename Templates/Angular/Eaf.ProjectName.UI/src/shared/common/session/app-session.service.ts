@@ -17,8 +17,8 @@ export class AppSessionService {
   private _theme: UiCustomizationSettingsDto;
 
   constructor(
-    private _sessionService: SessionServiceProxy,
-    private _eafMultiTenancyService: EafMultiTenancyService,
+    private readonly _sessionService: SessionServiceProxy,
+    private readonly _eafMultiTenancyService: EafMultiTenancyService,
   ) {}
 
   get application(): ApplicationInfoDto {
@@ -108,9 +108,7 @@ export class AppSessionService {
       return true;
     }
 
-    if (!tenantId && this.tenant) {
-      return false;
-    } else if (tenantId && (!this.tenant || this.tenant.id !== tenantId)) {
+    if ((!tenantId && this.tenant) || (tenantId && this.tenant?.id !== tenantId)) {
       return false;
     }
 

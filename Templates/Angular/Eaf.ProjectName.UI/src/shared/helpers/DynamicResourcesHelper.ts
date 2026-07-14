@@ -5,7 +5,7 @@ import * as rtlDetect from 'rtl-detect';
 
 export class DynamicResourcesHelper {
   static loadResources(callback: () => void): void {
-    Promise.all([DynamicResourcesHelper.loadStyles()]).then(() => {
+    DynamicResourcesHelper.loadStyles().then(() => {
       callback();
     });
   }
@@ -19,7 +19,6 @@ export class DynamicResourcesHelper {
       document.documentElement.setAttribute('dir', 'rtl');
     }
 
-    const cssPostfix = isRtl ? '-rtl' : '';
     const styleLoaderService = new StyleLoaderService();
 
     const styleUrls = [

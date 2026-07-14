@@ -7,11 +7,11 @@
 export class MenuHorizontalOffcanvasDirective implements AfterViewInit {
   menuOffcanvas: any;
 
-  constructor(private el: ElementRef) {}
+  constructor(private readonly el: ElementRef) {}
 
   ngAfterViewInit(): void {
     // init the mOffcanvas plugin
-    this.menuOffcanvas = new mOffcanvas(this.el.nativeElement, {
+    this.menuOffcanvas = new (mOffcanvas as any)(this.el.nativeElement, {
       overlay: true,
       baseClass: 'm-aside-header-menu-mobile',
       toggleBy: {

@@ -5,7 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
   providedIn: 'root',
 })
 export class StorageService {
-  constructor(private cookieService: CookieService) {}
+  constructor(private readonly cookieService: CookieService) {}
 
   public setValue(key: string, value: any): void {
     localStorage.setItem(key, JSON.stringify(value));

@@ -33,8 +33,8 @@ import { SsoComponent } from './login/sso.component';
 })
 export class AccountRoutingModule {
   constructor(
-    private router: Router,
-    private _uiCustomizationService: AppUiCustomizationService,
+    private readonly router: Router,
+    private readonly _uiCustomizationService: AppUiCustomizationService,
   ) {
     router.events.subscribe((event: NavigationEnd) => {
       setTimeout(() => {
@@ -49,7 +49,7 @@ export class AccountRoutingModule {
       return;
     }
 
-    if (url.indexOf('/account/') >= 0) {
+    if (url.includes('/account/')) {
       this.setAccountModuleBodyClassInternal();
     } else {
       document.body.className = this._uiCustomizationService.getAppModuleBodyClass();
@@ -61,7 +61,7 @@ export class AccountRoutingModule {
 
     let classesToRemember = '';
 
-    if (currentBodyClass.indexOf('swal2-toast-shown') >= 0) {
+    if (currentBodyClass.includes('swal2-toast-shown')) {
       classesToRemember += ' swal2-toast-shown';
     }
 

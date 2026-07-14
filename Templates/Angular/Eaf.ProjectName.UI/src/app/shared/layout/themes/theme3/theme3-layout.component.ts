@@ -1,7 +1,7 @@
-﻿import { Injector, ElementRef, Component, OnInit, AfterViewInit, ViewChild, HostBinding } from '@angular/core';
+﻿import { Injector, ElementRef, Component, AfterViewInit, ViewChild, HostBinding } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service';
-import { UrlHelper } from '@shared/helpers/UrlHelper';
+
 import { AppConsts } from '@shared/AppConsts';
 import { MenuAsideOffcanvasDirective } from '@metronic/app/core/directives/menu-aside-offcanvas.directive';
 import { AppComponentBase } from '@shared/common/app-component-base';
@@ -22,7 +22,7 @@ export class Theme3LayoutComponent extends AppComponentBase implements AfterView
 
   constructor(
     injector: Injector,
-    private layoutRefService: LayoutRefService,
+    private readonly layoutRefService: LayoutRefService,
   ) {
     super(injector);
   }

@@ -38,11 +38,11 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
 
   public constructor(
     injector: Injector,
-    private _chatSignalrService: ChatSignalrService,
-    private _userNotificationHelper: UserNotificationHelper,
-    private _appAuthenticationService: AppAuthenticationService,
-    private _storageService: StorageService,
-    private router: Router,
+    private readonly _chatSignalrService: ChatSignalrService,
+    private readonly _userNotificationHelper: UserNotificationHelper,
+    private readonly _appAuthenticationService: AppAuthenticationService,
+    private readonly _storageService: StorageService,
+    private readonly router: Router,
       ) {
     super(injector);
   }
@@ -79,7 +79,7 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
   }
 
   setUpTagManager(): void {
-    if (AppConsts.googleTagManager !== undefined && typeof gtag !== 'undefined') {
+    if (AppConsts.googleTagManager !== undefined && gtag !== undefined) {
       this.router.events.forEach(item => {
         if (item instanceof NavigationEnd) {
           gtag('config', AppConsts.googleTagManager, {

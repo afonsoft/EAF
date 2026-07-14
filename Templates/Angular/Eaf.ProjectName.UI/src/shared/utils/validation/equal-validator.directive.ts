@@ -35,29 +35,28 @@ export class EqualValidator implements Validator {
       return null;
     }
 
-    if (this.isReverse) {
-      if (value === pairValue) {
-        if (pairControl.errors) {
-          delete pairControl.errors['validateEqual'];
-        }
+    return this.isReverse ? this.validateReverse(pairControl, value, pairValue) : this.validateForward(value, pairValue);
+  }
 
-        if (!Object.keys(pairControl.errors).length) {
-          pairControl.setErrors(null);
-        }
-      } else {
-        pairControl.setErrors({
-          validateEqual: true,
-        });
+  private validateReverse(pairControl: AbstractControl, value: any, pairValue: any): null {
+    if (value === pairValue) {
+      if (pairControl.errors) {
+        delete pairControl.errors['validateEqual'];
       }
 
-      return null;
+      if (!Object.keys(pairControl.errors).length) {
+        pairControl.setErrors(null);
+      }
     } else {
-      if (value !== pairValue) {
-        return {
-          validateEqual: true,
-        };
-      }
+      pairControl.setErrors({
+        validateEqual: true,
+      });
     }
+
     return null;
+  }
+
+  private validateForward(value: any, pairValue: any): { [key: string]: any } {
+    return value !== pairValue ? { validateEqual: true } : null;
   }
 }

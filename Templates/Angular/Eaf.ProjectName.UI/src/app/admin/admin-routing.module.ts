@@ -39,7 +39,7 @@ import { UsersComponent } from './users/users.component';
   exports: [RouterModule],
 })
 export class AdminRoutingModule {
-  constructor(private router: Router) {
+  constructor(private readonly router: Router) {
     router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         window.scroll(0, 0);

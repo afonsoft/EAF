@@ -19,8 +19,8 @@ export class HeaderNotificationsComponent extends AppComponentBase implements On
 
   constructor(
     injector: Injector,
-    private _notificationService: NotificationServiceProxy,
-    private _userNotificationHelper: UserNotificationHelper,
+    private readonly _notificationService: NotificationServiceProxy,
+    private readonly _userNotificationHelper: UserNotificationHelper,
     public _zone: NgZone,
   ) {
     super(injector);
@@ -32,65 +32,65 @@ export class HeaderNotificationsComponent extends AppComponentBase implements On
   }
 
   loadNotifications(): void {
-    const self = this;
+
     this._notificationService.getUserNotifications(undefined, 3, 0).subscribe(result => {
-      self.unreadNotificationCount = result.unreadCount;
-      self.notifications = [];
+      this.unreadNotificationCount = result.unreadCount;
+      this.notifications = [];
 
       _.forEach(result.items, (item: UserNotification) => {
-        self.notifications.push(self._userNotificationHelper.format(<any>item));
+        this.notifications.push(this._userNotificationHelper.format(<any>item));
         if (item.state == UserNotificationState.Unread) {
-          self.unreadUserNotification.push(item);
+          this.unreadUserNotification.push(item);
         }
       });
 
-      _.forEach(self.unreadUserNotification, (item: UserNotification) => {
-        self._zone.run(() => {
-          self._userNotificationHelper.show(<any>item);
+      _.forEach(this.unreadUserNotification, (item: UserNotification) => {
+        this._zone.run(() => {
+          this._userNotificationHelper.show(<any>item);
         });
       });
     });
   }
 
   registerToEvents() {
-    const self = this;
+
     if (environment.production) {
       Push.default.config({ serviceWorker: './ngsw-worker.js' });
     }
-    function onNotificationReceived(userNotification) {
-      self._userNotificationHelper.show(userNotification);
-      self.loadNotifications();
+    const onNotificationReceived = (userNotification) => {
+      this._userNotificationHelper.show(userNotification);
+      this.loadNotifications();
     }
 
     eaf.event.on('eaf.notifications.received', userNotification => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onNotificationReceived(userNotification);
       });
     });
 
     function onNotificationsRefresh() {
-      self.loadNotifications();
+      this.loadNotifications();
     }
 
     eaf.event.on('app.notifications.refresh', () => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onNotificationsRefresh();
       });
     });
 
     function onNotificationsRead(userNotificationId) {
-      for (let i = 0; i < self.notifications.length; i++) {
-        if (self.notifications[i].userNotificationId === userNotificationId) {
-          self.notifications[i].state = 'READ';
-          self.notifications[i].isUnread = false;
+      for (const notification of this.notifications) {
+        if (notification.userNotificationId === userNotificationId) {
+          notification.state = 'READ';
+          notification.isUnread = false;
         }
       }
 
-      self.unreadNotificationCount -= 1;
+      this.unreadNotificationCount -= 1;
     }
 
     eaf.event.on('app.notifications.read', userNotificationId => {
-      self._zone.run(() => {
+      this._zone.run(() => {
         onNotificationsRead(userNotificationId);
       });
     });

@@ -1,7 +1,7 @@
 ﻿import { HttpEvent, HttpHandler, HttpHeaders, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable, Optional } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
+import { timeout } from 'rxjs/operators';
 
 import { TokenService } from './auth/token.service';
 import { LogService } from './log/log.service';
@@ -32,8 +32,8 @@ export interface IAjaxResponse {
 @Injectable()
 export class EafHttpConfiguration {
   constructor(
-    private _messageService: MessageService,
-    private _logService: LogService,
+    private readonly _messageService: MessageService,
+    private readonly _logService: LogService,
   ) {}
 
   defaultError = <IErrorInfo>{
@@ -77,32 +77,32 @@ export class EafHttpConfiguration {
   }
 
   handleUnAuthorizedRequest(messagePromise: any, targetUrl?: string) {
-    const self = this;
+
 
     if (messagePromise) {
       messagePromise.done(() => {
         this.handleTargetUrl(targetUrl || '/');
       });
     } else {
-      self.handleTargetUrl(targetUrl || '/');
+      this.handleTargetUrl(targetUrl || '/');
     }
   }
 
   handleNonEafErrorResponse(response: HttpResponse<any>) {
-    const self = this;
+
 
     switch (response.status) {
       case 401:
-        self.handleUnAuthorizedRequest(self.showError(self.defaultError401), '/');
+        this.handleUnAuthorizedRequest(this.showError(this.defaultError401), '/');
         break;
       case 403:
-        self.showError(self.defaultError403);
+        this.showError(this.defaultError403);
         break;
       case 404:
-        self.showError(self.defaultError404);
+        this.showError(this.defaultError404);
         break;
       default:
-        self.showError(self.defaultError);
+        this.showError(this.defaultError);
         break;
     }
   }
@@ -139,7 +139,7 @@ export class EafHttpConfiguration {
   }
 
   getEafAjaxResponseOrNull(response: HttpResponse<any>): IAjaxResponse | null {
-    if (!response || !response.headers) {
+    if (!response?.headers) {
       return null;
     }
 
@@ -177,12 +177,10 @@ export class EafHttpConfiguration {
         observer.next('');
         observer.complete();
       } else {
-        const reader = new FileReader();
-        reader.onload = function () {
-          observer.next(this.result);
+        blob.text().then(text => {
+          observer.next(text);
           observer.complete();
-        };
-        reader.readAsText(blob);
+        });
       }
     });
   }
@@ -195,8 +193,8 @@ export class EafHttpInterceptor implements HttpInterceptor {
 
   constructor(
     configuration: EafHttpConfiguration,
-    private _storageService: StorageService,
-    private _tokenService: TokenService,
+    private readonly _storageService: StorageService,
+    private readonly _tokenService: TokenService,
   ) {
     this.configuration = configuration;
   }
@@ -261,21 +259,19 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   protected handleSuccessResponse(event: HttpEvent<any>, interceptObservable: Subject<HttpEvent<any>>): void {
-    const self = this;
+
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
     if (event instanceof HttpResponse) {
       if (event.body instanceof Blob && event.body.type && event.body.type.indexOf('application/json') >= 0) {
-        const clonedResponse = event.clone();
-
-        self.configuration.blobToText(event.body).subscribe(json => {
+        this.configuration.blobToText(event.body).subscribe(json => {
           const responseBody = json == 'null' ? {} : JSON.parse(json);
 
           if (isLocalhost) {
             (window as any).eaf.log.info('[EafHttpInterceptor] Blob JSON parsed: ' + JSON.stringify(responseBody));
           }
 
-          const modifiedResponse = self.configuration.handleResponse(
+          const modifiedResponse = this.configuration.handleResponse(
             event.clone({
               body: responseBody,
             }),
@@ -335,8 +331,8 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   private itemExists<T>(items: T[], predicate: (item: T) => boolean): boolean {
-    for (let i = 0; i < items.length; i++) {
-      if (predicate(items[i])) {
+    for (const item of items) {
+      if (predicate(item)) {
         return true;
       }
     }
@@ -345,8 +341,7 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   protected normalizeRequestHeaders(request: HttpRequest<any>): HttpRequest<any> {
-    let modifiedHeaders = new HttpHeaders();
-    modifiedHeaders = request.headers
+    let modifiedHeaders = request.headers
       .set('Pragma', 'no-cache')
       .set('Cache-Control', 'no-cache')
       .set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
@@ -407,7 +402,7 @@ export class EafHttpInterceptor implements HttpInterceptor {
       authorizationHeaders = [];
     }
 
-    if (!this.itemExists(authorizationHeaders, (item: string) => item.indexOf('Bearer ') == 0)) {
+    if (!this.itemExists(authorizationHeaders, (item: string) => item.startsWith('Bearer '))) {
       const token = this._tokenService.getToken();
       if (headers && token) {
         headers = headers.set('Authorization', 'Bearer ' + token);

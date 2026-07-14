@@ -31,7 +31,7 @@ export class CreateOrEditLanguageModalComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _languageService: LanguageServiceProxy,
+    private readonly _languageService: LanguageServiceProxy,
   ) {
     super(injector);
   }

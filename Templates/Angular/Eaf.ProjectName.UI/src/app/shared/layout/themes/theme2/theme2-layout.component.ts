@@ -1,7 +1,7 @@
-﻿import { Injector, ElementRef, Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+﻿import { Injector, ElementRef, Component, AfterViewInit, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service';
-import { UrlHelper } from '@shared/helpers/UrlHelper';
+
 import { AppComponentBase } from '@shared/common/app-component-base';
 
 @Component({
@@ -15,7 +15,7 @@ export class Theme2LayoutComponent extends AppComponentBase implements AfterView
 
   constructor(
     injector: Injector,
-    private layoutRefService: LayoutRefService,
+    private readonly layoutRefService: LayoutRefService,
   ) {
     super(injector);
   }
@@ -66,6 +66,6 @@ export class Theme2LayoutComponent extends AppComponentBase implements AfterView
       options.offset.mobile = mUtil.attr(headerEl, 'm-minimize-mobile-offset');
     }
 
-    return new mHeader('m_header', options);
+    return new (mHeader as any)('m_header', options);
   }
 }

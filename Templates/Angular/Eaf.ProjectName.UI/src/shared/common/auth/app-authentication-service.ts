@@ -4,13 +4,13 @@ import { AppConsts } from 'shared/AppConsts';
 
 @Injectable()
 export class AppAuthenticationService {
-  constructor(private _hostSettingService: HostSettingsServiceProxy) {}
+  constructor(private readonly _hostSettingService: HostSettingsServiceProxy) {}
 
   init(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      const self = this;
 
-      self._hostSettingService.getAllSettings().subscribe(setting => {
+
+      this._hostSettingService.getAllSettings().subscribe(setting => {
         AppConsts.appActiveDirectoryEnabled = setting.azureActiveDirectory.isModuleEnabled && setting.azureActiveDirectory.isEnabled;
         AppConsts.appLdapEnabled = setting.ldap.isModuleEnabled && setting.ldap.isEnabled;
         AppConsts.googleAnalytics = setting.google.analytics;

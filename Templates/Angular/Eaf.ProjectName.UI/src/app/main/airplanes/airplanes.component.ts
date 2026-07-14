@@ -31,8 +31,8 @@ export class AirplanesComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _airplanesServiceProxy: AirplanesServiceProxy,
-    private _fileDownloadService: FileDownloadService,
+    private readonly _airplanesServiceProxy: AirplanesServiceProxy,
+    private readonly _fileDownloadService: FileDownloadService,
   ) {
     super(injector);
   }
@@ -41,8 +41,7 @@ export class AirplanesComponent extends AppComponentBase implements OnInit {
     this.registerEvents();
     const customSettings = (eaf as any).custom;
     this.entityHistoryEnabled =
-      customSettings.EntityHistory &&
-      customSettings.EntityHistory.isEnabled &&
+      customSettings.EntityHistory?.isEnabled &&
       _.filter(customSettings.EntityHistory.enabledEntities, entityType => entityType === this._entityTypeFullName).length === 1;
   }
 

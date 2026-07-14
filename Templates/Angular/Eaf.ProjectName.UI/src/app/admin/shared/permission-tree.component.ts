@@ -26,8 +26,8 @@ export class PermissionTreeComponent extends AppComponentBase {
   filter = '';
 
   constructor(
-    private _arrayToTreeConverterService: ArrayToTreeConverterService,
-    private _treeDataHelperService: TreeDataHelperService,
+    private readonly _arrayToTreeConverterService: ArrayToTreeConverterService,
+    private readonly _treeDataHelperService: TreeDataHelperService,
     injector: Injector,
   ) {
     super(injector);
@@ -65,14 +65,14 @@ export class PermissionTreeComponent extends AppComponentBase {
   }
 
   getGrantedPermissionNames(): string[] {
-    if (!this.selectedPermissions || !this.selectedPermissions.length) {
+    if (!this.selectedPermissions?.length) {
       return [];
     }
 
     const permissionNames = [];
 
-    for (let i = 0; i < this.selectedPermissions.length; i++) {
-      permissionNames.push(this.selectedPermissions[i].data.name);
+    for (const selectedPermission of this.selectedPermissions) {
+      permissionNames.push(selectedPermission.data.name);
     }
 
     return permissionNames;
@@ -103,7 +103,7 @@ export class PermissionTreeComponent extends AppComponentBase {
 
     const childrenNodes = this._treeDataHelperService.findChildren(this.treeData, { data: { name: event.node.data.name } });
     childrenNodes.push(event.node.data.name);
-    _.remove(this.selectedPermissions, x => childrenNodes.indexOf(x.data.name) !== -1);
+    _.remove(this.selectedPermissions, x => childrenNodes.includes(x.data.name));
   }
 
   filterPermissions(event): void {
@@ -112,7 +112,7 @@ export class PermissionTreeComponent extends AppComponentBase {
 
   filterPermission(nodes, filterText): any {
     _.forEach(nodes, node => {
-      if (node.data.displayName.toLowerCase().indexOf(filterText.toLowerCase()) >= 0) {
+      if (node.data.displayName.toLowerCase().includes(filterText.toLowerCase())) {
         node.styleClass = this.showParentNodes(node);
       } else {
         node.styleClass = 'hidden-tree-node';

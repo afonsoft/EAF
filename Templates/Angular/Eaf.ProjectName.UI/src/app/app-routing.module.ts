@@ -43,7 +43,7 @@ import { NotificationsComponent } from './shared/layout/notifications/notificati
   exports: [RouterModule],
 })
 export class AppRoutingModule {
-  constructor(private router: Router) {
+  constructor(private readonly router: Router) {
     router.events.subscribe(event => {
       if (event instanceof RouteConfigLoadStart) {
         eaf.ui.setBusy();
@@ -54,7 +54,7 @@ export class AppRoutingModule {
       }
 
       if (event instanceof NavigationEnd) {
-        document.querySelector('meta[property=og\\:url').setAttribute('content', window.location.href);
+        document.querySelector(String.raw`meta[property=og\:url]`).setAttribute('content', window.location.href);
       }
     });
   }

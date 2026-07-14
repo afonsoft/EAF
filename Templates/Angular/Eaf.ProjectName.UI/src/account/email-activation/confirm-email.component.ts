@@ -14,9 +14,9 @@ export class ConfirmEmailComponent extends AppComponentBase implements OnInit {
 
   constructor(
     injector: Injector,
-    private _accountService: AccountServiceProxy,
-    private _router: Router,
-    private _activatedRoute: ActivatedRoute,
+    private readonly _accountService: AccountServiceProxy,
+    private readonly _router: Router,
+    private readonly _activatedRoute: ActivatedRoute,
   ) {
     super(injector);
   }
@@ -40,6 +40,6 @@ export class ConfirmEmailComponent extends AppComponentBase implements OnInit {
   }
 
   parseTenantId(tenantIdAsStr?: string): number {
-    return !tenantIdAsStr ? undefined : parseInt(tenantIdAsStr, 10);
+    return !tenantIdAsStr ? undefined : Number.parseInt(tenantIdAsStr, 10);
   }
 }

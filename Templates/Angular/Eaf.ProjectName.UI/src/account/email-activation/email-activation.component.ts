@@ -16,8 +16,8 @@ export class EmailActivationComponent extends AppComponentBase {
 
   constructor(
     injector: Injector,
-    private _accountService: AccountServiceProxy,
-    private _router: Router,
+    private readonly _accountService: AccountServiceProxy,
+    private readonly _router: Router,
   ) {
     super(injector);
   }

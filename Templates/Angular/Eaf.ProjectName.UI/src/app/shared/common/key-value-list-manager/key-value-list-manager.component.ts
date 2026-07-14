@@ -1,6 +1,6 @@
 ﻿import { Component, Injector, Input } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import * as _ from 'lodash';
+
 
 @Component({
   standalone: false,
@@ -35,7 +35,7 @@ export class KeyValueListManagerComponent extends AppComponentBase {
   }
 
   onKeyChange() {
-    const itemIndex = _.findIndex(this.items, item => item.key === this.addOrEditKey);
+    const itemIndex = this.items.findIndex(item => item.key === this.addOrEditKey);
     this.isEdit = itemIndex !== -1;
     if (this.isEdit) {
       this.addOrEditValue = this.items[itemIndex].value;
@@ -50,7 +50,10 @@ export class KeyValueListManagerComponent extends AppComponentBase {
   }
 
   removeItem(keyValueItem: { key: string; value: string }) {
-    _.remove(this.items, item => item.key === keyValueItem.key);
+    const indexToRemove = this.items.findIndex(item => item.key === keyValueItem.key);
+    if (indexToRemove !== -1) {
+      this.items.splice(indexToRemove, 1);
+    }
     this.onKeyChange();
   }
 
@@ -64,7 +67,7 @@ export class KeyValueListManagerComponent extends AppComponentBase {
       value: this.addOrEditValue,
     };
 
-    const indexOfItemInArray = _.findIndex(this.items, item => item.key === newItem.key);
+    const indexOfItemInArray = this.items.findIndex(item => item.key === newItem.key);
     if (indexOfItemInArray !== -1) {
       //edit
       this.items.splice(indexOfItemInArray, 1, newItem);
