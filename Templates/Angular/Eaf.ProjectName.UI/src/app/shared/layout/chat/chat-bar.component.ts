@@ -40,7 +40,7 @@ import {
   ChatMessageDto,
 } from '@shared/service-proxies/service-proxies';
 import { LocalStorageService } from '@shared/utils/local-storage.service';
-import { filter as _filter, map as _map, forEach as _forEach, min as _min, reduce as _reduce } from 'lodash';
+
 import { ChatFriendDto } from './ChatFriendDto';
 import { ChatSignalrService } from './chat-signalr.service';
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
@@ -326,8 +326,8 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       return;
     }
 
-    const unreadMessages = _filter(user.messages, m => m.readState === ChatMessageReadState.Unread);
-    const unreadMessageIds = _map(unreadMessages, 'id');
+    const unreadMessages = (user.messages || []).filter(m => m.readState === ChatMessageReadState.Unread);
+    const unreadMessageIds = unreadMessages.map(m => m.id);
 
     if (!unreadMessageIds.length) {
       return;
@@ -339,7 +339,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     input.groupId = user.groupId;
 
     this._chatService.markAllUnreadMessagesOfUserAsRead(input).subscribe(() => {
-      _forEach(user.messages, message => {
+      user.messages?.forEach(message => {
         if (unreadMessageIds.includes(message.id)) {
           message.readState = ChatMessageReadState.Read;
         }
@@ -358,7 +358,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
 
     let minMessageId;
     if (user.messages?.length) {
-      minMessageId = _min(_map(user.messages, m => m.id));
+      minMessageId = Math.min(...user.messages.map(m => m.id));
     }
 
     this._chatService
@@ -420,7 +420,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   getFriendOrNull(userId: number, tenantId?: number): ChatFriendDto {
-    const friends = _filter(this.friends, friend => friend.friendUserId === userId && friend.friendTenantId === tenantId);
+    const friends = this.friends?.filter(friend => friend.friendUserId === userId && friend.friendTenantId === tenantId) || [];
     if (friends.length) {
       return friends[0];
     }
@@ -428,17 +428,17 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   getFilteredFriends(state: FriendshipState, userNameFilter: string): FriendshipDto[] {
-    const foundFriends = _filter(
-      this.friends,
-      friend =>
-        friend.state === state && this.getShownUserName(friend).toLocaleLowerCase().includes(userNameFilter.toLocaleLowerCase()),
-    );
+    const foundFriends =
+      this.friends?.filter(
+        friend =>
+          friend.state === state && this.getShownUserName(friend).toLocaleLowerCase().includes(userNameFilter.toLocaleLowerCase()),
+      ) || [];
 
     return foundFriends;
   }
 
   getFilteredFriendsCount(state: FriendshipState): number {
-    return _filter(this.friends, friend => friend.state === state).length;
+    return (this.friends || []).filter(friend => friend.state === state).length;
   }
 
   getUserNameByChatSide(chatSide: ChatSide): string {
@@ -583,7 +583,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     let totalUnreadMessageCount = 0;
 
     if (this.friends) {
-      totalUnreadMessageCount = _reduce(this.friends, (memo, friend) => memo + friend.unreadMessageCount, 0);
+      totalUnreadMessageCount = this.friends.reduce((memo, friend) => memo + friend.unreadMessageCount, 0);
     }
 
     eaf.event.trigger('app.chat.unreadMessageCountChanged', totalUnreadMessageCount);
@@ -646,7 +646,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       if (!isOwnRequest) {
         eaf.notify.info(this.l('UserSendYouAFriendshipRequest', data.friendUserName));
       }
-      if (!_filter(this.friends, f => f.friendUserId === data.friendUserId && f.friendTenantId === data.friendTenantId).length) {
+      if (!(this.friends || []).filter(f => f.friendUserId === data.friendUserId && f.friendTenantId === data.friendTenantId).length) {
         this.friends.push(data);
       }
     }
@@ -709,7 +709,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
         return;
       }
 
-      _forEach(user.messages, message => {
+      user.messages?.forEach(message => {
         message.receiverReadState = ChatMessageReadState.Read;
       });
     }

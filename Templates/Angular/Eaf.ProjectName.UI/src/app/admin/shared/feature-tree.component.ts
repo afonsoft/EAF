@@ -4,7 +4,7 @@ import { AppComponentBase } from '@shared/common/app-component-base';
 import { FlatFeatureDto, NameValueDto } from '@shared/service-proxies/service-proxies';
 import { ArrayToTreeConverterService } from '@shared/utils/array-to-tree-converter.service';
 import { TreeDataHelperService } from '@shared/utils/tree-data-helper.service';
-import * as _ from 'lodash';
+
 import { TreeNode } from 'primeng/api';
 
 @Component({
@@ -60,8 +60,8 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   setSelectedNodes(val: FeatureTreeEditModel) {
-    _.forEach(val.features, feature => {
-      const items = _.filter(val.featureValues, { name: feature.name });
+    val.features?.forEach(feature => {
+      const items = val.featureValues?.filter(f => f.name === feature.name) || [];
       if (items?.length === 1) {
         const item = items[0];
         this.setSelectedNode(item.name, item.value);
@@ -111,7 +111,7 @@ export class FeatureTreeComponent extends AppComponentBase {
   findFeatureByName(featureName: string): FlatFeatureDto {
 
 
-    const feature = _.find(this._editData.features, f => f.name === featureName);
+    const feature = this._editData.features?.find(f => f.name === featureName);
 
     if (!feature) {
       eaf.log.warn('Could not find a feature by name: ' + featureName);
@@ -127,7 +127,7 @@ export class FeatureTreeComponent extends AppComponentBase {
       return '';
     }
 
-    const featureValue = _.find(this._editData.featureValues, f => f.name === featureName);
+    const featureValue = this._editData.featureValues?.find(f => f.name === featureName);
     if (!featureValue) {
       return feature.defaultValue;
     }
@@ -187,18 +187,18 @@ export class FeatureTreeComponent extends AppComponentBase {
   areAllValuesValid(): boolean {
     let result = true;
 
-    _.forEach(this._editData.features, feature => {
+    for (const feature of this._editData.features || []) {
       const value = this.getFeatureValueByName(feature.name);
       if (!this.isFeatureValueValid(feature.name, value)) {
         result = false;
       }
-    });
+    }
 
     return result;
   }
 
   setFeatureValueByName(featureName: string, value: string): void {
-    const featureValue = _.find(this._editData.featureValues, f => f.name === featureName);
+    const featureValue = this._editData.featureValues?.find(f => f.name === featureName);
     if (!featureValue) {
       return;
     }
@@ -208,9 +208,7 @@ export class FeatureTreeComponent extends AppComponentBase {
 
   isFeatureSelected(name: string): boolean {
     // let nodes = _.filter(this.selectedFeatures, { data: { name: name } });
-    const nodes = _.filter(this.selectedFeatures, function (o) {
-      return o.data.name == name;
-    });
+    const nodes = this.selectedFeatures?.filter(o => o.data.name == name) || [];
     return nodes?.length === 1;
   }
 

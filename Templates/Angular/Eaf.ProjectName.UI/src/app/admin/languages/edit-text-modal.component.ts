@@ -1,7 +1,7 @@
 ﻿import { Component, ElementRef, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { LanguageServiceProxy, UpdateLanguageTextInput } from '@shared/service-proxies/service-proxies';
-import * as _ from 'lodash';
+
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
@@ -39,8 +39,8 @@ export class EditTextModalComponent extends AppComponentBase {
     this.model.value = targetText;
 
     this.baseText = baseText;
-    this.baseLanguage = _.find(eaf.localization.languages, l => l.name === baseLanguageName);
-    this.targetLanguage = _.find(eaf.localization.languages, l => l.name === targetLanguageName);
+    this.baseLanguage = eaf.localization.languages?.find(l => l.name === baseLanguageName);
+    this.targetLanguage = eaf.localization.languages?.find(l => l.name === targetLanguageName);
 
     this.active = true;
 
@@ -69,6 +69,6 @@ export class EditTextModalComponent extends AppComponentBase {
   }
 
   private findLanguage(name: string): eaf.localization.ILanguageInfo {
-    return _.find(eaf.localization.languages, l => l.name === name);
+    return eaf.localization.languages?.find(l => l.name === name);
   }
 }

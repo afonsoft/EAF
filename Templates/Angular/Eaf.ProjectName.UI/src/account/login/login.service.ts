@@ -18,7 +18,7 @@ import {
 } from '@shared/service-proxies/service-proxies';
 import { ScriptLoaderService } from '@shared/utils/script-loader.service';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
-import * as _ from 'lodash';
+
 import { finalize } from 'rxjs/operators';
 
 declare const gapi: any;
@@ -190,7 +190,7 @@ export class LoginService {
   private initExternalLoginProviders(callback?: () => void) {
     callback = callback || (() => {});
     this._tokenAuthService.getExternalAuthenticationProviders().subscribe((providers: ExternalLoginProviderInfoModel[]) => {
-      this.externalLoginProviders = _.map(providers, p => new ExternalLoginProvider(p));
+      this.externalLoginProviders = providers.map(p => new ExternalLoginProvider(p));
       if (callback) {
         callback();
       }
@@ -291,9 +291,7 @@ export class LoginService {
 
   public openIdConnectLoginCallback(callback?: () => void) {
     this.initExternalLoginProviders(() => {
-      const openIdProvider = _.filter(this.externalLoginProviders, {
-        name: 'OpenIdConnect',
-      })[0];
+      const openIdProvider = this.externalLoginProviders.find(p => p.name === 'OpenIdConnect');
       const authConfig = this.getOpenIdConnectConfig(openIdProvider);
 
       this.oauthService.configure(authConfig);
@@ -433,9 +431,7 @@ export class LoginService {
 
   SSO_Microsoft_Callback() {
     this.initExternalLoginProviders(() => {
-      const microsoftProvider = _.filter(this.externalLoginProviders, {
-        name: 'Microsoft',
-      })[0];
+      const microsoftProvider = this.externalLoginProviders.find(p => p.name === 'Microsoft');
 
       this.ensureExternalLoginProviderInitialized(microsoftProvider, () => {
         this.MSAL.handleRedirectPromise()
@@ -454,9 +450,7 @@ export class LoginService {
 
   SSO_AuthZero_Callback() {
     this.initExternalLoginProviders(() => {
-      const auth0Provider = _.filter(this.externalLoginProviders, {
-        name: 'AuthZero',
-      })[0];
+      const auth0Provider = this.externalLoginProviders.find(p => p.name === 'AuthZero');
 
       this.ensureExternalLoginProviderInitialized(auth0Provider, () => {
         this.auth0

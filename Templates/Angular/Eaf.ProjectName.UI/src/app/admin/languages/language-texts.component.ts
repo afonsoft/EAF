@@ -9,7 +9,7 @@ import { Table } from 'primeng/table';
 import { EditTextModalComponent } from './edit-text-modal.component';
 import { finalize } from 'rxjs/operators';
 
-import * as _ from 'lodash';
+
 
 @Component({
   standalone: false,
@@ -47,10 +47,10 @@ export class LanguageTextsComponent extends AppComponentBase implements AfterVie
   }
 
   ngOnInit(): void {
-    this.sourceNames = _.map(
-      _.filter(eaf.localization.sources, source => source.type === 'MultiTenantLocalizationSource'),
-      value => value.name,
-    );
+    this.sourceNames =
+      eaf.localization.sources
+        ?.filter(source => source.type === 'MultiTenantLocalizationSource')
+        .map(value => value.name) || [];
     this.languages = eaf.localization.languages;
   }
 
