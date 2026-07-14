@@ -77,7 +77,7 @@ export class AccountComponent extends AppComponentBase implements OnInit {
     this._storageService.setCookieValue(
       'Abp.Localization.CultureName',
       language.name,
-      new Date(new Date().getTime() + 5 * 365 * 86400000), // 5 year
+      new Date(Date.now() + 5 * 365 * 86400000), // 5 year
       eaf.appPath,
     );
 

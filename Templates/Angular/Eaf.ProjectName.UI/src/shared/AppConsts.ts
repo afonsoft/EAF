@@ -1,17 +1,17 @@
 ﻿export class AppConsts {
   static readonly tenancyNamePlaceHolderInUrl = '{TENANCY_NAME}';
-  static remoteServiceBaseUrl: string;
-  static remoteServiceBaseUrlFormat: string;
-  static appBaseUrl: string;
-  static appBaseHref: string;
-  static appBaseUrlFormat: string;
-  static recaptchaSiteKey: string;
-  static appActiveDirectoryEnabled = false;
-  static appLdapEnabled = false;
-  static googleAnalytics: string;
-  static googleTagManager: string;
+  static remoteServiceBaseUrl: string; // NOSONAR
+  static remoteServiceBaseUrlFormat: string; // NOSONAR
+  static appBaseUrl: string; // NOSONAR
+  static appBaseHref: string; // NOSONAR
+  static appBaseUrlFormat: string; // NOSONAR
+  static recaptchaSiteKey: string; // NOSONAR
+  static appActiveDirectoryEnabled = false; // NOSONAR
+  static appLdapEnabled = false; // NOSONAR
+  static googleAnalytics: string; // NOSONAR
+  static googleTagManager: string; // NOSONAR
 
-  static localeMappings: any = [];
+  static localeMappings: any = []; // NOSONAR
 
   static readonly userManagement = {
     defaultAdminUserName: 'admin',

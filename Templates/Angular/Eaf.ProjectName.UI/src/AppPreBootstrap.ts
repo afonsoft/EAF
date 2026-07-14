@@ -110,7 +110,7 @@ export class AppPreBootstrap {
       this.storageService.setCookieValue(
         'Abp.Localization.CultureName',
         cookieLangValue,
-        new Date(new Date().getTime() + 5 * 365 * 86400000), // 5 year
+        new Date(Date.now() + 5 * 365 * 86400000), // 5 year
         eaf.appPath,
       );
     }
@@ -159,7 +159,7 @@ export class AppPreBootstrap {
     this.storageService.setCookieValue(
       AppConsts.authorization.encrptedAuthTokenName,
       encryptedToken,
-      new Date(new Date().getTime() + 365 * 86400000), //1 year
+      new Date(Date.now() + 365 * 86400000), //1 year
       eaf.appPath,
     );
   }

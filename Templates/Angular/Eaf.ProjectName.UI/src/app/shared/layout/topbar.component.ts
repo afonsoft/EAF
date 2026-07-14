@@ -93,7 +93,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
     this._storageService.setCookieValue(
       'Abp.Localization.CultureName',
       languageName,
-      new Date(new Date().getTime() + 5 * 365 * 86400000), //5 year
+      new Date(Date.now() + 5 * 365 * 86400000), //5 year
       eaf.appPath,
     );
     this._profileServiceProxy.changeLanguage(input).subscribe(() => {
