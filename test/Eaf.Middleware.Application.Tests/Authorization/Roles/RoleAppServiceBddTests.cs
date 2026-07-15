@@ -83,7 +83,11 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Roles
 
             var objectMapper = Substitute.For<Abp.ObjectMapping.IObjectMapper>();
             objectMapper.Map<List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>>(Arg.Any<object>())
-                .Returns(new List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>());
+                .Returns(new List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>
+                {
+                    new Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto { Name = "Pages.A", DisplayName = "A" },
+                    new Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto { Name = "Pages.B", DisplayName = "B" }
+                });
             _sut.ObjectMapper = objectMapper;
 
             // Quando
@@ -123,7 +127,11 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Roles
             objectMapper.Map<RoleEditDto>(role)
                 .Returns(new RoleEditDto { Id = 1, DisplayName = "Admin" });
             objectMapper.Map<List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>>(Arg.Any<object>())
-                .Returns(new List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>());
+                .Returns(new List<Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto>
+                {
+                    new Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto { Name = "Pages.A", DisplayName = "A" },
+                    new Eaf.Middleware.Authorization.Permissions.Dto.FlatPermissionDto { Name = "Pages.B", DisplayName = "B" }
+                });
             _sut.ObjectMapper = objectMapper;
 
             // Quando

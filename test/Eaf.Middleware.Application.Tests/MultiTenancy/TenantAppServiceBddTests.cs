@@ -403,7 +403,11 @@ namespace Eaf.Middleware.Application.Tests.MultiTenancy
 
             var objectMapper = Substitute.For<IObjectMapper>();
             objectMapper.Map<List<FlatFeatureDto>>(Arg.Any<object>())
-                .Returns(new List<FlatFeatureDto> { new FlatFeatureDto { DisplayName = "Test Feature" } });
+                .Returns(new List<FlatFeatureDto>
+                {
+                    new FlatFeatureDto { DisplayName = "Z Feature" },
+                    new FlatFeatureDto { DisplayName = "A Feature" }
+                });
 
             _sut.TenantManager = tenantManager;
             _sut.FeatureManager = featureManager;
