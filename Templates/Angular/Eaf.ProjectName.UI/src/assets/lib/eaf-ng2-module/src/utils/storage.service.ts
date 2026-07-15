@@ -9,7 +9,7 @@ export class StorageService {
 
   public setValue(key: string, value: any): void {
     localStorage.setItem(key, JSON.stringify(value));
-    this.cookieService.set(key, JSON.stringify(value), new Date(new Date().getTime() + 86400000), '/', '', true, 'Lax');
+    this.cookieService.set(key, JSON.stringify(value), new Date(Date.now() + 86400000), '/', '', true, 'Lax');
   }
 
   public getValue(key: string): any {

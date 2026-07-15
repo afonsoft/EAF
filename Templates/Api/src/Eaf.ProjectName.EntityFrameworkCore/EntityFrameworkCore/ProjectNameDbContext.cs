@@ -7,6 +7,7 @@ using Eaf.Middleware.Friendships;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.Storage;
 using Eaf.ProjectName.Airplanes;
+using Abp.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -19,6 +20,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
     public class ProjectNameDbContext : AbpZeroDbContext<Tenant, Role, User, ProjectNameDbContext>
     {
         private static bool _created = false;
+        private static readonly object _migrateLock = new object();
         public static bool SkipMigrate { get; set; } = false;
 
         public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options) : base(options)
@@ -26,23 +28,29 @@ namespace Eaf.ProjectName.EntityFrameworkCore
             MigrateDatabase(Database);
         }
 
-        private void MigrateDatabase(DatabaseFacade database)
+        private static void MigrateDatabase(DatabaseFacade database)
         {
             if (!_created)
             {
-                try
+                lock (_migrateLock)
                 {
-                    _created = true;
-                    if (!SkipMigrate)
+                    if (!_created)
                     {
-                        Logger.Trace("Database Migrate started...");
-                        database.Migrate();
+                        try
+                        {
+                            _created = true;
+                            if (!SkipMigrate)
+                            {
+                                LogHelper.Logger.Trace("Database Migrate started...");
+                                database.Migrate();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _created = false;
+                            LogHelper.Logger.Warn("Database Migrate started Error ...", ex);
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _created = false;
-                    Logger.Warn("Database Migrate started Error ...", ex);
                 }
             }
         }

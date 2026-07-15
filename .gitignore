@@ -355,6 +355,7 @@ MigrationBackup/
 !SQLite.Interop.dll
 /.sonarqube
 /resultTest/*.trx
+.sonar_devin_auto_fix/**
 /nupkg/test
 /Templates/Angular/Eaf.ProjectName.UI/.vscode/chrome
 
