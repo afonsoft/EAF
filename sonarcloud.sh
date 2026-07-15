@@ -31,6 +31,7 @@ dotnet-sonarscanner begin \
     /d:sonar.scm.provider="git" \
     /d:sonar.coverage.exclusions="**Test*.cs" \
     /d:sonar.exclusions="Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/metronic/assets/vendors/base/scripts.bundle.js,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/mdbootstrap/mdb.min.js,**/*.Designer.cs,**/service-proxies.ts,dotnet-install.sh,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/primeng/**,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/ngx-bootstrap/**,**/node_modules/**,**/dist/**,**/bin/**,**/obj/**,**/*.min.js,**/*.bundle.js" \
+    /d:sonar.cpd.exclusions="Templates/**" \
     /d:sonar.cs.vstest.reportsPaths="resultTest/*.trx" \
     /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml"
 
