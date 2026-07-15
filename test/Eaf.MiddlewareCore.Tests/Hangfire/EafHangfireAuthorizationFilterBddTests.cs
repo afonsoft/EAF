@@ -15,6 +15,7 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Security.Claims;
 using Xunit;
 
@@ -348,6 +349,43 @@ namespace Eaf.Middleware.Tests.Hangfire
             var result = sut.Authorize(CriarDashboardContext(httpContext));
 
             result.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_UserIdentifierNulo_Quando_IsPermissionGranted_Entao_DeveRetornarFalso()
+        {
+            var httpContext = CriarHttpContext();
+            var dashboardContext = CriarDashboardContext(httpContext);
+            var method = typeof(EafHangfireAuthorizationFilter).GetMethod(
+                "IsPermissionGranted",
+                BindingFlags.NonPublic | BindingFlags.Static,
+                null,
+                new[] { typeof(DashboardContext), typeof(UserIdentifier), typeof(string[]) },
+                null);
+            method.ShouldNotBeNull();
+
+            var result = (bool)method.Invoke(null, new object[] { dashboardContext, null, Array.Empty<string>() });
+
+            result.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Dado_PermissoesVaziasEUsuarioValido_Quando_IsPermissionGranted_Entao_DeveUsarPermissoesPadrao()
+        {
+            var httpContext = CriarHttpContext();
+            var dashboardContext = CriarDashboardContext(httpContext);
+            var method = typeof(EafHangfireAuthorizationFilter).GetMethod(
+                "IsPermissionGranted",
+                BindingFlags.NonPublic | BindingFlags.Static,
+                null,
+                new[] { typeof(DashboardContext), typeof(UserIdentifier), typeof(string[]) },
+                null);
+            method.ShouldNotBeNull();
+
+            var userIdentifier = new UserIdentifier(1, 2);
+            var result = (bool)method.Invoke(null, new object[] { dashboardContext, userIdentifier, Array.Empty<string>() });
+
+            result.ShouldBeTrue();
         }
 
         private static string CriarTokenJwtComSubSemTenant(long userId)
