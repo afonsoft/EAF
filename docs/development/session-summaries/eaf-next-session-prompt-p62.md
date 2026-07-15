@@ -12,7 +12,7 @@ O P61 foi concluído. As métricas atuais são:
 | Tests | 4597 total, 4596 passando, 1 ignorado |
 | Build warnings | 162 |
 
-Branch ativa: `feature/devin-20260716-priority62-coverage-audit` (a criar a partir de `origin/main` no commit do P61).
+Branch ativa: `feature/devin-20260715-priority62-coverage-audit` (a criar a partir de `origin/main` no commit do P61).
 
 ## Objetivo
 
