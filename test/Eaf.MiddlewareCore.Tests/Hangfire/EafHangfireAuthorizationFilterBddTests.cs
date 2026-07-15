@@ -244,6 +244,33 @@ namespace Eaf.Middleware.Tests.Hangfire
         }
 
         [Fact]
+        public void Dado_PermissoesNulasComUsuarioNaSessao_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var sut = new EafHangfireAuthorizationFilter((string[])null);
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext, withUser: true));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_TokenJwtComSubSemTenant_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtComSubSemTenant(2);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "token", token }
+            });
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(CriarDashboardContext(httpContext));
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
         public void Dado_ContextoNulo_Quando_Authorize_Entao_DeveRetornarFalso()
         {
             var sut = new EafHangfireAuthorizationFilter();
@@ -302,6 +329,17 @@ namespace Eaf.Middleware.Tests.Hangfire
             var result = sut.Authorize(CriarDashboardContext(httpContext));
 
             result.ShouldBeFalse();
+        }
+
+        private static string CriarTokenJwtComSubSemTenant(long userId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = new JwtSecurityToken(
+                claims: new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString())
+                });
+            return tokenHandler.WriteToken(token);
         }
 
         private static string CriarTokenJwtComTenantSemSub(int tenantId)

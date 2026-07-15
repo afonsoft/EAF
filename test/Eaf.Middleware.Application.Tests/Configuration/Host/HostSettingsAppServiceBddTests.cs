@@ -79,6 +79,54 @@ namespace Eaf.Middleware.Application.Tests.Configuration.Host
             return sut;
         }
 
+        private static HostSettingsAppService CreateSutWithFailingExternalLoginSettings(out ISettingManager settingManager)
+        {
+            settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueForApplicationAsync(Arg.Any<string>()).Returns(ci =>
+            {
+                var name = ci.Arg<string>();
+                if (name.Contains("ExternalLoginProvider"))
+                    throw new Exception("fail");
+                return GetSettingValue(name);
+            });
+            settingManager.GetSettingValueForApplicationAsync(Arg.Any<string>(), Arg.Any<bool>()).Returns(ci =>
+            {
+                var name = ci.Arg<string>();
+                if (name.Contains("ExternalLoginProvider"))
+                    throw new Exception("fail");
+                return GetSettingValue(name);
+            });
+            settingManager.GetSettingValueAsync(Arg.Any<string>()).Returns(ci => GetSettingValue(ci.Arg<string>()));
+
+            var settingDefinitionManager = Substitute.For<ISettingDefinitionManager>();
+            settingDefinitionManager.GetSettingDefinition(Arg.Any<string>()).Returns(ci => new SettingDefinition(ci.Arg<string>(), GetSettingValue(ci.Arg<string>())));
+
+            var timeZoneService = Substitute.For<ITimeZoneService>();
+            timeZoneService.GetDefaultTimezoneAsync(SettingScopes.Application, Arg.Any<int?>()).Returns("UTC");
+
+            var azureConfig = Substitute.For<IEafMiddlewareAzureActiveDirectoryModuleConfig>();
+            var ldapConfig = Substitute.For<IEafMiddlewareLdapModuleConfig>();
+            var emailSender = Substitute.For<IEmailSender>();
+
+            var abpSession = Substitute.For<IAbpSession>();
+            abpSession.TenantId.Returns(1);
+
+            var sut = new HostSettingsAppService(
+                emailSender,
+                timeZoneService,
+                settingDefinitionManager,
+                azureConfig,
+                ldapConfig
+            )
+            {
+                AbpSession = abpSession,
+                SettingManager = settingManager,
+                Logger = Substitute.For<ILogger>()
+            };
+
+            return sut;
+        }
+
         private static string GetSettingValue(string name)
         {
             if (name.Contains("ExternalLoginProvider.Host"))
@@ -466,6 +514,21 @@ namespace Eaf.Middleware.Application.Tests.Configuration.Host
             result.ExternalLoginProviderSettings.AuthZero.ClientId.ShouldBe("cid");
             result.ExternalLoginProviderSettings.OpenIdConnectClaimsMapping.ShouldNotBeNull();
             result.ExternalLoginProviderSettings.OpenIdConnectClaimsMapping.Count.ShouldBe(1);
+        }
+
+        [Fact]
+        public async Task Dado_ErroNaLeituraDeExternalLoginProvider_Quando_GetAllSettings_Entao_DeveRetornarConfiguracaoPadrao()
+        {
+            var sut = CreateSutWithFailingExternalLoginSettings(out _);
+
+            var result = await sut.GetAllSettings();
+
+            result.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.ShouldNotBeNull();
+            result.ExternalLoginProviderSettings.Google_IsEnabled.ShouldBeFalse();
+            result.ExternalLoginProviderSettings.Microsoft_IsEnabled.ShouldBeFalse();
+            result.ExternalLoginProviderSettings.OpenIdConnect_IsEnabled.ShouldBeFalse();
+            result.ExternalLoginProviderSettings.AuthZero_IsEnabled.ShouldBeFalse();
         }
 
         [Fact]

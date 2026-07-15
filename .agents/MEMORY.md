@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260714-priority59-coverage-audit`
+Last session branch: `feature/devin-20260714-priority60-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -20,6 +20,16 @@ Current coverage (after P56): Line 97.6%, Branch 87.2%, Method 99.6% (4516 tests
 Current coverage (after P57): Line 97.7%, Branch 87.5%, Method 99.6% (4533 tests, 4532 passing, 1 skipped). Build warnings: 154.
 Current coverage (after P58): Line 97.7%, Branch 89.1%, Method 99.7% (4555 tests, 4554 passing, 1 skipped). Build warnings: 159.
 Current coverage (after P59): Line 97.7%, Branch 90.0%, Method 99.8% (4585 tests, 4584 passing, 1 skipped). Build warnings: 161.
+Current coverage (after P60): Line 97.8%, Branch 90.2%, Method 99.8% (4593 tests, 4592 passing, 1 skipped). Build warnings: 161.
+
+## P60 gotchas
+- `System.Linq.Enumerable.OrderBy` on a single-element list does not invoke the key selector, so `ObjectMapper.Map<List<T>>` stubs returning one item do not cover `OrderBy` lambda sequence points; return at least two elements.
+- `Permission.Children` uses `ImmutableList` and its getter throws `ArgumentNullException` when the backing field is null, making the `permission.Children == null` early-return branch in `PermissionAppService.AddPermission` effectively unreachable on this ABP version.
+- `EafHangfireAuthorizationFilter.Authorize` returns true when `permissions` is null or when a JWT `sub` claim exists without `tenantId`.
+- `HostSettingsAppService.GetAllSettings` catches `Exception` while reading `ExternalLoginProviderSettings` and returns a default instance when the underlying setting value is invalid/missing.
+- `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` branches on `ConsoleExporter`, `OtlpEndpoint` and `MeterName`; use a real `IServiceCollection`/`ILoggingBuilder` and assert the returned `IOpenTelemetryBuilder`/logger factory.
+- `ChatMessageManager.SendMessageAsync` has branches for existing friendships, updated friend-cache info and missing reverse friendship; use non-null `FriendshipState.Accepted` for both directions and cache entries that already match sender info.
+- `RoleAppService.GetRolesForEdit`, `TenantAppService.GetTenantFeaturesForEdit` and `UserAppService.GetUserPermissionsForEdit` all sort returned `FlatPermissionDto`/`FlatFeatureDto` lists by `DisplayName`; two items are required to exercise the `OrderBy` key selector.
 
 ## P59 gotchas
 - `IRepository<UserToken, long>` configured with `NSubstitute` `Returns` expects `Task<UserToken>`; cast `EafUserToken` to `UserToken` before wrapping with `Task.FromResult`.

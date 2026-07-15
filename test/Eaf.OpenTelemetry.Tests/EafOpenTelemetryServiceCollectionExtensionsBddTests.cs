@@ -152,12 +152,48 @@ namespace Eaf.OpenTelemetry.Tests
             {
                 options.ServiceName = "TestService";
                 options.ConsoleExporter = true;
+                options.OtlpEndpoint = null;
             });
 
             var serviceProvider = services.BuildServiceProvider();
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
 
             loggerFactory.ShouldNotBeNull();
+            loggerFactory?.CreateLogger("Test").LogInformation("test");
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_BuildarEObterLoggerFactorySemConsoleExporter_Entao_DeveCriarFactory()
+        {
+            var services = new ServiceCollection();
+            services.AddEafOpenTelemetry(options =>
+            {
+                options.ServiceName = "TestService";
+                options.ConsoleExporter = false;
+                options.OtlpEndpoint = null;
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+
+            loggerFactory.ShouldNotBeNull();
+            loggerFactory?.CreateLogger("Test").LogInformation("test");
+        }
+
+        [Fact]
+        public void Dado_ServiceCollection_Quando_AddEafOpenTelemetryComMeterNameCustomizado_Entao_DeveConfigurarSourceEMeter()
+        {
+            var services = new ServiceCollection();
+            Action<EafOpenTelemetryOptions> optionsAction = options =>
+            {
+                options.ServiceName = "TestService";
+                options.SourceName = new[] { "CustomSource" };
+                options.MeterName = new[] { "CustomMeter" };
+            };
+
+            var result = services.AddEafOpenTelemetry(optionsAction);
+
+            result.ShouldNotBeNull();
         }
 
         [Fact]

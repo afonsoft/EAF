@@ -320,7 +320,11 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             permissionManager.GetAllPermissionsAsync().Returns(new List<Permission> { new Permission("Pages.Test", displayName: null) });
 
             var objectMapper = Substitute.For<IObjectMapper>();
-            objectMapper.Map<List<FlatPermissionDto>>(Arg.Any<object>()).Returns(new List<FlatPermissionDto> { new FlatPermissionDto { Name = "Pages.Test" } });
+            objectMapper.Map<List<FlatPermissionDto>>(Arg.Any<object>()).Returns(new List<FlatPermissionDto>
+            {
+                new FlatPermissionDto { Name = "Pages.Test", DisplayName = "Test" },
+                new FlatPermissionDto { Name = "Pages.Other", DisplayName = "Other" }
+            });
 
             _sut.UserManager = userManager;
             _sut.PermissionManager = permissionManager;
@@ -331,8 +335,9 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
 
             // Então
             result.ShouldNotBeNull();
-            result.Permissions.Count.ShouldBe(1);
-            result.Permissions[0].Name.ShouldBe("Pages.Test");
+            result.Permissions.Count.ShouldBe(2);
+            result.Permissions[0].DisplayName.ShouldBe("Other");
+            result.Permissions[1].DisplayName.ShouldBe("Test");
         }
 
         #endregion
