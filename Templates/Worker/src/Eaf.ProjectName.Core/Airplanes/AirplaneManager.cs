@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using Eaf.Domain.Repositories;
+using System.Threading.Tasks;
+using Abp.Domain.Repositories;
 using System.Linq;
-using Eaf.UI;
+using Abp.UI;
 using System;
 
 namespace Eaf.ProjectName.Airplanes

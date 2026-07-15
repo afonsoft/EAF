@@ -1,5 +1,6 @@
-﻿using Eaf.Middleware.Worker;
-using Eaf.Modules;
+using Abp.Reflection.Extensions;
+using Eaf.Middleware.Worker;
+using Abp.Modules;
 using Eaf.ProjectName.Application;
 using Eaf.ProjectName.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +15,7 @@ namespace Eaf.ProjectName.WorkerService
         typeof(MiddlewareWorkerModule)
     //typeof(ProjectNameEntityFrameworkCoreModule)
     )]
-    public class WorkerModule : EafModule
+    public class WorkerModule : AbpModule
     {
         private readonly IConfigurationRoot _appConfiguration;
 

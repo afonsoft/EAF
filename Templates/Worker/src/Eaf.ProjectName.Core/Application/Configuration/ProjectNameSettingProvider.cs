@@ -1,4 +1,4 @@
-﻿using Eaf.Configuration;
+using Abp.Configuration;
 using System.Collections.Generic;
 
 namespace Eaf.ProjectName.Configuration

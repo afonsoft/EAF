@@ -1,23 +1,21 @@
-﻿using Eaf.AutoMapper;
-using Eaf.Configuration.Startup;
-using Eaf.Dependency;
-using Eaf.MailKit;
-using Eaf.Modules;
-using Eaf.Net.Mail;
-using Eaf.Net.Sms;
+using Abp.AutoMapper;
+using Abp.Configuration.Startup;
+using Abp.Dependency;
+using Abp.MailKit;
+using Abp.Modules;
+using Abp.Net.Mail;
+using Abp.Reflection.Extensions;
 using Eaf.ProjectName.Debugging;
 using Eaf.ProjectName.Localization;
-using Eaf.TextTemplating;
 using System;
 
 namespace Eaf.ProjectName
 {
     [DependsOn(
-        typeof(EafAutoMapperModule),
-        typeof(EafMailKitModule),
-        typeof(EafTextTemplatingCoreModule)
+        typeof(AbpAutoMapperModule),
+        typeof(AbpMailKitModule)
         )]
-    public class ProjectNameCoreModule : EafModule
+    public class ProjectNameCoreModule : AbpModule
     {
         public override void PreInitialize()
         {
@@ -31,7 +29,6 @@ namespace Eaf.ProjectName
             {
                 //Disabling email/sms sending in debug mode
                 Configuration.ReplaceService<IEmailSender, NullEmailSender>(DependencyLifeStyle.Transient);
-                Configuration.ReplaceService<ISmsSender, NullSmsSender>(DependencyLifeStyle.Transient);
             }
         }
 
