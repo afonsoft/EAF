@@ -256,6 +256,27 @@ namespace Eaf.SqliteCache.Tests
         }
 
         [Fact]
+        public void Dado_ExpiracaoAbsolutaEDeslizante_Quando_Set_Entao_DeveArmazenarValor()
+        {
+            // Arrange
+            var options = new EafSqliteCacheOptions
+            {
+                MemoryOnly = true
+            };
+
+            using var cache = new EafSqliteCache(GetUniqueCacheName(), options);
+            var absoluteExpiry = DateTimeOffset.UtcNow.AddMinutes(5);
+
+            // Act
+            cache.Set("combined-key", "combined-value", TimeSpan.FromMinutes(1), absoluteExpiry);
+
+            // Assert
+            var result = cache.TryGetValue("combined-key", out var value);
+            result.ShouldBeTrue();
+            value.ShouldBe("combined-value");
+        }
+
+        [Fact]
         public void TryGetValue_WithNonExistentKey_ShouldReturnFalse()
         {
             // Arrange

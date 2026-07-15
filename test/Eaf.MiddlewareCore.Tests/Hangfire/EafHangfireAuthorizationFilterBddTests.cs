@@ -271,6 +271,25 @@ namespace Eaf.Middleware.Tests.Hangfire
         }
 
         [Fact]
+        public void Dado_TokenValidoSemPermissao_Quando_Authorize_Entao_DeveRetornarFalso()
+        {
+            var httpContext = CriarHttpContext();
+            var token = CriarTokenJwtValido(2, 1);
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                { "token", token }
+            });
+            var dashboardContext = CriarDashboardContext(httpContext);
+            var permissionChecker = dashboardContext.GetHttpContext().RequestServices.GetRequiredService<IPermissionChecker>();
+            permissionChecker.IsGranted(Arg.Any<UserIdentifier>(), Arg.Any<string>()).Returns(false);
+            var sut = new EafHangfireAuthorizationFilter();
+
+            var result = sut.Authorize(dashboardContext);
+
+            result.ShouldBeFalse();
+        }
+
+        [Fact]
         public void Dado_ContextoNulo_Quando_Authorize_Entao_DeveRetornarFalso()
         {
             var sut = new EafHangfireAuthorizationFilter();

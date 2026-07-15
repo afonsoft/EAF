@@ -342,6 +342,32 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
         }
 
         [Fact]
+        public async Task Dado_LoginSemTenant_Quando_Authenticate_Entao_DeveChamarInitializeOptionsComTenantNulo()
+        {
+            var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) });
+            var loginResult = new AbpLoginResult<Eaf.Middleware.MultiTenancy.Tenant, User>((Eaf.Middleware.MultiTenancy.Tenant?)null, user, identity);
+
+            var userManager = CriarUserManagerSubstituto(user);
+            var roleManager = IdentityTestHelper.CreateRoleManager();
+            var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
+            var controller = CriarController(userManager, roleManager, logInManager);
+            controller.AbpSession = CriarAbpSession(user);
+            controller.UnitOfWorkManager = IdentityTestHelper.CreateUnitOfWorkManager();
+            controller.SettingManager = CriarSettingManagerAsync();
+
+            var result = await controller.Authenticate(new AuthenticateModel
+            {
+                UserNameOrEmailAddress = "admin",
+                Password = "password"
+            });
+
+            result.ShouldNotBeNull();
+            result.AccessToken.ShouldNotBeNullOrWhiteSpace();
+            await userManager.Received(1).InitializeOptionsAsync((int?)null);
+        }
+
+        [Fact]
         public async Task Dado_UsuarioDeveAlterarSenha_Quando_Authenticate_Entao_DeveRetornarPasswordResetCode()
         {
             var user = IdentityTestHelper.CreateUser(securityStamp: "stamp-123");
