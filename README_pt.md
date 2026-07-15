@@ -5,11 +5,11 @@
 **[English](README.md)** | Português
 
 ![Line Coverage](https://img.shields.io/badge/Line%20Coverage-97.9%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.4%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.5%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.8%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4602-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4601-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4604-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4603-brightgreen)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-162-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
@@ -379,11 +379,11 @@ Este exemplo demonstra vários recursos do EAF:
 
 | Módulo | Testes | Cobertura de Linha | Status |
 |--------|--------|-------------------|--------|
-| **Eaf.Castle.Serilog** | 72 | 98.9% | ✅ Excelente |
-| **Eaf.SqlServerCache** | 99 | 98.1% | ✅ Excelente |
+| **Eaf.Castle.Serilog** | 73 | 100% | ✅ Excelente |
+| **Eaf.SqlServerCache** | 100 | 100% | ✅ Excelente |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
-| **Eaf.Middleware.Application** | 1506 | 99.8% | ✅ Excelente |
-| **Eaf.Middleware.Core** | 1261 | 99.8% | ✅ Excelente |
+| **Eaf.Middleware.Application** | 1507 | 99.9% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1265 | 99.9% | ✅ Excelente |
 | **Eaf.Middleware.Web.Core** | 769 | 96.9% | ✅ Excelente |
 | **Eaf.Middleware.Worker** | 191 | 100% | ✅ Excelente |
 | **Eaf.SqliteCache** | 162 | 98% | ✅ Excelente |
@@ -392,12 +392,12 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.Log4NetServiceBus** | 52 | 96.0% | ✅ Boa |
 | **Eaf.Middleware.AzureActiveDirectory** | 66 | 95.3% | ✅ Excelente |
 | **Eaf.Middleware.Ldap** | 99 | 66.3% | ⚠️ Precisa melhorar |
-| **TOTAL** | **4597** | **97.8%** | ✅ Em progresso |
+| **TOTAL** | **4604** | **97.9%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 97.8% linha, 90.2% branch, 99.8% método
-- **Testes Backend**: 4593 total, 4592 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Atual**: 97.9% linha, 90.5% branch, 99.8% método
+- **Testes Backend**: 4604 total, 4603 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
 - **Próximos passos**: P59 coverage audit — continuar melhorando cobertura de branch/método nas classes restantes, priorizando PermissionAppService, RoleAppService, MiddlewareAppServiceBase, TenantAppService, LdapAuthenticationSource, LdapSettings, ChatHub, TokenAuthController, MiddlewareWebCoreModule, EafHangfireApplicationBuilderExtensions, EafHangfireAuthorizationFilter e ServiceBusQueueAppender, e documentar ramos inacessíveis no Linux.
