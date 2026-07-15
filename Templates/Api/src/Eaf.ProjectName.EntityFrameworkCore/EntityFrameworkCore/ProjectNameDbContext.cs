@@ -9,6 +9,7 @@ using Eaf.Middleware.Storage;
 using Eaf.ProjectName.Airplanes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.SqlServer.Diagnostics.Internal;
 using System;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
             MigrateDatabase(Database);
         }
 
-        private static void MigrateDatabase(DatabaseFacade database)
+        private void MigrateDatabase(DatabaseFacade database)
         {
             if (!_created)
             {
