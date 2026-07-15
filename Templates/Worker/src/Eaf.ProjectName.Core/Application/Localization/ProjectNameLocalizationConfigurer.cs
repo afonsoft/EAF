@@ -1,6 +1,7 @@
-﻿using Eaf.Configuration.Startup;
-using Eaf.Localization.Dictionaries;
-using Eaf.Localization.Dictionaries.Xml;
+using Abp.Configuration.Startup;
+using Abp.Localization.Dictionaries;
+using Abp.Localization.Dictionaries.Xml;
+using Abp.Reflection.Extensions;
 using System;
 
 namespace Eaf.ProjectName.Localization

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Eaf.ProjectName.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -18,9 +19,8 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         {
             var builder = new DbContextOptionsBuilder<ProjectNameDbContext>();
             var configuration = GetConfigurationRoot();
-            var isOracleEnabled = Convert.ToBoolean(configuration["Database:IsOracleEnabled"]);
 
-            ProjectNameDbContextConfigurer.Configure(builder, configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName), isOracleEnabled);
+            ProjectNameDbContextConfigurer.Configure(builder, configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName));
 
             return new ProjectNameDbContext(builder.Options);
         }
@@ -33,7 +33,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 
         private static IConfigurationRoot buildConfiguration(string path)
         {
-            return Configuration.AppConfigurations.Get(path);
+            return AppConfigurations.Get(path);
         }
 
         private static string CalculateContentRootFolder()

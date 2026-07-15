@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Transactions;
-using Eaf.Dependency;
-using Eaf.Domain.Uow;
-using Eaf.EntityFrameworkCore.Uow;
-using Eaf.MultiTenancy;
+using Abp.Dependency;
+using Abp.Domain.Uow;
+using Abp.EntityFrameworkCore.Uow;
+using Abp.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
 using Eaf.ProjectName.EntityFrameworkCore;
 

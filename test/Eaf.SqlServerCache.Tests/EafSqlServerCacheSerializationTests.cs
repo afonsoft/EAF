@@ -4,6 +4,7 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -316,6 +317,26 @@ namespace Eaf.SqlServerCache.Tests
 
             // Quando & Então
             Should.NotThrow(() => _cache.Set(key, null));
+        }
+
+        [Fact]
+        public async Task Dado_ArrayDeBytesNulo_Quando_CompressBytesAsync_Entao_DeveCapturarExcecaoERetornarNulo()
+        {
+            // Dado
+            var method = typeof(EafSqlServerCache).GetMethod(
+                "CompressBytesAsync",
+                BindingFlags.NonPublic | BindingFlags.Static,
+                null,
+                new[] { typeof(byte[]), typeof(CancellationToken) },
+                null);
+            method.ShouldNotBeNull();
+
+            // Quando
+            var task = (Task<byte[]>)method.Invoke(null, new object?[] { null, default(CancellationToken) })!;
+            var result = await task;
+
+            // Então
+            result.ShouldBeNull();
         }
 
         #endregion

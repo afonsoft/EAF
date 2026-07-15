@@ -1,9 +1,9 @@
-﻿using Eaf.EntityFrameworkCore;
+using Abp.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Eaf.ProjectName.EntityFrameworkCore
 {
-    public class ProjectNameDbContext : EafDbContext
+    public class ProjectNameDbContext : AbpDbContext
     {
         /* Define an IDbSet for each entity of the application */
 

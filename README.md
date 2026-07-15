@@ -4,12 +4,12 @@
 
 English | **[Português](README_pt.md)**
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-97.8%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.3%25-brightgreen)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-97.9%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.4%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.8%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4597-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4596-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4602-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4601-brightgreen)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-162-yellow)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
@@ -379,11 +379,11 @@ This example demonstrates several EAF features:
 
 | Metric | Value |
 |---|---|
-| **Line coverage** | 97.8% |
-| **Branch coverage** | 90.3% |
+| **Line coverage** | 97.9% |
+| **Branch coverage** | 90.4% |
 | **Method coverage** | 99.8% |
-| **Total tests** | 4597 |
-| **Passed** | 4596 |
+| **Total tests** | 4602 |
+| **Passed** | 4601 |
 | **Skipped** | 1 |
 | **Failed** | 0 |
 
@@ -391,11 +391,11 @@ This example demonstrates several EAF features:
 
 | Module | Tests | Line Coverage | Status |
 |---|---|---|---|
-| **Eaf.Castle.Serilog** | 72 | 98.9% | ✅ Excellent |
-| **Eaf.SqlServerCache** | 99 | 98.1% | ✅ Excellent |
+| **Eaf.Castle.Serilog** | 73 | 100% | ✅ Excellent |
+| **Eaf.SqlServerCache** | 100 | 100% | ✅ Excellent |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excellent |
-| **Eaf.Middleware.Application** | 1506 | 99.8% | ✅ Excellent |
-| **Eaf.Middleware.Core** | 1261 | 99.8% | ✅ Excellent |
+| **Eaf.Middleware.Application** | 1507 | 99.9% | ✅ Excellent |
+| **Eaf.Middleware.Core** | 1263 | 99.9% | ✅ Excellent |
 | **Eaf.Middleware.Web.Core** | 769 | 96.9% | ✅ Excellent |
 | **Eaf.Middleware.Worker** | 191 | 100% | ✅ Excellent |
 | **Eaf.SqliteCache** | 162 | 98% | ✅ Excellent |

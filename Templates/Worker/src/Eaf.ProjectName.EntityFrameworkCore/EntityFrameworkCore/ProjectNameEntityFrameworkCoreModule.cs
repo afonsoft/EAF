@@ -1,19 +1,23 @@
-﻿using Eaf.Dependency;
-using Eaf.EntityFrameworkCore;
-using Eaf.EntityFrameworkCore.Configuration;
-using Eaf.Modules;
+using Abp;
+using Abp.Dependency;
+using Abp.EntityFrameworkCore;
+using Abp.EntityFrameworkCore.Configuration;
+using Abp.EntityHistory;
+using Abp.Modules;
 using Eaf.ProjectName.EntityHistory;
 using Eaf.ProjectName.Migrations.Seed;
+using Abp.Reflection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 
 namespace Eaf.ProjectName.EntityFrameworkCore
 {
     [DependsOn(
-        typeof(EafEntityFrameworkCoreModule),
+        typeof(AbpEntityFrameworkCoreModule),
         typeof(ProjectNameCoreModule)
     )]
-    public class ProjectNameEntityFrameworkCoreModule : EafModule
+    public class ProjectNameEntityFrameworkCoreModule : AbpModule
     {
         public bool SkipDbContextRegistration { get; set; }
 
@@ -23,24 +27,24 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         {
             if (!SkipDbContextRegistration)
             {
-                Configuration.Modules.EafEfCore().AddDbContext<ProjectNameDbContext>(options =>
+                Configuration.Modules.AbpEfCore().AddDbContext<ProjectNameDbContext>(options =>
                 {
-                    options.DbContextOptions.EnableDetailedErrors(Configuration.Database.EnableDetailedErrors);
-                    options.DbContextOptions.EnableSensitiveDataLogging(Configuration.Database.EnableSensitiveDataLogging);
+                    options.DbContextOptions.EnableDetailedErrors(true);
+                    options.DbContextOptions.EnableSensitiveDataLogging(false);
 
-                    if (Configuration.Database.EnableDetailedErrors && Configuration.IocManager.IsRegistered<ILoggerFactory>())
+                    if (Configuration.IocManager.IsRegistered<ILoggerFactory>())
                     {
                         options.DbContextOptions.UseLoggerFactory(Configuration.IocManager.Resolve<ILoggerFactory>());
                     }
 
                     if (options.ExistingConnection != null)
-                        ProjectNameDbContextConfigurer.Configure(options.DbContextOptions, options.ExistingConnection, Configuration.Database.IsOracleEnabled);
+                        ProjectNameDbContextConfigurer.Configure(options.DbContextOptions, options.ExistingConnection);
                     else
-                        ProjectNameDbContextConfigurer.Configure(options.DbContextOptions, options.ConnectionString, Configuration.Database.IsOracleEnabled);
+                        ProjectNameDbContextConfigurer.Configure(options.DbContextOptions, options.ConnectionString);
                 });
             }
 
-            Configuration.EntityHistory.Selectors.Add("ProjectNameEntities", EntityHistoryHelper.TrackedTypes);
+            Configuration.EntityHistory.Selectors.Add(new NamedTypeSelector("ProjectNameEntities", type => EntityHistoryHelper.TrackedTypes.Contains(type)));
             Configuration.CustomConfigProviders.Add(new EntityHistoryConfigProvider(Configuration));
         }
 

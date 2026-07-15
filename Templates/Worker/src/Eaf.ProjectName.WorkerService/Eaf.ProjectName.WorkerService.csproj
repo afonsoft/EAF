@@ -10,17 +10,18 @@
 		<DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
     </PropertyGroup>
     <ItemGroup>
-		<!--<PackageReference Include="Eaf.Castle.Serilog" Version=" 6.1.9" />
-		<PackageReference Include="Eaf.OpenTelemetry" Version=" 6.1.9" />
-		<PackageReference Include="Eaf.Middleware.Worker" Version=" 6.1.9" />-->
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.8" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     </ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Eaf.ProjectName.Core\Eaf.ProjectName.Core.csproj" />
 		<ProjectReference Include="..\Eaf.ProjectName.EntityFrameworkCore\Eaf.ProjectName.EntityFrameworkCore.csproj" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.Castle.Serilog\Eaf.Castle.Serilog.csproj" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.Middleware.Core\Eaf.Middleware.Core.csproj" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.Middleware.Worker\Eaf.Middleware.Worker.csproj" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.OpenTelemetry\Eaf.OpenTelemetry.csproj" />
 	</ItemGroup>
 </Project>

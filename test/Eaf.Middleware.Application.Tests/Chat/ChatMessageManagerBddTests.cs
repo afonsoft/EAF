@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -26,9 +27,10 @@ namespace Eaf.Middleware.Tests.Application.Chat
     {
         private static TestableChatMessageManager CriarChatMessageManager(
             IRepository<ChatMessage, long>? chatMessageRepository,
-            UserManager? userManager)
+            UserManager? userManager,
+            IFriendshipManager? friendshipManager = null)
         {
-            var friendshipManager = Substitute.For<IFriendshipManager>();
+            if (friendshipManager == null) friendshipManager = Substitute.For<IFriendshipManager>();
             var chatCommunicator = Substitute.For<IChatCommunicator>();
             var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
             if (userManager == null) userManager = ManagerTestHelper.CreateUserManager();
@@ -1350,6 +1352,32 @@ namespace Eaf.Middleware.Tests.Application.Chat
 
             var result = sut.InvokeL("Count", ptBR, 5);
             result.ShouldBe("5 itens");
+        }
+
+        [Fact]
+        public async Task Dado_AmizadeBloqueada_Quando_HandleSenderToReceiverAsync_Entao_NaoDeveSalvarMensagem()
+        {
+            // Dado
+            var sender = new UserIdentifier(null, 10);
+            var receiver = new UserIdentifier(null, 20);
+            var friendship = new Friendship(sender, receiver, null, "receiver", null, FriendshipState.Blocked);
+
+            var friendshipManager = Substitute.For<IFriendshipManager>();
+            friendshipManager.GetFriendshipOrNullAsync(sender, receiver).Returns(Task.FromResult<Friendship?>(friendship));
+
+            var repository = Substitute.For<IRepository<ChatMessage, long>>();
+            var sut = CriarChatMessageManager(repository, null, friendshipManager);
+
+            // Quando
+            var method = typeof(ChatMessageManager).GetMethod(
+                "HandleSenderToReceiverAsync",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            method.ShouldNotBeNull();
+            var task = (Task)method.Invoke(sut, new object?[] { sender, receiver, "Hello", Guid.NewGuid() })!;
+            await task;
+
+            // Então
+            repository.DidNotReceive().InsertAndGetId(Arg.Any<ChatMessage>());
         }
 
         private class TestableChatMessageManager : ChatMessageManager

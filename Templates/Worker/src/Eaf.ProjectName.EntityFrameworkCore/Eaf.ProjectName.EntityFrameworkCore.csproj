@@ -8,16 +8,15 @@
 		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
-		<!--<PackageReference Include="Eaf.EntityFrameworkCore" Version="6.1.9" />-->		
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" />
+		<PackageReference Include="Abp.EntityFrameworkCore" Version="10.4.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\..\src\Eaf.EntityFrameworkCore\Eaf.EntityFrameworkCore.csproj" />
 		<ProjectReference Include="..\Eaf.ProjectName.Core\Eaf.ProjectName.Core.csproj" />
 	</ItemGroup>
 </Project>

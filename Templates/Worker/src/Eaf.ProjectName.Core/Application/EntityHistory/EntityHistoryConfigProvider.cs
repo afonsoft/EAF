@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using Eaf.Configuration;
-using Eaf.Configuration.Startup;
+using Abp.Configuration;
+using Abp.Configuration.Startup;
 
 namespace Eaf.ProjectName.EntityHistory
 {
     public class EntityHistoryConfigProvider : ICustomConfigProvider
     {
-        private readonly IEafStartupConfiguration _eafStartupConfiguration;
+        private readonly IAbpStartupConfiguration _eafStartupConfiguration;
 
         public EntityHistoryConfigProvider(
-            IEafStartupConfiguration eafStartupConfiguration
+            IAbpStartupConfiguration eafStartupConfiguration
         )
         {
             _eafStartupConfiguration = eafStartupConfiguration;

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Eaf.Domain.Entities.Auditing;
-using Eaf.Domain.Entities;
-using Eaf.Auditing;
+using Abp.Domain.Entities.Auditing;
+using Abp.Domain.Entities;
+using Abp.Auditing;
 
 namespace Eaf.ProjectName.Airplanes
 {

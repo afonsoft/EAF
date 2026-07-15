@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260715-priority61-coverage-audit`
+Last session branch: `feature/devin-20260715-priority62-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -22,6 +22,16 @@ Current coverage (after P58): Line 97.7%, Branch 89.1%, Method 99.7% (4555 tests
 Current coverage (after P59): Line 97.7%, Branch 90.0%, Method 99.8% (4585 tests, 4584 passing, 1 skipped). Build warnings: 161.
 Current coverage (after P60): Line 97.8%, Branch 90.2%, Method 99.8% (4593 tests, 4592 passing, 1 skipped). Build warnings: 161.
 Current coverage (after P61): Line 97.8%, Branch 90.3%, Method 99.8% (4597 tests, 4596 passing, 1 skipped). Build warnings: 162.
+Current coverage (after P62): Line 97.9%, Branch 90.4%, Method 99.8% (4602 tests, 4601 passing, 1 skipped). Build warnings: 162.
+
+## P62 gotchas
+- `SerilogLogger` has an internal parameterless constructor used by `Castle Windsor` reflection; invoke it via reflection in tests to reach 100% method coverage.
+- `ChatMessageManager.HandleSenderToReceiverAsync` returns early when an existing friendship is `FriendshipState.Blocked`; this branch is reachable by invoking the private method directly with a blocked `Friendship`.
+- `EafSqlServerCache.CompressBytesAsync` catch swallows any compression error and returns the original bytes; passing `null` bytes triggers an `ArgumentNullException` and covers the catch.
+- `EafHangfireAuthorizationFilter.IsPermissionGranted` has defensive early returns for `userIdentifier == null` and empty `requiredPermissionName`; both branches are reachable via reflection and default to the standard Hangfire dashboard permissions.
+- `Templates/Worker` had legacy `Eaf.*` namespaces and missing `Microsoft.Extensions.*` package versions; aligning it with `Abp.*` types and the API template package versions made the Worker template build with 0 errors.
+- `Templates/Api`, `Templates/Worker` and `Templates/Angular/Eaf.ProjectName.UI` all build successfully (Release for .NET, production for Angular). Worker produced 6 warnings (AutoMapper NU1903 + obsolete `ServicePointManager` SYSLIB0014), API 26 warnings (Pomelo/AutoMapper), Angular build completed with no errors.
+- `LdapAuthenticationSource`, `MiddlewareWebCoreModule`, `PermissionAppService`, `EafSqliteCache`, `ServiceBusQueueAppender`, `TokenAuthController`, `DefaultExternalLoginInfoManager`, `OpenIdConnectAuthProviderApi`, `EafHangfireApplicationBuilderExtensions`, `MiddlewareWebCoreModule`, `LdapSettings`, `UserEmailer` and `AzureActiveDirectoryAuthenticationSource` still contain branches that are Linux/infrastructure-limited or require real external services; document as inalcançáveis for P63.
 
 ## P60 gotchas
 - `System.Linq.Enumerable.OrderBy` on a single-element list does not invoke the key selector, so `ObjectMapper.Map<List<T>>` stubs returning one item do not cover `OrderBy` lambda sequence points; return at least two elements.

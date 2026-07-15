@@ -361,5 +361,20 @@ namespace Eaf.Castle.Serilog.Tests
                 return new object[] { "test" };
             return null;
         }
+
+        [Fact]
+        public void Dado_ConstrutorInterno_Quando_Criar_Entao_DeveRetornarInstancia()
+        {
+            // Arrange
+            var ctor = typeof(SerilogLogger).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
+            ctor.ShouldNotBeNull();
+
+            // Act
+            var logger = ctor.Invoke(null);
+
+            // Assert
+            logger.ShouldNotBeNull();
+            logger.ShouldBeOfType<SerilogLogger>();
+        }
     }
 }
