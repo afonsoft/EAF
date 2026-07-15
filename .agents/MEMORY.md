@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260714-priority60-coverage-audit`
+Last session branch: `feature/devin-20260715-priority61-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -21,6 +21,7 @@ Current coverage (after P57): Line 97.7%, Branch 87.5%, Method 99.6% (4533 tests
 Current coverage (after P58): Line 97.7%, Branch 89.1%, Method 99.7% (4555 tests, 4554 passing, 1 skipped). Build warnings: 159.
 Current coverage (after P59): Line 97.7%, Branch 90.0%, Method 99.8% (4585 tests, 4584 passing, 1 skipped). Build warnings: 161.
 Current coverage (after P60): Line 97.8%, Branch 90.2%, Method 99.8% (4593 tests, 4592 passing, 1 skipped). Build warnings: 161.
+Current coverage (after P61): Line 97.8%, Branch 90.3%, Method 99.8% (4597 tests, 4596 passing, 1 skipped). Build warnings: 162.
 
 ## P60 gotchas
 - `System.Linq.Enumerable.OrderBy` on a single-element list does not invoke the key selector, so `ObjectMapper.Map<List<T>>` stubs returning one item do not cover `OrderBy` lambda sequence points; return at least two elements.
@@ -30,6 +31,17 @@ Current coverage (after P60): Line 97.8%, Branch 90.2%, Method 99.8% (4593 tests
 - `EafOpenTelemetryServiceCollectionExtensions.AddEafOpenTelemetry` branches on `ConsoleExporter`, `OtlpEndpoint` and `MeterName`; use a real `IServiceCollection`/`ILoggingBuilder` and assert the returned `IOpenTelemetryBuilder`/logger factory.
 - `ChatMessageManager.SendMessageAsync` has branches for existing friendships, updated friend-cache info and missing reverse friendship; use non-null `FriendshipState.Accepted` for both directions and cache entries that already match sender info.
 - `RoleAppService.GetRolesForEdit`, `TenantAppService.GetTenantFeaturesForEdit` and `UserAppService.GetUserPermissionsForEdit` all sort returned `FlatPermissionDto`/`FlatFeatureDto` lists by `DisplayName`; two items are required to exercise the `OrderBy` key selector.
+
+## P61 gotchas
+- `Templates/Api/src/Eaf.ProjectName.Core/Eaf.ProjectName.Core.csproj` was missing `Microsoft.EntityFrameworkCore`, causing `CS0234` in `AirplaneManager.cs` during `Production Build`; fixed by adding `PackageReference` version `10.0.8`.
+- `Templates/Api/src/Eaf.ProjectName.EntityFrameworkCore/EntityFrameworkCore/ProjectNameDbContext.cs` needed `using Microsoft.EntityFrameworkCore.Infrastructure;` and `MigrateDatabase` must be instance (not static) because `AbpDbContext.Logger` is non-static.
+- `Environment.SetEnvironmentVariable` tests in xUnit are flaky when run in parallel with other test classes; avoid relying on global env vars for branch coverage.
+- `UserAppService.GetGrantedPermissionsAsync` returns the granted permissions list directly when the user is not null; stub `GetGrantedPermissionsAsync` with a non-empty list to cover the non-empty branch.
+- `TokenAuthController.Authenticate` calls `InitializeOptionsAsync` with the resolved tenant id (nullable); a login without explicit tenant passes `(int?)null`.
+- `ChatHub` disposes its Windsor container only once due to `_isCallByRelease`; calling `Dispose` twice does not release twice.
+- `EafHangfireAuthorizationFilter.Authorize` returns `false` when `permissionChecker.IsGranted` returns false after a valid JWT is supplied.
+- `EafSqliteCache.Set` supports combined `slidingExpireTime` and absolute `expiry`; passing both values stores and retrieves the value correctly.
+- `LdapAuthenticationSource`, `MiddlewareWebCoreModule`, `PermissionAppService`, `EafSqlServerCache`, `EafSqliteCache`, `ServiceBusQueueAppender`, `TokenAuthController`, `ChatHub`, `DefaultExternalLoginInfoManager`, `OpenIdConnectAuthProviderApi`, `EafHangfireApplicationBuilderExtensions`, `EafHangfireAuthorizationFilter`, `MiddlewareWebCoreModule`, `LdapSettings`, `UserEmailer` and `AzureActiveDirectoryAuthenticationSource` still contain branches that are Linux/infrastructure-limited or require real external services; document as inalcançáveis for P62.
 
 ## P59 gotchas
 - `IRepository<UserToken, long>` configured with `NSubstitute` `Returns` expects `Task<UserToken>`; cast `EafUserToken` to `UserToken` before wrapping with `Task.FromResult`.

@@ -349,6 +349,58 @@ namespace Eaf.Middleware.Tests.WebCore.SignalR.Chat
             windsorContainer.Received(1).Release(chatHub);
         }
 
+        [Fact]
+        public void Dado_ChatHubJaLiberado_Quando_DisposeProtegido_Entao_DeveRetornarSemChamarWindsorNovamente()
+        {
+            // Dado
+            var testableHub = CriarTestableChatHub();
+
+            // Quando - primeira liberação direta
+            testableHub.DisposeProtegido(true);
+            // Quando - segunda liberação direta: _isCallByRelease deve ser true
+            testableHub.DisposeProtegido(true);
+
+            // Então
+            testableHub.WindsorContainer.Received(1).Release(testableHub);
+        }
+
+        private static TestableChatHub CriarTestableChatHub()
+        {
+            var chatMessageManager = Substitute.For<IChatMessageManager>();
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            var localizationSource = Substitute.For<ILocalizationSource>();
+            localizationSource.GetString("InternalServerError").Returns("InternalServerError");
+            localizationManager.GetSource("Eaf").Returns(localizationSource);
+            var onlineClientManager = Substitute.For<IOnlineClientManager<ChatChannel>>();
+            var clientInfoProvider = Substitute.For<IOnlineClientInfoProvider>();
+            var windsorContainer = Substitute.For<IWindsorContainer>();
+
+            return new TestableChatHub(
+                chatMessageManager,
+                localizationManager,
+                windsorContainer,
+                onlineClientManager,
+                clientInfoProvider);
+        }
+
+        private class TestableChatHub : ChatHub
+        {
+            public IWindsorContainer WindsorContainer { get; }
+
+            public TestableChatHub(
+                IChatMessageManager chatMessageManager,
+                ILocalizationManager localizationManager,
+                IWindsorContainer windsorContainer,
+                IOnlineClientManager<ChatChannel> onlineClientManager,
+                IOnlineClientInfoProvider clientInfoProvider)
+                : base(chatMessageManager, localizationManager, windsorContainer, onlineClientManager, clientInfoProvider)
+            {
+                WindsorContainer = windsorContainer;
+            }
+
+            public void DisposeProtegido(bool disposing) => Dispose(disposing);
+        }
+
         private static ChatHub CriarChatHub()
         {
             return CriarChatHubCompleto().Hub;

@@ -314,7 +314,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             var user = new User { Id = 1, UserName = "admin" };
             var userManager = ManagerTestHelper.CreateUserManager();
             userManager.GetUserByIdAsync(1).Returns(user);
-            userManager.GetGrantedPermissionsAsync(user).Returns(new List<Permission>());
+            userManager.GetGrantedPermissionsAsync(user).Returns(new List<Permission> { new Permission("Pages.Granted") });
 
             var permissionManager = Substitute.For<IPermissionManager>();
             permissionManager.GetAllPermissionsAsync().Returns(new List<Permission> { new Permission("Pages.Test", displayName: null) });
@@ -338,6 +338,8 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Users
             result.Permissions.Count.ShouldBe(2);
             result.Permissions[0].DisplayName.ShouldBe("Other");
             result.Permissions[1].DisplayName.ShouldBe("Test");
+            result.GrantedPermissionNames.Count.ShouldBe(1);
+            result.GrantedPermissionNames[0].ShouldBe("Pages.Granted");
         }
 
         #endregion
