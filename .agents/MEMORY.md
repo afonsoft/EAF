@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260715-priority62-coverage-audit`
+Last session branch: `feature/devin-20260715-priority63-coverage-audit`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -23,6 +23,17 @@ Current coverage (after P59): Line 97.7%, Branch 90.0%, Method 99.8% (4585 tests
 Current coverage (after P60): Line 97.8%, Branch 90.2%, Method 99.8% (4593 tests, 4592 passing, 1 skipped). Build warnings: 161.
 Current coverage (after P61): Line 97.8%, Branch 90.3%, Method 99.8% (4597 tests, 4596 passing, 1 skipped). Build warnings: 162.
 Current coverage (after P62): Line 97.9%, Branch 90.4%, Method 99.8% (4602 tests, 4601 passing, 1 skipped). Build warnings: 162.
+Current coverage (after P63): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 162.
+
+## P63 gotchas
+- SonarCloud duplication on PR #197 was caused by `Templates/**` boilerplate being included in CPD; adding `sonar.cpd.exclusions=Templates/**` to `.sonarcloud.properties` and `/d:sonar.cpd.exclusions="Templates/**"` to `sonarcloud.sh` resolves it for future PRs.
+- `EafHangfireAuthorizationFilter` branches for missing `IPermissionChecker` (returns `true`) and cache-token miss with a remote IP are reachable with a fake `IServiceProvider` that implements `ISupportRequiredService`.
+- `PermissionAppService.AddPermission` defensive `if (permission.Children == null)` remains unreachable because ABP `Permission.Children` getter throws `ArgumentNullException` when the backing list is null.
+- `LdapSettings.GetContextType` and `AzureActiveDirectoryAuthenticationSource`/`LdapAuthenticationSource` AD/LDAP branches are Windows/infrastructure-limited and cannot be covered on Linux.
+- `MiddlewareAppServiceBase.GetCurrentTenant` (`TenantManager.GetById`) always throws `NotImplementedException`, so the closing return is unreachable.
+- `EafSqliteCache` outer `catch (SqliteException)` in `Connect` and `ServiceBusQueueAppender.OnClose` catch are practically unreachable in unit tests because `Microsoft.Data.Sqlite` only throws on command execution (caught inside `CheckExistingDb`) and `ServiceBusConnection.CloseAsync` is non-virtual/no-throw without a real service bus.
+- `EafHangfireApplicationBuilderExtensions.UseEafHangfire` line `DisplayNameFunc = (context, job) => EafDisplayNameExtensions.Format(context, job)` is only executed when the Hangfire dashboard renders at runtime; unit tests configure the dashboard but do not render it.
+- `TokenAuthController` and `MiddlewareWebCoreModule` still contain branches tied to real external services (Google/Facebook/Microsoft/WS-Federation/Redis/SignalR/Hangfire runtime) and are documented as inalcançáveis.
 
 ## P62 gotchas
 - `SerilogLogger` has an internal parameterless constructor used by `Castle Windsor` reflection; invoke it via reflection in tests to reach 100% method coverage.

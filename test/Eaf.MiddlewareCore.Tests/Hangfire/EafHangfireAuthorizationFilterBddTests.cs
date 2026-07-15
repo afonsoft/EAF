@@ -300,7 +300,72 @@ namespace Eaf.Middleware.Tests.Hangfire
             result.ShouldBeFalse();
         }
 
+        [Fact]
+        public void Dado_SessaoComUsuarioSemPermissionChecker_Quando_Authorize_Entao_DeveRetornarVerdadeiro()
+        {
+            // Dado
+            var httpContext = CriarHttpContext();
+            var session = Substitute.For<IAbpSession>();
+            session.UserId.Returns(2L);
+            session.TenantId.Returns(1);
+
+            var services = new Dictionary<Type, object>
+            {
+                [typeof(IAbpSession)] = session,
+                [typeof(ICacheManager)] = Substitute.For<ICacheManager>(),
+                [typeof(IPermissionChecker)] = null
+            };
+            httpContext.RequestServices = new FakeServiceProvider(services);
+
+            var dashboardContext = CriarDashboardContext(httpContext, httpContext.RequestServices);
+            var sut = new EafHangfireAuthorizationFilter();
+
+            // Quando
+            var result = sut.Authorize(dashboardContext);
+
+            // Então
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Dado_SessaoNulaComIpRemotoECacheNulo_Quando_Authorize_Entao_DeveRetornarFalso()
+        {
+            // Dado
+            var httpContext = CriarHttpContext();
+            httpContext.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("127.0.0.1");
+
+            var cache = Substitute.For<ICache>();
+            cache.GetOrDefault(Arg.Any<string>()).Returns((object)null);
+            var cacheManager = Substitute.For<ICacheManager>();
+            cacheManager.GetCache(Arg.Any<string>()).Returns(cache);
+
+            var services = new Dictionary<Type, object>
+            {
+                [typeof(IAbpSession)] = null,
+                [typeof(ICacheManager)] = cacheManager,
+                [typeof(IPermissionChecker)] = null
+            };
+            httpContext.RequestServices = new FakeServiceProvider(services);
+
+            var dashboardContext = CriarDashboardContext(httpContext, httpContext.RequestServices);
+            var sut = new EafHangfireAuthorizationFilter();
+
+            // Quando
+            var result = sut.Authorize(dashboardContext);
+
+            // Então
+            result.ShouldBeFalse();
+        }
+
         #endregion
+
+        private static DashboardContext CriarDashboardContext(HttpContext httpContext, IServiceProvider serviceProvider)
+        {
+            httpContext.RequestServices = serviceProvider;
+
+            var jobStorage = Substitute.For<JobStorage>();
+            return new AspNetCoreDashboardContext(jobStorage, new DashboardOptions(), httpContext);
+        }
 
         private static DashboardContext CriarDashboardContext(HttpContext httpContext, bool withUser = false)
         {
@@ -325,6 +390,27 @@ namespace Eaf.Middleware.Tests.Hangfire
 
             var jobStorage = Substitute.For<JobStorage>();
             return new AspNetCoreDashboardContext(jobStorage, new DashboardOptions(), httpContext);
+        }
+
+        private class FakeServiceProvider : IServiceProvider, ISupportRequiredService
+        {
+            private readonly Dictionary<Type, object> _services;
+
+            public FakeServiceProvider(Dictionary<Type, object> services)
+            {
+                _services = services;
+            }
+
+            public object GetService(Type serviceType)
+            {
+                _services.TryGetValue(serviceType, out var service);
+                return service;
+            }
+
+            public object GetRequiredService(Type serviceType)
+            {
+                return GetService(serviceType);
+            }
         }
 
         private static HttpContext CriarHttpContext()
