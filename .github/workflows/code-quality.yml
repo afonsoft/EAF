@@ -67,10 +67,13 @@ jobs:
           fi
 
   # SonarQube Analysis
+  # Temporarily skipped: SonarCloud Automatic Analysis is already enabled for this project,
+  # and the CI-based dotnet-sonarscanner cannot run concurrently with it.
+  # Re-enable once Automatic Analysis is disabled in the SonarCloud UI.
   sonarqube:
     name: 📊 SonarQube Analysis
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: false
 
     steps:
       - name: 📥 Checkout
