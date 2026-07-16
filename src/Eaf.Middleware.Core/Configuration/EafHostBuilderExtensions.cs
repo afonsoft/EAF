@@ -24,9 +24,9 @@ namespace Eaf.Middleware.Configuration
             {
                 config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddInMemoryCollection();
-                config.AddEnvironmentVariables();
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                 config.AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
+                config.AddEnvironmentVariables();
 
                 if (!string.IsNullOrEmpty(prefix))
                     config.AddEnvironmentVariables(prefix: prefix);
@@ -48,9 +48,9 @@ namespace Eaf.Middleware.Configuration
             {
                 config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddInMemoryCollection();
-                config.AddEnvironmentVariables();
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                 config.AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true);
+                config.AddEnvironmentVariables();
 
                 if (!string.IsNullOrEmpty(prefix))
                     config.AddEnvironmentVariables(prefix: prefix);

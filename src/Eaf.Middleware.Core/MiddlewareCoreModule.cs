@@ -31,15 +31,15 @@ using System.Transactions;
 
 namespace Eaf.Middleware
 {
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareCore.
+    /// </summary>
     [DependsOn(
         typeof(AbpZeroCoreModule),
         typeof(EafMiddlewareAzureActiveDirectoryModule),
         typeof(EafMiddlewareLdapModule),
         typeof(AbpAutoMapperModule),
         typeof(AbpMailKitModule))]
-    /// <summary>
-    /// Módulo ABP que configura e inicializa MiddlewareCore.
-    /// </summary>
     public class MiddlewareCoreModule : AbpModule
     {
         /// <summary>

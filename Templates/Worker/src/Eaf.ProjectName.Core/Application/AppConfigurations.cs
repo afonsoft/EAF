@@ -35,13 +35,15 @@ namespace Eaf.ProjectName.Configuration
             var builder = new ConfigurationBuilder()
                 .SetBasePath(path)
                 .AddInMemoryCollection()
-                .AddEnvironmentVariables()
-                .AddEnvironmentVariables(prefix: "EAF_")
-                .AddEnvironmentVariables(prefix: "ASPNETCORE_")
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             if (!environmentName.IsNullOrWhiteSpace())
                 builder = builder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
+
+            builder = builder
+                .AddEnvironmentVariables()
+                .AddEnvironmentVariables(prefix: "EAF_")
+                .AddEnvironmentVariables(prefix: "ASPNETCORE_");
 
             return builder.Build();
         }
