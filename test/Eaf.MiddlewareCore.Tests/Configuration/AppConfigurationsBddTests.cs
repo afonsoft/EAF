@@ -147,5 +147,30 @@ namespace Eaf.Middleware.Tests.Configuration
                 Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", original);
             }
         }
+
+        [Fact]
+        public void Dado_AppsettingsEVariavelDeAmbienteComMesmoNome_Quando_Get_Entao_VariavelDeAmbienteSobrescreveJson()
+        {
+            var configKey = "EafP66OverrideKey";
+            var envVarName = "ASPNETCORE_" + configKey;
+            var original = Environment.GetEnvironmentVariable(envVarName);
+            var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")[..8]);
+            Directory.CreateDirectory(dir);
+
+            try
+            {
+                File.WriteAllText(Path.Combine(dir, "appsettings.json"), $"{{\"{configKey}\": \"json-value\"}}");
+                Environment.SetEnvironmentVariable(envVarName, "env-value");
+
+                var config = AppConfigurations.Get(dir, "OverrideTest");
+
+                config[configKey].ShouldBe("env-value");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(envVarName, original);
+                try { Directory.Delete(dir, true); } catch { }
+            }
+        }
     }
 }

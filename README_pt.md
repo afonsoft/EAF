@@ -383,7 +383,7 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.SqlServerCache** | 100 | 100% | ✅ Excelente |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excelente |
 | **Eaf.Middleware.Application** | 1507 | 99.9% | ✅ Excelente |
-| **Eaf.Middleware.Core** | 1265 | 99.9% | ✅ Excelente |
+| **Eaf.Middleware.Core** | 1266 | 99.9% | ✅ Excelente |
 | **Eaf.Middleware.Web.Core** | 769 | 96.9% | ✅ Excelente |
 | **Eaf.Middleware.Worker** | 191 | 100% | ✅ Excelente |
 | **Eaf.SqliteCache** | 162 | 98% | ✅ Excelente |
@@ -392,16 +392,17 @@ Este exemplo demonstra vários recursos do EAF:
 | **Eaf.Log4NetServiceBus** | 52 | 96.0% | ✅ Boa |
 | **Eaf.Middleware.AzureActiveDirectory** | 66 | 95.3% | ✅ Excelente |
 | **Eaf.Middleware.Ldap** | 99 | 66.3% | ⚠️ Precisa melhorar |
-| **TOTAL** | **4604** | **97.9%** | ✅ Em progresso |
+| **TOTAL** | **4605** | **97.9%** | ✅ Em progresso |
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
 - **Atual**: 97.9% linha, 90.5% branch, 99.8% método; build `Eaf.sln` com 0 warnings
-- **Testes Backend**: 4604 total, 4603 passando, 1 ignorado, 0 falhas (100% sucesso)
+- **Testes Backend**: 4605 total, 4604 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
 - **Build dos templates**: 0 warnings (`Api`, `Worker` e `Angular`)
-- **Próximos passos**: P66 — executar e validar o template API (`Eaf.ApiWithSrc.sln`) em runtime, abrir o Swagger em `localhost` e tratar eventuais problemas de inicialização.
+- **Template API runtime**: `Eaf.ApiWithSrc.sln` iniciou e o Swagger carregou em `http://localhost:5000/swagger`; precedência das variáveis de ambiente corrigida para sobrescrever `appsettings.json`.
+- **Próximos passos**: P67 — validar o template Worker em runtime e garantir a integração entre templates.
 
 ### Melhorias Implementadas
 - **Expansão de Testes (Julho 2026)**: P58 coverage audit — testes BDD para SerilogLogger, TenantAddress, EafWorkerBase, UserAppService, ChatMessageManager, HostSettingsAppService, EafSqliteCache e EafSqlServerCache
