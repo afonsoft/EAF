@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Abp.Domain.Repositories;
 using System.Linq;
 using Abp.UI;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace Eaf.ProjectName.Airplanes
@@ -32,7 +33,7 @@ namespace Eaf.ProjectName.Airplanes
 
         public async Task<Airplane> CreateAsync(Airplane airplane)
         {
-            if (_repositoryAirplane.GetAll().Any(e => e.Number.ToLower() == airplane.Number))
+            if (await (await _repositoryAirplane.GetAllAsync()).AnyAsync(e => e.Number.ToLower() == airplane.Number))
                 throw new UserFriendlyException(L("AirplaneValidate"));
 
             return await _repositoryAirplane.InsertAsync(airplane);

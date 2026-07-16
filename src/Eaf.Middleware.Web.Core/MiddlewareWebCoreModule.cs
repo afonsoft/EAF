@@ -274,7 +274,7 @@ namespace Eaf.Middleware.Web
             appFolders.ProfileImagesFolder = Path.Combine(contentRootPath, webRootPath, "ProfileImages");
             appFolders.WebLogsFolder = Path.Combine(contentRootPath, webRootPath, "Logs");
             appFolders.WebDownloadFolder = Path.Combine(contentRootPath, webRootPath, "Downloads");
-            appFolders.WebTempFolder = Path.GetTempPath();
+            appFolders.WebTempFolder = Path.Combine(contentRootPath, webRootPath, "Temp");
             appFolders.WebDataFolder = Path.Combine(contentRootPath, webRootPath);
 
             try

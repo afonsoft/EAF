@@ -27,13 +27,13 @@ dotnet-sonarscanner begin \
     /o:"afonsoft" \
     /k:"afonsoft_EAF2" \
     /d:sonar.host.url="https://sonarcloud.io" \
-    /d:sonar.login="${SONAR_TOKEN}" \
+    /d:sonar.token="${SONAR_TOKEN}" \
     /d:sonar.scm.provider="git" \
     /d:sonar.coverage.exclusions="**Test*.cs" \
     /d:sonar.exclusions="Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/metronic/assets/vendors/base/scripts.bundle.js,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/mdbootstrap/mdb.min.js,**/*.Designer.cs,**/service-proxies.ts,dotnet-install.sh,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/primeng/**,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/ngx-bootstrap/**,**/node_modules/**,**/dist/**,**/bin/**,**/obj/**,**/*.min.js,**/*.bundle.js" \
     /d:sonar.cpd.exclusions="Templates/**" \
-    /d:sonar.cs.vstest.reportsPaths="resultTest/*.trx" \
-    /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml"
+    /d:sonar.cs.vstest.reportsPaths="resultTest/**/*.trx" \
+    /d:sonar.cs.opencover.reportsPaths="resultTest/**/coverage.opencover.xml"
 
 # Build solution
 echo "🔨 Building solution..."
@@ -84,18 +84,12 @@ for project in "${test_projects[@]}"; do
     fi
 done
 
-# Merge coverage reports
-echo ""
-echo "📊 Merging coverage reports..."
-if [[ -f "$HOME/.dotnet/tools/coverlet" ]]; then
-    # Merge all coverage files
-    find resultTest/ -name "coverage.cobertura.xml" -exec cat {} \; > coverage.opencover.xml 2>/dev/null || true
-fi
+# Coverage reports are collected by the dotnet test --collect step and reported via wildcards.
 
 # End SonarCloud analysis
 echo ""
 echo "🏁 Ending SonarCloud analysis..."
-dotnet-sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
+dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
 
 echo ""
 echo "✅ SonarCloud scan completed!"

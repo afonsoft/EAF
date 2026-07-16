@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace EafRenamerCli
@@ -294,7 +295,9 @@ namespace EafRenamerCli
 
             var processStartInfo = new ProcessStartInfo()
             {
-                FileName = "cmd",
+                FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? Path.Combine(Environment.SystemDirectory, "cmd.exe")
+                    : "/bin/sh",
                 RedirectStandardOutput = true,
                 RedirectStandardInput = true,
                 WorkingDirectory = workingDirectory
@@ -307,7 +310,8 @@ namespace EafRenamerCli
                 throw new InvalidOperationException("Process should not be null.");
             }
 
-            process.StandardInput.WriteLine($"{commandToRun} & exit");
+            process.StandardInput.WriteLine(commandToRun);
+            process.StandardInput.WriteLine("exit");
             WriteLine($"{YELLOW}command:[/] {GREEN}{commandToRun}[/]");
             if (output)
             {

@@ -127,7 +127,7 @@ namespace Eaf.Middleware.Worker
             appFolders.ProfileImagesFolder = Path.Combine(contentRootPath, "ProfileImages");
             appFolders.LogsFolder = Path.Combine(contentRootPath, "Logs");
             appFolders.DownloadFolder = Path.Combine(contentRootPath, "Downloads");
-            appFolders.TempFolder = Path.GetTempPath();
+            appFolders.TempFolder = Path.Combine(contentRootPath, "Temp");
             appFolders.DataFolder = Path.Combine(contentRootPath, "data");
 
             try
