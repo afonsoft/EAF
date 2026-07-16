@@ -26,6 +26,15 @@ Current coverage (after P62): Line 97.9%, Branch 90.4%, Method 99.8% (4602 tests
 Current coverage (after P63): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 162.
 Current coverage (after P64): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 0 (Eaf.sln).
 Current coverage (after P65): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular).
+Current coverage (after P66): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); `Eaf.ApiWithSrc.sln` Swagger validated on `http://localhost:5000/swagger`.
+
+## P66 gotchas
+- `AppConfigurations.BuildConfiguration` and `EafHostBuilderExtensions.UseEafConfiguration` added environment variables **before** JSON files, preventing env-based overrides of `ConnectionStrings` and other settings. Moving `AddEnvironmentVariables` after `appsettings.json`/`appsettings.{Environment}.json` fixes this and matches standard .NET configuration precedence.
+- `MiddlewareCoreModule.cs` had an XML doc comment after `DependsOn` attributes, causing `CS1587`; moved the comment above the attributes.
+- Template Worker `AppConfigurations.cs` copy was updated with the same precedence fix.
+- Added BDD test `Dado_AppsettingsEVariavelDeAmbienteComMesmoNome_Quando_Get_Entao_VariavelDeAmbienteSobrescreveJson` to lock in env override behavior.
+- To run `Eaf.ApiWithSrc.sln` locally: start a SQL Server 2022 Docker container, run `Eaf.ProjectName.Migrator` with `ConnectionStrings__LOCAL`, then run `Eaf.ProjectName.Web.Host` with `ConnectionStrings__Default` (or `ProjectName_` prefix via host builder), `Hangfire__IsEnabled=false`, and `SqlServerCache__IsEnabled=false`.
+- `GET /api/services/app/About/GetAbout` returns 200 with environment info.
 
 ## P65 gotchas
 - Template `Api` and `Worker` build warnings reduced to 0 by adding documented suppressions (`NU1608` for Pomelo and `NuGetAuditSuppress` for `GHSA-rvv3-g6hj-g44x`) to `Templates/Api/common.props` and `Templates/Worker/common.props`.

@@ -382,14 +382,14 @@ This example demonstrates several EAF features:
 | **Line coverage** | 97.9% |
 | **Branch coverage** | 90.5% |
 | **Method coverage** | 99.8% |
-| **Total tests** | 4604 |
-| **Passed** | 4603 |
+| **Total tests** | 4605 |
+| **Passed** | 4604 |
 | **Skipped** | 1 |
 | **Failed** | 0 |
 | **Build warnings** | 0 |
 | **Template build warnings** | 0 (Api, Worker, Angular) |
 
-*P65 update: template `Api`, `Worker` and `Angular` builds are now warning-free; remaining `Pomelo` NU1608 and `AutoMapper` NU1903 warnings are suppressed in template `common.props` and documented while waiting for safe upstream releases.*
+*P66 update: `Eaf.ApiWithSrc.sln` starts and Swagger UI loads at `http://localhost:5000/swagger`; runtime config precedence fixed so environment variables override `appsettings.json`. P65 template build warnings remain suppressed and documented.*
 
 ### Coverage by Module
 
@@ -399,7 +399,7 @@ This example demonstrates several EAF features:
 | **Eaf.SqlServerCache** | 100 | 100% | ✅ Excellent |
 | **Eaf.KeyVault.AspNetCore** | 10 | 100% | ✅ Excellent |
 | **Eaf.Middleware.Application** | 1507 | 99.9% | ✅ Excellent |
-| **Eaf.Middleware.Core** | 1265 | 99.9% | ✅ Excellent |
+| **Eaf.Middleware.Core** | 1266 | 99.9% | ✅ Excellent |
 | **Eaf.Middleware.Web.Core** | 769 | 96.9% | ✅ Excellent |
 | **Eaf.Middleware.Worker** | 191 | 100% | ✅ Excellent |
 | **Eaf.SqliteCache** | 162 | 98% | ✅ Excellent |
