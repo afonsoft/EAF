@@ -35,13 +35,13 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
             public string? PublicL(string name, System.Globalization.CultureInfo culture, params object[] args) => L(name, culture, args);
             public ILocalizationManager? ExposedLocalizationManager => LocalizationManager;
 
-            public new IUnitOfWorkManager? UnitOfWorkManagerProperty
+            public IUnitOfWorkManager? UnitOfWorkManagerProperty
             {
                 get => base.UnitOfWorkManager;
                 set => base.UnitOfWorkManager = value!;
             }
 
-            public new ILocalizationSource? LocalizationSourceProperty
+            public ILocalizationSource? LocalizationSourceProperty
             {
                 get => base.LocalizationSource;
             }
@@ -52,7 +52,7 @@ namespace Eaf.Middleware.Tests.WebCore.WebHooks
                 set => base.LocalizationSourceName = value;
             }
 
-            public new IActiveUnitOfWork? CurrentUnitOfWorkProperty => base.CurrentUnitOfWork;
+            public IActiveUnitOfWork? CurrentUnitOfWorkProperty => base.CurrentUnitOfWork;
 
             public override Task ProcessRequest(string requestBody)
             {

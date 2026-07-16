@@ -6,7 +6,6 @@ using Eaf.ProjectName.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Net;
 
 namespace Eaf.ProjectName.WorkerService
 {
@@ -35,9 +34,5 @@ namespace Eaf.ProjectName.WorkerService
             Configuration.DefaultNameOrConnectionString = _appConfiguration.GetConnectionString(ProjectNameConsts.ConnectionStringName);
         }
 
-        public override void PostInitialize()
-        {
-            ServicePointManager.Expect100Continue = true;
-        }
     }
 }
