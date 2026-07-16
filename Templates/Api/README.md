@@ -97,6 +97,43 @@ Para garantir que o Hangfire execute continuamente em produção, configure o II
 
 Isso garante que o Hangfire Server inicie automaticamente após o reciclagem do IIS e continue processando jobs mesmo durante períodos de inatividade.
 
+## Docker
+
+A imagem Docker do template API está em `Templates/Api/Dockerfile` e deve ser buildada a partir da raiz do repositório, pois o template referencia os projetos-fonte do EAF em `src/`.
+
+### Build
+
+```bash
+cd /caminho/para/EAF
+docker build -t eaf-api -f Templates/Api/Dockerfile .
+```
+
+### Execução
+
+As configurações sensíveis (connection string) e opcionais são passadas por variáveis de ambiente no momento da execução:
+
+```bash
+docker run -d -p 8001:8001 \
+  -e ConnectionStrings__Default="Server=...,1433;Database=...;user id=...;Password=...;TrustServerCertificate=True;Encrypt=false" \
+  -e Database__Provider=SqlServer \
+  -e Hangfire__IsEnabled=false \
+  -e SqlServerCache__IsEnabled=false \
+  -e RedisCache__IsEnabled=false \
+  -e App__ServerRootAddress=http://localhost:8001/ \
+  -e App__ClientRootAddress=http://localhost:8000/ \
+  -e App__CorsOrigins=* \
+  eaf-api
+```
+
+### docker-compose
+
+```bash
+cd Templates/Api
+ConnectionStrings__Default="..." docker-compose up --build
+```
+
+As variáveis são lidas pelo `ASPNETCORE_ENVIRONMENT=Production` e sobrescrevem as configurações do `appsettings.json`. Os arquivos `appsettings.{Local|Staging|Production|Development}.json` são removidos da imagem para evitar conexões padrão.
+
 ## Estrutura do Projeto
 
 ```

@@ -332,6 +332,38 @@ dotnet test Eaf.sln --collect:"XPlat Code Coverage" --settings coverlet.runsetti
 reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Html;Badges;TextSummary"
 ```
 
+### Running the Templates with Docker
+
+#### API Template
+
+```bash
+cd /path/to/EAF
+docker build -t eaf-api -f Templates/Api/Dockerfile .
+
+docker run -d -p 8001:8001 \
+  -e ConnectionStrings__Default="Server=...,1433;Database=...;user id=...;Password=...;TrustServerCertificate=True;Encrypt=false" \
+  -e Database__Provider=SqlServer \
+  -e Hangfire__IsEnabled=false \
+  -e SqlServerCache__IsEnabled=false \
+  -e RedisCache__IsEnabled=false \
+  -e App__CorsOrigins=* \
+  eaf-api
+```
+
+#### Angular Template
+
+```bash
+cd Templates/Angular/Eaf.ProjectName.UI
+docker build -t eaf-angular .
+
+docker run -d -p 80:80 \
+  -e REMOTE_SERVICE_BASE_URL=http://localhost:8001/ \
+  -e APP_BASE_URL=http://localhost:8000/ \
+  eaf-angular
+```
+
+See `Templates/Api/README.md` and `Templates/Angular/Eaf.ProjectName.UI/README.md` for details.
+
 ### Usage Example
 
 Let's examine a simple class to see the benefits of EAF:

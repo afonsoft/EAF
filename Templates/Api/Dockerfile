@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8001
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-ENV ASPNETCORE_ENVIRONMENT=Local
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8001
 ENV DOTNET_GCServer=1
 ENV DOTNET_TieredCompilation=1
@@ -14,41 +14,31 @@ ENV DOTNET_GCHeapCount=2
 ENV DOTNET_GCHeapAffinitize=0
 ENV DOTNET_GCLatencyMode=1
 ENV DOTNET_GCConcurrent=1
+ENV Database__Provider=SqlServer
+ENV Hangfire__IsEnabled=false
+ENV SqlServerCache__IsEnabled=false
+ENV RedisCache__IsEnabled=false
+ENV App__ServerRootAddress=http://localhost:8001/
+ENV App__ClientRootAddress=http://localhost:8000/
+ENV App__CorsOrigins=*
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-ENV NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED=true
-RUN update-ca-certificates
-COPY ["./nuget.config", "./"]
-COPY ["src/Eaf.ProjectName.Web.Host/Eaf.ProjectName.Web.Host.csproj", "src/Eaf.ProjectName.Web.Host/"]
-COPY ["src/Eaf.ProjectName.Application/Eaf.ProjectName.Application.csproj", "src/Eaf.ProjectName.Application/"]
-COPY ["src/Eaf.ProjectName.EntityFrameworkCore/Eaf.ProjectName.EntityFrameworkCore.csproj", "src/Eaf.ProjectName.EntityFrameworkCore/"]
-COPY ["src/Eaf.ProjectName.Core/Eaf.ProjectName.Core.csproj", "src/Eaf.ProjectName.Core/"]
-RUN wget -qO- https://aka.ms/install-artifacts-credprovider.sh | bash
-RUN dotnet restore "src/Eaf.ProjectName.Web.Host/Eaf.ProjectName.Web.Host.csproj" --interactive
 COPY . .
-WORKDIR "/src/src/Eaf.ProjectName.Web.Host"
-RUN dotnet build "Eaf.ProjectName.Web.Host.csproj" \
-    -c Release \
-    -o /app/build \
-    --no-restore \
-    -p:PublishTrimmed=false \
-    -p:PublishSingleFile=false \
-    -p:PublishReadyToRun=true \
-    -p:PublishReadyToRunComposite=true
-
-FROM build AS publish
+WORKDIR "/src/Templates/Api/src/Eaf.ProjectName.Web.Host"
+RUN dotnet restore "Eaf.ProjectName.Web.Host.csproj"
 RUN dotnet publish "Eaf.ProjectName.Web.Host.csproj" \
     -c Release \
     -o /app/publish \
+    --no-restore \
     -p:PublishTrimmed=false \
-    -p:PublishSingleFile=false \
-    -p:PublishReadyToRun=true \
-    -p:PublishReadyToRunComposite=true
+    -p:PublishSingleFile=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
+
+RUN rm -f appsettings.Local.json appsettings.Production.json appsettings.Staging.json appsettings.Development.json
 
 ENV TZ="America/Sao_Paulo"
 
@@ -64,6 +54,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     chown -R app:app /app
 
-USER app 
+USER app
 
 ENTRYPOINT ["dotnet", "Eaf.ProjectName.Web.Host.dll"]

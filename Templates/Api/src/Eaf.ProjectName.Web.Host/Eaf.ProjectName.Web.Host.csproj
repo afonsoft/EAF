@@ -12,10 +12,8 @@
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
 		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-		<DockerfileFile>Dockerfile</DockerfileFile>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<StartupObject>Eaf.ProjectName.Web.Startup.Program</StartupObject>
-		<DockerfileContext>..\..</DockerfileContext>
 		<ServerGarbageCollection>true</ServerGarbageCollection>
 		<AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
 		<GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>

@@ -133,15 +133,33 @@ npm run nswag
 
 ## Docker Deployment
 
-The template includes a Dockerfile for containerized deployment:
+The template includes a `dockerfile` for containerized deployment using Node 20 and Nginx.
+
+### Build
 
 ```bash
-# Build Docker image
 docker build -t eaf-angular-ui .
-
-# Run Docker container
-docker run -p 80:80 eaf-angular-ui
 ```
+
+### Run with API URL via environment variables
+
+```bash
+docker run -d -p 80:80 \
+  -e REMOTE_SERVICE_BASE_URL=http://localhost:8001/ \
+  -e APP_BASE_URL=http://localhost:8000/ \
+  -e ASPNETCORE_ENVIRONMENT=Local \
+  eaf-angular-ui
+```
+
+### Configuration at runtime
+
+The container uses `envsubst` to generate `assets/env.js` from `src/assets/env.template.js` at startup. The following variables are available:
+
+- `REMOTE_SERVICE_BASE_URL` - URL base da API EAF (ex: `http://localhost:8001/`)
+- `APP_BASE_URL` - URL base da aplicação Angular (ex: `http://localhost:8000/`)
+- `ASPNETCORE_ENVIRONMENT` - Ambiente usado para carregar `appconfig.{env}.json` quando `REMOTE_SERVICE_BASE_URL` não é fornecido
+
+Quando `REMOTE_SERVICE_BASE_URL` está definido, o `AppPreBootstrap` o utiliza diretamente e ignora o `appconfig.{env}.json`. Isso permite reutilizar a mesma imagem Docker em diferentes ambientes (dev, hom, prod) sem recompilar o frontend.
 
 ## Browser Support
 

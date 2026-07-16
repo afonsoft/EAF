@@ -22,7 +22,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D04D9608-9CEB-4E0A-B548-410F7475E9F1}"
 	ProjectSection(SolutionItems) = preProject
 		common.props = common.props
-		src\Eaf.ProjectName.Web.Host\Dockerfile = src\Eaf.ProjectName.Web.Host\Dockerfile
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eaf.ProjectName.ConsoleApiClient", "test\Eaf.ProjectName.ConsoleApiClient\Eaf.ProjectName.ConsoleApiClient.csproj", "{BD02FF1C-6E0A-4127-AA2E-804019F89A99}"
