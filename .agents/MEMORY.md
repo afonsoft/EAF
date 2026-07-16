@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260715-priority63-coverage-audit`
+Last session branch: `feature/devin-20260715-priority64-quality-debt`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -24,6 +24,13 @@ Current coverage (after P60): Line 97.8%, Branch 90.2%, Method 99.8% (4593 tests
 Current coverage (after P61): Line 97.8%, Branch 90.3%, Method 99.8% (4597 tests, 4596 passing, 1 skipped). Build warnings: 162.
 Current coverage (after P62): Line 97.9%, Branch 90.4%, Method 99.8% (4602 tests, 4601 passing, 1 skipped). Build warnings: 162.
 Current coverage (after P63): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 162.
+Current coverage (after P64): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 0 (Eaf.sln).
+
+## P64 gotchas
+- `Eaf.sln` build warnings reduced from 141 to 0 by switching test projects to `<Nullable>annotations</Nullable>`, removing unnecessary `Microsoft.Extensions.*` package references from `Eaf.Middleware.Worker.Tests`, removing unnecessary `new` modifiers in `EafWebhookReceiverBddTests`, replacing obsolete `FormatterServices.GetUninitializedObject` with `RuntimeHelpers.GetUninitializedObject` in `LdapAuthenticationSourceBddTests`, and removing obsolete `ServicePointManager.Expect100Continue` from the Worker template.
+- Test projects use nullable annotations-only context to avoid noise from intentional null values in test setup while keeping `?`/`!` syntax available.
+- SonarCloud quality gate on PR #198 passed with 0 new issues; no Bug/Vulnerability issues to treat.
+- Templates `Api`, `Worker` and `Angular/Eaf.ProjectName.UI` build successfully. Worker template warnings reduced; API template still emits 26 warnings (Pomelo `NU1608` + AutoMapper `NU1903`) and Worker template 6 warnings (AutoMapper `NU1903`). These require dependency version updates that are not yet safe (Pomelo EF Core 10 support not on stable NuGet; AutoMapper >= 15 binary-incompatible with `Abp.AutoMapper 10.4.0`).
 
 ## P63 gotchas
 - SonarCloud duplication on PR #197 was caused by `Templates/**` boilerplate being included in CPD; adding `sonar.cpd.exclusions=Templates/**` to `.sonarcloud.properties` and `/d:sonar.cpd.exclusions="Templates/**"` to `sonarcloud.sh` resolves it for future PRs.

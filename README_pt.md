@@ -10,7 +10,7 @@
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
 ![Total Tests](https://img.shields.io/badge/Total%20Tests-4604-blue)
 ![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4603-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-162-yellow)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-0-brightgreen)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -396,11 +396,11 @@ Este exemplo demonstra vários recursos do EAF:
 
 ### Meta de Cobertura
 - **Objetivo**: 90% de cobertura de código
-- **Atual**: 97.9% linha, 90.5% branch, 99.8% método
+- **Atual**: 97.9% linha, 90.5% branch, 99.8% método; build `Eaf.sln` com 0 warnings
 - **Testes Backend**: 4604 total, 4603 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
-- **Próximos passos**: P59 coverage audit — continuar melhorando cobertura de branch/método nas classes restantes, priorizando PermissionAppService, RoleAppService, MiddlewareAppServiceBase, TenantAppService, LdapAuthenticationSource, LdapSettings, ChatHub, TokenAuthController, MiddlewareWebCoreModule, EafHangfireApplicationBuilderExtensions, EafHangfireAuthorizationFilter e ServiceBusQueueAppender, e documentar ramos inacessíveis no Linux.
+- **Próximos passos**: P65 — reduzir warnings restantes nos templates (`AutoMapper` NU1903, `Pomelo` NU1608), avaliar atualização de dependências obsoletas e continuar auditoria de débito técnico no SonarCloud.
 
 ### Melhorias Implementadas
 - **Expansão de Testes (Julho 2026)**: P58 coverage audit — testes BDD para SerilogLogger, TenantAddress, EafWorkerBase, UserAppService, ChatMessageManager, HostSettingsAppService, EafSqliteCache e EafSqlServerCache

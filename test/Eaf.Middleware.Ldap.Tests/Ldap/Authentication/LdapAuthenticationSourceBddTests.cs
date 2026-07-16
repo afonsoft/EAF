@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -379,12 +379,14 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
         [Fact]
         public void Dado_PlataformaNaoWindows_Quando_SearchWithLimit_Entao_DeveLancarExcecaoDePlataforma()
         {
+#pragma warning disable CA1416
             var sut = CriarSut();
-            var searcher = (PrincipalSearcher)FormatterServices.GetUninitializedObject(typeof(PrincipalSearcher));
+            var searcher = (PrincipalSearcher)RuntimeHelpers.GetUninitializedObject(typeof(PrincipalSearcher));
 
             var ex = Should.Throw<PlatformNotSupportedException>(() => sut.SearchWithLimitPublic(searcher, 10));
 
             ex.ShouldNotBeNull();
+#pragma warning restore CA1416
         }
 
         [Theory]
@@ -773,7 +775,9 @@ namespace Eaf.Middleware.Ldap.Tests.Ldap.Authentication
 
             protected override Task<PrincipalContext> CreatePrincipalContext(TestTenant tenant, string? userNameOrEmailAddress, string? plainPassword)
             {
+#pragma warning disable CA1416
                 return Task.FromResult(PrincipalContextToReturn ?? null!);
+#pragma warning restore CA1416
             }
 
             public async Task<LdapConnection> CreateLdapContextBaseAsync(TestTenant? tenant, string? userNameOrEmailAddress = null, string? plainPassword = null)
