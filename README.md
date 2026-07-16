@@ -10,7 +10,7 @@ English | **[Português](README_pt.md)**
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
 ![Total Tests](https://img.shields.io/badge/Total%20Tests-4604-blue)
 ![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4603-brightgreen)
-![Build Warnings](https://img.shields.io/badge/Build%20Warnings-162-yellow)
+![Build Warnings](https://img.shields.io/badge/Build%20Warnings-0-brightgreen)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
@@ -375,7 +375,7 @@ This example demonstrates several EAF features:
 
 ## Code Coverage
 
-### Latest Test Results (2026-07-15)
+### Latest Test Results (2026-07-16)
 
 | Metric | Value |
 |---|---|
@@ -386,6 +386,7 @@ This example demonstrates several EAF features:
 | **Passed** | 4603 |
 | **Skipped** | 1 |
 | **Failed** | 0 |
+| **Build warnings** | 0 |
 
 ### Coverage by Module
 
