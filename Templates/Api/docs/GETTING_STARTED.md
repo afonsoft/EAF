@@ -124,26 +124,35 @@ dotnet Eaf.ProjectName.Web.Host.dll
 
 ## Docker Deployment
 
-The template includes a Dockerfile for containerized deployment.
+O Dockerfile do template está em `Templates/Api/Dockerfile` e deve ser buildado a partir da raiz do repositório, pois o template referencia os projetos-fonte do EAF em `src/`.
 
 ### Build Docker Image
 
 ```bash
-docker build -t eaf-api .
+cd /path/to/EAF
+docker build -t eaf-api -f Templates/Api/Dockerfile .
 ```
 
 ### Run Docker Container
 
 ```bash
-docker run -p 21021:80 -e ConnectionStrings__Default="Server=sqlserver;Database=EafProjectName;User Id=sa;Password=YourPassword" eaf-api
+docker run -d -p 8001:8001 \
+  -e ConnectionStrings__Default="Server=sqlserver;Database=EafProjectName;User Id=sa;Password=YourPassword;TrustServerCertificate=True;Encrypt=false" \
+  -e Database__Provider=SqlServer \
+  -e Hangfire__IsEnabled=false \
+  -e SqlServerCache__IsEnabled=false \
+  -e RedisCache__IsEnabled=false \
+  -e App__CorsOrigins=* \
+  eaf-api
 ```
 
 ### Docker Compose
 
-Use the included `docker-compose.yml`:
+Use o `docker-compose.yml` em `Templates/Api`:
 
 ```bash
-docker-compose up
+cd Templates/Api
+ConnectionStrings__Default="..." docker-compose up --build
 ```
 
 ## Project Structure

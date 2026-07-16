@@ -35,6 +35,12 @@ Current coverage (after P66): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests
 - Added BDD test `Dado_AppsettingsEVariavelDeAmbienteComMesmoNome_Quando_Get_Entao_VariavelDeAmbienteSobrescreveJson` to lock in env override behavior.
 - To run `Eaf.ApiWithSrc.sln` locally: start a SQL Server 2022 Docker container, run `Eaf.ProjectName.Migrator` with `ConnectionStrings__LOCAL`, then run `Eaf.ProjectName.Web.Host` with `ConnectionStrings__Default` (or `ProjectName_` prefix via host builder), `Hangfire__IsEnabled=false`, and `SqlServerCache__IsEnabled=false`.
 - `GET /api/services/app/About/GetAbout` returns 200 with environment info.
+- The `Templates/Api/Dockerfile` must be built from the repository root because the API template references EAF source projects in `src/` via `ProjectReference`.
+- The Angular Dockerfile uses `envsubst` to generate `assets/env.js` from `src/assets/env.template.js`; `AppPreBootstrap.getApplicationConfig` reads `window['env']['remoteServiceBaseUrl']` and `window['env']['appBaseUrl']` at runtime to override `appconfig.{env}.json`.
+
+## Docker template notes (P66 follow-up)
+- API Dockerfile: build context is repo root; remove `appsettings.{Local|Staging|Production|Development}.json` from image; pass `ConnectionStrings__Default`, `Database__Provider`, `Hangfire__IsEnabled`, `SqlServerCache__IsEnabled`, `RedisCache__IsEnabled`, `App__ServerRootAddress`, `App__ClientRootAddress` and `App__CorsOrigins` as environment variables.
+- Angular Dockerfile: Node 20 alpine, `npm install --legacy-peer-deps`; pass `REMOTE_SERVICE_BASE_URL`, `APP_BASE_URL` and `ASPNETCORE_ENVIRONMENT` at runtime.
 
 ## P65 gotchas
 - Template `Api` and `Worker` build warnings reduced to 0 by adding documented suppressions (`NU1608` for Pomelo and `NuGetAuditSuppress` for `GHSA-rvv3-g6hj-g44x`) to `Templates/Api/common.props` and `Templates/Worker/common.props`.

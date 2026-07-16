@@ -36,6 +36,18 @@ export class AppPreBootstrap {
   }
 
   private static getApplicationConfig(appRootUrl: string, callback: () => void) {
+    const env = (window as any).env || {};
+    if (env.remoteServiceBaseUrl) {
+      const currentOrigin = window.location.origin;
+      AppConsts.remoteServiceBaseUrlFormat = env.remoteServiceBaseUrl;
+      AppConsts.remoteServiceBaseUrl = env.remoteServiceBaseUrl;
+      AppConsts.appBaseUrlFormat = env.appBaseUrl || currentOrigin;
+      AppConsts.appBaseUrl = env.appBaseUrl || currentOrigin;
+      AppConsts.localeMappings = env.localeMappings || [{ from: 'pt-BR', to: 'pt' }];
+      callback();
+      return;
+    }
+
     const type = 'GET';
     const url = appRootUrl + 'assets/' + environment.appConfig;
     const customHeaders = [
