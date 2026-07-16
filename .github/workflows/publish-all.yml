@@ -57,13 +57,13 @@ jobs:
 
     steps:
       - name: "📥 Checkout"
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: "📦 Setup NuGet"
-        uses: NuGet/setup-nuget@v4
+        uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123 # v4
 
       - name: "🗄️ Setup .NET"
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           dotnet-version: "10.0.x"
 
@@ -95,21 +95,25 @@ jobs:
       - name: "📦 Publish to GitHub Packages"
         id: publish-github
         continue-on-error: true
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Publishing to GitHub Packages..."
           dotnet nuget push **/*.nupkg \
             --source 'https://nuget.pkg.github.com/afonsoft/index.json' \
-            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --api-key "$GITHUB_PACKAGES_TOKEN" \
             --skip-duplicate
 
       - name: "📦 Publish to NuGet.org"
         id: publish-nuget-org
         continue-on-error: true
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_TOKEN }}
         run: |
           echo "Publishing to NuGet.org..."
           dotnet nuget push **/*.nupkg \
             --source 'https://api.nuget.org/v3/index.json' \
-            --api-key ${{ secrets.NUGET_TOKEN }} \
+            --api-key "$NUGET_API_KEY" \
             --skip-duplicate
 
       - name: "❌ Fail if both targets failed"
@@ -170,13 +174,13 @@ jobs:
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: 📦 Setup NuGet
-        uses: NuGet/setup-nuget@v4
+        uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123 # v4
 
       - name: 🗄️ Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           dotnet-version: "10.0.x"
 
@@ -199,28 +203,34 @@ jobs:
             --ignore-failed-sources
 
       - name: 🛑 Take site offline (upload app_offline.htm)
+        env:
+          FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
+          FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
         run: |
           echo "Uploading app_offline.htm to take site offline..."
-          curl -s -T .github/app_offline/app_offline.htm \
-            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+          curl -s --ssl-reqd -T .github/app_offline/app_offline.htm \
+            -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
             "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/app_offline.htm"
           echo "app_offline.htm uploaded."
 
       - name: 🗑️ Delete *.dll *.json *.config files from server via FTP
+        env:
+          FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
+          FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
         run: |
-          FTP_USER="${{ secrets.FTP_PUBLISH_USER }}"
-          FTP_PASS="${{ secrets.FTP_PUBLISH_PASSWORD }}"
+          FTP_USER="${FTP_PUBLISH_USER}"
+          FTP_PASS="${FTP_PUBLISH_PASSWORD}"
           FTP_URL="ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/"
 
           echo "Listing remote files..."
-          FILE_LIST=$(curl -s -l -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}")
+          FILE_LIST=$(curl -s --ssl-reqd -l -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}")
 
           echo "Deleting *.dll, *.json, *.config files from server root..."
           for FILE in $FILE_LIST; do
             case "$FILE" in
               *.dll|*.json|*.config)
                 echo "  Deleting $FILE ..."
-                curl -s -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}" \
+                curl -s --ssl-reqd -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}" \
                   -Q "DELE /demo-eaf-api.afonsoft.com.br/$FILE" \
                   -o /dev/null 2>&1 || echo "  Warning: could not delete $FILE"
                 ;;
@@ -234,14 +244,17 @@ jobs:
           sleep 30
 
       - name: 📤 Upload offline appsettings.json and web.config (force IIS recycle)
+        env:
+          FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
+          FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
         run: |
           echo "Uploading web.config.offline to force IIS app pool recycle..."
-          curl -s -T .github/app_offline/web.config.offline \
-            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+          curl -s --ssl-reqd -T .github/app_offline/web.config.offline \
+            -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
             "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/web.config"
           echo "Uploading appsettings.json.offline..."
-          curl -s -T .github/app_offline/appsettings.json.offline \
-            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+          curl -s --ssl-reqd -T .github/app_offline/appsettings.json.offline \
+            -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
             "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/appsettings.json"
           echo "Offline config files uploaded."
 
@@ -253,10 +266,11 @@ jobs:
       - name: 📦 Deploy API via FTP
         id: ftp_deploy
         continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
         with:
           server: ftp.afonsoft.com.br
           port: 21
+          protocol: ftps
           local-dir: publish/
           server-dir: /demo-eaf-api.afonsoft.com.br/
           log-level: minimal
@@ -273,10 +287,11 @@ jobs:
       - name: 📦 Deploy API via FTP (retry)
         id: ftp_deploy_retry
         if: steps.ftp_deploy.outcome == 'failure'
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
         with:
           server: ftp.afonsoft.com.br
           port: 21
+          protocol: ftps
           local-dir: publish/
           server-dir: /demo-eaf-api.afonsoft.com.br/
           log-level: minimal
@@ -286,22 +301,28 @@ jobs:
 
       - name: 🔧 Restore web.config and appsettings.json on deploy failure
         if: always() && steps.ftp_deploy.outcome == 'failure' && (steps.ftp_deploy_retry.outcome == 'failure' || steps.ftp_deploy_retry.outcome == 'skipped')
+        env:
+          FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
+          FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
         run: |
           echo "Both deploy attempts failed — restoring web.config and appsettings.json from build output..."
-          curl -s -T publish/web.config \
-            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+          curl -s --ssl-reqd -T publish/web.config \
+            -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
             "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/web.config" \
             && echo "web.config restored" || echo "Warning: could not restore web.config"
-          curl -s -T publish/appsettings.json \
-            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+          curl -s --ssl-reqd -T publish/appsettings.json \
+            -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
             "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/appsettings.json" \
             && echo "appsettings.json restored" || echo "Warning: could not restore appsettings.json"
 
       - name: 🟢 Bring site back online (remove app_offline.htm)
         if: always()
+        env:
+          FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
+          FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
         run: |
-          curl -s --ftp-create-dirs \
-            -u "${{ secrets.FTP_PUBLISH_USER }}:${{ secrets.FTP_PUBLISH_PASSWORD }}" \
+          curl -s --ssl-reqd --ftp-create-dirs \
+            -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
             "ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br/app_offline.htm" \
             -Q "DELE /demo-eaf-api.afonsoft.com.br/app_offline.htm" \
             -o /dev/null || echo "Warning: could not remove app_offline.htm"
@@ -326,10 +347,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "20.20.0"
           cache: "npm"
@@ -351,10 +372,11 @@ jobs:
         run: cp -f Templates/ReplaceConfigs/UI/assets/*.json Templates/Angular/Eaf.ProjectName.UI/dist/assets/
 
       - name: 📦 Deploy UI via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
         with:
           server: ftp.afonsoft.com.br
           port: 21
+          protocol: ftps
           local-dir: Templates/Angular/Eaf.ProjectName.UI/dist/
           server-dir: /demo-eaf.afonsoft.com.br/
           log-level: minimal

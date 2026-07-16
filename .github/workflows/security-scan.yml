@@ -26,19 +26,19 @@ jobs:
     
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       
       - name: 🔍 Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
       
       - name: 🔍 Autobuild
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
       
       - name: 🔍 Perform Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
         with:
           category: "/language:${{matrix.language}}"
 
@@ -50,17 +50,19 @@ jobs:
     
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       
       - name: 🗄️ Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           dotnet-version: "10.0.x"
       
       - name: 🔑 Validate Snyk Token
         id: snyk-token-check
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          if [ -z "${{ secrets.SNYK_TOKEN }}" ]; then
+          if [ -z "$SNYK_TOKEN" ]; then
             echo "has_token=false" >> $GITHUB_OUTPUT
             echo "::warning::SNYK_TOKEN não configurado. Scan será ignorado."
           else
@@ -74,7 +76,7 @@ jobs:
       - name: 🛡️ Run Snyk (.NET)
         if: steps.snyk-token-check.outputs.has_token == 'true'
         id: snyk-dotnet
-        uses: snyk/actions/dotnet@master
+        uses: snyk/actions/dotnet@8e119fbb6c251787721d34ba683ed48eba792766 # master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -84,7 +86,7 @@ jobs:
       - name: 🛡️ Snyk UI Scan
         if: steps.snyk-token-check.outputs.has_token == 'true'
         id: snyk-node
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@8e119fbb6c251787721d34ba683ed48eba792766 # master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -120,14 +122,16 @@ jobs:
     
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           fetch-depth: 0
 
       - name: 🔑 Validate Sonar Token
         id: sonar-token-check
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+          if [ -z "$SONAR_TOKEN" ]; then
             echo "has_token=false" >> $GITHUB_OUTPUT
             echo "::warning::SONAR_TOKEN não configurado. SonarQube scan será ignorado."
           else
@@ -136,13 +140,13 @@ jobs:
       
       - name: 🗄️ Setup .NET
         if: steps.sonar-token-check.outputs.has_token == 'true'
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           dotnet-version: "10.0.x"
       
       - name: 📦 Setup NuGet
         if: steps.sonar-token-check.outputs.has_token == 'true'
-        uses: NuGet/setup-nuget@v4
+        uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123 # v4
       
       - name: 🔧 Restore Dependencies
         if: steps.sonar-token-check.outputs.has_token == 'true'
@@ -155,7 +159,7 @@ jobs:
       - name: 📊 SonarQube Scan
         if: steps.sonar-token-check.outputs.has_token == 'true'
         id: sonar-scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarcloud-github-action@ba3875ecf642b2129de2b589510c81a8b53dbf4e # master
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
