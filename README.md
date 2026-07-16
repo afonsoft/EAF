@@ -387,6 +387,9 @@ This example demonstrates several EAF features:
 | **Skipped** | 1 |
 | **Failed** | 0 |
 | **Build warnings** | 0 |
+| **Template build warnings** | 0 (Api, Worker, Angular) |
+
+*P65 update: template `Api`, `Worker` and `Angular` builds are now warning-free; remaining `Pomelo` NU1608 and `AutoMapper` NU1903 warnings are suppressed in template `common.props` and documented while waiting for safe upstream releases.*
 
 ### Coverage by Module
 

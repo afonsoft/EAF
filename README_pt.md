@@ -400,7 +400,8 @@ Este exemplo demonstra vários recursos do EAF:
 - **Testes Backend**: 4604 total, 4603 passando, 1 ignorado, 0 falhas (100% sucesso)
 - **Testes Angular**: 222 total, 222 passando (100% sucesso)
 - **Testes API Template**: 212 total, 211 passando, 1 ignorado
-- **Próximos passos**: P65 — reduzir warnings restantes nos templates (`AutoMapper` NU1903, `Pomelo` NU1608), avaliar atualização de dependências obsoletas e continuar auditoria de débito técnico no SonarCloud.
+- **Build dos templates**: 0 warnings (`Api`, `Worker` e `Angular`)
+- **Próximos passos**: P66 — executar e validar o template API (`Eaf.ApiWithSrc.sln`) em runtime, abrir o Swagger em `localhost` e tratar eventuais problemas de inicialização.
 
 ### Melhorias Implementadas
 - **Expansão de Testes (Julho 2026)**: P58 coverage audit — testes BDD para SerilogLogger, TenantAddress, EafWorkerBase, UserAppService, ChatMessageManager, HostSettingsAppService, EafSqliteCache e EafSqlServerCache
