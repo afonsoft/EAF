@@ -337,33 +337,51 @@ reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:"Test
 
 ### Executando os Templates com Docker
 
-#### Template API
+#### Stack completo (SQL Server + Migrator + API + Worker + Angular)
 
 ```bash
 cd /caminho/para/EAF
-docker build -t eaf-api -f Templates/Api/Dockerfile .
 
-docker run -d -p 8001:8001 \
-  -e ConnectionStrings__Default="Server=...,1433;Database=...;user id=...;Password=...;TrustServerCertificate=True;Encrypt=false" \
-  -e Database__Provider=SqlServer \
-  -e Hangfire__IsEnabled=false \
-  -e SqlServerCache__IsEnabled=false \
-  -e RedisCache__IsEnabled=false \
-  -e App__CorsOrigins=* \
-  eaf-api
+# Copie e edite o arquivo de ambiente
+cp .env.example .env
+
+# Inicie todos os serviços
+docker compose -f docker-compose.all.yml up --build -d
+
+# Valide
+curl http://localhost:5000/swagger/v1/swagger.json
+curl http://localhost:4200/
 ```
 
-#### Template Angular
+#### Stack mínimo (API + Angular, sem infraestrutura)
+
+Use este compose quando a infraestrutura (SQL Server, Redis etc.) for gerenciada fora do Docker Compose.
 
 ```bash
-cd Templates/Angular/Eaf.ProjectName.UI
-docker build -t eaf-angular .
+cd /caminho/para/EAF
 
-docker run -d -p 80:80 \
-  -e REMOTE_SERVICE_BASE_URL=http://localhost:8001/ \
-  -e APP_BASE_URL=http://localhost:8000/ \
-  eaf-angular
+# Configure o .env com a connection string do seu banco externo
+cp .env.example .env
+
+# Inicie a API e o Angular
+docker compose -f docker-compose.yml up --build -d
+
+# Ou use um SQL Server em outro compose na mesma rede
+docker compose -f docker-compose.all.yml up -d eaf-sqlserver eaf-migrator
+docker compose -f docker-compose.yml up --build -d
 ```
+
+#### Script de validação
+
+```bash
+# Validação padrão do stack completo
+bash scripts/validate-docker-compose.sh
+
+# Validar um compose específico
+COMPOSE_FILE=docker-compose.all.yml bash scripts/validate-docker-compose.sh
+```
+
+#### Exemplos manuais de containers
 
 Veja `Templates/Api/README.md` e `Templates/Angular/Eaf.ProjectName.UI/README.md` para mais detalhes.
 
