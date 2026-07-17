@@ -25,13 +25,13 @@ using System.Transactions;
 
 namespace Eaf.Middleware.Worker
 {
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareWorker.
+    /// </summary>
     [DependsOn(
         typeof(AbpZeroCommonModule),
         typeof(AbpAutoMapperModule),
         typeof(AbpMailKitModule))]
-    /// <summary>
-    /// Módulo ABP que configura e inicializa MiddlewareWorker.
-    /// </summary>
     public class MiddlewareWorkerModule : AbpModule
     {
         private readonly IConfigurationRoot _appConfiguration;

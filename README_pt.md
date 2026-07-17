@@ -8,12 +8,14 @@
 ![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.5%25-brightgreen)
 ![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.8%25-brightgreen)
 ![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4604-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4603-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-4605-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4604-brightgreen)
+![Skipped Tests](https://img.shields.io/badge/Skipped%20Tests-1-yellow)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-0-brightgreen)
 ![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
+![Worker Runtime](https://img.shields.io/badge/Worker%20Runtime-Validated-brightgreen)
 
 ## Índice
 
