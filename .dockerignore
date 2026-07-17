@@ -21,5 +21,8 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+**/TestResults
+**/.devin-files
+**/*.log
 LICENSE
 README.md
