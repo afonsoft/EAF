@@ -121,6 +121,7 @@ namespace Eaf.Middleware.Ldap.Authentication
             return await GetUsersFromLdapAsync(userNameOrEmailAddress);
         }
 
+        [SupportedOSPlatform("windows")]
         private async Task<List<TUser>> GetUsersFromActiveDirectoryAsync(string userNameOrEmailAddress)
         {
             using (var principalContext = await CreatePrincipalContext(null))
