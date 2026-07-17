@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260717-priority68-docker-integration`
+Last session branch: `feature/devin-20260718-priority69-compose-hardening`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -29,6 +29,17 @@ Current coverage (after P65): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests
 Current coverage (after P66): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); `Eaf.ApiWithSrc.sln` Swagger validated on `http://localhost:5000/swagger`.
 Current coverage (after P67): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Worker template starts locally against SQL Server Docker.
 Current coverage (after P68): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 0 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Docker Compose end-to-end validated (SQL Server, Migrator, API, Worker, Angular); `http://localhost:5000/swagger` and `http://localhost:4200` respond.
+Current coverage (after P69): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 0 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); `docker-compose.yml` split into `docker-compose.all.yml` (full stack) and `docker-compose.yml` (API + Angular only, driven by environment variables); healthchecks, named volumes, `.env.example`, and `scripts/validate-docker-compose.sh` added.
+
+## P69 gotchas
+- Split `docker-compose.yml` into two files:
+  - `docker-compose.all.yml` — full stack with SQL Server, Migrator, API, Worker and Angular, plus healthchecks and named volumes (`mssql-data`, `eaf-api-logs`, `eaf-worker-logs`).
+  - `docker-compose.yml` — minimal API + Angular stack driven entirely by environment variables; no infrastructure containers, meant for scenarios where SQL Server/Redis are managed externally.
+- Added `curl` to the API Dockerfile (`ca-certificates curl`) so the API healthcheck (`/health`) works inside the container.
+- Added `procps` to the Worker Dockerfile so the Worker healthcheck (`pgrep -x dotnet`) works inside the container.
+- The validation script `scripts/validate-docker-compose.sh` starts the stack, waits for endpoint responses, verifies the migrator exited cleanly and checks Worker logs for `FATAL`/`Unhandled`/`Critical`.
+- When running `docker-compose.yml` with the infrastructure from `docker-compose.all.yml`, start only `eaf-sqlserver` and `eaf-migrator` from the full compose (`docker compose -f docker-compose.all.yml up -d eaf-sqlserver eaf-migrator`) and then start the minimal compose; both share the same `eaf-network` bridge.
+- The API healthcheck uses `curl -f http://localhost:8001/health`; the Angular healthcheck uses `curl -f http://localhost/` (nginx image includes curl).
 
 ## P68 gotchas
 - Docker Compose end-to-end stack: `eaf-sqlserver`, `eaf-migrator`, `eaf-api`, `eaf-worker` and `eaf-angular` (nginx) all start and communicate over the `eaf-network` bridge network.

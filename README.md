@@ -337,33 +337,51 @@ reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:"Test
 
 ### Running the Templates with Docker
 
-#### API Template
+#### Full stack (SQL Server + Migrator + API + Worker + Angular)
 
 ```bash
 cd /path/to/EAF
-docker build -t eaf-api -f Templates/Api/Dockerfile .
 
-docker run -d -p 8001:8001 \
-  -e ConnectionStrings__Default="Server=...,1433;Database=...;user id=...;Password=...;TrustServerCertificate=True;Encrypt=false" \
-  -e Database__Provider=SqlServer \
-  -e Hangfire__IsEnabled=false \
-  -e SqlServerCache__IsEnabled=false \
-  -e RedisCache__IsEnabled=false \
-  -e App__CorsOrigins=* \
-  eaf-api
+# Copy and edit the environment file
+cp .env.example .env
+
+# Start everything
+docker compose -f docker-compose.all.yml up --build -d
+
+# Validate
+curl http://localhost:5000/swagger/v1/swagger.json
+curl http://localhost:4200/
 ```
 
-#### Angular Template
+#### Minimal stack (API + Angular only, external SQL Server)
+
+Use this when the infrastructure (SQL Server, Redis, etc.) is managed outside Docker Compose.
 
 ```bash
-cd Templates/Angular/Eaf.ProjectName.UI
-docker build -t eaf-angular .
+cd /path/to/EAF
 
-docker run -d -p 80:80 \
-  -e REMOTE_SERVICE_BASE_URL=http://localhost:8001/ \
-  -e APP_BASE_URL=http://localhost:8000/ \
-  eaf-angular
+# Configure .env with your external connection string
+cp .env.example .env
+
+# Start API and Angular
+docker compose -f docker-compose.yml up --build -d
+
+# Or use an external SQL Server container in the same network
+docker compose -f docker-compose.all.yml up -d eaf-sqlserver eaf-migrator
+docker compose -f docker-compose.yml up --build -d
 ```
+
+#### Validation script
+
+```bash
+# Full stack validation (default)
+bash scripts/validate-docker-compose.sh
+
+# Validate a specific compose file
+COMPOSE_FILE=docker-compose.all.yml bash scripts/validate-docker-compose.sh
+```
+
+#### Manual container examples
 
 See `Templates/Api/README.md` and `Templates/Angular/Eaf.ProjectName.UI/README.md` for details.
 
