@@ -1,0 +1,103 @@
+x-common-variables: &common-variables
+  Database__Provider: SqlServer
+  Hangfire__IsEnabled: false
+  SqlServerCache__IsEnabled: false
+  RedisCache__IsEnabled: false
+
+services:
+  eaf-sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: eaf-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD is required}"
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $${MSSQL_SA_PASSWORD} -Q 'SELECT 1' -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - eaf-network
+
+  eaf-migrator:
+    build:
+      context: .
+      dockerfile: Templates/Api/Dockerfile.migrator
+    container_name: eaf-migrator
+    environment:
+      <<: *common-variables
+      ASPNETCORE_Docker_Enabled: true
+      ConnectionStrings__LOCAL: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
+      ConnectionStrings__Default: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
+    depends_on:
+      eaf-sqlserver:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - eaf-network
+
+  eaf-api:
+    build:
+      context: .
+      dockerfile: Templates/Api/Dockerfile
+    container_name: eaf-api
+    environment:
+      <<: *common-variables
+      ASPNETCORE_ENVIRONMENT: Staging
+      DOTNET_ENVIRONMENT: Staging
+      ASPNETCORE_URLS: http://+:8001
+      ConnectionStrings__Default: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
+      App__ServerRootAddress: http://localhost:5000/
+      App__ClientRootAddress: http://localhost:4200/
+      App__CorsOrigins: http://localhost:4200
+    ports:
+      - "5000:8001"
+    depends_on:
+      eaf-sqlserver:
+        condition: service_healthy
+      eaf-migrator:
+        condition: service_completed_successfully
+    networks:
+      - eaf-network
+
+  eaf-worker:
+    build:
+      context: .
+      dockerfile: Templates/Worker/Dockerfile
+    container_name: eaf-worker
+    environment:
+      <<: *common-variables
+      DOTNET_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
+    depends_on:
+      eaf-sqlserver:
+        condition: service_healthy
+      eaf-migrator:
+        condition: service_completed_successfully
+    networks:
+      - eaf-network
+
+  eaf-angular:
+    build:
+      context: Templates/Angular/Eaf.ProjectName.UI
+      dockerfile: dockerfile
+    container_name: eaf-angular
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      REMOTE_SERVICE_BASE_URL: http://localhost:5000
+      APP_BASE_URL: http://localhost:4200
+    ports:
+      - "4200:80"
+    depends_on:
+      - eaf-api
+    networks:
+      - eaf-network
+
+networks:
+  eaf-network:
+    driver: bridge
