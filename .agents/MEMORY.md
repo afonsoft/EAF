@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260715-priority64-quality-debt`
+Last session branch: `feature/devin-20260716-priority67-worker-runtime`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -27,6 +27,14 @@ Current coverage (after P63): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests
 Current coverage (after P64): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 0 (Eaf.sln).
 Current coverage (after P65): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular).
 Current coverage (after P66): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); `Eaf.ApiWithSrc.sln` Swagger validated on `http://localhost:5000/swagger`.
+Current coverage (after P67): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Worker template starts locally against SQL Server Docker.
+
+## P67 gotchas
+- Worker template `ProjectNameCoreModule` was missing `MiddlewareCoreModule` in `DependsOn`, so `AbpZeroEntityTypes` (`Tenant`/`User`/`Role`) was not set and startup threw `ArgumentNullException`. Adding `typeof(MiddlewareCoreModule)` fixes the module initialization chain.
+- `Eaf.Middleware.Worker/MiddlewareWorkerModule.cs`, `Eaf.Middleware.Application/MiddlewareApplicationModule.cs` and `Eaf.Middleware.Web.Core/MiddlewareWebCoreModule.cs` had XML doc comments placed after `[DependsOn]` attributes, causing `CS1587`; moving the `/// <summary>` block above the attribute resolves the warnings.
+- `LdapAuthenticationSource.GetUsersFromActiveDirectoryAsync` uses `System.DirectoryServices.AccountManagement` APIs that are Windows-only. Annotating the method with `[SupportedOSPlatform("windows")]` removes `CA1416` warnings without suppressing the analyzer globally.
+- Running the Worker locally requires the same Docker SQL Server setup as the API and environment variables: `DOTNET_ENVIRONMENT=Production`, `ConnectionStrings__Default` (SQL Server with `Encrypt=false`), `Database__Provider=SqlServer`, `Hangfire__IsEnabled=false`, `SqlServerCache__IsEnabled=false`.
+- `Eaf.SqliteCache.Tests` test `Set_WithAbsoluteExpiration_ShouldExpireCorrectly` is timing-sensitive and can fail when the full test suite runs in parallel; it passes in isolation and coverage is unaffected.
 
 ## P66 gotchas
 - `AppConfigurations.BuildConfiguration` and `EafHostBuilderExtensions.UseEafConfiguration` added environment variables **before** JSON files, preventing env-based overrides of `ConnectionStrings` and other settings. Moving `AddEnvironmentVariables` after `appsettings.json`/`appsettings.{Environment}.json` fixes this and matches standard .NET configuration precedence.
