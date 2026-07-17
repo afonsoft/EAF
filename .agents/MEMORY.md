@@ -1,6 +1,6 @@
 # EAF Coverage Audit Memory
 
-Last session branch: `feature/devin-20260716-priority67-worker-runtime`
+Last session branch: `feature/devin-20260717-priority68-docker-integration`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
 Current coverage (after P43): Line 96.1%, Branch 82.0%, Method 99.1%.
@@ -28,6 +28,15 @@ Current coverage (after P64): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests
 Current coverage (after P65): Line 97.9%, Branch 90.5%, Method 99.8% (4604 tests, 4603 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular).
 Current coverage (after P66): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); `Eaf.ApiWithSrc.sln` Swagger validated on `http://localhost:5000/swagger`.
 Current coverage (after P67): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Worker template starts locally against SQL Server Docker.
+Current coverage (after P68): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 0 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Docker Compose end-to-end validated (SQL Server, Migrator, API, Worker, Angular); `http://localhost:5000/swagger` and `http://localhost:4200` respond.
+
+## P68 gotchas
+- Docker Compose end-to-end stack: `eaf-sqlserver`, `eaf-migrator`, `eaf-api`, `eaf-worker` and `eaf-angular` (nginx) all start and communicate over the `eaf-network` bridge network.
+- SQL Server 2022 healthcheck in Docker must use `/opt/mssql-tools18/bin/sqlcmd` and the `-C` (trust certificate) flag; the older `/opt/mssql-tools/bin/sqlcmd` path no longer exists in the `2022-latest` image.
+- The Worker `Templates/Worker/Dockerfile` was outdated (context `Templates/Worker`, wrong project path, .NET 8 images); it was rewritten to build from the repository root and target `Templates/Worker/src/Eaf.ProjectName.WorkerService` using .NET 10 images.
+- A dedicated `Templates/Api/Dockerfile.migrator` runs `Eaf.ProjectName.Migrator.dll -s` with `ASPNETCORE_Docker_Enabled=true`, executing migrations before API/Worker start via `depends_on`/`service_completed_successfully`.
+- The API only exposes Swagger in non-Production environments (`Startup.cs` line 244); for the Docker Compose validation the API service uses `ASPNETCORE_ENVIRONMENT=Staging` so `http://localhost:5000/swagger` responds.
+- OpenTelemetry in the API/Worker containers tries to export to `https://otlp.nr-data.net` and logs 404/405; this is non-fatal and does not prevent startup or serving requests.
 
 ## P67 gotchas
 - Worker template `ProjectNameCoreModule` was missing `MiddlewareCoreModule` in `DependsOn`, so `AbpZeroEntityTypes` (`Tenant`/`User`/`Role`) was not set and startup threw `ArgumentNullException`. Adding `typeof(MiddlewareCoreModule)` fixes the module initialization chain.
