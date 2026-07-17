@@ -5,6 +5,7 @@ using Abp.MailKit;
 using Abp.Modules;
 using Abp.Net.Mail;
 using Abp.Reflection.Extensions;
+using Eaf.Middleware;
 using Eaf.ProjectName.Debugging;
 using Eaf.ProjectName.Localization;
 using System;
@@ -12,6 +13,7 @@ using System;
 namespace Eaf.ProjectName
 {
     [DependsOn(
+        typeof(MiddlewareCoreModule),
         typeof(AbpAutoMapperModule),
         typeof(AbpMailKitModule)
         )]
