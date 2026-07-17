@@ -129,10 +129,53 @@ docker run -d -p 8001:8001 \
 
 ```bash
 cd Templates/Api
-ConnectionStrings__Default="..." docker-compose up --build
+ConnectionStrings__Default="..." docker compose up --build
 ```
 
 As variáveis são lidas pelo `ASPNETCORE_ENVIRONMENT=Production` e sobrescrevem as configurações do `appsettings.json`. Os arquivos `appsettings.{Local|Staging|Production|Development}.json` são removidos da imagem para evitar conexões padrão.
+
+#### Variáveis de ambiente
+
+Copie `.env.example` para `.env` e ajuste os valores:
+
+```bash
+cp .env.example .env
+```
+
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `ConnectionStrings__Default` | Connection string do SQL Server | `Server=sqlserver,1433;Database=EafProjectName;User Id=sa;Password=...` |
+| `Database__Provider` | Provider do banco de dados | `SqlServer` |
+| `Hangfire__IsEnabled` | Habilita o Hangfire | `false` |
+| `SqlServerCache__IsEnabled` | Habilita cache no SQL Server | `false` |
+| `RedisCache__IsEnabled` | Habilita cache no Redis | `true` |
+| `RedisCache__ConnectionString` | Connection string do Redis | `redis:6379` |
+| `RedisCache__DatabaseId` | Database ID do Redis | `0` |
+| `App__ServerRootAddress` | URL raiz da API | `http://localhost:8001/` |
+| `App__ClientRootAddress` | URL raiz do client | `http://localhost:8000/` |
+| `App__CorsOrigins` | Origens permitidas pelo CORS | `*` |
+
+#### Simulando Redis e SQL Server localmente
+
+Para testar a API com Redis e SQL Server sem depender de infraestrutura externa, use o arquivo opcional `docker-compose.infra.yml`:
+
+```bash
+cd Templates/Api
+ConnectionStrings__Default="Server=sqlserver,1433;Database=EafProjectName;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;Encrypt=false" \
+RedisCache__IsEnabled=true \
+docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.infra.yml up -d
+```
+
+Esse comando sobe:
+- `eaf-sqlserver`: SQL Server 2022 Express
+- `eaf-redis`: Redis 7
+- `eaf.projectname.web.host`: API EAF conectada aos dois
+
+Aplique as migrations no SQL Server antes de acessar a API pela primeira vez:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.infra.yml exec eaf.projectname.web.host dotnet ef database update
+```
 
 ## Estrutura do Projeto
 
