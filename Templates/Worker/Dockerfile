@@ -46,6 +46,7 @@ RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
         libc6-dev \
         libgdiplus \
+        procps \
         tzdata \
         zlib1g-dev && \
     ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \

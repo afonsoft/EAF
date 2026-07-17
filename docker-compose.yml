@@ -1,84 +1,35 @@
 x-common-variables: &common-variables
-  Database__Provider: SqlServer
-  Hangfire__IsEnabled: false
-  SqlServerCache__IsEnabled: false
-  RedisCache__IsEnabled: false
+  Database__Provider: ${DATABASE_PROVIDER:-SqlServer}
+  Hangfire__IsEnabled: ${HANGFIRE_ENABLED:-false}
+  SqlServerCache__IsEnabled: ${SQLSERVERCACHE_ENABLED:-false}
+  RedisCache__IsEnabled: ${REDISCACHE_ENABLED:-false}
 
 services:
-  eaf-sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: eaf-sqlserver
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD is required}"
-      MSSQL_PID: Developer
-    ports:
-      - "1433:1433"
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $${MSSQL_SA_PASSWORD} -Q 'SELECT 1' -C || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks:
-      - eaf-network
-
-  eaf-migrator:
-    build:
-      context: .
-      dockerfile: Templates/Api/Dockerfile.migrator
-    container_name: eaf-migrator
-    environment:
-      <<: *common-variables
-      ASPNETCORE_Docker_Enabled: true
-      ConnectionStrings__LOCAL: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
-      ConnectionStrings__Default: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
-    depends_on:
-      eaf-sqlserver:
-        condition: service_healthy
-    restart: on-failure
-    networks:
-      - eaf-network
-
   eaf-api:
     build:
       context: .
       dockerfile: Templates/Api/Dockerfile
-    container_name: eaf-api
+    container_name: ${EAF_API_CONTAINER_NAME:-eaf-api}
     environment:
       <<: *common-variables
-      ASPNETCORE_ENVIRONMENT: Staging
-      DOTNET_ENVIRONMENT: Staging
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Staging}
+      DOTNET_ENVIRONMENT: ${DOTNET_ENVIRONMENT:-Staging}
       ASPNETCORE_URLS: http://+:8001
-      ConnectionStrings__Default: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
-      App__ServerRootAddress: http://localhost:5000/
-      App__ClientRootAddress: http://localhost:4200/
-      App__CorsOrigins: http://localhost:4200
+      ConnectionStrings__Default: ${CONNECTIONSTRINGS_DEFAULT:?CONNECTIONSTRINGS_DEFAULT is required}
+      App__ServerRootAddress: ${APP_SERVER_ROOT_ADDRESS:-http://localhost:5000/}
+      App__ClientRootAddress: ${APP_CLIENT_ROOT_ADDRESS:-http://localhost:4200/}
+      App__CorsOrigins: ${APP_CORS_ORIGINS:-http://localhost:4200}
     ports:
-      - "5000:8001"
-    depends_on:
-      eaf-sqlserver:
-        condition: service_healthy
-      eaf-migrator:
-        condition: service_completed_successfully
-    networks:
-      - eaf-network
-
-  eaf-worker:
-    build:
-      context: .
-      dockerfile: Templates/Worker/Dockerfile
-    container_name: eaf-worker
-    environment:
-      <<: *common-variables
-      DOTNET_ENVIRONMENT: Production
-      ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__Default: "Server=eaf-sqlserver,1433;Database=afonsoft_eaf;user id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=false"
-    depends_on:
-      eaf-sqlserver:
-        condition: service_healthy
-      eaf-migrator:
-        condition: service_completed_successfully
+      - "${EAF_API_PORT:-5000}:8001"
+    volumes:
+      - eaf-api-logs:/app/Logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
     networks:
       - eaf-network
 
@@ -86,18 +37,29 @@ services:
     build:
       context: Templates/Angular/Eaf.ProjectName.UI
       dockerfile: dockerfile
-    container_name: eaf-angular
+    container_name: ${EAF_ANGULAR_CONTAINER_NAME:-eaf-angular}
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      REMOTE_SERVICE_BASE_URL: http://localhost:5000
-      APP_BASE_URL: http://localhost:4200
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      REMOTE_SERVICE_BASE_URL: ${REMOTE_SERVICE_BASE_URL:-http://localhost:5000}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:4200}
     ports:
-      - "4200:80"
+      - "${EAF_ANGULAR_PORT:-4200}:80"
     depends_on:
-      - eaf-api
+      eaf-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
     networks:
       - eaf-network
 
 networks:
   eaf-network:
     driver: bridge
+
+volumes:
+  eaf-api-logs:

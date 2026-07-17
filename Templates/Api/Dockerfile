@@ -47,6 +47,8 @@ ENV TZ="America/Sao_Paulo"
 
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
+        ca-certificates \
+        curl \
         icu-devtools \
         libc6-dev \
         libgdiplus \
