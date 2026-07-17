@@ -39,6 +39,9 @@ using System.IO;
 
 namespace Eaf.Middleware.Web
 {
+    /// <summary>
+    /// Módulo ABP que configura e inicializa MiddlewareWebCore.
+    /// </summary>
     [DependsOn(
         typeof(MiddlewareApplicationModule),
         typeof(AbpAspNetCoreModule),
@@ -47,9 +50,6 @@ namespace Eaf.Middleware.Web
         typeof(AbpRedisCacheModule),
         typeof(EafSqlServerCacheModule)
     )]
-    /// <summary>
-    /// Módulo ABP que configura e inicializa MiddlewareWebCore.
-    /// </summary>
     public class MiddlewareWebCoreModule : AbpModule
     {
         private const string HangfireIsEnabledKey = "Hangfire:IsEnabled";
