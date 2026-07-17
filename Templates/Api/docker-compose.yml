@@ -6,3 +6,9 @@ services:
     build:
       context: ../..
       dockerfile: Templates/Api/Dockerfile
+    networks:
+      - eaf-network
+
+networks:
+  eaf-network:
+    driver: bridge
