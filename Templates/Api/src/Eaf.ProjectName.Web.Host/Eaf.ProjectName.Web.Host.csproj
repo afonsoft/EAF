@@ -85,4 +85,11 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
+	<ItemGroup>
+		<ContainerEnvironmentVariable Include="DOTNET_gcServer" Value="true" />
+		<ContainerEnvironmentVariable Include="DOTNET_gcConcurrent" Value="true" />
+		<ContainerEnvironmentVariable Include="DOTNET_PROCESSOR_COUNT" Value="2" />
+		<ContainerEnvironmentVariable Include="CORECLR_ENABLE_PROFILING" Value="1" />
+		<ContainerEnvironmentVariable Include="CORECLR_PROFILER" Value="{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" />
+	</ItemGroup>
 </Project>
