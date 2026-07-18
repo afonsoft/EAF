@@ -381,6 +381,10 @@ bash scripts/validate-docker-compose.sh
 COMPOSE_FILE=docker-compose.all.yml bash scripts/validate-docker-compose.sh
 ```
 
+#### CI validation
+
+Pull requests that change `docker-compose*.yml`, `Dockerfile*` or `scripts/validate-docker-compose.sh` trigger the `.github/workflows/docker-compose-validation.yml` workflow, which builds `Eaf.sln` and runs the full Docker Compose stack end-to-end.
+
 #### Manual container examples
 
 See `Templates/Api/README.md` and `Templates/Angular/Eaf.ProjectName.UI/README.md` for details.
