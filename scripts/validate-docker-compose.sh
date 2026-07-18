@@ -12,7 +12,7 @@ LOGS_DIR="${LOGS_DIR:-}"
 
 cleanup() {
     echo ""
-    if [ -n "$LOGS_DIR" ]; then
+    if [[ -n "$LOGS_DIR" ]]; then
         echo "Saving container logs to $LOGS_DIR..."
         mkdir -p "$LOGS_DIR"
         docker compose -f "$COMPOSE_FILE" logs --no-color > "$LOGS_DIR/docker-compose.log" 2>&1 || true
