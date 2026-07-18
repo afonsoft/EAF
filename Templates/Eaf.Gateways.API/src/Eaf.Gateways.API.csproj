@@ -15,23 +15,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="MMLib.SwaggerForOcelot" Version="9.0.0" />
-    <PackageReference Include="Ocelot" Version="23.4.3" />
-	<PackageReference Include="Ocelot.Cache.CacheManager" Version="23.4.3" />
-	<PackageReference Include="Ocelot.Provider.Polly" Version="23.4.3" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
-	<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
-	<PackageReference Include="OpenTelemetry" Version="1.15.3" />
-	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />
-	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.10.0" />
-	<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.10.0" />
-	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.1" />
-	<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
-	<PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="1.10.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="MMLib.SwaggerForOcelot" Version="10.0.2" />
+    <PackageReference Include="Ocelot" Version="24.1.0" />
+	<PackageReference Include="Ocelot.Cache.CacheManager" Version="24.1.0" />
+	<PackageReference Include="Ocelot.Provider.Polly" Version="24.1.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+	<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.19.2" />
+	<PackageReference Include="OpenTelemetry" Version="1.17.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.17.0" />
+	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.17.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.17.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="1.17.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,4 +71,11 @@
     </Content>
   </ItemGroup>
 
+	<ItemGroup>
+		<ContainerEnvironmentVariable Include="DOTNET_gcServer" Value="true" />
+		<ContainerEnvironmentVariable Include="DOTNET_gcConcurrent" Value="true" />
+		<ContainerEnvironmentVariable Include="DOTNET_PROCESSOR_COUNT" Value="2" />
+		<ContainerEnvironmentVariable Include="CORECLR_ENABLE_PROFILING" Value="1" />
+		<ContainerEnvironmentVariable Include="CORECLR_PROFILER" Value="{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" />
+	</ItemGroup>
 </Project>
