@@ -30,6 +30,13 @@ Current coverage (after P66): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests
 Current coverage (after P67): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 1 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Worker template starts locally against SQL Server Docker.
 Current coverage (after P68): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 0 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); Docker Compose end-to-end validated (SQL Server, Migrator, API, Worker, Angular); `http://localhost:5000/swagger` and `http://localhost:4200` respond.
 Current coverage (after P69): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 0 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); `docker-compose.yml` split into `docker-compose.all.yml` (full stack) and `docker-compose.yml` (API + Angular only, driven by environment variables); healthchecks, named volumes, `.env.example`, and `scripts/validate-docker-compose.sh` added.
+Current coverage (after P70): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests, 4604 passing, 0 skipped). Build warnings: 0 (Eaf.sln); template build warnings: 0 (Api, Worker, Angular); added `.github/workflows/docker-compose-validation.yml` to run `docker-compose.all.yml` end-to-end on PRs touching Docker/Compose files; `scripts/validate-docker-compose.sh` now saves container logs to `LOGS_DIR` for CI artifact upload; `docs/development/session-summaries` removed; future prompts moved to `.specs`.
+
+## P70 gotchas
+- Added `.github/workflows/docker-compose-validation.yml` triggered on PRs and `workflow_dispatch` when `docker-compose*.yml`, `Dockerfile*` or `scripts/validate-docker-compose.sh` change.
+- Workflow builds `Eaf.sln` in Release, sets up Docker Buildx, caches NuGet packages and Docker layers, then runs `scripts/validate-docker-compose.sh` with `COMPOSE_FILE=docker-compose.all.yml`.
+- `scripts/validate-docker-compose.sh` now persists container logs to `LOGS_DIR` (when set) before tearing down the stack, so the workflow can upload logs as artifacts on failure.
+- Removed `docs/development/session-summaries`; future session prompts and summaries go under `.specs/`.
 
 ## P69 gotchas
 - Split `docker-compose.yml` into two files:

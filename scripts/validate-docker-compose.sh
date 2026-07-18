@@ -8,8 +8,16 @@ MAX_WAIT="${MAX_WAIT:-300}"
 API_URL="http://localhost:${API_PORT}/swagger/v1/swagger.json"
 ANGULAR_URL="http://localhost:${ANGULAR_PORT}/"
 
+LOGS_DIR="${LOGS_DIR:-}"
+
 cleanup() {
     echo ""
+    if [[ -n "$LOGS_DIR" ]]; then
+        echo "Saving container logs to $LOGS_DIR..."
+        mkdir -p "$LOGS_DIR"
+        docker compose -f "$COMPOSE_FILE" logs --no-color > "$LOGS_DIR/docker-compose.log" 2>&1 || true
+        docker compose -f "$COMPOSE_FILE" ps > "$LOGS_DIR/docker-compose-ps.log" 2>&1 || true
+    fi
     echo "Cleaning up Docker Compose stack ($COMPOSE_FILE)..."
     docker compose -f "$COMPOSE_FILE" down --volumes --remove-orphans || true
 }
