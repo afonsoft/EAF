@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 ENV DOTNET_ENVIRONMENT=Production
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV DOTNET_GCServer=1
+ENV DOTNET_gcServer=true
 ENV DOTNET_TieredCompilation=1
 ENV DOTNET_ReadyToRun=true
 ENV DOTNET_EventPipeEnable=true
@@ -11,7 +11,10 @@ ENV DOTNET_ThreadPool_UnfairSemaphoreSpinLimit=5000
 ENV DOTNET_GCHeapCount=2
 ENV DOTNET_GCHeapAffinitize=0
 ENV DOTNET_GCLatencyMode=1
-ENV DOTNET_GCConcurrent=1
+ENV DOTNET_gcConcurrent=true
+ENV DOTNET_PROCESSOR_COUNT=2
+ENV CORECLR_ENABLE_PROFILING=1
+ENV CORECLR_PROFILER={846F5F1C-F9AE-4B07-969E-05C26BC060D8}
 ENV ConnectionStrings__Default=""
 ENV Database__Provider=SqlServer
 ENV Hangfire__IsEnabled=false
