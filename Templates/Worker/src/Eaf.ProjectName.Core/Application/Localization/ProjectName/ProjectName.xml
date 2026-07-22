@@ -10,5 +10,7 @@
     <text name="Model">Model</text>
     <text name="AirplaneValidate">There is already an airplane with this number</text>
     <text name="StartJob">Start Job</text>
+    <text name="UseCaptchaOnLogin">Use Captcha On Login</text>
+    <text name="ReCaptcha">ReCaptcha</text>
   </texts>
 </localizationDictionary>
