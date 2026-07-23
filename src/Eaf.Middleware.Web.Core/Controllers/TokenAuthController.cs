@@ -1265,9 +1265,25 @@ namespace Eaf.Middleware.Web.Controllers
             };
         }
 
+        private async Task<int> GetRefreshTokenExpirationDaysAsync()
+        {
+            try
+            {
+                var value = await SettingManager.GetSettingValueAsync(AppSettings.UserManagement.RefreshTokenExpirationInDays);
+                if (int.TryParse(value, out var days))
+                    return days;
+            }
+            catch (FormatException)
+            {
+                // Valor não numérico configurado (ex.: "false" em testes/mock).
+            }
+
+            return 7;
+        }
+
         private async Task<RefreshTokenInfo> GenerateAndStoreRefreshTokenAsync(User user)
         {
-            var refreshTokenExpirationDays = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.RefreshTokenExpirationInDays);
+            var refreshTokenExpirationDays = await GetRefreshTokenExpirationDaysAsync();
             var refreshTokenExpiration = TimeSpan.FromDays(refreshTokenExpirationDays > 0 ? refreshTokenExpirationDays : 7);
 
             var securityStamp = await _userManager.GetSecurityStampAsync(user);
@@ -1296,6 +1312,9 @@ namespace Eaf.Middleware.Web.Controllers
 
         private void AppendRefreshTokenCookie(string token, DateTime expireDate)
         {
+            if (Response == null)
+                return;
+
             Response.Cookies.Append(
                 "Eaf.RefreshToken",
                 token,

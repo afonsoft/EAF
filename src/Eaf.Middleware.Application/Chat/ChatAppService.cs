@@ -12,6 +12,7 @@ using Eaf.Middleware.Friendships.Cache;
 using Eaf.Middleware.Friendships.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -167,11 +168,43 @@ namespace Eaf.Middleware.Chat
 
         private async Task SetTargetUserNamesAsync(List<ChatMessageDto> messages)
         {
+            if (messages == null || messages.Count == 0)
+                return;
+
             var userIds = messages.Select(m => m.TargetUserId).Distinct().ToList();
-            var userNames = await UserManager.Users
-                .AsNoTracking()
-                .Where(u => userIds.Contains(u.Id))
-                .ToDictionaryAsync(u => u.Id, u => u.Name);
+            var userNames = new Dictionary<long, string>();
+
+            if (UserManager != null)
+            {
+                try
+                {
+                    userNames = await UserManager.Users
+                        .AsNoTracking()
+                        .Where(u => userIds.Contains(u.Id))
+                        .ToDictionaryAsync(u => u.Id, u => u.Name);
+                }
+                catch (Exception)
+                {
+                    // Ignora falhas do IQueryable para tentar carregamento individual.
+                }
+
+                if (userNames.Count == 0)
+                {
+                    foreach (var id in userIds)
+                    {
+                        try
+                        {
+                            var user = await UserManager.GetUserByIdAsync(id);
+                            if (user != null)
+                                userNames[id] = user.Name;
+                        }
+                        catch
+                        {
+                            // Usuário não encontrado: nome permanecerá vazio.
+                        }
+                    }
+                }
+            }
 
             foreach (var message in messages)
             {
