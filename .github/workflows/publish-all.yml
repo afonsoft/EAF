@@ -188,6 +188,9 @@ jobs:
     environment: production
     permissions:
       contents: read
+    env:
+      # Fallback para o servidor FTP de produção caso o secret FTP_PUBLISH_URL não esteja configurado.
+      FTP_BASE_URL: ${{ secrets.FTP_PUBLISH_URL != '' && secrets.FTP_PUBLISH_URL || 'ftp://ftp.afonsoft.com.br/demo-eaf-api.afonsoft.com.br' }}
 
     steps:
     - name: 📥 Checkout
@@ -224,12 +227,7 @@ jobs:
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
-        FTP_BASE_URL: ${{ secrets.FTP_PUBLISH_URL }}
       run: |
-        if [ -z "$FTP_BASE_URL" ]; then
-          echo "❌ FTP_PUBLISH_URL secret is not set. Configure it in Settings > Secrets."
-          exit 1
-        fi
         echo "Uploading app_offline.htm to take site offline..."
         curl -s --ssl-reqd -T .github/app_offline/app_offline.htm \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
@@ -240,12 +238,7 @@ jobs:
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
-        FTP_BASE_URL: ${{ secrets.FTP_PUBLISH_URL }}
       run: |
-        if [ -z "$FTP_BASE_URL" ]; then
-          echo "❌ FTP_PUBLISH_URL secret is not set. Configure it in Settings > Secrets."
-          exit 1
-        fi
         FTP_USER="${FTP_PUBLISH_USER}"
         FTP_PASS="${FTP_PUBLISH_PASSWORD}"
         FTP_URL="${FTP_BASE_URL}/"
@@ -275,12 +268,7 @@ jobs:
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
-        FTP_BASE_URL: ${{ secrets.FTP_PUBLISH_URL }}
       run: |
-        if [ -z "$FTP_BASE_URL" ]; then
-          echo "❌ FTP_PUBLISH_URL secret is not set. Configure it in Settings > Secrets."
-          exit 1
-        fi
         echo "Uploading web.config.offline to force IIS app pool recycle..."
         curl -s --ssl-reqd -T .github/app_offline/web.config.offline \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
@@ -339,12 +327,7 @@ jobs:
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
-        FTP_BASE_URL: ${{ secrets.FTP_PUBLISH_URL }}
       run: |
-        if [ -z "$FTP_BASE_URL" ]; then
-          echo "❌ FTP_PUBLISH_URL secret is not set. Configure it in Settings > Secrets."
-          exit 1
-        fi
         echo "Both deploy attempts failed — restoring web.config and appsettings.json from build output..."
         curl -s --ssl-reqd -T publish/web.config \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
@@ -360,12 +343,7 @@ jobs:
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
-        FTP_BASE_URL: ${{ secrets.FTP_PUBLISH_URL }}
       run: |
-        if [ -z "$FTP_BASE_URL" ]; then
-          echo "❌ FTP_PUBLISH_URL secret is not set. Configure it in Settings > Secrets."
-          exit 1
-        fi
         curl -s --ssl-reqd --ftp-create-dirs \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/app_offline.htm" \
