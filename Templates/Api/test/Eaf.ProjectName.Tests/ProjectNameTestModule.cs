@@ -72,6 +72,9 @@ namespace Eaf.ProjectName.Tests
 
         private void RegisterFakeService<TService>() where TService : class
         {
+            if (IocManager.IocContainer.Kernel.HasComponent(typeof(TService)))
+                return;
+
             IocManager.IocContainer.Register(
                 Component.For<TService>()
                     .UsingFactoryMethod(() => Substitute.For<TService>())

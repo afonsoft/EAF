@@ -35,8 +35,7 @@ namespace Eaf.ProjectName.Web.Tests
         typeof(ProjectNameEntityFrameworkCoreModule),
         typeof(AbpAspNetCoreTestBaseModule),
         typeof(MiddlewareWebCoreModule),
-        typeof(EafKeyVaultAspNetCoreModule),
-        typeof(ProjectNameTestModule)
+        typeof(EafKeyVaultAspNetCoreModule)
     )]
     public class ProjectNameWebTestModule : AbpModule
     {
@@ -108,6 +107,9 @@ namespace Eaf.ProjectName.Web.Tests
 
         private void RegisterFakeService<TService>() where TService : class
         {
+            if (IocManager.IocContainer.Kernel.HasComponent(typeof(TService)))
+                return;
+
             IocManager.IocContainer.Register(
                 Component.For<TService>()
                     .UsingFactoryMethod(() => Substitute.For<TService>())
