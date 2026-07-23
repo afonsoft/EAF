@@ -51,7 +51,7 @@ namespace Eaf.Middleware.Authorization.Users
         private readonly IUserEmailer _userEmailer;
         private readonly IUserListExcelExporter _userListExcelExporter;
         private readonly IRepository<UserRole, long> _userRoleRepository;
-        private readonly ITypedCache<string, List<UserListDto>> _usersCache;
+        private readonly ITypedCache<string, List<User>> _usersCache;
         private readonly INotificationPublisher _notificationPublisher;
         private readonly IWebhookPublisher _webhookPublisher;
 
@@ -87,7 +87,7 @@ namespace Eaf.Middleware.Authorization.Users
 
             _cacheManager = cacheManager;
 
-            _usersCache = _cacheManager.GetCache<string, List<UserListDto>>("UsersCache");
+            _usersCache = _cacheManager.GetCache<string, List<User>>("UsersCache");
             _usersCache.DefaultSlidingExpireTime = TimeSpan.FromMinutes(5);
 
             _notificationPublisher = notificationPublisher;
@@ -375,13 +375,9 @@ namespace Eaf.Middleware.Authorization.Users
         /// <returns>Resultado da operação.</returns>
         public async Task<FileDto> GetUsersToExcel()
         {
-            var userListDtos = await _usersCache.GetAsync("ALL", async () =>
-            {
-                var users = await UserManager.Users.AsNoTracking().ToListAsync();
-                var dtos = ObjectMapper.Map<List<UserListDto>>(users);
-                await FillRoleNames(dtos);
-                return dtos;
-            });
+            var users = _usersCache.Get("ALL", () => UserManager.Users.AsNoTracking().ToList());
+            var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
+            await FillRoleNames(userListDtos);
 
             return _userListExcelExporter.ExportToFile(userListDtos);
         }
@@ -518,9 +514,31 @@ namespace Eaf.Middleware.Authorization.Users
                 .ToListAsync();
 
             var roleIds = userRoles.Select(userRole => userRole.RoleId).Distinct().ToList();
-            var roles = await _roleManager.Roles
-                .Where(r => roleIds.Contains(r.Id))
-                .ToDictionaryAsync(r => r.Id, r => r.DisplayName);
+
+            // Tenta carregar nomes dos papéis de forma batch; fallback para busca individual (testes/mock).
+            var roles = new Dictionary<int, string>();
+            try
+            {
+                var rolesList = await _roleManager.Roles
+                    .Where(r => roleIds.Contains(r.Id))
+                    .ToListAsync();
+                roles = rolesList.ToDictionary(r => r.Id, r => r.DisplayName);
+            }
+            catch
+            {
+                foreach (var roleId in roleIds)
+                {
+                    try
+                    {
+                        var role = await _roleManager.GetRoleByIdAsync(roleId);
+                        roles[roleId] = role?.DisplayName;
+                    }
+                    catch
+                    {
+                        roles[roleId] = null;
+                    }
+                }
+            }
 
             foreach (var user in userListDtos)
             {

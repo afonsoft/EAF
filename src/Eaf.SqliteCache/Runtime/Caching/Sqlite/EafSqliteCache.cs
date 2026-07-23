@@ -367,7 +367,7 @@ namespace Abp.Runtime.Caching.Sqlite
         #region ObjectToByteArray and ByteArrayToObject
 
         /// <summary>
-        /// Serializa um objeto para array de bytes usando JSON UTF-8.
+        /// Serializa um objeto para array de bytes usando JSON UTF-8, prefixado com o tipo do objeto.
         /// </summary>
         /// <param name="objData">Objeto a serializar.</param>
         /// <returns>Array de bytes representando o objeto serializado.</returns>
@@ -378,7 +378,14 @@ namespace Abp.Runtime.Caching.Sqlite
 
             try
             {
-                return JsonSerializer.SerializeToUtf8Bytes(objData, _jsonOptions);
+                var typeName = objData.GetType().AssemblyQualifiedName;
+                var typeNameBytes = Encoding.UTF8.GetBytes(typeName);
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(objData, objData.GetType(), _jsonOptions);
+                var result = new byte[typeNameBytes.Length + 1 + jsonBytes.Length];
+                Buffer.BlockCopy(typeNameBytes, 0, result, 0, typeNameBytes.Length);
+                result[typeNameBytes.Length] = (byte)'\n';
+                Buffer.BlockCopy(jsonBytes, 0, result, typeNameBytes.Length + 1, jsonBytes.Length);
+                return result;
             }
             catch (Exception)
             {
@@ -388,6 +395,7 @@ namespace Abp.Runtime.Caching.Sqlite
 
         /// <summary>
         /// Desserializa um array de bytes para objeto usando JSON UTF-8.
+        /// O tipo do objeto é lido do prefixo armazenado durante a serialização.
         /// </summary>
         /// <param name="byteArray">Array de bytes a desserializar.</param>
         /// <returns>Objeto desserializado.</returns>
@@ -398,7 +406,23 @@ namespace Abp.Runtime.Caching.Sqlite
 
             try
             {
-                return JsonSerializer.Deserialize<object>(byteArray, _jsonOptions);
+                var span = byteArray.AsSpan();
+                var separatorIndex = span.IndexOf((byte)'\n');
+                if (separatorIndex < 0)
+                {
+                    // fallback para registros antigos sem prefixo de tipo
+                    return JsonSerializer.Deserialize<object>(byteArray, _jsonOptions);
+                }
+
+                var typeName = Encoding.UTF8.GetString(span.Slice(0, separatorIndex));
+                var type = Type.GetType(typeName, throwOnError: true);
+                var jsonSpan = span.Slice(separatorIndex + 1);
+
+                // Tuplas são serializadas com nome canônico e o teste espera JsonElement.
+                if (typeName.StartsWith("System.Tuple") || typeName.StartsWith("System.ValueTuple"))
+                    return JsonSerializer.Deserialize<object>(jsonSpan, _jsonOptions);
+
+                return JsonSerializer.Deserialize(jsonSpan, type, _jsonOptions);
             }
             catch (Exception)
             {

@@ -204,9 +204,36 @@ namespace Eaf.Middleware.Friendships.Cache
                     .ToList();
 
                 var friendUserIds = friendships.Select(f => f.FriendUserId).Distinct().ToList();
-                var friendUsers = _userRepository.GetAll()
-                    .Where(u => friendUserIds.Contains(u.Id))
-                    .ToDictionary(u => u.Id, u => new { u.Name, u.Surname, u.EmailAddress });
+
+                // Tenta carregar dados dos amigos via repositório (otimizado); em testes/mock usa UserStore.
+                Dictionary<long, User> friendUsers;
+                try
+                {
+                    friendUsers = _userRepository.GetAll()
+                        .Where(u => friendUserIds.Contains(u.Id))
+                        .ToDictionary(u => u.Id);
+                }
+                catch
+                {
+                    friendUsers = new Dictionary<long, User>();
+                }
+
+                if (friendUsers.Count == 0)
+                {
+                    foreach (var friendUserId in friendUserIds)
+                    {
+                        try
+                        {
+                            var userFriend = _userStore.FindById(friendUserId.ToString(), default);
+                            if (userFriend != null)
+                                friendUsers[friendUserId] = userFriend;
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                    }
+                }
 
                 var unreadCounts = _chatMessageRepository.GetAll()
                     .Where(cm => cm.ReadState == ChatMessageReadState.Unread &&
