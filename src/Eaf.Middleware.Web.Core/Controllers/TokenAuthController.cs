@@ -32,8 +32,10 @@ using Abp.Runtime.Security;
 using Abp.UI;
 using Abp.Webhooks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
@@ -42,6 +44,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Abp.Extensions;
@@ -57,6 +60,7 @@ namespace Eaf.Middleware.Web.Controllers
     /// </summary>
     [AbpAllowAnonymous]
     [Route("api/[controller]/[action]")]
+    [EnableRateLimiting("EafAuth")]
     public class TokenAuthController : MiddlewareControllerBase, IApplicationService
     {
         private const string ExternalTokenInformationCacheName = "ExternalTokenInformationCache";
@@ -65,6 +69,7 @@ namespace Eaf.Middleware.Web.Controllers
         private readonly TokenAuthConfiguration _configuration;
         private readonly AbpLoginResultTypeHelper _AbpLoginResultTypeHelper;
         private readonly IEmailSender _emailSender;
+        private readonly IRefreshTokenStore _refreshTokenStore;
         private readonly IExternalAuthConfiguration _externalAuthConfiguration;
         private readonly IExternalAuthManager _externalAuthManager;
         private readonly IdentityOptions _identityOptions;
@@ -109,7 +114,8 @@ namespace Eaf.Middleware.Web.Controllers
             IBinaryObjectManager binaryObjectManager,
             INotificationSubscriptionManager notificationSubscriptionManager,
             IWebhookPublisher webhookPublisher,
-            IPrincipalAccessor principalAccessor
+            IPrincipalAccessor principalAccessor,
+            IRefreshTokenStore refreshTokenStore
         )
         {
             _logInManager = logInManager;
@@ -134,6 +140,7 @@ namespace Eaf.Middleware.Web.Controllers
             _webhookPublisher = webhookPublisher;
             _notificationSubscriptionManager = notificationSubscriptionManager;
             _principalAccessor = principalAccessor;
+            _refreshTokenStore = refreshTokenStore;
             RecaptchaValidator = NullRecaptchaValidator.Instance;
         }
 
@@ -230,6 +237,9 @@ namespace Eaf.Middleware.Web.Controllers
 
             //Login!
             var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User), expiration);
+            var refreshToken = await GenerateAndStoreRefreshTokenAsync(loginResult.User);
+            AppendRefreshTokenCookie(refreshToken.Token, refreshToken.ExpireDate);
+
             return new AuthenticateResultModel
             {
                 AccessToken = accessToken,
@@ -288,7 +298,7 @@ namespace Eaf.Middleware.Web.Controllers
                     model.ProviderAccessCode,
                     slidingExpireTime: TimeSpan.FromDays(1));
 
-            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user, model.AuthProvider));
+            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user, model.AuthProvider), expiration);
 
             var returnUrl = model.ReturnUrl;
 
@@ -461,7 +471,7 @@ namespace Eaf.Middleware.Web.Controllers
             var expiration = TimeSpan.FromSeconds(expirationSettings);
 
             var result = await _impersonationManager.GetImpersonatedUserAndIdentity(impersonationToken);
-            var accessToken = CreateAccessToken(await CreateJwtClaims(result.Identity, result.User));
+            var accessToken = CreateAccessToken(await CreateJwtClaims(result.Identity, result.User), expiration);
 
             return new ImpersonatedAuthenticateResultModel
             {
@@ -647,14 +657,6 @@ namespace Eaf.Middleware.Web.Controllers
             );
 
             return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-        }
-
-        private string CreateAccessToken(IEnumerable<Claim> claims)
-        {
-            var expirationSettings = SettingManager.GetSettingValue<int>(AppSettings.UserManagement.TokenExpiration);
-            var expiration = TimeSpan.FromSeconds(expirationSettings);
-
-            return CreateAccessToken(claims, expiration);
         }
 
         [UnitOfWork]
@@ -1210,6 +1212,102 @@ namespace Eaf.Middleware.Web.Controllers
             // Acquires an access token for this application (usually a Web API) from the authority configured in the application.
             var responseToken = await app.AcquireTokenOnBehalfOf(scopes, assert).ExecuteAsync();
             return responseToken;
+        }
+
+        [AbpAllowAnonymous]
+        [HttpPost]
+        public async Task<AuthenticateResultModel> Refresh()
+        {
+            var refreshTokenValue = Request.Cookies["Eaf.RefreshToken"];
+            if (string.IsNullOrEmpty(refreshTokenValue))
+            {
+                throw new UserFriendlyException(L("RefreshTokenIsMissing"));
+            }
+
+            var refreshToken = await _refreshTokenStore.GetAsync(refreshTokenValue);
+            if (refreshToken == null || refreshToken.ExpireDate < DateTime.UtcNow)
+            {
+                throw new UserFriendlyException(L("InvalidRefreshToken"));
+            }
+
+            var user = await _userManager.GetUserByIdAsync(refreshToken.UserId);
+            if (user == null)
+            {
+                throw new UserFriendlyException(L("UserNotFound"));
+            }
+
+            var currentSecurityStamp = await _userManager.GetSecurityStampAsync(user);
+            if (refreshToken.SecurityStamp != currentSecurityStamp)
+            {
+                throw new UserFriendlyException(L("InvalidRefreshToken"));
+            }
+
+            await _refreshTokenStore.RemoveAsync(refreshTokenValue);
+
+            var identity = new ClaimsIdentity();
+            identity.AddClaim(new Claim(_identityOptions.ClaimsIdentity.UserIdClaimType, user.Id.ToString()));
+            identity.AddClaim(new Claim(_identityOptions.ClaimsIdentity.UserNameClaimType, user.UserName));
+            identity.AddClaim(new Claim(EafClaimTypes.UserIdentifierClaimType, new UserIdentifier(AbpSession.TenantId, user.Id).ToUserIdentifierString()));
+
+            var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+            var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user), expiration);
+            var newRefreshToken = await GenerateAndStoreRefreshTokenAsync(user);
+            AppendRefreshTokenCookie(newRefreshToken.Token, newRefreshToken.ExpireDate);
+
+            return new AuthenticateResultModel
+            {
+                AccessToken = accessToken,
+                ExpireInSeconds = (int)expiration.TotalSeconds,
+                EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                UserId = user.Id
+            };
+        }
+
+        private async Task<RefreshTokenInfo> GenerateAndStoreRefreshTokenAsync(User user)
+        {
+            var refreshTokenExpirationDays = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.RefreshTokenExpirationInDays);
+            var refreshTokenExpiration = TimeSpan.FromDays(refreshTokenExpirationDays > 0 ? refreshTokenExpirationDays : 7);
+
+            var securityStamp = await _userManager.GetSecurityStampAsync(user);
+            var refreshToken = new RefreshTokenInfo
+            {
+                Token = GenerateRefreshTokenValue(),
+                UserId = user.Id,
+                TenantId = AbpSession.TenantId,
+                SecurityStamp = securityStamp,
+                ExpireDate = DateTime.UtcNow.Add(refreshTokenExpiration)
+            };
+
+            await _refreshTokenStore.SetAsync(refreshToken);
+            return refreshToken;
+        }
+
+        private static string GenerateRefreshTokenValue()
+        {
+            var bytes = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(bytes);
+            }
+            return Convert.ToHexString(bytes).ToLowerInvariant();
+        }
+
+        private void AppendRefreshTokenCookie(string token, DateTime expireDate)
+        {
+            Response.Cookies.Append(
+                "Eaf.RefreshToken",
+                token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = new DateTimeOffset(expireDate),
+                    Path = "/api/TokenAuth"
+                }
+            );
         }
     }
 }

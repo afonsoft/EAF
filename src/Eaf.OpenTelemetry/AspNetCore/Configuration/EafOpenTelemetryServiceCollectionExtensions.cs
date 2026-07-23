@@ -132,6 +132,7 @@ namespace Eaf.AspNetCore.Configuration
 
             AddOtlpExporter(builder, options);
             AddConsoleExporter(builder, options);
+            builder.AddProcessor<PiiRedactionProcessor>();
         }
 
         private static void ConfigureLoggingProvider(LoggerProviderBuilder builder, EafOpenTelemetryOptions options)

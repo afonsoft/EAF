@@ -123,6 +123,34 @@ namespace Eaf.Middleware.Authorization.Users
         }
 
         /// <summary>
+        /// GetUser.
+        /// </summary>
+        /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
+        /// <returns>Resultado da operação.</returns>
+        public User GetUser(UserIdentifier userIdentifier)
+        {
+            var user = GetUserOrNull(userIdentifier);
+            if (user == null)
+                throw new InvalidOperationException("There is no user: " + userIdentifier);
+
+            return user;
+        }
+
+        /// <summary>
+        /// GetUserOrNull.
+        /// </summary>
+        /// <param name="userIdentifier">Parâmetro userIdentifier.</param>
+        /// <returns>Resultado da operação.</returns>
+        [UnitOfWork]
+        public virtual User GetUserOrNull(UserIdentifier userIdentifier)
+        {
+            using (_unitOfWorkManager.Current.SetTenantId(userIdentifier.TenantId))
+            {
+                return _userRepository.FirstOrDefault(userIdentifier.UserId);
+            }
+        }
+
+        /// <summary>
         /// SetGrantedPermissionsAsync.
         /// </summary>
         /// <param name="user">Parâmetro user.</param>

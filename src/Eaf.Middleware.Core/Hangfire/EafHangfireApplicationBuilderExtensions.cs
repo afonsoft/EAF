@@ -50,7 +50,8 @@ namespace Eaf.AspNetCore.Hangfire.Configuration
                 app.UseHangfireServer(new BackgroundJobServerOptions
                 {
                     WorkerCount = _options.WorkerCount,
-                    Queues = _options.Queues
+                    Queues = _options.Queues,
+                    SchedulePollingInterval = _options.SchedulePollingInterval
                 },
                 additionalProcesses: new[] { new ProcessMonitor(checkInterval: TimeSpan.FromSeconds(5)) },
                 storage: JobStorage.Current);

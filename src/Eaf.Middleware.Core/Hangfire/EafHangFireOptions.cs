@@ -54,6 +54,26 @@ namespace Eaf.Hangfire
         /// </summary>
         public int WorkerCount { get; set; } = Environment.ProcessorCount * 4 > 16 ? 16 : Environment.ProcessorCount * 4;
 
+        /// <summary>
+        /// Tempo limite de transação do Hangfire com SQL Server. Padrão: 15 minutos.
+        /// </summary>
+        public TimeSpan SqlServerTransactionTimeout { get; set; } = TimeSpan.FromMinutes(15);
+
+        /// <summary>
+        /// Intervalo entre leituras da fila. Padrão: 15 segundos.
+        /// </summary>
+        public TimeSpan QueuePollInterval { get; set; } = TimeSpan.FromSeconds(15);
+
+        /// <summary>
+        /// Número máximo de itens exibidos por página no dashboard. Padrão: 250.
+        /// </summary>
+        public int DashboardJobListLimit { get; set; } = 250;
+
+        /// <summary>
+        /// Habilite o recurso de SchedulePollingInterval. Padrão: 15 segundos.
+        /// </summary>
+        public TimeSpan SchedulePollingInterval { get; set; } = TimeSpan.FromSeconds(15);
+
         public EafHangFireOptions Value => this;
     }
 }

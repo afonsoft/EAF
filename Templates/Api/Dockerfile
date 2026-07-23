@@ -26,7 +26,7 @@ ENV RedisCache__ConnectionString="redis:6379"
 ENV RedisCache__DatabaseId=0
 ENV App__ServerRootAddress=http://localhost:8001/
 ENV App__ClientRootAddress=http://localhost:8000/
-ENV App__CorsOrigins=*
+ENV App__CorsOrigins=
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
@@ -61,6 +61,11 @@ RUN apt-get update && \
     dpkg-reconfigure -f noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/* && \
     chown -R app:app /app
+
+VOLUME ["/app/data-protection-keys"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -fs http://localhost:8001/health || exit 1
 
 USER app
 

@@ -1,15 +1,16 @@
 name: Docker Compose Validation
 
+permissions: {}
 on:
   pull_request:
     branches:
-      - main
-      - develop
+    - main
+    - develop
     paths:
-      - "docker-compose*.yml"
-      - "Dockerfile*"
-      - "**/Dockerfile*"
-      - "scripts/validate-docker-compose.sh"
+    - "docker-compose*.yml"
+    - "Dockerfile*"
+    - "**/Dockerfile*"
+    - "scripts/validate-docker-compose.sh"
   workflow_dispatch:
 
 env:
@@ -22,66 +23,69 @@ jobs:
   docker-compose-validation:
     name: Docker Compose End-to-End Validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 20
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-        with:
-          fetch-depth: 0
+    - name: Checkout Code
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      with:
+        fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Cache NuGet Packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+    - name: Cache NuGet Packages
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9   # v6
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
-      - name: Restore Dependencies
-        run: dotnet restore Eaf.sln
+    - name: Restore Dependencies
+      run: dotnet restore Eaf.sln
 
-      - name: Build Solution
-        run: dotnet build Eaf.sln --configuration Release --no-restore --verbosity minimal
+    - name: Build Solution
+      run: dotnet build Eaf.sln --configuration Release --no-restore --verbosity
+        minimal
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c   # v4.2.0
 
-      - name: Cache Docker Layers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.ref_name }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.ref_name }}-
-            ${{ runner.os }}-buildx-
+    - name: Cache Docker Layers
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9   # v6
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-${{ github.ref_name }}-
+          ${{ runner.os }}-buildx-
 
-      - name: Run Docker Compose Validation
-        run: bash scripts/validate-docker-compose.sh
+    - name: Run Docker Compose Validation
+      run: bash scripts/validate-docker-compose.sh
 
-      - name: Upload Container Logs
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        if: failure()
-        with:
-          name: docker-compose-logs
-          path: /tmp/docker-compose-logs
-          retention-days: 7
+    - name: Upload Container Logs
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a   # v7
+      if: failure()
+      with:
+        name: docker-compose-logs
+        path: /tmp/docker-compose-logs
+        retention-days: 7
 
-      - name: Docker Compose Summary
-        if: always()
-        run: |
-          echo "## Docker Compose Validation" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Docker Compose validation passed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ Docker Compose validation failed" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "- **Compose file**: ${{ env.COMPOSE_FILE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **API URL**: http://localhost:5000/swagger/v1/swagger.json" >> $GITHUB_STEP_SUMMARY
-          echo "- **Angular URL**: http://localhost:4200/" >> $GITHUB_STEP_SUMMARY
+    - name: Docker Compose Summary
+      if: always()
+      run: |
+        echo "## Docker Compose Validation" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Docker Compose validation passed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Docker Compose validation failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "- **Compose file**: ${{ env.COMPOSE_FILE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **API URL**: http://localhost:5000/swagger/v1/swagger.json" >> $GITHUB_STEP_SUMMARY
+        echo "- **Angular URL**: http://localhost:4200/" >> $GITHUB_STEP_SUMMARY

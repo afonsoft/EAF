@@ -1,5 +1,6 @@
 name: OpenCode
 
+permissions: {}
 on:
   issue_comment:
     types: [created]
@@ -25,18 +26,18 @@ jobs:
     env:
       OMNIROUTE_BASE_URL: https://omniroute.afonsoft.dev/v1
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-        with:
-          fetch-depth: 1
-          persist-credentials: false
+    - name: Checkout repository
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      with:
+        fetch-depth: 1
+        persist-credentials: false
 
-      - name: Run OpenCode
-        uses: anomalyco/opencode/github@127bdb30784d508cc556c71a0f32b508a3061517 # v1.18.3
-        env:
-          OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          model: omniroute/auto/claude-sonnet
-          agent: build
-          use_github_token: true
+    - name: Run OpenCode
+      uses: anomalyco/opencode/github@127bdb30784d508cc556c71a0f32b508a3061517   # v1.18.3
+      env:
+        OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        model: omniroute/auto/claude-sonnet
+        agent: build
+        use_github_token: true

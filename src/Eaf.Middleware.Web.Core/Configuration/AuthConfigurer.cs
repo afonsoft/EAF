@@ -56,10 +56,13 @@ namespace Eaf.Middleware.Web.Startup
             {
                 var tokenAuthConfig = ConfigureTokenAuth(configuration);
 
+                var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")?.Equals("Development", StringComparison.OrdinalIgnoreCase) == true
+                    || Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")?.Equals("Development", StringComparison.OrdinalIgnoreCase) == true;
+
                 authenticationBuilder.AddJwtBearer(options =>
                 {
-                    options.IncludeErrorDetails = true;
-                    options.SaveToken = true;
+                    options.IncludeErrorDetails = isDevelopment;
+                    options.SaveToken = false;
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -67,6 +70,7 @@ namespace Eaf.Middleware.Web.Startup
 
                         // The signing key must match!
                         IssuerSigningKey = tokenAuthConfig.SecurityKey,
+                        ValidateIssuerSigningKey = true,
 
                         // Validate the JWT Issuer (iss) claim
                         ValidateIssuer = true,

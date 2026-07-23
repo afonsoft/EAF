@@ -14,6 +14,7 @@ using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Ldap.Authentication
@@ -88,9 +89,10 @@ namespace Eaf.Middleware.Ldap.Authentication
                     container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
                 string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
-                var filter1 = $"(&(objectClass=user)(SAMAccountName={userNameOrEmailAddress}))";
+                var escapedUserName = EscapeLdapFilter(userNameOrEmailAddress);
+                var filter1 = $"(&(objectClass=user)(SAMAccountName={escapedUserName}))";
                 var searcher1 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
-                var ldapEntry = FillUsersLdap(searcher1).Result.Item1.FirstOrDefault();
+                var ldapEntry = (await FillUsersLdap(searcher1)).Item1.FirstOrDefault();
 
                 if (ldapEntry != null)
                 {
@@ -160,13 +162,15 @@ namespace Eaf.Middleware.Ldap.Authentication
         {
             string container = NormalizeLdapContainer(SimpleStringCipher.Instance.Decrypt(await _settings.GetDomain(null)));
             string userName = NormalizeLdapUserName(userNameOrEmailAddress);
+            string escapedUserName = EscapeLdapFilter(userName);
+            string escapedEmail = EscapeLdapFilter(userNameOrEmailAddress);
             string[] attributes = { "samAccountName", "displayName", "userPrincipalName", "mail" };
 
             var results = await Task.WhenAll(
-                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(samAccountName={userName}))", attributes),
-                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(mail={userNameOrEmailAddress}))", attributes),
-                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(displayName={userName}*))", attributes),
-                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(userPrincipalName={userName}*))", attributes)
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(samAccountName={escapedUserName}))", attributes),
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(mail={escapedEmail}))", attributes),
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(displayName={escapedUserName}*))", attributes),
+                ExecuteLdapSearchAsync(container, $"(&(objectClass=user)(userPrincipalName={escapedUserName}*))", attributes)
             );
 
             var users = results.SelectMany(r => r.Item1).ToList();
@@ -358,9 +362,10 @@ namespace Eaf.Middleware.Ldap.Authentication
                         container = "DC=" + string.Join(DomainComponentSeparator, container.Split("."));
 
                     string[] attrib = { "samAccountName", "displayName", "userPrincipalName", "mail" };
-                    var filter1 = $"(&(objectClass=user)(SAMAccountName={user.UserName}))";
+                    var escapedUserName = EscapeLdapFilter(user.UserName);
+                    var filter1 = $"(&(objectClass=user)(SAMAccountName={escapedUserName}))";
                     var searcher1 = await principalContext.SearchAsync(container, LdapConnection.ScopeSub, filter1, attrib, false);
-                    var ldapEntry = FillUsersLdap(searcher1).Result.Item1.FirstOrDefault();
+                    var ldapEntry = (await FillUsersLdap(searcher1)).Item1.FirstOrDefault();
 
                     if (ldapEntry != null)
                     {
@@ -564,7 +569,7 @@ namespace Eaf.Middleware.Ldap.Authentication
                 {
                     using (DirectorySearcher adsSearcher = new(adsEntry))
                     {
-                        adsSearcher.Filter = "(sAMAccountName=" + userNameOrEmailAddress + ")";
+                        adsSearcher.Filter = "(sAMAccountName=" + EscapeLdapFilter(userNameOrEmailAddress) + ")";
                         try
                         {
                             //Valida se loga no ldap
@@ -597,6 +602,50 @@ namespace Eaf.Middleware.Ldap.Authentication
                 ds.SizeLimit = sizeLimit;
 
             return searcher.FindAll();
+        }
+
+        /// <summary>
+        /// Escapa caracteres especiais em valores usados em filtros LDAP (RFC 4515).
+        /// </summary>
+        /// <param name="input">Valor a ser escapado.</param>
+        /// <returns>Valor escapado para uso seguro em filtros LDAP.</returns>
+        private static string EscapeLdapFilter(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            var sb = new StringBuilder(input.Length);
+            foreach (var c in input)
+            {
+                switch (c)
+                {
+                    case '\0':
+                        sb.Append("\\00");
+                        break;
+
+                    case '*':
+                        sb.Append("\\2a");
+                        break;
+
+                    case '(':
+                        sb.Append("\\28");
+                        break;
+
+                    case ')':
+                        sb.Append("\\29");
+                        break;
+
+                    case '\\':
+                        sb.Append("\\5c");
+                        break;
+
+                    default:
+                        sb.Append(c);
+                        break;
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

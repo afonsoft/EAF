@@ -8,6 +8,7 @@ using Eaf.Middleware.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Net;
 
 namespace Eaf.ProjectName.Web.Startup
@@ -61,7 +62,9 @@ namespace Eaf.ProjectName.Web.Startup
 
             Configuration.Caching.MemoryCacheOptions = new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions
             {
-                SizeLimit = 256 //Mb
+                SizeLimit = 256 * 1024 * 1024, // 256 MB
+                CompactionPercentage = 0.25,
+                ExpirationScanFrequency = TimeSpan.FromMinutes(5)
             };
         }
 

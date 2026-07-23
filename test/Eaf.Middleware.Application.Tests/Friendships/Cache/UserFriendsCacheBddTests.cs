@@ -31,6 +31,7 @@ namespace Eaf.Middleware.Application.Tests.Friendships.Cache
         private readonly ICache _friendCache;
         private readonly IRepository<Friendship, long> _friendshipRepository;
         private readonly IRepository<ChatMessage, long> _chatMessageRepository;
+        private readonly IRepository<User, long> _userRepository;
         private readonly ITenantCache _tenantCache;
         private readonly UserStore _userStore;
 
@@ -50,11 +51,13 @@ namespace Eaf.Middleware.Application.Tests.Friendships.Cache
             unitOfWorkManager.Current.Returns(activeUow);
 
             _userStore = Substitute.For<UserStore>(new object[10]);
+            _userRepository = Substitute.For<IRepository<User, long>>();
 
             _sut = new UserFriendsCache(
                 _cacheManager,
                 _friendshipRepository,
                 _chatMessageRepository,
+                _userRepository,
                 _tenantCache,
                 unitOfWorkManager,
                 _userStore

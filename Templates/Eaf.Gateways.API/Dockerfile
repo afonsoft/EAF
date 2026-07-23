@@ -52,6 +52,8 @@ RUN apt-get update && \
     chown -R app:app /app
 
 # set to use the non-root USER here
-USER app 
+USER app
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD dotnet --info || exit 1
 
 ENTRYPOINT ["dotnet", "Eaf.Gateways.API.dll"]

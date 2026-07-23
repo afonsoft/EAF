@@ -86,24 +86,27 @@ namespace Eaf.Middleware.Logging
                 return new GetLatestWebLogsOutput();
             }
 
-            var lines = AppFileHelper.ReadLines(lastLogFile.FullName).Reverse().Take(10000).ToList();
+            const int maxLinesToRead = 1000;
+            const int logLinesToReturn = 100;
+            var logLevels = new[] { "[IMF]", "INFO", "[DBG]", "DEBUG", "[WRN]", "WARNING", "[ERR]", "ERROR", "[FAT]", "[FTL]", "FATAL" };
+
+            var recentLines = File.ReadLines(lastLogFile.FullName)
+                .Reverse()
+                .Take(maxLinesToRead)
+                .ToList();
+
             var logLineCount = 0;
             var lineCount = 0;
-
-            foreach (var line in lines)
+            for (int i = 0; i < recentLines.Count; i++)
             {
-                if (line.Contains("[IMF]") || line.Contains("INFO") ||
-                    line.Contains("[DBG]") || line.Contains("DEBUG") ||
-                    line.Contains("[WRN]") || line.Contains("WARNING") ||
-                    line.Contains("[ERR]") || line.Contains("ERROR") ||
-                    line.Contains("[FAT]") || line.Contains("[FTL]") || line.Contains("FATAL"))
+                if (logLevels.Any(level => recentLines[i].Contains(level)))
                 {
                     logLineCount++;
                 }
 
                 lineCount++;
 
-                if (logLineCount == 100)
+                if (logLineCount == logLinesToReturn)
                 {
                     break;
                 }
@@ -111,7 +114,7 @@ namespace Eaf.Middleware.Logging
 
             return new GetLatestWebLogsOutput
             {
-                LatestWebLogLines = lines.Take(lineCount).Reverse().ToList()
+                LatestWebLogLines = recentLines.Take(lineCount).Reverse().ToList()
             };
         }
 

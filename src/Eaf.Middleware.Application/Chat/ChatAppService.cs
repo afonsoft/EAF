@@ -86,18 +86,7 @@ namespace Eaf.Middleware.Chat
                     FriendUserName = L("Group"),
                     Name = L("Group"),
                     Surname = "",
-                    UnreadMessageCount = await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
-                                                               cm.UserId == userIdentifier.UserId &&
-                                                               cm.TenantId == userIdentifier.TenantId &&
-                                                               cm.TargetUserId == 0 &&
-                                                               cm.TargetTenantId == userIdentifier.TenantId &&
-                                                               cm.Side == ChatSide.Receiver) +
-                                         await (await _chatMessageRepository.GetAllAsync()).CountAsync(cm => cm.ReadState == ChatMessageReadState.Unread &&
-                                                               cm.UserId == 0 &&
-                                                               cm.TenantId == userIdentifier.TenantId &&
-                                                               cm.TargetUserId == userIdentifier.UserId &&
-                                                               cm.TargetTenantId == userIdentifier.TenantId &&
-                                                               cm.Side == ChatSide.Receiver)
+                    UnreadMessageCount = await GetGroupUnreadMessageCountAsync(userIdentifier)
                 });
             }
 
@@ -178,16 +167,15 @@ namespace Eaf.Middleware.Chat
 
         private async Task SetTargetUserNamesAsync(List<ChatMessageDto> messages)
         {
+            var userIds = messages.Select(m => m.TargetUserId).Distinct().ToList();
+            var userNames = await UserManager.Users
+                .AsNoTracking()
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.Name);
+
             foreach (var message in messages)
             {
-                try
-                {
-                    message.TargetUserName = (await UserManager.GetUserByIdAsync(message.TargetUserId)).Name;
-                }
-                catch
-                {
-                    message.TargetUserName = "";
-                }
+                message.TargetUserName = userNames.TryGetValue(message.TargetUserId, out var name) ? name : "";
             }
         }
 
@@ -230,7 +218,7 @@ namespace Eaf.Middleware.Chat
             using (CurrentUnitOfWork.SetTenantId(input.TenantId))
             {
                 var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
-                    .Where(m => m.UserId == input.UserId && m.TargetTenantId == tenantId && m.TargetUserId == userId)
+                .Where(m => m.UserId == input.UserId && m.TargetTenantId == tenantId && m.TargetUserId == userId)
                     .ToListAsync();
 
                 if (!reverseMessages.Any())
@@ -285,7 +273,7 @@ namespace Eaf.Middleware.Chat
             using (CurrentUnitOfWork.SetTenantId(input.TenantId))
             {
                 var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
-                    .Where(m => m.UserId == 0
+                .Where(m => m.UserId == 0
                         && m.TargetTenantId == tenantId
                         && m.TargetUserId == userId
                         && m.ReadState == ChatMessageReadState.Unread)
@@ -310,6 +298,24 @@ namespace Eaf.Middleware.Chat
                 await _chatCommunicator.SendAllUnreadMessagesOfUserReadToClients(onlineUserClients, userIdentifier);
                 await _chatCommunicator.SendReadStateChangeToClients(onlineUserClients, userIdentifier);
             }
+        }
+
+        private async Task<int> GetGroupUnreadMessageCountAsync(UserIdentifier userIdentifier)
+        {
+            var query = (await _chatMessageRepository.GetAllAsync())
+                .Where(cm =>
+                    cm.ReadState == ChatMessageReadState.Unread &&
+                    cm.TenantId == userIdentifier.TenantId &&
+                    cm.TargetTenantId == userIdentifier.TenantId &&
+                    cm.Side == ChatSide.Receiver);
+
+            var unreadAsSender = await query
+                .CountAsync(cm => cm.UserId == userIdentifier.UserId && cm.TargetUserId == 0);
+
+            var unreadAsReceiver = await query
+                .CountAsync(cm => cm.UserId == 0 && cm.TargetUserId == userIdentifier.UserId);
+
+            return unreadAsSender + unreadAsReceiver;
         }
     }
 }
