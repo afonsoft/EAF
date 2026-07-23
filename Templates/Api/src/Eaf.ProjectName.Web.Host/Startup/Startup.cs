@@ -21,6 +21,7 @@ using Eaf.ProjectName.Debugging;
 using Eaf.ProjectName.Web.Middleware;
 using Eaf.ProjectName.Web.WebHooks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -91,26 +92,39 @@ namespace Eaf.ProjectName.Web.Startup
             {
                 options.AddPolicy(ProjectNameConsts.DefaultCorsPolicyName, builder =>
                 {
-                    builder.SetIsOriginAllowedToAllowWildcardSubdomains();
+                    var corsOrigins = _appConfiguration["App:CorsOrigins"];
+                    var isDevelopment = _hostingEnvironment.IsDevelopment();
 
-                    //App:CorsOrigins in appsettings.json can contain more than one address with splitted by comma.
-                    if (_appConfiguration["App:CorsOrigins"] == "*")
-                        builder
-                            .SetIsOriginAllowed((host) => true);
+                    if (!isDevelopment && (string.IsNullOrWhiteSpace(corsOrigins) || corsOrigins == "*"))
+                    {
+                        throw new InvalidOperationException("App:CorsOrigins must be configured with explicit origins in production.");
+                    }
+
+                    if (isDevelopment && corsOrigins == "*")
+                    {
+                        builder.SetIsOriginAllowed((host) => true);
+                    }
                     else
+                    {
                         builder.WithOrigins(
-                            _appConfiguration["App:CorsOrigins"]
-                                .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                                .Select(o => o.RemovePostFix("/"))
-                                .ToArray()
-                        );
+                                corsOrigins
+                                    .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(o => o.RemovePostFix("/"))
+                                    .ToArray()
+                            )
+                            .SetIsOriginAllowedToAllowWildcardSubdomains();
+                    }
 
                     builder.AllowAnyMethod()
                            .AllowCredentials()
-                           .AllowAnyHeader()
-                           .Build();
+                           .WithHeaders("Authorization", "Content-Type", "X-Requested-With", "Accept", "X-XSRF-TOKEN");
                 });
             });
+
+            // GDPR / Data Protection
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(_hostingEnvironment.ContentRootPath, "data-protection-keys")))
+                .SetApplicationName("Eaf.ProjectName");
 
             //Swagger - Enable this line and the related lines in Configure method to enable swagger UI
             services.AddSwaggerGen(options =>
@@ -148,7 +162,7 @@ namespace Eaf.ProjectName.Web.Startup
             // Response Compression (Brotli + Gzip)
             services.AddResponseCompression(options =>
             {
-                options.EnableForHttps = true;
+                options.EnableForHttps = false;
                 options.Providers.Add<BrotliCompressionProvider>();
                 options.Providers.Add<GzipCompressionProvider>();
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
@@ -163,14 +177,18 @@ namespace Eaf.ProjectName.Web.Startup
                 });
             });
 
+            var compressionLevel = _hostingEnvironment.IsProduction()
+                ? CompressionLevel.Optimal
+                : CompressionLevel.Fastest;
+
             services.Configure<BrotliCompressionProviderOptions>(options =>
             {
-                options.Level = CompressionLevel.Fastest;
+                options.Level = compressionLevel;
             });
 
             services.Configure<GzipCompressionProviderOptions>(options =>
             {
-                options.Level = CompressionLevel.Fastest;
+                options.Level = compressionLevel;
             });
 
             //Configure Eaf and Dependency Injection
@@ -191,7 +209,10 @@ namespace Eaf.ProjectName.Web.Startup
             });
 
             app.UseResponseCompression();
+            app.UseRateLimiter();
+            app.UseCookiePolicy();
             app.UseEafHealthChecks();
+            app.UseMiddleware<SecurityHeadersMiddleware>();
             app.UseMiddleware<ContentSecurityPolicyMiddleware>();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();

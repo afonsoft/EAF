@@ -4,7 +4,6 @@ using Abp.Domain.Repositories;
 using Abp.Localization;
 using Eaf.Middleware.Authorization;
 using Eaf.Middleware.Localization.Dto;
-using Abp.Threading;
 using Abp.UI;
 using System;
 using System.Collections.Generic;
@@ -77,12 +76,12 @@ namespace Eaf.Middleware.Localization
         /// <returns>Resultado da operação.</returns>
         public async Task<List<LanguageInfo>> GetAllLanguages()
         {
-            var languageInfos = AsyncHelper.RunSync(() => _applicationLanguageManager.GetLanguagesAsync(AbpSession.TenantId))
+            var languages = await _applicationLanguageManager.GetLanguagesAsync(AbpSession.TenantId);
+
+            return languages
                    .OrderBy(l => l.DisplayName)
                    .Select(l => l.ToLanguageInfo())
                    .ToList();
-
-            return await Task.FromResult(languageInfos);
         }
 
         [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Languages_Create, MiddlewarePermissions.Pages_Administration_Languages_Edit)]

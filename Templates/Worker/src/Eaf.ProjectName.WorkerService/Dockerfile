@@ -28,8 +28,12 @@ RUN apt-get update && \
         zlib1g-dev && \
     ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r app && useradd -r -g app app && \
+    chown -R app:app /app
 
 USER app
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD dotnet --info || exit 1
 
 ENTRYPOINT ["dotnet", "Eaf.ProjectName.WorkerService.dll"]

@@ -59,4 +59,6 @@ RUN apt-get update && \
 
 USER app
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD dotnet --info || exit 1
+
 ENTRYPOINT ["dotnet", "Eaf.ProjectName.WorkerService.dll"]

@@ -1,5 +1,6 @@
 name: 🔒 Security Scan
 
+permissions: {}
 on:
   push:
     branches: [main, develop]
@@ -7,7 +8,7 @@ on:
     branches: [main, develop]
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM UTC
+  - cron: '0 2 * * 1'    # Weekly on Monday at 2 AM UTC
 
 jobs:
   # CodeQL Analysis
@@ -18,101 +19,98 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    
+
     strategy:
       fail-fast: false
       matrix:
         language: ['csharp', 'javascript']
-    
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-      
-      - name: 🔍 Initialize CodeQL
-        uses: github/codeql-action/init@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-extended,security-and-quality
-      
-      - name: 🔍 Autobuild
-        uses: github/codeql-action/autobuild@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
-      
-      - name: 🔍 Perform Analysis
-        uses: github/codeql-action/analyze@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
-        with:
-          category: "/language:${{matrix.language}}"
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+    - name: 🔍 Initialize CodeQL
+      uses: github/codeql-action/init@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06   # v4
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+
+    - name: 🔍 Autobuild
+      uses: github/codeql-action/autobuild@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06           # v4
+    - name: 🔍 Perform Analysis
+      uses: github/codeql-action/analyze@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06           # v4
+      with:
+        category: "/language:${{matrix.language}}"
 
   # Snyk Security Scan
   snyk:
     name: 🛡️ Snyk Security
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.actor != 'dependabot[bot]'
-    
+
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-      
-      - name: 🗄️ Setup .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: "10.0.x"
-      
-      - name: 🔑 Validate Snyk Token
-        id: snyk-token-check
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          if [ -z "$SNYK_TOKEN" ]; then
-            echo "has_token=false" >> $GITHUB_OUTPUT
-            echo "::warning::SNYK_TOKEN não configurado. Scan será ignorado."
-          else
-            echo "has_token=true" >> $GITHUB_OUTPUT
-          fi
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+    - name: 🗄️ Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
+      with:
+        dotnet-version: "10.0.x"
+    - name: 🔑 Validate Snyk Token
+      id: snyk-token-check
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: |
+        if [ -z "$SNYK_TOKEN" ]; then
+          echo "has_token=false" >> $GITHUB_OUTPUT
+          echo "::warning::SNYK_TOKEN não configurado. Scan será ignorado."
+        else
+          echo "has_token=true" >> $GITHUB_OUTPUT
+        fi
 
-      - name: 🔧 Restore Dependencies
-        if: steps.snyk-token-check.outputs.has_token == 'true'
-        run: dotnet restore Eaf.sln --ignore-failed-sources
-      
-      - name: 🛡️ Run Snyk (.NET)
-        if: steps.snyk-token-check.outputs.has_token == 'true'
-        id: snyk-dotnet
-        uses: snyk/actions/dotnet@8e119fbb6c251787721d34ba683ed48eba792766 # master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
-      
-      - name: 🛡️ Snyk UI Scan
-        if: steps.snyk-token-check.outputs.has_token == 'true'
-        id: snyk-node
-        uses: snyk/actions/node@8e119fbb6c251787721d34ba683ed48eba792766 # master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
+    - name: 🔧 Restore Dependencies
+      if: steps.snyk-token-check.outputs.has_token == 'true'
+      run: dotnet restore Eaf.sln --ignore-failed-sources
 
-      - name: 📋 Snyk Summary
-        if: always()
-        run: |
-          echo "## 🛡️ Snyk Security Scan" >> $GITHUB_STEP_SUMMARY
+    - name: 🛡️ Run Snyk (.NET)
+      if: steps.snyk-token-check.outputs.has_token == 'true'
+      id: snyk-dotnet
+      uses: snyk/actions/dotnet@8e119fbb6c251787721d34ba683ed48eba792766   # master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+    - name: 🛡️ Snyk UI Scan
+      if: steps.snyk-token-check.outputs.has_token == 'true'
+      id: snyk-node
+      uses: snyk/actions/node@8e119fbb6c251787721d34ba683ed48eba792766   # master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+    - name: 📋 Snyk Summary
+      if: always()
+      run: |
+        echo "## 🛡️ Snyk Security Scan" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.snyk-token-check.outputs.has_token }}" != "true" ]; then
+          echo "⚠️ **SNYK_TOKEN não configurado** — scan ignorado" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.snyk-token-check.outputs.has_token }}" != "true" ]; then
-            echo "⚠️ **SNYK_TOKEN não configurado** — scan ignorado" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Configure o secret SNYK_TOKEN em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Scan | Status |" >> $GITHUB_STEP_SUMMARY
-            echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-            echo "| .NET Backend | ${{ steps.snyk-dotnet.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-            echo "| Node Frontend | ${{ steps.snyk-node.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            if [ "${{ steps.snyk-dotnet.outcome }}" == "failure" ] || [ "${{ steps.snyk-node.outcome }}" == "failure" ]; then
-              echo "### ⚠️ Vulnerabilidades detectadas" >> $GITHUB_STEP_SUMMARY
-              echo "Verifique os logs do Snyk para detalhes." >> $GITHUB_STEP_SUMMARY
-            fi
+          echo "Configure o secret SNYK_TOKEN em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "| Scan | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| .NET Backend | ${{ steps.snyk-dotnet.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node Frontend | ${{ steps.snyk-node.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.snyk-dotnet.outcome }}" == "failure" ] || [ "${{ steps.snyk-node.outcome }}" == "failure" ]; then
+            echo "### ⚠️ Vulnerabilidades detectadas" >> $GITHUB_STEP_SUMMARY
+            echo "Verifique os logs do Snyk para detalhes." >> $GITHUB_STEP_SUMMARY
           fi
+        fi
 
   # SonarQube Analysis
   # Disabled: SonarCloud Automatic Analysis is already enabled for this project.
@@ -120,137 +118,174 @@ jobs:
   sonarqube:
     name: 📊 SonarQube Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: false
-    
+
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-        with:
-          fetch-depth: 0
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      with:
+        fetch-depth: 0
 
-      - name: 🔑 Validate Sonar Token
-        id: sonar-token-check
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "has_token=false" >> $GITHUB_OUTPUT
-            echo "::warning::SONAR_TOKEN não configurado. SonarQube scan será ignorado."
-          else
-            echo "has_token=true" >> $GITHUB_OUTPUT
-          fi
-      
-      - name: 🗄️ Setup .NET
-        if: steps.sonar-token-check.outputs.has_token == 'true'
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: "10.0.x"
-      
-      - name: 📦 Setup NuGet
-        if: steps.sonar-token-check.outputs.has_token == 'true'
-        uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123 # v4
-      
-      - name: 🔧 Restore Dependencies
-        if: steps.sonar-token-check.outputs.has_token == 'true'
-        run: dotnet restore Eaf.sln --ignore-failed-sources
-      
-      - name: 🏗️ Build Solution
-        if: steps.sonar-token-check.outputs.has_token == 'true'
-        run: dotnet build Eaf.sln --configuration Release --no-restore
-      
-      - name: 📊 SonarQube Scan
-        if: steps.sonar-token-check.outputs.has_token == 'true'
-        id: sonar-scan
-        uses: sonarsource/sonarcloud-github-action@ba3875ecf642b2129de2b589510c81a8b53dbf4e # master
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: 🔑 Validate Sonar Token
+      id: sonar-token-check
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        if [ -z "$SONAR_TOKEN" ]; then
+          echo "has_token=false" >> $GITHUB_OUTPUT
+          echo "::warning::SONAR_TOKEN não configurado. SonarQube scan será ignorado."
+        else
+          echo "has_token=true" >> $GITHUB_OUTPUT
+        fi
 
-      - name: 📋 SonarQube Summary
-        if: always()
-        run: |
-          echo "## 📊 SonarQube Analysis" >> $GITHUB_STEP_SUMMARY
+    - name: 🗄️ Setup .NET
+      if: steps.sonar-token-check.outputs.has_token == 'true'
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
+      with:
+        dotnet-version: "10.0.x"
+    - name: 📦 Setup NuGet
+      if: steps.sonar-token-check.outputs.has_token == 'true'
+      uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123   # v4
+    - name: 🔧 Restore Dependencies
+      if: steps.sonar-token-check.outputs.has_token == 'true'
+      run: dotnet restore Eaf.sln --ignore-failed-sources
+
+    - name: 🏗️ Build Solution
+      if: steps.sonar-token-check.outputs.has_token == 'true'
+      run: dotnet build Eaf.sln --configuration Release --no-restore
+
+    - name: 📊 SonarQube Scan
+      if: steps.sonar-token-check.outputs.has_token == 'true'
+      id: sonar-scan
+      uses: sonarsource/sonarcloud-github-action@ba3875ecf642b2129de2b589510c81a8b53dbf4e           # master
+      continue-on-error: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: 📋 SonarQube Summary
+      if: always()
+      run: |
+        echo "## 📊 SonarQube Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.sonar-token-check.outputs.has_token }}" != "true" ]; then
+          echo "⚠️ **SONAR_TOKEN não configurado** — análise ignorada" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.sonar-token-check.outputs.has_token }}" != "true" ]; then
-            echo "⚠️ **SONAR_TOKEN não configurado** — análise ignorada" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Configure o secret SONAR_TOKEN em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.sonar-scan.outcome }}" == "success" ]; then
-            echo "✅ **Análise SonarQube completada**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "[Ver resultados no SonarCloud](https://sonarcloud.io/project/overview?id=afonsoft_EAF)" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.sonar-scan.outcome }}" == "failure" ]; then
-            echo "❌ **Análise SonarQube falhou**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Possíveis causas:" >> $GITHUB_STEP_SUMMARY
-            echo "- SONAR_TOKEN expirado ou inválido" >> $GITHUB_STEP_SUMMARY
-            echo "- Erro de conexão com sonarcloud.io" >> $GITHUB_STEP_SUMMARY
-            echo "- Falha no build (pré-requisito)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ **Análise ignorada ou cancelada**" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "Configure o secret SONAR_TOKEN em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
+        elif [ "${{ steps.sonar-scan.outcome }}" == "success" ]; then
+          echo "✅ **Análise SonarQube completada**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[Ver resultados no SonarCloud](https://sonarcloud.io/project/overview?id=afonsoft_EAF)" >> $GITHUB_STEP_SUMMARY
+        elif [ "${{ steps.sonar-scan.outcome }}" == "failure" ]; then
+          echo "❌ **Análise SonarQube falhou**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Possíveis causas:" >> $GITHUB_STEP_SUMMARY
+          echo "- SONAR_TOKEN expirado ou inválido" >> $GITHUB_STEP_SUMMARY
+          echo "- Erro de conexão com sonarcloud.io" >> $GITHUB_STEP_SUMMARY
+          echo "- Falha no build (pré-requisito)" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ **Análise ignorada ou cancelada**" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # Secret Leak Detection
+  gitleaks:
+    name: 🔐 Secret Leak Detection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4
+      with:
+        fetch-depth: 0
+    - name: 🔐 Run Gitleaks
+      uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc   # v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # Infrastructure as Code Security Scan
+  checkov:
+    name: 🏗️ IaC Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4
+    - name: 🏗️ Run Checkov
+      uses: bridgecrewio/checkov-action@7b972723c44fb3d256283fac96fae5d7c1894bb7   # v12
+      with:
+        directory: .
+        framework: dockerfile,github_actions
+        quiet: true
+        output_format: github_failed_only
+        skip_check: CKV_GHA_7
 
   # Security Summary
   security-summary:
     name: 📋 Security Summary
     runs-on: ubuntu-latest
-    needs: [codeql, snyk, sonarqube]
+    permissions:
+      contents: read
+    needs: [codeql, snyk, sonarqube, gitleaks, checkov]
     if: always()
-    
+
     steps:
-      - name: 📋 Generate Security Report
-        run: |
-          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+    - name: 📋 Generate Security Report
+      run: |
+        echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Tool | Status | Detalhes |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+
+        # CodeQL
+        CODEQL_STATUS="${{ needs.codeql.result }}"
+        case "$CODEQL_STATUS" in
+          success) CODEQL_DETAIL="✅ Sem vulnerabilidades" ;;
+          failure) CODEQL_DETAIL="❌ Vulnerabilidades encontradas" ;;
+          skipped) CODEQL_DETAIL="⏭️ Ignorado (condição não atendida)" ;;
+          *) CODEQL_DETAIL="⚠️ $CODEQL_STATUS" ;;
+        esac
+        echo "| 🔍 CodeQL | $CODEQL_STATUS | $CODEQL_DETAIL |" >> $GITHUB_STEP_SUMMARY
+
+        # Snyk
+        SNYK_STATUS="${{ needs.snyk.result }}"
+        case "$SNYK_STATUS" in
+          success) SNYK_DETAIL="✅ Sem vulnerabilidades críticas" ;;
+          failure) SNYK_DETAIL="❌ Vulnerabilidades high+ encontradas" ;;
+          skipped) SNYK_DETAIL="⏭️ Ignorado (Dependabot ou token ausente)" ;;
+          *) SNYK_DETAIL="⚠️ $SNYK_STATUS" ;;
+        esac
+        echo "| 🛡️ Snyk | $SNYK_STATUS | $SNYK_DETAIL |" >> $GITHUB_STEP_SUMMARY
+
+        # SonarQube
+        SONAR_STATUS="${{ needs.sonarqube.result }}"
+        case "$SONAR_STATUS" in
+          success) SONAR_DETAIL="✅ Quality gate passed" ;;
+          failure) SONAR_DETAIL="❌ Quality gate failed" ;;
+          skipped) SONAR_DETAIL="⏭️ Apenas push/workflow_dispatch" ;;
+          *) SONAR_DETAIL="⚠️ $SONAR_STATUS" ;;
+        esac
+        echo "| 📊 SonarQube | $SONAR_STATUS | $SONAR_DETAIL |" >> $GITHUB_STEP_SUMMARY
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [[ "${{ needs.codeql.result }}" == "failure" || "${{ needs.snyk.result }}" == "failure" || "${{ needs.sonarqube.result }}" == "failure" ]]; then
+          echo "❌ **Problemas de segurança detectados!**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Tool | Status | Detalhes |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|----------|" >> $GITHUB_STEP_SUMMARY
-
-          # CodeQL
-          CODEQL_STATUS="${{ needs.codeql.result }}"
-          case "$CODEQL_STATUS" in
-            success) CODEQL_DETAIL="✅ Sem vulnerabilidades" ;;
-            failure) CODEQL_DETAIL="❌ Vulnerabilidades encontradas" ;;
-            skipped) CODEQL_DETAIL="⏭️ Ignorado (condição não atendida)" ;;
-            *) CODEQL_DETAIL="⚠️ $CODEQL_STATUS" ;;
-          esac
-          echo "| 🔍 CodeQL | $CODEQL_STATUS | $CODEQL_DETAIL |" >> $GITHUB_STEP_SUMMARY
-
-          # Snyk
-          SNYK_STATUS="${{ needs.snyk.result }}"
-          case "$SNYK_STATUS" in
-            success) SNYK_DETAIL="✅ Sem vulnerabilidades críticas" ;;
-            failure) SNYK_DETAIL="❌ Vulnerabilidades high+ encontradas" ;;
-            skipped) SNYK_DETAIL="⏭️ Ignorado (Dependabot ou token ausente)" ;;
-            *) SNYK_DETAIL="⚠️ $SNYK_STATUS" ;;
-          esac
-          echo "| 🛡️ Snyk | $SNYK_STATUS | $SNYK_DETAIL |" >> $GITHUB_STEP_SUMMARY
-
-          # SonarQube
-          SONAR_STATUS="${{ needs.sonarqube.result }}"
-          case "$SONAR_STATUS" in
-            success) SONAR_DETAIL="✅ Quality gate passed" ;;
-            failure) SONAR_DETAIL="❌ Quality gate failed" ;;
-            skipped) SONAR_DETAIL="⏭️ Apenas push/workflow_dispatch" ;;
-            *) SONAR_DETAIL="⚠️ $SONAR_STATUS" ;;
-          esac
-          echo "| 📊 SonarQube | $SONAR_STATUS | $SONAR_DETAIL |" >> $GITHUB_STEP_SUMMARY
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [[ "${{ needs.codeql.result }}" == "failure" || "${{ needs.snyk.result }}" == "failure" || "${{ needs.sonarqube.result }}" == "failure" ]]; then
-            echo "❌ **Problemas de segurança detectados!**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 🔧 Ações recomendadas:" >> $GITHUB_STEP_SUMMARY
-            if [ "${{ needs.codeql.result }}" == "failure" ]; then
-              echo "- Revisar alertas CodeQL na aba Security" >> $GITHUB_STEP_SUMMARY
-            fi
-            if [ "${{ needs.snyk.result }}" == "failure" ]; then
-              echo "- Atualizar dependências vulneráveis (\`dotnet outdated\`)" >> $GITHUB_STEP_SUMMARY
-            fi
-            if [ "${{ needs.sonarqube.result }}" == "failure" ]; then
-              echo "- Corrigir code smells no [SonarCloud](https://sonarcloud.io/project/overview?id=afonsoft_EAF)" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "✅ **Todos os scans de segurança passaram!**" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Ações recomendadas:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.codeql.result }}" == "failure" ]; then
+            echo "- Revisar alertas CodeQL na aba Security" >> $GITHUB_STEP_SUMMARY
           fi
+          if [ "${{ needs.snyk.result }}" == "failure" ]; then
+            echo "- Atualizar dependências vulneráveis (\`dotnet outdated\`)" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.sonarqube.result }}" == "failure" ]; then
+            echo "- Corrigir code smells no [SonarCloud](https://sonarcloud.io/project/overview?id=afonsoft_EAF)" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "✅ **Todos os scans de segurança passaram!**" >> $GITHUB_STEP_SUMMARY
+        fi

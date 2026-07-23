@@ -77,14 +77,34 @@ builder.Services.AddHostedService<ConfigurationNotifyingService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("EafGateWayCorsPolicy", builder =>
+    options.AddPolicy("EafGateWayCorsPolicy", policyBuilder =>
     {
-        builder.SetIsOriginAllowedToAllowWildcardSubdomains()
-            .SetIsOriginAllowed((host) => true)
-            .AllowAnyMethod()
+        var corsOrigins = builder.Configuration["App:CorsOrigins"];
+        var isDevelopment = builder.Environment.IsDevelopment();
+
+        if (!isDevelopment && (string.IsNullOrWhiteSpace(corsOrigins) || corsOrigins == "*"))
+        {
+            throw new InvalidOperationException("App:CorsOrigins must be configured with explicit origins in production.");
+        }
+
+        if (isDevelopment && corsOrigins == "*")
+        {
+            policyBuilder.SetIsOriginAllowed((host) => true);
+        }
+        else
+        {
+            policyBuilder.WithOrigins(
+                    corsOrigins
+                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(o => o.TrimEnd('/'))
+                        .ToArray()
+                )
+                .SetIsOriginAllowedToAllowWildcardSubdomains();
+        }
+
+        policyBuilder.AllowAnyMethod()
             .AllowCredentials()
-            .AllowAnyHeader()
-            .Build();
+            .WithHeaders("Authorization", "Content-Type", "X-Requested-With", "Accept", "X-XSRF-TOKEN");
     });
 });
 

@@ -4,7 +4,6 @@ using Abp.Dependency;
 using Abp.Domain.Uow;
 using Abp.Logging;
 using Abp.Runtime.Caching;
-using Abp.Threading;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -89,7 +88,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
                         using (var userManager = IocManager.Instance.ResolveAsDisposable<UserManager>())
                         {
                             var userManagerObject = userManager.Object;
-                            var user = AsyncHelper.RunSync(() => userManagerObject.GetUserAsync(userIdentifier));
+                            var user = userManagerObject.GetUser(userIdentifier);
 
                             userSecurityStamp = user.SecurityStamp ?? "";
                             securityStampValid = tokenValidityValueInClaims == userSecurityStamp;

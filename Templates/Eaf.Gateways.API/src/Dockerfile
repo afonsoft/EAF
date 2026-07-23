@@ -22,5 +22,11 @@ RUN dotnet publish "src/Eaf.Gateways.API.csproj" -c "$BUILD_CONFIGURATION" -o /a
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+RUN groupadd -r app && useradd -r -g app app && chown -R app:app /app
+
 USER app
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD dotnet --info || exit 1
+
 ENTRYPOINT ["dotnet", "Eaf.Gateways.API.dll"]

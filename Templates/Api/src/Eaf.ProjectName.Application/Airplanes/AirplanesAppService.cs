@@ -36,10 +36,12 @@ namespace Eaf.ProjectName.Airplanes
 
         public async Task<PagedResultDto<AirplaneDto>> GetAll(GetAirplanesInput input)
         {
+            var normalizedFilter = input.Filter?.ToLowerInvariant();
+
             var query = _airplaneManager.Airplanes
                 .AsNoTracking()
-                .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    e => e.Number.Contains(input.Filter) || e.Model.Contains(input.Filter));
+                .WhereIf(!string.IsNullOrWhiteSpace(normalizedFilter),
+                    e => e.Number.ToLower().Contains(normalizedFilter) || e.Model.ToLower().Contains(normalizedFilter));
 
             var total = await query.CountAsync();
             var items = await query.OrderBy(input.Sorting ?? "id asc").PageBy(input).ToListAsync();
@@ -89,7 +91,11 @@ namespace Eaf.ProjectName.Airplanes
 
         public async Task<FileDto> GetAirplanesToExcel()
         {
-            var items = await _airplaneManager.Airplanes.AsNoTracking().ToListAsync();
+            var items = await _airplaneManager.Airplanes
+                .AsNoTracking()
+                .OrderBy(e => e.Id)
+                .ToListAsync();
+
             return _airplanesExcelExporter.ExportToFile(ObjectMapper.Map<List<AirplaneDto>>(items));
         }
 

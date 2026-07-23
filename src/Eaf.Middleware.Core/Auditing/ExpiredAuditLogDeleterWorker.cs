@@ -129,7 +129,11 @@ namespace Eaf.Middleware.Web.Auditing
                 return;
             }
 
-            if (expiredEntryCount > MaxDeletionCount)
+            if (expiredEntryCount <= MaxDeletionCount)
+            {
+                _auditLogRepository.Delete(l => l.ExecutionTime < expireDate);
+            }
+            else
             {
                 var idsToDelete = _auditLogRepository.GetAll()
                     .Where(l => l.ExecutionTime < expireDate)
@@ -138,11 +142,10 @@ namespace Eaf.Middleware.Web.Auditing
                     .Select(l => l.Id)
                     .ToList();
 
-                _auditLogRepository.Delete(l => idsToDelete.Contains(l.Id));
-            }
-            else
-            {
-                _auditLogRepository.Delete(l => l.ExecutionTime < expireDate);
+                if (idsToDelete.Any())
+                {
+                    _auditLogRepository.Delete(l => idsToDelete.Contains(l.Id));
+                }
             }
         }
     }

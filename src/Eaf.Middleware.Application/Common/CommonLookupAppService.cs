@@ -37,13 +37,15 @@ namespace Eaf.Middleware.Common
 
             using (CurrentUnitOfWork.SetTenantId(input.TenantId))
             {
+                var normalizedFilter = input.Filter?.ToLowerInvariant().Trim() ?? "";
+
                 var query = UserManager.Users.WhereIf(
-                  !input.Filter.IsNullOrWhiteSpace(),
+                  !normalizedFilter.IsNullOrWhiteSpace(),
                   u =>
-                      u.Name.Contains(input.Filter, StringComparison.OrdinalIgnoreCase) ||
-                      u.UserName.Contains(input.Filter, StringComparison.OrdinalIgnoreCase) ||
-                      u.Surname.Contains(input.Filter, StringComparison.OrdinalIgnoreCase) ||
-                      u.EmailAddress.Contains(input.Filter, StringComparison.OrdinalIgnoreCase)
+                      u.Name.ToLower().Contains(normalizedFilter) ||
+                      u.UserName.ToLower().Contains(normalizedFilter) ||
+                      u.Surname.ToLower().Contains(normalizedFilter) ||
+                      u.EmailAddress.ToLower().Contains(normalizedFilter)
               ).AsNoTracking().AsQueryable();
 
                 var userCount = await query.CountAsync();

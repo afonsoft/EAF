@@ -121,17 +121,17 @@ namespace Eaf.Middleware.Auditing
 
         private IQueryable<AuditLogAndUser> CreateAuditLogAndUsersQuery(GetAuditLogsInput input)
         {
-            var query = from auditLog in _auditLogRepository.GetAll()
-                        join user in _userRepository.GetAll() on auditLog.UserId equals user.Id into userJoin
+            var query = from auditLog in _auditLogRepository.GetAll().AsNoTracking()
+                        join user in _userRepository.GetAll().AsNoTracking() on auditLog.UserId equals user.Id into userJoin
                         from joinedUser in userJoin.DefaultIfEmpty()
                         where auditLog.ExecutionTime >= input.StartDate && auditLog.ExecutionTime <= input.EndDate
                         select new AuditLogAndUser { AuditLog = auditLog, User = joinedUser };
 
             query = query
-                .WhereIf(!input.UserName.IsNullOrWhiteSpace(), item => item.User.UserName.Contains(input.UserName))
-                .WhereIf(!input.ServiceName.IsNullOrWhiteSpace(), item => item.AuditLog.ServiceName.Contains(input.ServiceName))
-                .WhereIf(!input.MethodName.IsNullOrWhiteSpace(), item => item.AuditLog.MethodName.Contains(input.MethodName))
-                .WhereIf(!input.BrowserInfo.IsNullOrWhiteSpace(), item => item.AuditLog.BrowserInfo.Contains(input.BrowserInfo))
+                .WhereIf(!input.UserName.IsNullOrWhiteSpace(), item => item.User.UserName.ToLower().Contains(input.UserName.ToLowerInvariant()))
+                .WhereIf(!input.ServiceName.IsNullOrWhiteSpace(), item => item.AuditLog.ServiceName.ToLower().Contains(input.ServiceName.ToLowerInvariant()))
+                .WhereIf(!input.MethodName.IsNullOrWhiteSpace(), item => item.AuditLog.MethodName.ToLower().Contains(input.MethodName.ToLowerInvariant()))
+                .WhereIf(!input.BrowserInfo.IsNullOrWhiteSpace(), item => item.AuditLog.BrowserInfo.ToLower().Contains(input.BrowserInfo.ToLowerInvariant()))
                 .WhereIf(input.MinExecutionDuration.HasValue && input.MinExecutionDuration > 0, item => item.AuditLog.ExecutionDuration >= input.MinExecutionDuration.Value)
                 .WhereIf(input.MaxExecutionDuration.HasValue && input.MaxExecutionDuration < int.MaxValue, item => item.AuditLog.ExecutionDuration <= input.MaxExecutionDuration.Value)
                 .WhereIf(input.HasException == true, item => item.AuditLog.Exception != null && item.AuditLog.Exception != "")

@@ -92,6 +92,7 @@ namespace Eaf.Middleware.Configuration
             public const string IsEmailConfirmationRequiredForLogin = "App.UserManagement.IsEmailConfirmationRequiredForLogin";
             public const string StoreExternalTokenInformation = "App.UserManagement.StoreExternalTokenInformation";
             public const string TokenExpiration = "App.UserManagement.TokenExpiration";
+            public const string RefreshTokenExpirationInDays = "App.UserManagement.RefreshTokenExpirationInDays";
             public const string UseCaptchaOnLogin = "App.UserManagement.UseCaptchaOnLogin";
 
             /// <summary>

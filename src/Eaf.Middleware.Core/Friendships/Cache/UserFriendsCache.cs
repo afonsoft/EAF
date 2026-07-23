@@ -6,6 +6,7 @@ using Abp.MultiTenancy;
 using Abp.Runtime.Caching;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Eaf.Middleware.Friendships.Cache
@@ -18,6 +19,7 @@ namespace Eaf.Middleware.Friendships.Cache
         private readonly ICacheManager _cacheManager;
         private readonly IRepository<ChatMessage, long> _chatMessageRepository;
         private readonly IRepository<Friendship, long> _friendshipRepository;
+        private readonly IRepository<User, long> _userRepository;
         private readonly object _syncObj = new object();
         private readonly ITenantCache _tenantCache;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -29,6 +31,7 @@ namespace Eaf.Middleware.Friendships.Cache
         /// <param name="cacheManager">Parâmetro cacheManager.</param>
         /// <param name="friendshipRepository">Parâmetro friendshipRepository.</param>
         /// <param name="chatMessageRepository">Parâmetro chatMessageRepository.</param>
+        /// <param name="userRepository">Parâmetro userRepository.</param>
         /// <param name="tenantCache">Parâmetro tenantCache.</param>
         /// <param name="unitOfWorkManager">Parâmetro unitOfWorkManager.</param>
         /// <param name="userStore">Parâmetro userStore.</param>
@@ -37,6 +40,7 @@ namespace Eaf.Middleware.Friendships.Cache
             ICacheManager cacheManager,
             IRepository<Friendship, long> friendshipRepository,
             IRepository<ChatMessage, long> chatMessageRepository,
+            IRepository<User, long> userRepository,
             ITenantCache tenantCache,
             IUnitOfWorkManager unitOfWorkManager,
             UserStore userStore)
@@ -44,6 +48,7 @@ namespace Eaf.Middleware.Friendships.Cache
             _cacheManager = cacheManager;
             _friendshipRepository = friendshipRepository;
             _chatMessageRepository = chatMessageRepository;
+            _userRepository = userRepository;
             _tenantCache = tenantCache;
             _unitOfWorkManager = unitOfWorkManager;
             _userStore = userStore;
@@ -194,9 +199,28 @@ namespace Eaf.Middleware.Friendships.Cache
 
             using (_unitOfWorkManager.Current.SetTenantId(userIdentifier.TenantId))
             {
-                var friendCacheItems = _friendshipRepository.GetAll()
+                var friendships = _friendshipRepository.GetAll()
                     .Where(friendship => friendship.UserId == userIdentifier.UserId)
-                    .Select(friendship => new FriendCacheItem
+                    .ToList();
+
+                var friendUserIds = friendships.Select(f => f.FriendUserId).Distinct().ToList();
+                var friendUsers = _userRepository.GetAll()
+                    .Where(u => friendUserIds.Contains(u.Id))
+                    .ToDictionary(u => u.Id, u => new { u.Name, u.Surname, u.EmailAddress });
+
+                var unreadCounts = _chatMessageRepository.GetAll()
+                    .Where(cm => cm.ReadState == ChatMessageReadState.Unread &&
+                                 cm.UserId == userIdentifier.UserId &&
+                                 cm.TenantId == userIdentifier.TenantId &&
+                                 cm.Side == ChatSide.Receiver &&
+                                 friendUserIds.Contains(cm.TargetUserId))
+                    .ToList()
+                    .GroupBy(cm => new { cm.TargetUserId, cm.TargetTenantId })
+                    .ToDictionary(g => (g.Key.TargetUserId, g.Key.TargetTenantId), g => g.Count());
+
+                var friendCacheItems = friendships.Select(friendship =>
+                {
+                    var friendCacheItem = new FriendCacheItem
                     {
                         FriendUserId = friendship.FriendUserId,
                         FriendTenantId = friendship.FriendTenantId,
@@ -204,33 +228,20 @@ namespace Eaf.Middleware.Friendships.Cache
                         FriendUserName = friendship.FriendUserName,
                         FriendTenancyName = friendship.FriendTenancyName,
                         FriendProfilePictureId = friendship.FriendProfilePictureId,
-                        UnreadMessageCount = _chatMessageRepository.GetAll().Count(cm => cm.ReadState == ChatMessageReadState.Unread &&
-                                                               cm.UserId == userIdentifier.UserId &&
-                                                               cm.TenantId == userIdentifier.TenantId &&
-                                                               cm.TargetUserId == friendship.FriendUserId &&
-                                                               cm.TargetTenantId == friendship.FriendTenantId &&
-                                                               cm.Side == ChatSide.Receiver)
-                    }).ToList();
+                        UnreadMessageCount = unreadCounts.TryGetValue((friendship.FriendUserId, friendship.FriendTenantId), out var count) ? count : 0
+                    };
+
+                    if (friendUsers.TryGetValue(friendship.FriendUserId, out var friendUser))
+                    {
+                        friendCacheItem.Name = friendUser.Name;
+                        friendCacheItem.Surname = friendUser.Surname;
+                        friendCacheItem.Email = friendUser.EmailAddress;
+                    }
+
+                    return friendCacheItem;
+                }).ToList();
 
                 var user = _userStore.FindById(userIdentifier.UserId.ToString(), default);
-
-                foreach (var friend in friendCacheItems)
-                {
-                    try
-                    {
-                        var userFriend = _userStore.FindById(friend.FriendUserId.ToString(), default);
-                        if (userFriend != null)
-                        {
-                            friend.Surname = userFriend.Surname;
-                            friend.Name = userFriend.Name;
-                            friend.Email = userFriend.EmailAddress;
-                        }
-                    }
-                    catch
-                    {
-                        //Igonre
-                    }
-                }
 
                 return new UserWithFriendsCacheItem
                 {

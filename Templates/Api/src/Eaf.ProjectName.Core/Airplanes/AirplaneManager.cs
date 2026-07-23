@@ -39,7 +39,9 @@ namespace Eaf.ProjectName.Airplanes
 
         public async Task<Airplane> CreateAsync(Airplane airplane)
         {
-            if (await (await _repositoryAirplane.GetAllAsync()).AnyAsync(e => e.Number.ToLower() == airplane.Number))
+            var normalizedNumber = airplane.Number?.ToLowerInvariant();
+            if (await (await _repositoryAirplane.GetAllAsync())
+                .AnyAsync(e => e.Number.ToLower() == normalizedNumber))
                 throw new UserFriendlyException(L("AirplaneValidate"));
 
             return await _repositoryAirplane.InsertAsync(airplane);

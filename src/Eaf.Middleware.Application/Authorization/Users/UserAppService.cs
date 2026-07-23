@@ -51,7 +51,7 @@ namespace Eaf.Middleware.Authorization.Users
         private readonly IUserEmailer _userEmailer;
         private readonly IUserListExcelExporter _userListExcelExporter;
         private readonly IRepository<UserRole, long> _userRoleRepository;
-        private readonly ITypedCache<string, List<User>> _usersCache;
+        private readonly ITypedCache<string, List<UserListDto>> _usersCache;
         private readonly INotificationPublisher _notificationPublisher;
         private readonly IWebhookPublisher _webhookPublisher;
 
@@ -87,7 +87,7 @@ namespace Eaf.Middleware.Authorization.Users
 
             _cacheManager = cacheManager;
 
-            _usersCache = _cacheManager.GetCache<string, List<User>>("UsersCache");
+            _usersCache = _cacheManager.GetCache<string, List<UserListDto>>("UsersCache");
             _usersCache.DefaultSlidingExpireTime = TimeSpan.FromMinutes(5);
 
             _notificationPublisher = notificationPublisher;
@@ -341,17 +341,17 @@ namespace Eaf.Middleware.Authorization.Users
         /// <returns>Resultado da operação.</returns>
         public async Task<PagedResultDto<UserListDto>> GetUsers(GetUsersInput input)
         {
-            input.Filter = !input.Filter.IsNullOrWhiteSpace() ? input.Filter.ToLower().Trim() : "";
+            input.Filter = !input.Filter.IsNullOrWhiteSpace() ? input.Filter.ToLowerInvariant().Trim() : "";
 
             var query = UserManager.Users
             .AsNoTracking()
             .WhereIf(
                   !input.Filter.IsNullOrWhiteSpace(),
                   u =>
-                      u.Name.Contains(input.Filter, StringComparison.OrdinalIgnoreCase) ||
-                      u.UserName.Contains(input.Filter, StringComparison.OrdinalIgnoreCase) ||
-                      u.Surname.Contains(input.Filter, StringComparison.OrdinalIgnoreCase) ||
-                      u.EmailAddress.Contains(input.Filter, StringComparison.OrdinalIgnoreCase)
+                      u.Name.ToLower().Contains(input.Filter) ||
+                      u.UserName.ToLower().Contains(input.Filter) ||
+                      u.Surname.ToLower().Contains(input.Filter) ||
+                      u.EmailAddress.ToLower().Contains(input.Filter)
               ).AsQueryable();
 
             var userCount = await query.CountAsync();
@@ -375,9 +375,13 @@ namespace Eaf.Middleware.Authorization.Users
         /// <returns>Resultado da operação.</returns>
         public async Task<FileDto> GetUsersToExcel()
         {
-            var users = _usersCache.Get("ALL", () => UserManager.Users.AsNoTracking().ToList());
-            var userListDtos = ObjectMapper.Map<List<UserListDto>>(users);
-            await FillRoleNames(userListDtos);
+            var userListDtos = await _usersCache.GetAsync("ALL", async () =>
+            {
+                var users = await UserManager.Users.AsNoTracking().ToListAsync();
+                var dtos = ObjectMapper.Map<List<UserListDto>>(users);
+                await FillRoleNames(dtos);
+                return dtos;
+            });
 
             return _userListExcelExporter.ExportToFile(userListDtos);
         }
@@ -505,33 +509,32 @@ namespace Eaf.Middleware.Authorization.Users
         private async Task FillRoleNames(List<UserListDto> userListDtos)
         {
             /* This method is optimized to fill role names to given list. */
-            var ids = userListDtos.Select(x => x.Id);
+            var ids = userListDtos.Select(x => x.Id).ToList();
+            if (!ids.Any())
+                return;
+
             var userRoles = await (await _userRoleRepository.GetAllAsync())
-                .Where(userRole => ids.Any(id => id == userRole.UserId))
+                .Where(userRole => ids.Contains(userRole.UserId))
                 .ToListAsync();
 
-            var distinctRoleIds = userRoles.Select(userRole => userRole.RoleId).Distinct();
+            var roleIds = userRoles.Select(userRole => userRole.RoleId).Distinct().ToList();
+            var roles = await _roleManager.Roles
+                .Where(r => roleIds.Contains(r.Id))
+                .ToDictionaryAsync(r => r.Id, r => r.DisplayName);
 
             foreach (var user in userListDtos)
             {
-                var rolesOfUser = userRoles.Where(userRole => userRole.UserId == user.Id).ToList();
-                user.Roles = ObjectMapper.Map<List<UserListRoleDto>>(rolesOfUser);
-            }
+                var rolesOfUser = userRoles
+                    .Where(userRole => userRole.UserId == user.Id)
+                    .Select(userRole => new UserListRoleDto
+                    {
+                        RoleId = userRole.RoleId,
+                        RoleName = roles.TryGetValue(userRole.RoleId, out var roleName) ? roleName : null
+                    })
+                    .OrderBy(r => r.RoleName)
+                    .ToList();
 
-            var roleNames = new Dictionary<int, string>();
-            foreach (var roleId in distinctRoleIds)
-            {
-                roleNames[roleId] = (await _roleManager.GetRoleByIdAsync(roleId)).DisplayName;
-            }
-
-            foreach (var userListDto in userListDtos)
-            {
-                foreach (var userListRoleDto in userListDto.Roles)
-                {
-                    userListRoleDto.RoleName = roleNames[userListRoleDto.RoleId];
-                }
-
-                userListDto.Roles = userListDto.Roles.OrderBy(r => r.RoleName).ToList();
+                user.Roles = rolesOfUser;
             }
         }
 

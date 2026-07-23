@@ -161,7 +161,8 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
                 Substitute.For<IBinaryObjectManager>(),
                 Substitute.For<INotificationSubscriptionManager>(),
                 Substitute.For<IWebhookPublisher>(),
-                Substitute.For<IPrincipalAccessor>()
+                Substitute.For<IPrincipalAccessor>(),
+                Substitute.For<IRefreshTokenStore>()
             );
 
             controller.SettingManager = settingManager;

@@ -36,6 +36,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Eaf.Middleware.Web
 {
@@ -132,13 +133,19 @@ namespace Eaf.Middleware.Web
         private void ConfigureHangfireStorage()
         {
             string connectionString = Configuration.DefaultNameOrConnectionString;
-            var storageType = Middleware.Web.Startup.HangFireConfigurer.ResolveStorageType(_appConfiguration);
+            var storageType = Eaf.Middleware.Web.Startup.HangFireConfigurer.ResolveStorageType(_appConfiguration);
+
+            var eafHangfireOptions = new EafHangFireOptions();
 
             switch (storageType)
             {
                 case HangfireStorageType.SqlServer:
                     if (!string.IsNullOrEmpty(connectionString))
-                        JobStorage.Current = new SqlServerStorage(connectionString, new SqlServerStorageOptions() { TransactionTimeout = TimeSpan.FromMinutes(30) });
+                        JobStorage.Current = new SqlServerStorage(connectionString, new SqlServerStorageOptions
+                        {
+                            TransactionTimeout = eafHangfireOptions.SqlServerTransactionTimeout,
+                            QueuePollInterval = eafHangfireOptions.QueuePollInterval
+                        });
                     else
                         JobStorage.Current = new InMemoryStorage();
                     break;

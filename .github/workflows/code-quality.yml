@@ -1,13 +1,14 @@
 name: 📊 Code Quality
 
+permissions: {}
 on:
   workflow_dispatch:
   pull_request:
     branches: [main, develop]
   push:
     branches:
-      - main
-      - "releases/*"
+    - main
+    - "releases/*"
 
 jobs:
   # Qodana Analysis
@@ -20,51 +21,51 @@ jobs:
       checks: write
 
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 🔍 Qodana Scan
-        id: qodana
-        uses: JetBrains/qodana-action@4861e015da555e86a72b862892aba6c2b93e6891 # v2026.1.3
-        continue-on-error: true
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-        with:
-          args: "--baseline,qodana.sarif.json,--fail-threshold,0"
-          cache-default-branch-only: true
-          upload-result: false
+    - name: 🔍 Qodana Scan
+      id: qodana
+      uses: JetBrains/qodana-action@4861e015da555e86a72b862892aba6c2b93e6891   # v2026.1.3
+      continue-on-error: true
+      env:
+        QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+      with:
+        args: "--baseline,qodana.sarif.json,--fail-threshold,0"
+        cache-default-branch-only: true
+        upload-result: false
 
-      - name: 📊 Upload Qodana Results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        if: always()
-        with:
-          name: qodana-report
-          path: ${{ github.workspace }}/qodana
+    - name: 📊 Upload Qodana Results
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a   # v7
+      if: always()
+      with:
+        name: qodana-report
+        path: ${{ github.workspace }}/qodana
 
-      - name: 📋 Qodana Summary
-        if: always()
-        run: |
-          echo "## 🔍 Qodana Analysis" >> $GITHUB_STEP_SUMMARY
+    - name: 📋 Qodana Summary
+      if: always()
+      run: |
+        echo "## 🔍 Qodana Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.qodana.outcome }}" == "success" ]; then
+          echo "✅ **Qodana scan completed successfully**" >> $GITHUB_STEP_SUMMARY
+        elif [ "${{ steps.qodana.outcome }}" == "failure" ]; then
+          echo "❌ **Qodana scan failed**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.qodana.outcome }}" == "success" ]; then
-            echo "✅ **Qodana scan completed successfully**" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.qodana.outcome }}" == "failure" ]; then
-            echo "❌ **Qodana scan failed**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 🔧 Possíveis causas:" >> $GITHUB_STEP_SUMMARY
-            echo "- Token QODANA_TOKEN inválido ou expirado" >> $GITHUB_STEP_SUMMARY
-            echo "- Arquivo baseline qodana.sarif.json não encontrado" >> $GITHUB_STEP_SUMMARY
-            echo "- Problema de configuração do linter" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📋 Detalhes" >> $GITHUB_STEP_SUMMARY
-            echo "- **Linter**: qodana-community-for-net (padrão qodana.yaml)" >> $GITHUB_STEP_SUMMARY
-            echo "- **Baseline**: qodana.sarif.json" >> $GITHUB_STEP_SUMMARY
-            echo "- **Fail Threshold**: 0" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ **Qodana scan skipped or cancelled**" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "### 🔧 Possíveis causas:" >> $GITHUB_STEP_SUMMARY
+          echo "- Token QODANA_TOKEN inválido ou expirado" >> $GITHUB_STEP_SUMMARY
+          echo "- Arquivo baseline qodana.sarif.json não encontrado" >> $GITHUB_STEP_SUMMARY
+          echo "- Problema de configuração do linter" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Detalhes" >> $GITHUB_STEP_SUMMARY
+          echo "- **Linter**: qodana-community-for-net (padrão qodana.yaml)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Baseline**: qodana.sarif.json" >> $GITHUB_STEP_SUMMARY
+          echo "- **Fail Threshold**: 0" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ **Qodana scan skipped or cancelled**" >> $GITHUB_STEP_SUMMARY
+        fi
 
   # SonarQube Analysis
   # Temporarily skipped: SonarCloud Automatic Analysis is already enabled for this project,
@@ -73,248 +74,259 @@ jobs:
   sonarqube:
     name: 📊 SonarQube Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: false
 
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-        with:
-          fetch-depth: 0
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      with:
+        fetch-depth: 0
 
-      - name: 📦 Setup NuGet
-        uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123 # v4
+    - name: 📦 Setup NuGet
+      uses: NuGet/setup-nuget@fd55a6f3b34392fa83fde1454582407d8c714123   # v4
 
-      - name: 🗄️ Setup .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: "10.0.x"
+    - name: 🗄️ Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
+      with:
+        dotnet-version: "10.0.x"
 
-      - name: ☕ Set up JDK 17
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
-        with:
-          java-version: 17
-          distribution: "zulu"
+    - name: ☕ Set up JDK 17
+      uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95   # v5
+      with:
+        java-version: 17
+        distribution: "zulu"
 
-      - name: 🔧 Clear NuGet cache
-        run: dotnet nuget locals all --clear
+    - name: 🔧 Clear NuGet cache
+      run: dotnet nuget locals all --clear
 
-      - name: 📦 Install SonarQube Tools
-        run: dotnet tool install --global --ignore-failed-sources dotnet-sonarscanner
+    - name: 📦 Install SonarQube Tools
+      run: dotnet tool install --global --ignore-failed-sources 
+        dotnet-sonarscanner
 
-      - name: 📦 Install Coverlet Tools
-        run: dotnet tool install --global --ignore-failed-sources coverlet.console
+    - name: 📦 Install Coverlet Tools
+      run: dotnet tool install --global --ignore-failed-sources coverlet.console
 
-      - name: 🔧 Fix Permission
-        run: chmod 755 sonar/ -R || true
+    - name: 🔧 Fix Permission
+      run: chmod 755 sonar/ -R || true
 
-      - name: � Restore Dependencies
-        run: dotnet restore Eaf.sln --ignore-failed-sources
+    - name: � Restore Dependencies
+      run: dotnet restore Eaf.sln --ignore-failed-sources
 
-      - name: �🔍 Prepare analysis on SonarQube
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          echo "🔍 Checking SonarQube configuration..."
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "❌ SONAR_TOKEN is not set or empty"
-            echo "⚠️ Skipping SonarQube analysis"
-            exit 0
-          fi
+    - name: �🔍 Prepare analysis on SonarQube
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        echo "🔍 Checking SonarQube configuration..."
+        if [ -z "$SONAR_TOKEN" ]; then
+          echo "❌ SONAR_TOKEN is not set or empty"
+          echo "⚠️ Skipping SonarQube analysis"
+          exit 0
+        fi
 
-          echo "✅ SONAR_TOKEN is configured"
-          dotnet sonarscanner begin \
-            /o:"afonsoft" \
-            /k:"afonsoft_EAF2" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.token="$SONAR_TOKEN" \
-            /d:sonar.scm.provider=git \
-            /d:sonar.coverage.exclusions="**Test*.cs" \
-            /d:sonar.exclusions="Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/metronic/assets/vendors/base/scripts.bundle.js,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/mdbootstrap/mdb.min.js,**/assets/lib/eaf-web-resources/**,**/*.Designer.cs,**/service-proxies.ts,**/node_modules/**,**/dist/**,**/bin/**,**/obj/**,**/*.min.js,**/*.bundle.js"
+        echo "✅ SONAR_TOKEN is configured"
+        dotnet sonarscanner begin \
+          /o:"afonsoft" \
+          /k:"afonsoft_EAF2" \
+          /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.token="$SONAR_TOKEN" \
+          /d:sonar.scm.provider=git \
+          /d:sonar.coverage.exclusions="**Test*.cs" \
+          /d:sonar.exclusions="Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/metronic/assets/vendors/base/scripts.bundle.js,Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/mdbootstrap/mdb.min.js,**/assets/lib/eaf-web-resources/**,**/*.Designer.cs,**/service-proxies.ts,**/node_modules/**,**/dist/**,**/bin/**,**/obj/**,**/*.min.js,**/*.bundle.js"
 
-      - name: 🏗️ Build
-        run: dotnet build Eaf.sln --configuration release --no-restore
+    - name: 🏗️ Build
+      run: dotnet build Eaf.sln --configuration release --no-restore
 
-      - name: 🔍 Run Code Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          echo "🔍 Finalizing SonarQube analysis..."
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "⚠️ SONAR_TOKEN not configured, skipping analysis"
-            exit 0
-          fi
+    - name: 🔍 Run Code Analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        echo "🔍 Finalizing SonarQube analysis..."
+        if [ -z "$SONAR_TOKEN" ]; then
+          echo "⚠️ SONAR_TOKEN not configured, skipping analysis"
+          exit 0
+        fi
 
-          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+        dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
   # Snyk Security Analysis
   snyk:
     name: 🛡️ Snyk Security
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.actor != 'dependabot[bot]'
 
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
 
-      - name: 🗄️ Setup .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: "10.0.x"
+    - name: 🗄️ Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
+      with:
+        dotnet-version: "10.0.x"
 
-      - name: 🔧 Restore Dependencies
-        run: dotnet restore Eaf.sln --ignore-failed-sources
+    - name: 🔧 Restore Dependencies
+      run: dotnet restore Eaf.sln --ignore-failed-sources
 
-      - name: 🔑 Validate Snyk Token
-        id: snyk-token-check
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          if [ -z "$SNYK_TOKEN" ]; then
-            echo "has_token=false" >> $GITHUB_OUTPUT
-            echo "::warning::SNYK_TOKEN não configurado. Snyk scan será ignorado."
-          else
-            echo "has_token=true" >> $GITHUB_OUTPUT
-          fi
+    - name: 🔑 Validate Snyk Token
+      id: snyk-token-check
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      run: |
+        if [ -z "$SNYK_TOKEN" ]; then
+          echo "has_token=false" >> $GITHUB_OUTPUT
+          echo "::warning::SNYK_TOKEN não configurado. Snyk scan será ignorado."
+        else
+          echo "has_token=true" >> $GITHUB_OUTPUT
+        fi
 
-      - name: 🛡️ Run Snyk
-        if: steps.snyk-token-check.outputs.has_token == 'true'
-        id: snyk-scan
-        uses: snyk/actions/dotnet@8e119fbb6c251787721d34ba683ed48eba792766 # master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --file=Eaf.sln --severity-threshold=high --sarif-file-output=snyk.sarif --json-output=snyk.json
+    - name: 🛡️ Run Snyk
+      if: steps.snyk-token-check.outputs.has_token == 'true'
+      id: snyk-scan
+      uses: snyk/actions/dotnet@8e119fbb6c251787721d34ba683ed48eba792766   # master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: test
+        args: --file=Eaf.sln --severity-threshold=high 
+          --sarif-file-output=snyk.sarif --json-output=snyk.json
 
-      - name: 📊 Upload Snyk Results
-        uses: github/codeql-action/upload-sarif@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
-        if: always() && hashFiles('snyk.sarif') != ''
-        with:
-          sarif_file: snyk.sarif
-          category: snyk
+    - name: 📊 Upload Snyk Results
+      uses: github/codeql-action/upload-sarif@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06           # v4
+      if: always() && hashFiles('snyk.sarif') != ''
+      with:
+        sarif_file: snyk.sarif
+        category: snyk
 
-      - name: 📋 Generate Snyk Summary
-        if: always()
-        run: |
-          echo "## 🛡️ Snyk Security Scan Results" >> $GITHUB_STEP_SUMMARY
+    - name: 📋 Generate Snyk Summary
+      if: always()
+      run: |
+        echo "## 🛡️ Snyk Security Scan Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ steps.snyk-token-check.outputs.has_token }}" != "true" ]; then
+          echo "⚠️ **SNYK_TOKEN não configurado**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.snyk-token-check.outputs.has_token }}" != "true" ]; then
-            echo "⚠️ **SNYK_TOKEN não configurado**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "O token de autenticação do Snyk não está disponível." >> $GITHUB_STEP_SUMMARY
-            echo "Configure o secret \'SNYK_TOKEN\' nas configurações do repositório." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 🔧 Como configurar:" >> $GITHUB_STEP_SUMMARY
-            echo "1. Acesse [snyk.io](https://snyk.io) e gere um token" >> $GITHUB_STEP_SUMMARY
-            echo "2. Adicione como secret \'SNYK_TOKEN\' em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-
-          if [ -f "snyk.json" ]; then
-            echo "### 📊 Vulnerability Summary" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Extract summary from JSON
-            VULNS=$(cat snyk.json | jq -r '.vulnerabilities | length // 0' 2>/dev/null || echo "0")
-            
-            echo "- **Vulnerabilities Found**: $VULNS" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            if [ "$VULNS" != "0" ] && [ "$VULNS" != "null" ]; then
-              echo "### ⚠️ Vulnerabilities Detected" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              cat snyk.json | jq -r '.vulnerabilities[]? | 
-                "- **\(.severity | ascii_upcase)**: \(.title) in \(.packageName)@\(.version)"' 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY
-            else
-              echo "✅ **No vulnerabilities found!** All dependencies are secure." >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "⚠️ **Snyk scan results not available**" >> $GITHUB_STEP_SUMMARY
-            if [ "${{ steps.snyk-scan.outcome }}" == "failure" ]; then
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "### ❌ Erro na execução do Snyk" >> $GITHUB_STEP_SUMMARY
-              echo "O scan falhou. Verifique:" >> $GITHUB_STEP_SUMMARY
-              echo "- Token SNYK_TOKEN válido" >> $GITHUB_STEP_SUMMARY
-              echo "- Conexão com api.snyk.io" >> $GITHUB_STEP_SUMMARY
-              echo "- Formato do arquivo Eaf.sln" >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-
+          echo "O token de autenticação do Snyk não está disponível." >> $GITHUB_STEP_SUMMARY
+          echo "Configure o secret \'SNYK_TOKEN\' nas configurações do repositório." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Scan Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- **Severity Threshold**: High" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target**: Eaf.sln" >> $GITHUB_STEP_SUMMARY
-          echo "- **Scanner**: Snyk .NET" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Como configurar:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Acesse [snyk.io](https://snyk.io) e gere um token" >> $GITHUB_STEP_SUMMARY
+          echo "2. Adicione como secret \'SNYK_TOKEN\' em Settings > Secrets" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        fi
+
+        if [ -f "snyk.json" ]; then
+          echo "### 📊 Vulnerability Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract summary from JSON
+          VULNS=$(cat snyk.json | jq -r '.vulnerabilities | length // 0' 2>/dev/null || echo "0")
+          
+          echo "- **Vulnerabilities Found**: $VULNS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$VULNS" != "0" ] && [ "$VULNS" != "null" ]; then
+            echo "### ⚠️ Vulnerabilities Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat snyk.json | jq -r '.vulnerabilities[]? | 
+              "- **\(.severity | ascii_upcase)**: \(.title) in \(.packageName)@\(.version)"' 2>/dev/null | head -10 >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **No vulnerabilities found!** All dependencies are secure." >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "⚠️ **Snyk scan results not available**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.snyk-scan.outcome }}" == "failure" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Erro na execução do Snyk" >> $GITHUB_STEP_SUMMARY
+            echo "O scan falhou. Verifique:" >> $GITHUB_STEP_SUMMARY
+            echo "- Token SNYK_TOKEN válido" >> $GITHUB_STEP_SUMMARY
+            echo "- Conexão com api.snyk.io" >> $GITHUB_STEP_SUMMARY
+            echo "- Formato do arquivo Eaf.sln" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 Scan Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "- **Severity Threshold**: High" >> $GITHUB_STEP_SUMMARY
+        echo "- **Target**: Eaf.sln" >> $GITHUB_STEP_SUMMARY
+        echo "- **Scanner**: Snyk .NET" >> $GITHUB_STEP_SUMMARY
 
   # Code Quality Metrics
   quality-metrics:
     name: 📈 Quality Metrics
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+    - name: 📥 Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
 
-      - name: 🗄️ Setup .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          dotnet-version: "10.0.x"
+    - name: 🗄️ Setup .NET
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
+      with:
+        dotnet-version: "10.0.x"
 
-      - name: 🔧 Restore Dependencies
-        run: dotnet restore Eaf.sln --ignore-failed-sources
+    - name: 🔧 Restore Dependencies
+      run: dotnet restore Eaf.sln --ignore-failed-sources
 
-      - name: 🏗️ Build Solution
-        run: dotnet build Eaf.sln --configuration Release --no-restore --verbosity minimal
+    - name: 🏗️ Build Solution
+      run: dotnet build Eaf.sln --configuration Release --no-restore --verbosity
+        minimal
 
-      - name: 📊 Calculate Metrics
-        run: |
-          echo "📊 Analyzing code quality metrics..."
+    - name: 📊 Calculate Metrics
+      run: |
+        echo "📊 Analyzing code quality metrics..."
 
-          # Count lines of code
-          echo "Lines of Code: $(find src -name '*.cs' -exec wc -l {} + | tail -1 | awk '{print $1}')"
+        # Count lines of code
+        echo "Lines of Code: $(find src -name '*.cs' -exec wc -l {} + | tail -1 | awk '{print $1}')"
 
-          # Count test files
-          echo "Test Files: $(find test -name '*Tests.cs' | wc -l)"
+        # Count test files
+        echo "Test Files: $(find test -name '*Tests.cs' | wc -l)"
 
-          # Count projects
-          echo "Projects: $(find src -name '*.csproj' | wc -l)"
+        # Count projects
+        echo "Projects: $(find src -name '*.csproj' | wc -l)"
 
-          # Check for task markers
-          echo "TODO Comments: $(grep -r 'TODO' src --include='*.cs' | wc -l)"
+        # Check for task markers
+        echo "TODO Comments: $(grep -r 'TODO' src --include='*.cs' | wc -l)"
 
-          echo "Quality metrics analysis completed!"
+        echo "Quality metrics analysis completed!"
 
   # Quality Summary
   quality-summary:
     name: 📋 Quality Summary
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [qodana, sonarqube, snyk, quality-metrics]
     if: always()
 
     steps:
-      - name: 📋 Generate Quality Report
-        run: |
-          echo "## 📊 Code Quality Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Tool | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Qodana | ${{ needs.qodana.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 SonarQube | ${{ needs.sonarqube.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🛡️ Snyk | ${{ needs.snyk.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📈 Metrics | ${{ needs.quality-metrics.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+    - name: 📋 Generate Quality Report
+      run: |
+        echo "## 📊 Code Quality Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Tool | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔍 Qodana | ${{ needs.qodana.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 📊 SonarQube | ${{ needs.sonarqube.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🛡️ Snyk | ${{ needs.snyk.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 📈 Metrics | ${{ needs.quality-metrics.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [[ "${{ needs.qodana.result }}" == "failure" || "${{ needs.sonarqube.result }}" == "failure" || "${{ needs.snyk.result }}" == "failure" ]]; then
-            echo "❌ **Quality issues detected! Please review the analysis reports.**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ **All quality checks passed!**" >> $GITHUB_STEP_SUMMARY
-          fi
+        if [[ "${{ needs.qodana.result }}" == "failure" || "${{ needs.sonarqube.result }}" == "failure" || "${{ needs.snyk.result }}" == "failure" ]]; then
+          echo "❌ **Quality issues detected! Please review the analysis reports.**" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ **All quality checks passed!**" >> $GITHUB_STEP_SUMMARY
+        fi
 
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Quality Metrics" >> $GITHUB_STEP_SUMMARY
-          echo "- **Lines of Code**: Calculated during build" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Coverage**: Available in CI pipeline" >> $GITHUB_STEP_SUMMARY
-          echo "- **Technical Debt**: Analyzed by Qodana & SonarQube" >> $GITHUB_STEP_SUMMARY
-          echo "- **Security**: Scanned by Snyk" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Quality Metrics" >> $GITHUB_STEP_SUMMARY
+        echo "- **Lines of Code**: Calculated during build" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Coverage**: Available in CI pipeline" >> $GITHUB_STEP_SUMMARY
+        echo "- **Technical Debt**: Analyzed by Qodana & SonarQube" >> $GITHUB_STEP_SUMMARY
+        echo "- **Security**: Scanned by Snyk" >> $GITHUB_STEP_SUMMARY

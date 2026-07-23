@@ -11,6 +11,8 @@ namespace Eaf.Middleware.Validation
     {
         public const string EmailRegex = @"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$";
 
+        private static readonly Regex _emailRegex = new(EmailRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
         /// <summary>
         /// IsEmail.
         /// </summary>
@@ -23,8 +25,7 @@ namespace Eaf.Middleware.Validation
                 return false;
             }
 
-            var regex = new Regex(EmailRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
-            return regex.IsMatch(value);
+            return _emailRegex.IsMatch(value);
         }
     }
 }

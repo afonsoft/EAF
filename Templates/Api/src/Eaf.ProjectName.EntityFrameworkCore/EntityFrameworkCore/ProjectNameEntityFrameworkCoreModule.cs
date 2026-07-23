@@ -6,7 +6,9 @@ using Abp.Reflection.Extensions;
 using Abp.Zero.EntityFrameworkCore;
 using Eaf.ProjectName.EntityHistory;
 using Eaf.ProjectName.Migrations.Seed;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Eaf.ProjectName.EntityFrameworkCore
 {
@@ -24,12 +26,14 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         {
             if (!SkipDbContextRegistration)
             {
+                var isDevelopment = IsDevelopmentEnvironment();
+
                 Configuration.Modules.AbpEfCore().AddDbContext<ProjectNameDbContext>(options =>
                 {
-                    options.DbContextOptions.EnableDetailedErrors(true);
+                    options.DbContextOptions.EnableDetailedErrors(isDevelopment);
                     options.DbContextOptions.EnableSensitiveDataLogging(false);
 
-                    if (Configuration.IocManager.IsRegistered<ILoggerFactory>())
+                    if (isDevelopment && Configuration.IocManager.IsRegistered<ILoggerFactory>())
                     {
                         options.DbContextOptions.UseLoggerFactory(Configuration.IocManager.Resolve<ILoggerFactory>());
                     }
@@ -59,6 +63,15 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                     SeedHelper.SeedHostDb(IocManager);
                 }
             }
+        }
+
+        private static bool IsDevelopmentEnvironment()
+        {
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+                ?? "Production";
+
+            return env.Equals("Development", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

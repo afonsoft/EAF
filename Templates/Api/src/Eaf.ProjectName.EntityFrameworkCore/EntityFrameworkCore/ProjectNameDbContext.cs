@@ -7,10 +7,8 @@ using Eaf.Middleware.Friendships;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.Storage;
 using Eaf.ProjectName.Airplanes;
-using Abp.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.SqlServer.Diagnostics.Internal;
 using System;
 using System.Linq;
@@ -19,40 +17,9 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 {
     public class ProjectNameDbContext : AbpZeroDbContext<Tenant, Role, User, ProjectNameDbContext>
     {
-        private static bool _created = false;
-        private static readonly object _migrateLock = new object();
-        public static bool SkipMigrate { get; set; } = false;
-
-        public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options) : base(options)
+        public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options)
+            : base(options)
         {
-            MigrateDatabase(Database);
-        }
-
-        private static void MigrateDatabase(DatabaseFacade database)
-        {
-            if (!_created)
-            {
-                lock (_migrateLock)
-                {
-                    if (!_created)
-                    {
-                        try
-                        {
-                            _created = true;
-                            if (!SkipMigrate)
-                            {
-                                LogHelper.Logger.Trace("Database Migrate started...");
-                                database.Migrate();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _created = false;
-                            LogHelper.Logger.Warn("Database Migrate started Error ...", ex);
-                        }
-                    }
-                }
-            }
         }
 
         /* Define an IDbSet for each entity of the application */

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Threading.Tasks;
 
 namespace Eaf.ProjectName.Web.Middleware
@@ -6,21 +8,18 @@ namespace Eaf.ProjectName.Web.Middleware
     public class ContentSecurityPolicyMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly string _contentSecurityPolicy;
 
-        private const string ContentSecurityPolicy = "default-src * 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://*.google.com https://*.hotjar.com https://*.hotjar.io wss://*.hotjar.com https://*.dynatrace.com 'unsafe-inline' 'unsafe-eval'; img-src * 'self' data: https:;";
-
-        public ContentSecurityPolicyMiddleware(RequestDelegate next)
+        public ContentSecurityPolicyMiddleware(RequestDelegate next, IConfiguration configuration)
         {
             _next = next;
+            _contentSecurityPolicy = BuildContentSecurityPolicy(configuration);
         }
 
         public async Task Invoke(HttpContext httpContext)
         {
-            //Content-Security-Policy is the name of a HTTP response header that modern browsers use to enhance the security of the document (or web page). The Content-Security-Policy header allows you to restrict how resources such as JavaScript, CSS, or pretty much anything that the browser loads.
-            AddHeaderIfNotExists(httpContext, "X-Content-Security-Policy", ContentSecurityPolicy);
-
-            //Content-Security-Policy is the name of a HTTP response header that modern browsers use to enhance the security of the document (or web page). The Content-Security-Policy header allows you to restrict how resources such as JavaScript, CSS, or pretty much anything that the browser loads.
-            AddHeaderIfNotExists(httpContext, "Content-Security-Policy", ContentSecurityPolicy);
+            AddHeaderIfNotExists(httpContext, "Content-Security-Policy", _contentSecurityPolicy);
+            AddHeaderIfNotExists(httpContext, "X-Content-Security-Policy", _contentSecurityPolicy);
 
             await _next.Invoke(httpContext);
         }
@@ -31,6 +30,39 @@ namespace Eaf.ProjectName.Web.Middleware
             {
                 context.Response.Headers.Append(key, value);
             }
+        }
+
+        private static string BuildContentSecurityPolicy(IConfiguration configuration)
+        {
+            var clientRootAddress = configuration["App:ClientRootAddress"];
+            var reportUri = configuration["App:CspReportUri"];
+
+            var defaultSrc = "default-src 'self'";
+            var scriptSrc = "script-src 'self'";
+            var styleSrc = "style-src 'self'";
+            var imgSrc = "img-src 'self' data:";
+            var fontSrc = "font-src 'self'";
+            var connectSrc = "connect-src 'self'";
+
+            if (!string.IsNullOrWhiteSpace(clientRootAddress))
+            {
+                var origin = new Uri(clientRootAddress).GetLeftPart(UriPartial.Authority);
+                defaultSrc += " " + origin;
+                scriptSrc += " " + origin;
+                styleSrc += " " + origin;
+                imgSrc += " " + origin;
+                fontSrc += " " + origin;
+                connectSrc += " " + origin;
+            }
+
+            var csp = $"{defaultSrc}; {scriptSrc}; {styleSrc}; {imgSrc}; {fontSrc}; {connectSrc}; object-src 'none'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
+
+            if (!string.IsNullOrWhiteSpace(reportUri))
+            {
+                csp += $"; report-uri {reportUri}";
+            }
+
+            return csp;
         }
     }
 }

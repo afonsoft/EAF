@@ -26,8 +26,10 @@ namespace Eaf.Middleware.Tests.Friendships
         private readonly ICache _cache;
         private readonly IRepository<Friendship, long> _friendshipRepository;
         private readonly IRepository<ChatMessage, long> _chatMessageRepository;
+        private readonly IRepository<User, long> _userRepository;
         private readonly ITenantCache _tenantCache;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
+        private readonly UserStore _userStore;
         private readonly UserFriendsCache _sut;
 
         public UserFriendsCacheBddTests()
@@ -38,16 +40,19 @@ namespace Eaf.Middleware.Tests.Friendships
 
             _friendshipRepository = Substitute.For<IRepository<Friendship, long>>();
             _chatMessageRepository = Substitute.For<IRepository<ChatMessage, long>>();
+            _userRepository = Substitute.For<IRepository<User, long>>();
             _tenantCache = Substitute.For<ITenantCache>();
             _unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
+            _userStore = Substitute.For<UserStore>(new object[10]);
 
             _sut = new UserFriendsCache(
                 _cacheManager,
                 _friendshipRepository,
                 _chatMessageRepository,
+                _userRepository,
                 _tenantCache,
                 _unitOfWorkManager,
-                null
+                _userStore
             );
         }
 
