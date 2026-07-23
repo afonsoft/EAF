@@ -17,9 +17,32 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 {
     public class ProjectNameDbContext : AbpZeroDbContext<Tenant, Role, User, ProjectNameDbContext>
     {
+        private static readonly object _migrateLock = new object();
+        private static bool _migrated;
+
         public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options)
             : base(options)
         {
+            EnsureMigrated(this);
+        }
+
+        /// <summary>
+        /// Garante que as migrations sejam aplicadas apenas uma vez durante a execução da aplicação.
+        /// </summary>
+        /// <param name="context">Contexto do Entity Framework a ser migrado.</param>
+        private static void EnsureMigrated(DbContext context)
+        {
+            if (_migrated)
+                return;
+
+            lock (_migrateLock)
+            {
+                if (_migrated)
+                    return;
+
+                context.Database.Migrate();
+                _migrated = true;
+            }
         }
 
         /* Define an IDbSet for each entity of the application */
