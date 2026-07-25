@@ -26,7 +26,7 @@ jobs:
         language: ['csharp', 'javascript']
     steps:
     - name: 📥 Checkout
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7
     - name: 🔍 Initialize CodeQL
       uses: github/codeql-action/init@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06   # v4
       with:
@@ -50,7 +50,7 @@ jobs:
 
     steps:
     - name: 📥 Checkout
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7
     - name: 🗄️ Setup .NET
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68   # v6.0.0
       with:
@@ -124,7 +124,7 @@ jobs:
 
     steps:
     - name: 📥 Checkout
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0   # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7
       with:
         fetch-depth: 0
 
@@ -197,7 +197,7 @@ jobs:
       contents: read
     steps:
     - name: 📥 Checkout
-      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
       with:
         fetch-depth: 0
     - name: 🔐 Run Gitleaks
@@ -214,7 +214,7 @@ jobs:
       contents: read
     steps:
     - name: 📥 Checkout
-      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
     - name: 🏗️ Run Checkov
       uses: bridgecrewio/checkov-action@7b972723c44fb3d256283fac96fae5d7c1894bb7   # v12
       with:
