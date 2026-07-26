@@ -43,7 +43,9 @@ describe('ChatSignalrService', () => {
         { provide: EafMultiTenancyService, useClass: MockEafMultiTenancyService },
         { provide: AppSessionService, useClass: MockAppSessionService },
         { provide: AppUiCustomizationService, useClass: MockAppUiCustomizationService },
-        { provide: AppUrlService, useClass: MockAppUrlService },ChatSignalrService],
+        { provide: AppUrlService, useClass: MockAppUrlService },
+        ChatSignalrService,
+      ],
     });
     service = TestBed.inject(ChatSignalrService);
   });

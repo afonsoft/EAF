@@ -45,6 +45,7 @@ import { ChatFriendDto } from './ChatFriendDto';
 import { ChatSignalrService } from './chat-signalr.service';
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
 import { LayoutRefService } from '@metronic/app/core/services/layout-ref.service';
+import { ChatContext } from '@app/shared/eaf-contracts/eaf-contracts';
 import * as moment from 'moment';
 
 @Component({
@@ -57,6 +58,7 @@ import * as moment from 'moment';
 export class ChatBarComponent extends AppComponentBase implements OnInit, AfterViewInit {
   @Output() progressChange: EventEmitter<any> = new EventEmitter();
   @Input() userLookupModal: CommonLookupModalComponent;
+  @Input() chatContext: ChatContext = {};
 
   public progress = 0;
   uploadUrl: string;
@@ -82,6 +84,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   interTenantChatAllowed = false;
   sendingMessage = false;
   loadingPreviousUserMessages = false;
+  chatError = '';
   userNameFilter = '';
   serverClientTimeDifference = 0;
   isMultiTenancyEnabled: boolean = this.multiTenancy.isEnabled;
@@ -157,7 +160,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     private readonly _chatService: ChatServiceProxy,
     private readonly _commonLookupService: CommonLookupServiceProxy,
     private readonly _localStorageService: LocalStorageService,
-    private readonly _chatSignalrService: ChatSignalrService,
+    public readonly _chatSignalrService: ChatSignalrService,
     private readonly _profileService: ProfileServiceProxy,
     private readonly _httpClient: HttpClient,
     private readonly _dateTimeService: DateTimeService,
@@ -355,6 +358,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
 
   loadMessages(user: ChatFriendDto, callback: any): void {
     this.loadingPreviousUserMessages = true;
+    this.chatError = '';
 
     let minMessageId;
     if (user.messages?.length) {
@@ -363,22 +367,28 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
 
     this._chatService
       .getUserChatMessages(minMessageId, user.friendTenantId ? user.friendTenantId : undefined, user.friendUserId, user.groupId)
-      .subscribe(result => {
-        if (!user.messages) {
-          user.messages = [];
-        }
-        user.messages = result.items.concat(user.messages);
+      .subscribe({
+        next: result => {
+          if (!user.messages) {
+            user.messages = [];
+          }
+          user.messages = result.items.concat(user.messages);
 
-        this.markAllUnreadMessagesOfUserAsRead(user);
+          this.markAllUnreadMessagesOfUserAsRead(user);
 
-        if (!result.items.length) {
-          user.allPreviousMessagesLoaded = true;
-        }
+          if (!result.items.length) {
+            user.allPreviousMessagesLoaded = true;
+          }
 
-        this.loadingPreviousUserMessages = false;
-        if (callback) {
-          callback();
-        }
+          this.loadingPreviousUserMessages = false;
+          if (callback) {
+            callback();
+          }
+        },
+        error: () => {
+          this.loadingPreviousUserMessages = false;
+          this.chatError = this.l('UnableToLoadChatMessages');
+        },
       });
   }
 
@@ -430,8 +440,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   getFilteredFriends(state: FriendshipState, userNameFilter: string): FriendshipDto[] {
     const foundFriends =
       this.friends?.filter(
-        friend =>
-          friend.state === state && this.getShownUserName(friend).toLocaleLowerCase().includes(userNameFilter.toLocaleLowerCase()),
+        friend => friend.state === state && this.getShownUserName(friend).toLocaleLowerCase().includes(userNameFilter.toLocaleLowerCase()),
       ) || [];
 
     return foundFriends;
@@ -468,8 +477,6 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   loadLastState(): void {
-
-
     this._localStorageService.getItem('app.chat.isOpen', (err, isOpen) => {
       this.isOpen = isOpen;
 
@@ -530,7 +537,12 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       event.stopPropagation();
     }
 
-    if (!this.chatMessage) {
+    if (event?.shiftKey) {
+      return;
+    }
+
+    const message = this.chatMessage.trim();
+    if (!message || this.sendingMessage || (!this.selectedUser.friendUserId && !this.selectedUser.groupId)) {
       return;
     }
 
@@ -540,11 +552,16 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       {
         tenantId: this.selectedUser.friendTenantId,
         userId: this.selectedUser.friendUserId,
-        message: this.chatMessage,
+        message,
         tenancyName: tenancyName,
         userName: this.appSession.user.userName,
         profilePictureId: this.appSession.user.profilePictureId,
         groupId: this.selectedUser.groupId,
+        conversationId: this.chatContext.conversationId,
+        gameId: this.chatContext.gameId,
+        matchId: this.chatContext.matchId,
+        contextType: this.chatContext.contextType,
+        clientMessageId: crypto.randomUUID(),
       },
       () => {
         this.chatMessage = '';
@@ -590,9 +607,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
   }
 
   registerEvents(): void {
-
-
-    const onMessageReceived = (message) => {
+    const onMessageReceived = message => {
       const user = this.getFriendOrNull(message.targetUserId, message.targetTenantId);
       if (!user) {
         return;
@@ -628,7 +643,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       }
 
       this.scrollToBottom();
-    }
+    };
 
     eaf.event.on('app.chat.messageReceived', message => {
       this._zone.run(() => {
@@ -649,7 +664,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       if (!(this.friends || []).filter(f => f.friendUserId === data.friendUserId && f.friendTenantId === data.friendTenantId).length) {
         this.friends.push(data);
       }
-    }
+    };
 
     eaf.event.on('app.chat.friendshipRequestReceived', (data, isOwnRequest) => {
       this._zone.run(() => {
@@ -657,14 +672,14 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       });
     });
 
-    const onUserConnectionStateChanged = (data) => {
+    const onUserConnectionStateChanged = data => {
       const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
       }
 
       user.isOnline = data.isConnected;
-    }
+    };
 
     eaf.event.on('app.chat.userConnectionStateChanged', data => {
       this._zone.run(() => {
@@ -672,14 +687,14 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       });
     });
 
-    const onUserStateChanged = (data) => {
+    const onUserStateChanged = data => {
       const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
       }
 
       user.state = data.state;
-    }
+    };
 
     eaf.event.on('app.chat.userStateChanged', data => {
       this._zone.run(() => {
@@ -687,7 +702,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       });
     });
 
-    const onAllUnreadMessagesOfUserRead = (data) => {
+    const onAllUnreadMessagesOfUserRead = data => {
       const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
@@ -695,7 +710,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
 
       user.unreadMessageCount = 0;
       this.triggerUnreadMessageCountChangeEvent();
-    }
+    };
 
     eaf.event.on('app.chat.allUnreadMessagesOfUserRead', data => {
       this._zone.run(() => {
@@ -703,7 +718,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       });
     });
 
-    const onReadStateChange = (data) => {
+    const onReadStateChange = data => {
       const user = this.getFriendOrNull(data.friend.userId, data.friend.tenantId);
       if (!user) {
         return;
@@ -712,7 +727,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
       user.messages?.forEach(message => {
         message.receiverReadState = ChatMessageReadState.Read;
       });
-    }
+    };
 
     eaf.event.on('app.chat.readStateChange', data => {
       this._zone.run(() => {
@@ -726,7 +741,7 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
           this.loadLastState();
         });
       });
-    }
+    };
 
     eaf.event.on('app.chat.connected', () => {
       this._zone.run(() => {

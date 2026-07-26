@@ -244,6 +244,47 @@ export class UsersComponent extends AppComponentBase {
 
 ## SignalR Implementation
 
+### Consumer contracts
+
+The template exposes opt-in contracts in
+`src/app/shared/eaf-contracts/eaf-contracts.ts`. They are deliberately
+independent from generated proxies:
+
+```typescript
+export interface ContextualChatMessage {
+  conversationId?: string;
+  gameId?: string;
+  matchId?: string;
+  clientMessageId?: string;
+  text: string;
+}
+```
+
+`normalizeEafError` accepts the public `{ code, message, retryable,
+correlationId }` envelope and maps unknown responses to a safe, retry-aware
+fallback. `EafCorrelationIdInterceptor` is opt-in; register it only when the
+application does not already register the EAF interceptor. It adds
+`X-Correlation-ID` and retries only `GET`, `HEAD` and `OPTIONS` requests once
+for transient failures.
+
+Do not edit `src/shared/service-proxies/service-proxies.ts`. Run the configured
+NSwag generation step after an EAF contract version is published.
+
+### Chat layout and interaction rules
+
+The chat panel follows the same Metronic offcanvas/card structure used by the
+rest of the template. Keep the panel flex-based and let the message viewport
+consume the remaining height; do not restore fixed `vh` heights or introduce a
+second layout system. The composer remains in the card footer, attachments use
+the existing PrimeNG upload controls, and mobile layouts must occupy the
+viewport width without horizontal overflow.
+
+The contextual banner is optional and appears only when `conversationId`,
+`gameId` or `matchId` is supplied. Sending trims whitespace, keeps
+`Shift+Enter` for line breaks, sends a `clientMessageId`, and includes
+contextual metadata without changing the generated proxy. Loading, empty,
+retry and reconnecting states are exposed with semantic status/live regions.
+
 ### Chat SignalR Service
 
 **Location**: `src/app/shared/layout/chat/chat-signalr.service.ts`
