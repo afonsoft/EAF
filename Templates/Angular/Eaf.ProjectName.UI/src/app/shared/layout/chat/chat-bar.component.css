@@ -12,8 +12,81 @@
 }
 
 #kt_quick_sidebar{
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
+}
+
+.chat-shell {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+}
+
+.chat-context-banner {
+    align-items: center;
+    background: rgba(98, 93, 187, 0.08);
+    border-bottom: 1px solid rgba(98, 93, 187, 0.16);
+    color: #3f3a75;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .65rem 1rem;
+}
+
+.chat-context-label {
+    font-weight: 700;
+}
+
+.chat-conversation {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.chat-messages-scroll {
+    display: block;
+    flex: 1;
+    height: auto !important;
+    min-height: 16rem;
+}
+
+.chat-state {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 5rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+.chat-composer {
+    padding-top: .5rem;
+}
+
+.chat-attachment-actions,
+.chat-send-actions {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.chat-send-actions {
+    text-align: right;
+}
+
+@media (max-width: 576px) {
+    #chatSideRight {
+        max-width: 100vw;
+        width: 100vw;
+    }
+
+    .chat-send {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
 }
 
 #kt_quick_sidebar .quick-panel-actions {
@@ -184,4 +257,3 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
 .scroll-pull{
     padding-left: 10px;
 }
-

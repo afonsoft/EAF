@@ -7,6 +7,7 @@ Esta seção detalha os templates fornecidos pelo EAF para iniciar novos projeto
 * [Angular UI Template](./angular-ui-template.md) - Template de interface de usuário usando Angular 18
 * [ASP.NET Core API Template](./aspnet-core-api-template.md) - Template de API REST usando ASP.NET Core
 * [Worker Template](./worker-template.md) - Template para serviços de background
+* [Contratos para consumidores realtime e sociais](../integration/gamehub-consumer-contracts.md) - Guia de integração para consumidores EAF
 
 ## Visão Geral
 

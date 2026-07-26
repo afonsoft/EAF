@@ -27,6 +27,35 @@ The EAF (Enterprise Application Framework) Angular UI Template is a full-feature
 - **Background Jobs**: Integration with Hangfire
 - **Localization**: Multi-language support
 
+### Contratos EAF para consumidores
+
+O template mantém chat, notificações e SignalR como capacidades EAF. Para
+consumidores que precisam de contexto de jogo, os contratos opcionais estão em
+`src/app/shared/eaf-contracts`:
+
+- `ContextualChatMessage` aceita `gameId`, `matchId`, `conversationId` e
+  `clientMessageId` opcionais;
+- `EafError` padroniza erros públicos sem stack trace;
+- `EafCorrelationIdInterceptor` é opt-in e adiciona correlation ID, repetindo
+  apenas requisições idempotentes com falhas transitórias;
+- `service-proxies.ts` continua sendo gerado pelo NSwag e não deve ser editado.
+
+Integre o interceptor somente uma vez no módulo raiz quando o consumidor não
+possuir um interceptor EAF equivalente:
+
+```typescript
+providers: [
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: EafCorrelationIdInterceptor,
+    multi: true,
+  },
+]
+```
+
+Estados de loading, empty, error e retry devem ser renderizados com controles
+semânticos, foco visível, navegação por teclado e regiões `aria-live`.
+
 ## Documentation
 
 For detailed documentation about the template, see the [docs folder](docs/).

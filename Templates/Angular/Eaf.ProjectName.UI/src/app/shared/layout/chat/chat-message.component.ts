@@ -28,7 +28,6 @@ export class ChatMessageComponent implements OnInit {
   }
 
   private setChatMessageType(): void {
-
     const encryptedAuthToken = this._storageService.getCookieValue(AppConsts.authorization.encrptedAuthTokenName);
 
     if (this.message.message.startsWith('[image]')) {

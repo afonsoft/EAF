@@ -259,6 +259,38 @@ Nomenclatura: `Dado_{Contexto}_Quando_{Acao}_Entao_{Resultado}`
 
 ## Próximos Passos
 
+## Contratos para consumidores realtime
+
+O template inclui exemplos opt-in em
+`src/Eaf.ProjectName.Core/Application/Contracts` para orientar consumidores
+EAF:
+
+- `ContextualChatMessageContract`: metadata opcional de conversa, jogo,
+  partida e idempotência;
+- `RateLimitContract`: decisão operacional e interface com
+  `CancellationToken`;
+- `ModerationAuditContract`: auditoria de moderação sem PII pública;
+- `PublicErrorContract`: envelope `{ code, message, retryable, correlationId }`.
+
+Esses tipos são contratos de exemplo. Eles não registram uma segunda
+persistência, não substituem `INotificationPublisher`/`ICacheManager` e não
+devem ser usados para criar entidades paralelas no consumidor. Consulte o
+[guia de contratos EAF](../../docs/integration/gamehub-consumer-contracts.md)
+antes de adicionar endpoints ou migrations.
+
+### Realtime, cache e observabilidade
+
+O template mantém `AddEafConfigurer`, `AddEafHealthChecks`,
+`AddEafOpenTelemetry` e `/signalr-chat` como pontos centrais. Redis deve ser
+configurado explicitamente por ambiente; cache, Hangfire e backplane SignalR
+podem compartilhar infraestrutura, mas devem usar prefixos, TTLs, health
+checks e métricas separados. Em produção, substitua as chaves locais de Data
+Protection por armazenamento compartilhado.
+
+O template não habilita retry automático para comandos de escrita. Clientes
+devem repetir somente falhas transitórias e sempre usar `clientMessageId` ou
+idempotency key quando o contrato suportar.
+
 - [ ] Aumentar cobertura de código para 90%
 - [ ] Adicionar documentação XML aos membros públicos
 - [ ] Migrar EPPlus para API `ExcelPackage.License` (v8+)

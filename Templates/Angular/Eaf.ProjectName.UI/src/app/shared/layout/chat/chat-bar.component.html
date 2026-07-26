@@ -2,17 +2,28 @@
   [class]="'bs-canvas bs-canvas-right position-fixed bg-light h-100 m-aside-left--skin-' + currentTheme.baseSettings.menu.asideSkin"
   id="chatSideRight"
 >
-  <div class="{{ ui.getSideBarMenuClass() }}" id="kt_quick_sidebar">
+  <div
+    class="{{ ui.getSideBarMenuClass() }}"
+    id="kt_quick_sidebar"
+    role="dialog"
+    aria-labelledby="chatPanelTitle"
+    aria-modal="false"
+  >
     <header class="bs-canvas-header p-3 bg-primary overflow-auto">
-      <button (click)="reversePinned()" aria-label="Pinned" class="bs-canvas-close float-left close pinned" type="button">
-        <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-label="Pinned" class="fa fa-map-pin"> </i>
+      <button (click)="reversePinned()" [attr.aria-label]="'Pinned' | localize" class="bs-canvas-close float-left close pinned" type="button">
+        <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-hidden="true" class="fa fa-map-pin"> </i>
       </button>
       <button (click)="closeChat()" aria-label="Close" class="bs-canvas-close float-left close" type="button">
         <span aria-hidden="true" class="text-light">&times;</span>
       </button>
-      <h4 class="d-inline-block text-light mb-0 float-right">Chat</h4>
+      <h4 class="d-inline-block text-light mb-0 float-right" id="chatPanelTitle">{{ 'Chat' | localize }}</h4>
     </header>
-    <div class="bs-canvas-content" style="width: 96%">
+    <div class="bs-canvas-content chat-shell">
+      <div class="chat-context-banner" *ngIf="chatContext.gameId || chatContext.matchId || chatContext.conversationId">
+        <span class="chat-context-label">{{ 'ChatContext' | localize }}</span>
+        <span *ngIf="chatContext.gameId">Game: {{ chatContext.gameId }}</span>
+        <span *ngIf="chatContext.matchId">Match: {{ chatContext.matchId }}</span>
+      </div>
       <div class="flex-row-auto">
         <div [hidden]="selectedUser.friendUserId || selectedUser.groupId" class="card card-custom offcanvas-body bs-canvas-content">
           <div class="card-body">
@@ -40,7 +51,7 @@
               <div *ngFor="let friend of getFilteredFriends(friendDtoState.Accepted, userNameFilter)" id="friendListFriends">
                 <chat-friend-list-item (selectChatFriend)="selectFriend(friend)" [friend]="friend"> </chat-friend-list-item>
               </div>
-              <p *ngIf="getFilteredFriendsCount(friendDtoState.Accepted) == 0" id="EmptyFriendListInfo">
+              <p *ngIf="getFilteredFriendsCount(friendDtoState.Accepted) === 0" id="EmptyFriendListInfo">
                 {{ 'YouDontHaveAnyFriend' | localize }}
               </p>
             </div>
@@ -51,7 +62,7 @@
                 <div *ngFor="let friend of getFilteredFriends(friendDtoState.Blocked, userNameFilter)">
                   <chat-friend-list-item (selectChatFriend)="selectFriend(friend)" [friend]="friend"> </chat-friend-list-item>
                 </div>
-                <p *ngIf="getFilteredFriendsCount(friendDtoState.Blocked) == 0" id="EmptyBlockedFriendListInfo">
+                <p *ngIf="getFilteredFriendsCount(friendDtoState.Blocked) === 0" id="EmptyBlockedFriendListInfo">
                   {{ 'YouDontHaveAnyBlockedFriend' | localize }}
                 </p>
               </div>
@@ -64,27 +75,28 @@
           class="flex-row-fluid offcanvas-body bs-canvas-content"
           id="kt_chat_content"
         >
-          <div class="card card-custom">
+          <div class="card card-custom chat-conversation">
             <!--begin::Header-->
             <div class="card-header align-items-center row">
               <div class="text-left flex-grow-1">
                 <div class="quick-panel-actions offcanvas-header">
-                  <a
+                  <button
                     (click)="quickSideBarBackClick()"
                     [hidden]="!selectedUser.friendUserId && !selectedUser.groupId"
                     class="btn btn-clean btn-sm btn-icon btn-icon btn-light quick-sidebar-back ml-2"
-                    href="javascript:;"
                     id="kt_quick_sidebar_back"
+                    [attr.aria-label]="'Back' | localize"
+                    type="button"
                   >
-                    <i aria-label="l('Back')" class="fa fa-arrow-alt-circle-left"> </i>
-                  </a>
+                    <i aria-hidden="true" class="fa fa-arrow-alt-circle-left"> </i>
+                  </button>
                 </div>
               </div>
               <div class="text-center flex-grow-1">
                 <div class="text-dark-75 font-weight-bold font-size-h5" id="selectedChatUserName" title="{{ getShowTitle(selectedUser) }}">
                   {{ getShownUserName(selectedUser) }}
                 </div>
-                <div id="selectedChatUserStatus">
+                <div id="selectedChatUserStatus" aria-live="polite">
                   <span
                     [ngClass]="{ 'label-success': selectedUser.isOnline, 'label-secondary': !selectedUser.isOnline }"
                     class="label label-dot mr-1"
@@ -95,6 +107,9 @@
                   </span>
                   <span *ngIf="!selectedUser.isOnline" class="font-weight-bold text-muted font-size-sm">
                     {{ 'Offline' | localize }}
+                  </span>
+                  <span *ngIf="!_chatSignalrService.isChatConnected" class="chat-connection-status text-warning ml-2">
+                    {{ 'Reconnecting' | localize }}
                   </span>
                 </div>
               </div>
@@ -147,14 +162,28 @@
 
             <!--begin::Body-->
             <div class="card-body row">
-              <ng-scrollbar
-                #chatScrollBar
-                style="height: 78vh"
-              >
+              <ng-scrollbar #chatScrollBar class="chat-messages-scroll">
                 <!--begin::Scroll-->
                 <div class="scroll scroll-pull">
+                  <div *ngIf="loadingPreviousUserMessages" class="chat-state" role="status">
+                    <span class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>
+                    {{ 'Loading' | localize }}
+                  </div>
+                  <div *ngIf="chatError" class="alert alert-warning chat-state" role="alert">
+                    <span>{{ chatError }}</span>
+                    <button (click)="loadPreviousMesssagesOfSelectedUser()" class="btn btn-link p-0 ml-2" type="button">
+                      {{ 'Retry' | localize }}
+                    </button>
+                  </div>
+                  <div
+                    *ngIf="!loadingPreviousUserMessages && !chatError && !selectedUser.messages?.length"
+                    class="chat-state text-muted"
+                    role="status"
+                  >
+                    {{ 'NoMessages' | localize }}
+                  </div>
                   <!--begin::Messages-->
-                  <div *ngFor="let message of selectedUser.messages" class="messages" id="UserChatMessages">
+                  <div *ngFor="let message of selectedUser.messages" class="messages" role="log" aria-live="polite">
                     <div
                       *ngIf="message.side === 1"
                       class="d-flex flex-column mb-3 align-items-start"
@@ -256,11 +285,11 @@
                     ></div>
                   </div>
                 </div>
-                <div class="col-md-12">
+                <div class="col-md-12 chat-composer">
                   <textarea
-                    (keydown.Enter)="sendMessage($event)"
+                    (keydown.enter)="sendMessage($event)"
                     [(ngModel)]="chatMessage"
-                    [disabled]="selectedUser.state == friendDtoState.Blocked"
+                    [disabled]="selectedUser.state === friendDtoState.Blocked"
                     #ChatMessage
                     class="form-control border-0 p-0"
                     id="ChatMessage"
@@ -269,12 +298,12 @@
                     placeholder="{{ 'TypeAMessageHere' | localize }}"
                     aria-label="{{ 'TypeAMessageHere' | localize }}"
                     required
-                    rows="2"
+                    rows="3"
                   >
                   </textarea>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-1 row" style="padding-top: 5px">
-                  <div class="col-8 align-items-start ustify-content-between" style="text-align: start; padding-left: 30px">
+                  <div class="col-8 align-items-start justify-content-between chat-attachment-actions">
                     <!--begin::anexo-->
                     <fieldset aria-label="Basic example" class="btn-group btn-group-sm">
                       <button
@@ -310,14 +339,16 @@
                     </fieldset>
                     <!--end::anexo-->
                   </div>
-                  <div class="col-4 align-items-end justify-content-between" style="text-align: end">
+                  <div class="col-4 align-items-end justify-content-between chat-send-actions">
                     <button
                       (click)="sendMessage($event)"
+                      [disabled]="sendingMessage || !chatMessage.trim()"
                       class="btn btn-primary btn-md text-uppercase font-weight-bold chat-send py-2 px-6"
                       id="SendChatMessageButton"
                       type="button"
                     >
-                      {{ 'Send' | localize }}
+                      <span *ngIf="!sendingMessage">{{ 'Send' | localize }}</span>
+                      <span *ngIf="sendingMessage" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
                     </button>
                   </div>
                 </div>

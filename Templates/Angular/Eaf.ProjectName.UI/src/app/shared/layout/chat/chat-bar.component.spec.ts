@@ -3,7 +3,12 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ChatBarComponent } from './chat-bar.component';
 import { ChatSignalrService } from './chat-signalr.service';
-import { ChatServiceProxy, FriendshipServiceProxy, ProfileServiceProxy, CommonLookupServiceProxy } from '@shared/service-proxies/service-proxies';
+import {
+  ChatServiceProxy,
+  FriendshipServiceProxy,
+  ProfileServiceProxy,
+  CommonLookupServiceProxy,
+} from '@shared/service-proxies/service-proxies';
 import { LocalStorageService } from '@shared/utils/local-storage.service';
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
 import { LocalizationService } from '@eaf/localization/localization.service';
@@ -83,7 +88,12 @@ describe('ChatBarComponent', () => {
   it('should have friends property declared', () => {
     const descriptor = Object.getOwnPropertyDescriptor(component, 'friends');
     // friends is declared on the class but may not be initialized until ngOnInit
-    expect(component.hasOwnProperty('friends') || 'friends' in Object.getPrototypeOf(component) || descriptor !== undefined || component['friends'] === undefined).toBeTrue();
+    expect(
+      Object.prototype.hasOwnProperty.call(component, 'friends') ||
+        'friends' in Object.getPrototypeOf(component) ||
+        descriptor !== undefined ||
+        component['friends'] === undefined,
+    ).toBeTrue();
   });
 
   it('should have isOpen set to false initially', () => {

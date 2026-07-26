@@ -22,7 +22,7 @@
     </div>
     <div class="col-9 d-flex flex-column">
       <span
-        *ngIf="friend.friendTenancyName && friend.friendTenancyName != 'Default'"
+        *ngIf="friend.friendTenancyName && friend.friendTenancyName !== 'Default'"
         class="text-muted font-weight-bold font-size-sm"
         style="font-size: 8pt"
       >
@@ -43,7 +43,7 @@
         style="text-decoration: none"
         title="{{ getTitle() }}"
       >
-        {{ friend.name != null ? friend.name : friend.friendUserName }}
+        {{ friend.name !== null ? friend.name : friend.friendUserName }}
       </a>
     </div>
     <div class="col-1 d-flex flex-column align-items-end">
