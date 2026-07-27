@@ -16,7 +16,7 @@
           class="m-login__form m-form login-form"
           method="post"
           novalidate>
-        <div *ngIf="isMultiTenancyEnabled" class="form-group m-form__group">
+        <div *ngIf="isMultiTenancyEnabled && !isTwoStepLogin" class="form-group m-form__group">
             <div class="row">
                 <div class="col-sm-6 m--margin-top-10">
                     <h5>{{"Tenant" | localize}}:</h5>

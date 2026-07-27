@@ -20,6 +20,11 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         private static readonly object _migrateLock = new object();
         private static bool _migrated;
 
+        /// <summary>
+        /// Quando <c>true</c>, desabilita o <see cref="EnsureMigrated"/> durante a criação do contexto em design-time.
+        /// </summary>
+        public static bool IsDesignTime { get; set; }
+
         public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options)
             : base(options)
         {
@@ -32,6 +37,9 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         /// <param name="context">Contexto do Entity Framework a ser migrado.</param>
         private static void EnsureMigrated(DbContext context)
         {
+            if (IsDesignTime)
+                return;
+
             if (_migrated)
                 return;
 
@@ -53,6 +61,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<ChatMessage> ChatMessages { get; set; }
         public virtual DbSet<EafCache> EafCaches { get; set; }
         public virtual DbSet<TenantAddress> TenantAddress { get; set; }
+        public virtual DbSet<UserTenantMembership> UserTenantMemberships { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -102,6 +111,12 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                 b.HasIndex(e => new { e.TenantId, e.FriendUserId });
                 b.HasIndex(e => new { e.FriendTenantId, e.UserId });
                 b.HasIndex(e => new { e.FriendTenantId, e.FriendUserId });
+            });
+
+            modelBuilder.Entity<UserTenantMembership>(b =>
+            {
+                b.HasIndex(e => new { e.UserId, e.TenantId }).IsUnique();
+                b.HasIndex(e => e.TenantUserId);
             });
 
             if (Database.IsSqlServer())

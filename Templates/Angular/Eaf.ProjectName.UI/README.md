@@ -17,6 +17,7 @@ The EAF (Enterprise Application Framework) Angular UI Template is a full-feature
 ## Features
 
 - **Authentication**: Login, logout, external providers (Google, Microsoft, Auth0, OpenID Connect)
+- **Two-Step Multi-Tenant Login**: Login no host, seleção de tenant e JWT escopado (opt-in via `AppConsts.multiTenancy.twoStepLogin`)
 - **Authorization**: Permission-based access control
 - **Multi-Tenancy**: Full multi-tenancy support with tenant management
 - **Admin Panel**: Complete admin interface for users, roles, tenants, languages, settings

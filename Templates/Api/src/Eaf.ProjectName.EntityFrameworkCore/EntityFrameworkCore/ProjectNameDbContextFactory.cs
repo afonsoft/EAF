@@ -17,15 +17,23 @@ namespace Eaf.ProjectName.EntityFrameworkCore
 
         public ProjectNameDbContext CreateDbContext(string[] args)
         {
-            var builder = new DbContextOptionsBuilder<ProjectNameDbContext>();
-            var configuration = GetConfigurationRoot();
-            var databaseProvider = configuration["Database:Provider"] ?? "SqlServer";
-            ProjectNameDbContextConfigurer.Configure(
-                builder,
-                configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName),
-                databaseProvider);
+            ProjectNameDbContext.IsDesignTime = true;
+            try
+            {
+                var builder = new DbContextOptionsBuilder<ProjectNameDbContext>();
+                var configuration = GetConfigurationRoot();
+                var databaseProvider = configuration["Database:Provider"] ?? "SqlServer";
+                ProjectNameDbContextConfigurer.Configure(
+                    builder,
+                    configuration.GetConnectionString(ProjectNameConsts.ConnectionStringName),
+                    databaseProvider);
 
-            return new ProjectNameDbContext(builder.Options);
+                return new ProjectNameDbContext(builder.Options);
+            }
+            finally
+            {
+                ProjectNameDbContext.IsDesignTime = false;
+            }
         }
 
         public static IConfigurationRoot GetConfigurationRoot()

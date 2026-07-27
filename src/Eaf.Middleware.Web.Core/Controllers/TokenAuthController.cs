@@ -3,6 +3,7 @@ using Abp.Application.Services;
 using Abp.Authorization;
 using Abp.Authorization.Users;
 using Abp.Configuration;
+using Abp.Data;
 using Abp.Dependency;
 using Abp.Domain.Uow;
 using Abp.Json;
@@ -249,6 +250,96 @@ namespace Eaf.Middleware.Web.Controllers
                 UserId = loginResult.User.Id,
                 ReturnUrl = returnUrl
             };
+        }
+
+        [AbpAllowAnonymous]
+        [HttpPost]
+        public virtual async Task<List<AvailableTenantResult>> GetAvailableTenants([FromBody] AvailableTenantsModel model)
+        {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
+            var loginResult = await GetLoginResultAsync(
+                model.UserNameOrEmailAddress,
+                model.Password,
+                null);
+
+            if (loginResult.User.TenantId.HasValue)
+                throw new UserFriendlyException(L("OnlyHostUsersCanSelectTenant"));
+
+            using (var tenantUserManager = _iocManager.ResolveAsDisposable<ITenantUserManager>())
+            {
+                var memberships = await tenantUserManager.Object.GetMembershipsAsync(loginResult.User.Id);
+
+                var results = new List<AvailableTenantResult>();
+                foreach (var membership in memberships)
+                {
+                    var tenant = _tenantCache.GetOrNull(membership.TenantId);
+                    if (tenant == null)
+                        continue;
+
+                    results.Add(new AvailableTenantResult
+                    {
+                        TenantId = membership.TenantId,
+                        TenantName = tenant.Name,
+                        TenancyName = tenant.TenancyName,
+                        IsDefault = membership.IsDefault
+                    });
+                }
+
+                return results;
+            }
+        }
+
+        [AbpAllowAnonymous]
+        [HttpPost]
+        public virtual async Task<AuthenticateResultModel> SelectTenant([FromBody] SelectTenantModel model)
+        {
+            if (!ModelState.IsValid)
+                throw new UserFriendlyException(L("InvalidRequest"));
+
+            var loginResult = await GetLoginResultAsync(
+                model.UserNameOrEmailAddress,
+                model.Password,
+                null);
+
+            if (loginResult.User.TenantId.HasValue)
+                throw new UserFriendlyException(L("OnlyHostUsersCanSelectTenant"));
+
+            using (var tenantUserManager = _iocManager.ResolveAsDisposable<ITenantUserManager>())
+            {
+                var membership = await tenantUserManager.Object.EnsureMembershipAsync(loginResult.User.Id, model.TenantId);
+
+                var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
+                var expiration = TimeSpan.FromSeconds(expirationSettings);
+
+                using (CurrentUnitOfWork.SetTenantId(model.TenantId, switchMustHaveTenantEnableDisable: false))
+                using (CurrentUnitOfWork.EnableFilter(AbpDataFilters.MayHaveTenant))
+                {
+                    var shadowUser = await _userManager.FindByIdAsync(membership.TenantUserId.ToString());
+                    if (shadowUser == null)
+                        throw new UserFriendlyException(L("ShadowUserNotFound"));
+
+                    ClaimsIdentity identity;
+                    using (var principalFactory = _iocManager.ResolveAsDisposable<UserClaimsPrincipalFactory>())
+                    {
+                        var principal = await principalFactory.Object.CreateAsync(shadowUser);
+                        identity = (ClaimsIdentity)principal.Identity;
+                    }
+
+                    var accessToken = CreateAccessToken(await CreateJwtClaims(identity, shadowUser), expiration);
+                    var refreshToken = await GenerateAndStoreRefreshTokenAsync(shadowUser);
+                    AppendRefreshTokenCookie(refreshToken.Token, refreshToken.ExpireDate);
+
+                    return new AuthenticateResultModel
+                    {
+                        AccessToken = accessToken,
+                        ExpireInSeconds = (int)expiration.TotalSeconds,
+                        EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
+                        UserId = shadowUser.Id
+                    };
+                }
+            }
         }
 
         [AbpAllowAnonymous]
