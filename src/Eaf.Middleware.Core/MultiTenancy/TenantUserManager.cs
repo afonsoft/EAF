@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -125,7 +126,7 @@ namespace Eaf.Middleware.MultiTenancy
                     };
                     shadowUser.SetNormalizedNames();
 
-                    var createResult = await _userManager.CreateAsync(shadowUser, User.CreateRandomPassword());
+                    var createResult = await _userManager.CreateAsync(shadowUser, GenerateShadowPassword());
                     if (!createResult.Succeeded)
                         throw new UserFriendlyException(createResult.Errors.FirstOrDefault()?.Description ?? L("FailedToCreateShadowUser"));
                 }
@@ -239,6 +240,15 @@ namespace Eaf.Middleware.MultiTenancy
             {
                 item.IsDefault = false;
             }
+        }
+
+        /// <summary>
+        /// Gera uma senha temporária para o shadow user que atende às regras padrão do Identity.
+        /// </summary>
+        private static string GenerateShadowPassword()
+        {
+            // Guid hex contém letras minúsculas e dígitos; adiciona maiúscula, dígito e caractere não alfanumérico.
+            return $"{Guid.NewGuid().ToString("N")[..12]}A1!";
         }
     }
 }

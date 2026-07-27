@@ -105,6 +105,7 @@ using (var tenantUserManager = _iocManager.ResolveAsDisposable<ITenantUserManage
 
 ## Considerações
 
-- O shadow user é criado com uma senha aleatória (`User.CreateRandomPassword()`) e `IsActive = true`.
+- O shadow user é criado com uma senha temporária gerada por `GenerateShadowPassword()` (maiuscula, minúscula, dígito e caractere não alfanumérico) e `IsActive = true`.
 - O `UserName` do shadow user é o mesmo do host user. Se houver conflito de username no tenant, o `TenantUserManager` encontrará o usuário existente e o usará como shadow user.
 - As permissões são replicadas quando a membership é criada; alterações posteriores nas roles host não são sincronizadas automaticamente.
+- Senha do shadow user não é usada para login direto; o acesso ao tenant é sempre via host user + `SelectTenant`.
