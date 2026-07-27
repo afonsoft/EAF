@@ -32,6 +32,7 @@ namespace Eaf.MiddlewareCore.SampleApp.EntityFramework
         public DbSet<ProductTranslation> ProductTranslations { get; set; }
         public DbSet<Store> Stores { get; set; }
         public DbSet<UserTestEntity> UserTestEntities { get; set; }
+        public DbSet<Eaf.Middleware.MultiTenancy.UserTenantMembership> UserTenantMemberships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,6 +67,12 @@ namespace Eaf.MiddlewareCore.SampleApp.EntityFramework
             modelBuilder.Entity<Book>().Property(e => e.Id).ValueGeneratedNever();
 
             modelBuilder.Entity<Store>().Property(e => e.Id).HasColumnName("StoreId");
+
+            modelBuilder.Entity<Eaf.Middleware.MultiTenancy.UserTenantMembership>(b =>
+            {
+                b.HasIndex(e => new { e.UserId, e.TenantId }).IsUnique();
+                b.HasIndex(e => e.TenantUserId);
+            });
         }
     }
 }
