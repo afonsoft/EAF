@@ -6,12 +6,15 @@
 }
 
 export interface ContextualChatMessage {
+  id?: number;
+  message?: string;
+  userId?: number;
   conversationId?: string;
   gameId?: string;
   matchId?: string;
   contextType?: string;
   clientMessageId?: string;
-  text: string;
+  creationTime?: string;
 }
 
 export interface ChatContext {
@@ -28,6 +31,31 @@ export interface EafNotificationMetadata {
   inviteId?: string;
   severity?: string;
   expiresAtUtc?: string;
+}
+
+export interface RateLimitDecision {
+  allowed: boolean;
+  retryAfterSeconds: number;
+  resetAt?: string;
+}
+
+export interface RateLimitContract {
+  allowed: boolean;
+  count: number;
+  limit: number;
+  resetAt: string;
+  retryAfterSeconds: number;
+}
+
+export interface ModerationAuditContract {
+  id: string;
+  action: string;
+  moderatorUserId?: number;
+  tenantId?: number;
+  resourceId?: string;
+  resourceType?: string;
+  reason?: string;
+  createdAt: string;
 }
 
 const transientStatusCodes = new Set([408, 425, 429, 500, 502, 503, 504]);

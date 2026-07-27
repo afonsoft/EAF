@@ -1,83 +1,64 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Eaf.ProjectName.Contracts
 {
     /// <summary>
-    /// Descreve uma decisão operacional de moderação sem PII pública.
+    /// Contrato para registros de auditoria de moderação compartilhados entre serviços.
     /// </summary>
-    public sealed class ModerationAuditEntry
+    public class ModerationAuditContract
     {
         /// <summary>
-        /// Obtém ou define o tenant da ação.
+        /// Identificador único do registro de auditoria.
         /// </summary>
-        public Guid? TenantId { get; set; }
+        public Guid Id { get; set; }
 
         /// <summary>
-        /// Obtém ou define o usuário executor.
+        /// Tipo da ação de moderação (por exemplo, <c>approve</c>, <c>reject</c> ou <c>ban</c>).
         /// </summary>
-        public Guid? ExecutorUserId { get; set; }
+        public string Action { get; set; }
 
         /// <summary>
-        /// Obtém ou define o tipo da ação.
+        /// Identificador do moderador que executou a ação.
         /// </summary>
-        public string ActionType { get; set; }
+        public long? ModeratorUserId { get; set; }
 
         /// <summary>
-        /// Obtém ou define o alvo anonimizado.
+        /// Tenant do moderador.
         /// </summary>
-        public string AnonymizedTarget { get; set; }
+        public int? TenantId { get; set; }
 
         /// <summary>
-        /// Obtém ou define o motivo da decisão.
+        /// Identificador do recurso moderado.
+        /// </summary>
+        public string ResourceId { get; set; }
+
+        /// <summary>
+        /// Tipo do recurso moderado (por exemplo, <c>user_content</c> ou <c>report</c>).
+        /// </summary>
+        public string ResourceType { get; set; }
+
+        /// <summary>
+        /// Motivo ou observação fornecida para a ação.
         /// </summary>
         public string Reason { get; set; }
 
         /// <summary>
-        /// Obtém ou define a decisão tomada.
+        /// Data e hora UTC em que a ação foi realizada.
         /// </summary>
-        public string Decision { get; set; }
-
-        /// <summary>
-        /// Obtém ou define o identificador de correlação.
-        /// </summary>
-        public string CorrelationId { get; set; }
-
-        /// <summary>
-        /// Obtém ou define a data UTC da ação.
-        /// </summary>
-        public DateTime TimestampUtc { get; set; }
-
-        /// <summary>
-        /// Obtém ou define o jogo associado, quando aplicável.
-        /// </summary>
-        public Guid? GameId { get; set; }
-
-        /// <summary>
-        /// Obtém ou define a partida associada, quando aplicável.
-        /// </summary>
-        public Guid? MatchId { get; set; }
-
-        /// <summary>
-        /// Obtém ou define o report associado, quando aplicável.
-        /// </summary>
-        public Guid? ReportId { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     /// <summary>
-    /// Exemplo de contrato para gravação de auditoria de moderação.
+    /// Escreve registros de auditoria de moderação para compliance e forense cross-cutting.
     /// </summary>
     public interface IModerationAuditWriter
     {
         /// <summary>
-        /// Grava uma ação de moderação dentro do tenant autorizado.
+        /// Grava um registro de auditoria de forma assíncrona.
         /// </summary>
         /// <param name="entry">Registro operacional da ação.</param>
-        /// <param name="cancellationToken">Token de cancelamento da operação.</param>
         /// <returns>Uma tarefa que representa a gravação.</returns>
-        Task WriteAsync(
-            ModerationAuditEntry entry,
-            CancellationToken cancellationToken = default);
+        Task WriteAsync(ModerationAuditContract entry);
     }
 }

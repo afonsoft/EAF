@@ -1,27 +1,27 @@
 ﻿namespace Eaf.ProjectName.Contracts
 {
     /// <summary>
-    /// Envelope de erro seguro para APIs consumidoras.
+    /// Envelope de erro seguro retornado pelas APIs EAF para clientes SDK.
     /// </summary>
     public sealed class PublicErrorContract
     {
         /// <summary>
-        /// Obtém ou define o código estável do erro.
+        /// Código estável e legível por máquina.
         /// </summary>
         public string Code { get; set; }
 
         /// <summary>
-        /// Obtém ou define a mensagem localizada para a interface.
+        /// Mensagem de erro legível por humanos.
         /// </summary>
         public string Message { get; set; }
 
         /// <summary>
-        /// Obtém ou define um valor que indica se a operação pode ser repetida.
+        /// Indica se o cliente pode repetir a mesma requisição.
         /// </summary>
         public bool Retryable { get; set; }
 
         /// <summary>
-        /// Obtém ou define o identificador de correlação.
+        /// Identificador de correlação para rastreamento distribuído.
         /// </summary>
         public string CorrelationId { get; set; }
     }
