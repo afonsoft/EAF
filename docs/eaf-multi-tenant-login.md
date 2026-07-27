@@ -114,3 +114,30 @@ A entidade `UserTenantMembership` gera a tabela `AbpUserTenantMemberships`. A mi
 
 - `TokenAuthControllerMultiTenantBddTests` cobre os endpoints `GetAvailableTenants` e `SelectTenant` com credenciais corretas e a validação de usuário de tenant.
 - Para testar `TenantUserManager` e `TenantRolePermissionReplicationService`, use um `DbContext` que herde `AbpZeroDbContext<Tenant, Role, User, ...>` com as entidades do `Eaf.Middleware.Core`.
+
+## Testes reais com Docker
+
+Um ambiente completo foi validado com SQL Server e Redis via Docker Compose:
+
+- Imagem do template API com `ASPNETCORE_ENVIRONMENT=Development` e CORS `*`.
+- Criação de dois tenants (`EmpresaA` e `EmpresaB`) e de um usuário host (`shareduser`).
+- Chamadas a `GetAvailableTenants` (inicialmente vazio) e `SelectTenant` para cada tenant.
+- Após selecionar os dois tenants, `GetAvailableTenants` retornou `[EmpresaA, EmpresaB]`.
+- Cada `SelectTenant` retornou um `accessToken` escopado com um `userId` diferente (shadow user).
+- O token do tenant `EmpresaA` conseguiu listar usuários dentro do tenant, mas foi negado em operações host-only (`Tenants`), conforme esperado.
+
+### Análise de performance
+
+Medições locais (10 chamadas cada):
+
+| Endpoint | Média |
+|---|---|
+| `GetAvailableTenants` | ~197 ms |
+| `SelectTenant` (tenant já selecionado) | ~330 ms |
+| `SelectTenant` (primeira vez/outlier) | até ~2.1 s |
+
+A primeira seleção de um tenant é mais lenta porque cria o shadow user, replica roles e executa `Database.Migrate`/`SaveChanges`. Chamadas subsequentes reutilizam o shadow user e ficam abaixo de 600 ms.
+
+### Correção encontrada nos testes reais
+
+A criação do shadow user falhava com `Passwords must have at least one non alphanumeric character` porque `User.CreateRandomPassword()` gera apenas hex. O `TenantUserManager` agora usa `GenerateShadowPassword()`, que garante letra maiúscula, minúscula, dígito e caractere não alfanumérico.

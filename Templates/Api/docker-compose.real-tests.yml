@@ -1,0 +1,19 @@
+version: '3.4'
+
+# Compose override para testes reais do fluxo multi-tenant.
+# Usa SQL Server e Redis da docker-compose.infra.yml com CORS permissivo.
+#
+# Uso:
+#   export ConnectionStrings__Default='Server=sqlserver,1433;Database=EafProjectNameDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;MultipleActiveResultSets=True'
+#   docker compose -f docker-compose.yml -f docker-compose.infra.yml -f docker-compose.override.yml -f docker-compose.real-tests.yml up -d --build
+
+services:
+  eaf.projectname.web.host:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - App__CorsOrigins=*
+      - RedisCache__IsEnabled=true
+      - RedisCache__ConnectionString=redis:6379
+    depends_on:
+      - sqlserver
+      - redis
