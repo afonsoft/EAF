@@ -117,6 +117,108 @@ namespace Eaf.Middleware.Chat
             return new ListResultDto<ChatMessageDto>(new List<ChatMessageDto>());
         }
 
+        [DisableAuditing]
+        [Produces("application/json", "application/json-patch+json", "text/json")]
+        public async Task<ListResultDto<ChatMessageDto>> GetHistoryAsync(GetChatHistoryInput input)
+        {
+            var query = await _chatMessageRepository.GetAllAsync();
+
+            if (input.ConversationId.HasValue)
+            {
+                query = query.Where(m => m.ConversationId == input.ConversationId.Value);
+            }
+
+            if (input.GameId.HasValue)
+            {
+                query = query.Where(m => m.GameId == input.GameId.Value);
+            }
+
+            if (input.MatchId.HasValue)
+            {
+                query = query.Where(m => m.MatchId == input.MatchId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(input.ContextType))
+            {
+                query = query.Where(m => m.ContextType == input.ContextType);
+            }
+
+            if (input.MinMessageId.HasValue)
+            {
+                query = query.Where(m => m.Id < input.MinMessageId.Value);
+            }
+
+            var takeCount = input.MaxResultCount ?? 100;
+
+            var messages = await query
+                .OrderByDescending(m => m.CreationTime)
+                .Take(takeCount)
+                .ToListAsync();
+
+            messages.Reverse();
+            var listMessages = ObjectMapper.Map<List<ChatMessageDto>>(messages);
+            await SetTargetUserNamesAsync(listMessages);
+            return new ListResultDto<ChatMessageDto>(listMessages);
+        }
+
+        [Produces("application/json", "application/json-patch+json", "text/json")]
+        public async Task MarkReadAsync(MarkChatReadInput input)
+        {
+            if (input.UserId.HasValue && input.UserId.Value > 0)
+            {
+                await MarkAllUnreadMessagesOfUserAsRead(new MarkAllUnreadMessagesOfUserAsReadInput
+                {
+                    TenantId = input.TenantId,
+                    UserId = input.UserId
+                });
+                return;
+            }
+
+            if (input.GroupId.HasValue && input.GroupId.Value > 0)
+            {
+                await MarkAllUnreadMessagesOfUserAsRead(new MarkAllUnreadMessagesOfUserAsReadInput
+                {
+                    TenantId = input.TenantId,
+                    GroupId = input.GroupId
+                });
+                return;
+            }
+
+            if (!input.ConversationId.HasValue && !input.GameId.HasValue && !input.MatchId.HasValue)
+            {
+                return;
+            }
+
+            var userId = AbpSession.GetUserId();
+            var tenantId = AbpSession.TenantId;
+            var query = await _chatMessageRepository.GetAllAsync();
+            query = query.Where(m => m.TargetUserId == userId && m.TargetTenantId == tenantId);
+
+            if (input.ConversationId.HasValue)
+            {
+                query = query.Where(m => m.ConversationId == input.ConversationId.Value);
+            }
+
+            if (input.GameId.HasValue)
+            {
+                query = query.Where(m => m.GameId == input.GameId.Value);
+            }
+
+            if (input.MatchId.HasValue)
+            {
+                query = query.Where(m => m.MatchId == input.MatchId.Value);
+            }
+
+            var messages = await query
+                .Where(m => m.ReadState == ChatMessageReadState.Unread)
+                .ToListAsync();
+
+            foreach (var message in messages)
+            {
+                message.ChangeReadState(ChatMessageReadState.Read);
+            }
+        }
+
         private async Task<ListResultDto<ChatMessageDto>> GetUserChatMessagesAsync(GetUserChatMessagesInput input, long userId)
         {
             var messages = await (await _chatMessageRepository.GetAllAsync())
