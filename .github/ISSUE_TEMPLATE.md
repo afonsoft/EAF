@@ -21,7 +21,7 @@ Please specify which component this issue relates to:
 If you're creating a bug/problem report, please include the following:
 
 - **Component**: Which specific module or template is affected?
-- **Version**: Your EAF package version (e.g., 9.2.0)
+- **Version**: Your EAF package version (e.g., 9.3.0)
 - **Exception**: Exception message and stack trace if available
 - **Steps**: Detailed steps needed to reproduce the problem
 - **Expected Behavior**: What you expected to happen
