@@ -264,6 +264,9 @@ namespace Eaf.Middleware.Web.Controllers
                 model.Password,
                 null);
 
+            if (loginResult.User.TenantId.HasValue)
+                throw new UserFriendlyException(L("OnlyHostUsersCanSelectTenant"));
+
             using (var tenantUserManager = _iocManager.ResolveAsDisposable<ITenantUserManager>())
             {
                 var memberships = await tenantUserManager.Object.GetMembershipsAsync(loginResult.User.Id);

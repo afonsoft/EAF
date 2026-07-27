@@ -34,5 +34,9 @@
 	  <PackageReference Update="coverlet.msbuild" Version="8.0.0" />
 	  <PackageReference Update="xunit.runner.visualstudio" Version="3.1.4" />
 	</ItemGroup>
-  
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\Eaf.Middleware.Core\Eaf.Middleware.Core.csproj" />
+	</ItemGroup>
+
 </Project>

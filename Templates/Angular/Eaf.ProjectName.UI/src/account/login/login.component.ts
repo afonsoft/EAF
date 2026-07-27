@@ -13,6 +13,7 @@ import { ReCaptchaV3Service } from 'ngx-captcha';
 import { UrlHelper } from 'shared/helpers/UrlHelper';
 
 import { ExternalLoginProvider, LoginService } from './login.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   standalone: false,
@@ -27,6 +28,10 @@ export class LoginComponent extends AppComponentBase implements OnInit {
 
   tenants: TenantListDto[] = [];
   selectedTenant: TenantListDto;
+
+  get isTwoStepLogin(): boolean {
+    return AppConsts.multiTenancy?.twoStepLogin ?? false;
+  }
 
   constructor(
     injector: Injector,
@@ -98,6 +103,15 @@ export class LoginComponent extends AppComponentBase implements OnInit {
   }
 
   login(): void {
+    if (this.isTwoStepLogin) {
+      this.twoStepLogin();
+      return;
+    }
+
+    this.normalLogin();
+  }
+
+  private normalLogin(): void {
     const recaptchaCallback = (token: string) => {
       this.submitting = true;
       this.loginService.authenticate(
@@ -108,6 +122,51 @@ export class LoginComponent extends AppComponentBase implements OnInit {
         null,
         token,
       );
+    };
+
+    if (this.useCaptcha) {
+      this._reCaptchaV3Service.execute(this.recaptchaSiteKey, 'login', token => {
+        recaptchaCallback(token);
+      });
+    } else {
+      recaptchaCallback(null);
+    }
+  }
+
+  private twoStepLogin(): void {
+    const recaptchaCallback = (token: string) => {
+      this.submitting = true;
+      this.dataTableHelper.showLoadingIndicator();
+
+      const model = {
+        userNameOrEmailAddress: this.loginService.authenticateModel.userNameOrEmailAddress,
+        password: this.loginService.authenticateModel.password,
+      };
+
+      this.loginService
+        .availableTenants(model)
+        .pipe(
+          finalize(() => {
+            this.submitting = false;
+            this.dataTableHelper.hideLoadingIndicator();
+          }),
+        )
+        .subscribe(tenants => {
+          this.loginService.availableTenantsResult = tenants;
+
+          if (tenants.length === 1 && AppConsts.autoSelectSingleTenant) {
+            this.loginService
+              .selectTenant({
+                ...model,
+                tenantId: tenants[0].tenantId,
+              })
+              .subscribe(result => {
+                this.loginService.loginTenant(result, tenants[0].tenantId);
+              });
+          } else {
+            this.loginService.navigateToSelectTenant();
+          }
+        });
     };
 
     if (this.useCaptcha) {

@@ -416,5 +416,12 @@
 		<text name="WebSiteLogsHeaderInfo">WebSite Logs</text>
 		<text name="TestSendMensage">Mensagem de Testes</text>
 		<text name="WelcomeToTheApplication">Bem vindo ao sistema</text>
+		<text name="OnlyHostUsersCanHaveTenantMemberships">Apenas usuários host podem ter associações a tenants.</text>
+		<text name="OnlyHostUsersCanSelectTenant">Apenas usuários host podem selecionar um tenant.</text>
+		<text name="TenantMembershipNotFound">Associação de tenant não encontrada.</text>
+		<text name="ShadowUserNotFound">Usuário sombra não encontrado.</text>
+		<text name="FailedToCreateShadowUser">Falha ao criar usuário sombra.</text>
+		<text name="FailedToAddRoleToShadowUser">Falha ao adicionar role ao usuário sombra.</text>
+		<text name="FailedToCreateTenantRole">Falha ao criar role no tenant.</text>
 	</texts>
 </localizationDictionary>

@@ -408,5 +408,12 @@
 		<text name="WebSiteLogsHeaderInfo">WebSite Logs</text>
 		<text name="TestSendMensage">Test send mensage</text>
 		<text name="WelcomeToTheApplication">Welcome to the application</text>
+		<text name="OnlyHostUsersCanHaveTenantMemberships">Only host users can have tenant memberships.</text>
+		<text name="OnlyHostUsersCanSelectTenant">Only host users can select a tenant.</text>
+		<text name="TenantMembershipNotFound">Tenant membership not found.</text>
+		<text name="ShadowUserNotFound">Shadow user not found.</text>
+		<text name="FailedToCreateShadowUser">Failed to create shadow user.</text>
+		<text name="FailedToAddRoleToShadowUser">Failed to add role to shadow user.</text>
+		<text name="FailedToCreateTenantRole">Failed to create tenant role.</text>
 	</texts>
 </localizationDictionary>
