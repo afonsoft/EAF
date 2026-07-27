@@ -5,43 +5,64 @@ using System.Threading.Tasks;
 namespace Eaf.ProjectName.Contracts
 {
     /// <summary>
-    /// Expõe a decisão operacional de uma política de limite.
+    /// Resultado de uma verificação de rate limit.
     /// </summary>
-    public sealed class RateLimitDecision
+    public class RateLimitDecision
     {
         /// <summary>
-        /// Obtém ou define um valor que indica se a operação foi permitida.
+        /// Verdadeiro quando a requisição é permitida.
         /// </summary>
         public bool Allowed { get; set; }
 
         /// <summary>
-        /// Obtém ou define o limite configurado.
+        /// Segundos de espera antes de tentar novamente quando negado.
         /// </summary>
-        public int Limit { get; set; }
+        public long RetryAfterSeconds { get; set; }
 
         /// <summary>
-        /// Obtém ou define o consumo observado.
+        /// Timestamp UTC quando a janela atual é reiniciada.
         /// </summary>
-        public int Current { get; set; }
-
-        /// <summary>
-        /// Obtém ou define os segundos até uma nova tentativa.
-        /// </summary>
-        public int RetryAfterSeconds { get; set; }
-
-        /// <summary>
-        /// Obtém ou define o identificador da política aplicada.
-        /// </summary>
-        public string Policy { get; set; }
+        public DateTime ResetAt { get; set; }
     }
 
     /// <summary>
-    /// Exemplo de contrato para rate limit compartilhado entre módulos.
+    /// Contrato que representa uma decisão de rate limit retornada aos clientes.
+    /// </summary>
+    public class RateLimitContract
+    {
+        /// <summary>
+        /// Verdadeiro quando a requisição é permitida.
+        /// </summary>
+        public bool Allowed { get; set; }
+
+        /// <summary>
+        /// Número atual de requisições dentro da janela.
+        /// </summary>
+        public long Count { get; set; }
+
+        /// <summary>
+        /// Número máximo de requisições permitidas na janela.
+        /// </summary>
+        public long Limit { get; set; }
+
+        /// <summary>
+        /// Timestamp UTC quando a janela atual é reiniciada.
+        /// </summary>
+        public DateTime ResetAt { get; set; }
+
+        /// <summary>
+        /// Segundos de espera antes de tentar novamente quando negado.
+        /// </summary>
+        public long RetryAfterSeconds { get; set; }
+    }
+
+    /// <summary>
+    /// Gerenciador de rate limit compartilhado entre módulos.
     /// </summary>
     public interface IRateLimitManager
     {
         /// <summary>
-        /// Avalia uma operação sem expor conteúdo privado ao consumidor.
+        /// Verifica se uma requisição é permitida sob a política e sujeito especificados.
         /// </summary>
         /// <param name="policy">Identificador da política.</param>
         /// <param name="subject">Sujeito tenant-aware da política.</param>

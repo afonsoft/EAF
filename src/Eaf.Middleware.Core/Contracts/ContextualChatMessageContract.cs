@@ -1,54 +1,54 @@
-﻿using System;
+using System;
 
-namespace Eaf.ProjectName.Contracts
+namespace Eaf.Middleware.Contracts
 {
     /// <summary>
-    /// Contrato para mensagens de chat contextual compartilhadas entre serviços.
+    /// Contract for contextual chat messages shared across services.
     /// </summary>
     public class ContextualChatMessageContract
     {
         /// <summary>
-        /// Identificador único da mensagem.
+        /// Unique message identifier.
         /// </summary>
         public long Id { get; set; }
 
         /// <summary>
-        /// Texto da mensagem.
+        /// Message text.
         /// </summary>
         public string Message { get; set; }
 
         /// <summary>
-        /// Identificador do usuário remetente.
+        /// Identifier of the sender user.
         /// </summary>
         public long UserId { get; set; }
 
         /// <summary>
-        /// Identificador da conversa para agrupamento contextual.
+        /// Conversation identifier for contextual chat grouping.
         /// </summary>
         public Guid? ConversationId { get; set; }
 
         /// <summary>
-        /// Identificador opcional do jogo ao qual a mensagem está relacionada.
+        /// Optional game identifier.
         /// </summary>
         public Guid? GameId { get; set; }
 
         /// <summary>
-        /// Identificador opcional da partida à qual a mensagem está relacionada.
+        /// Optional match identifier.
         /// </summary>
         public Guid? MatchId { get; set; }
 
         /// <summary>
-        /// Tipo de contexto onde a mensagem foi produzida (por exemplo, <c>lobby</c>, <c>match</c> ou <c>team</c>).
+        /// Context type (e.g., lobby, match, team).
         /// </summary>
         public string ContextType { get; set; }
 
         /// <summary>
-        /// Chave de idempotência gerada pelo cliente para evitar mensagens duplicadas em retries.
+        /// Client-generated idempotency key.
         /// </summary>
         public string ClientMessageId { get; set; }
 
         /// <summary>
-        /// Data e hora de criação da mensagem.
+        /// Message creation timestamp.
         /// </summary>
         public DateTime CreationTime { get; set; }
     }

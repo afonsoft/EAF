@@ -7,6 +7,9 @@ using Abp.Modules;
 using Abp.MultiTenancy;
 using Abp.Reflection.Extensions;
 using Eaf.Middleware;
+using Eaf.Middleware.Application.RateLimiting;
+using Eaf.Middleware.Moderation;
+using Eaf.Middleware.RateLimiting;
 using Eaf.ProjectName.EntityFrameworkCore;
 using Eaf.ProjectName.Migrations.Seed;
 using System;
@@ -32,6 +35,9 @@ namespace Eaf.ProjectName
 
         public override void PostInitialize()
         {
+            IocManager.RegisterIfNot<IRateLimitManager, RateLimitManager>(DependencyLifeStyle.Transient);
+            IocManager.RegisterIfNot<IModerationAuditWriter, NullModerationAuditWriter>(DependencyLifeStyle.Transient);
+
             using (var _connectionStringResolver = IocManager.ResolveAsDisposable<DefaultConnectionStringResolver>())
             {
                 var hostConnStr = _connectionStringResolver.Object.GetNameOrConnectionString(new ConnectionStringResolveArgs(MultiTenancySides.Host));

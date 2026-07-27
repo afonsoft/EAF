@@ -16,6 +16,6 @@
 		<ProjectReference Include="..\Eaf.ProjectName.EntityFrameworkCore\Eaf.ProjectName.EntityFrameworkCore.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<!--<PackageReference Include="Eaf.Middleware.Application" Version="9.3.0" />-->
+		<!--<PackageReference Include="Eaf.Middleware.Application" Version="9.3.1" />-->
 	</ItemGroup>
 </Project>

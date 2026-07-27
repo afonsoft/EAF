@@ -88,6 +88,33 @@ namespace Eaf.Middleware.Chat
         public long UserId { get; set; }
 
         /// <summary>
+        /// Conversation identifier for contextual chat grouping.
+        /// </summary>
+        public Guid? ConversationId { get; set; }
+
+        /// <summary>
+        /// Optional game identifier when the message is related to a game.
+        /// </summary>
+        public Guid? GameId { get; set; }
+
+        /// <summary>
+        /// Optional match identifier when the message is related to a multiplayer match.
+        /// </summary>
+        public Guid? MatchId { get; set; }
+
+        /// <summary>
+        /// Context type describing where the message was produced (e.g., lobby, match, team).
+        /// </summary>
+        [StringLength(64)]
+        public string ContextType { get; set; }
+
+        /// <summary>
+        /// Client-generated idempotency key to avoid duplicate messages on retries.
+        /// </summary>
+        [StringLength(64)]
+        public string ClientMessageId { get; set; }
+
+        /// <summary>
         /// ChangeReadState.
         /// </summary>
         /// <param name="newState">Parâmetro newState.</param>
