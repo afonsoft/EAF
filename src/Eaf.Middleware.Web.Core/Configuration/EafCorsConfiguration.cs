@@ -71,7 +71,6 @@ namespace Eaf.Middleware.Web.Startup
                             "X-Requested-With",
                             "X-Correlation-ID",
                             "Abp-TenantId",
-                            "Abp.TenantId",
                             "Abp.Localization.CultureName",
                             ".AspNetCore.Culture",
                             "X-XSRF-TOKEN"

@@ -62,7 +62,7 @@ namespace Eaf.Middleware.Web.Tests.Configuration
 
             policy.ShouldNotBeNull();
             policy.Headers.ShouldContain("Authorization");
-            policy.Headers.ShouldContain("Abp.TenantId");
+            policy.Headers.ShouldContain("Abp-TenantId");
             policy.Headers.ShouldContain("Pragma");
             policy.Headers.ShouldContain("Cache-Control");
             policy.Headers.ShouldContain("Expires");

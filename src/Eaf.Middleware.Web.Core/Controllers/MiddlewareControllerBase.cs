@@ -60,11 +60,11 @@ namespace Eaf.Middleware.Web.Controllers
         protected void SetTenantIdCookie(int? tenantId)
         {
             Response.Cookies.Append(
-                "Eaf.TenantId",
+                "Abp-TenantId",
                 tenantId?.ToString(),
                 new CookieOptions
                 {
-                    Expires = DateTimeOffset.Now.AddYears(5),
+                    Expires = DateTimeOffset.UtcNow.AddYears(5),
                     Path = "/",
                     HttpOnly = true,
                     Secure = true,
