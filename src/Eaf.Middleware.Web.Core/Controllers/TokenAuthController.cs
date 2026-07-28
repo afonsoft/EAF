@@ -767,12 +767,12 @@ namespace Eaf.Middleware.Web.Controllers
                 claims.Add(new Claim(JwtRegisteredClaimNames.Sub, nameIdClaim.Value));
             }
 
-            var userIdentifier = new UserIdentifier(AbpSession.TenantId, Convert.ToInt64(nameIdClaim.Value));
+            var userIdentifier = new UserIdentifier(user.TenantId, Convert.ToInt64(nameIdClaim.Value));
             var guid = Guid.NewGuid();
             claims.AddRange(new[]
             {
                 new Claim(JwtRegisteredClaimNames.Jti,guid.ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.Now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
                 new Claim(MiddlewareCoreConsts.TokenValidityKey, tokenValidityKey),
                 new Claim(MiddlewareCoreConsts.UserIdentifier, userIdentifier.ToUserIdentifierString())
             });

@@ -66,8 +66,8 @@ namespace Eaf.Middleware.Web.Controllers
                 {
                     Expires = DateTimeOffset.UtcNow.AddYears(5),
                     Path = "/",
-                    HttpOnly = true,
-                    Secure = true,
+                    HttpOnly = false,
+                    Secure = Request.IsHttps,
                     SameSite = SameSiteMode.Lax
                 }
             );

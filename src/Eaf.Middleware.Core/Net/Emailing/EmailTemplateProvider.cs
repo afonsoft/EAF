@@ -1,6 +1,7 @@
 using Abp.Dependency;
 using Abp.IO.Extensions;
 using Abp.Reflection.Extensions;
+using Abp.Timing;
 using System;
 
 using System.Collections.Concurrent;
@@ -39,7 +40,7 @@ namespace Eaf.Middleware.Net.Emailing
                 {
                     var bytes = stream.GetAllBytes();
                     var template = Encoding.UTF8.GetString(bytes);
-                    return template.Replace("{THIS_YEAR}", DateTime.Now.Year.ToString());
+                    return template.Replace("{THIS_YEAR}", Clock.Now.Year.ToString());
                 }
             });
         }
