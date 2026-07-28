@@ -1,6 +1,6 @@
 # Módulos do EAF (Enterprise Application Foundation)
 
-Esta seção detalha os módulos de middleware do EAF. O EAF é uma plataforma de middleware open source construída sobre o ASP.NET Boilerplate, fornecendo módulos reutilizáveis para aplicações empresariais.
+Esta seção detalha os módulos de middleware do EAF. O EAF é uma plataforma de middleware open source construída sobre o ASP.NET Boilerplate, fornecendo módulos reutilizáveis para aplicações empresariais, além de contratos compartilhados para integração com consumidores realtime e sociais.
 
 ## Módulos de Middleware
 
@@ -17,7 +17,7 @@ Esta seção detalha os módulos de middleware do EAF. O EAF é uma plataforma d
 * [Eaf.OpenTelemetry](./eaf-opentelemetry.md) - Integração com OpenTelemetry para observabilidade
 * [Eaf.SqlServerCache](./eaf-sqlservercache.md) - Cache distribuído usando SQL Server
 * [Eaf.SqliteCache](./eaf-sqlitecache.md) - Cache distribuído usando SQLite
-* [Contratos para consumidores realtime e sociais](../integration/gamehub-consumer-contracts.md) - Contratos versionados para chat, notificações, social, rate limit, auditoria e SignalR
+* [Contratos para consumidores realtime e sociais](../integration/gamehub-consumer-contracts.md) - Contratos versionados para chat contextual, notificações, social, rate limit, auditoria de moderação e SignalR
 
 ## Módulos do ASP.NET Boilerplate (Base)
 

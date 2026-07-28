@@ -82,13 +82,17 @@ O **EAF (Enterprise Application Foundation)** é uma implementação open source
 
 #### Comunicação em Tempo Real
 - **Chat System**: Sistema de chat entre usuários
+- **Contextual Chat Messages**: Mensagens de chat com contexto de conversa, jogo e partida
 - **SignalR Integration**: WebSockets para comunicação bidirecional
 - **Notificações Push**: Sistema de notificações em tempo real
 - **Tenant-to-Host Chat**: Chat entre inquilinos e host
 - **Group Chat**: Chat em grupo para colaboração
+- **Rate Limiting e Auditoria de Moderação**: Abstrações compartilhadas `IRateLimitManager` e `IModerationAuditWriter` para integrações com consumidores
 
 #### Multi-Tenancy
 - **Isolamento de Dados**: Separação completa de dados por tenant
+- **Login em Duas Etapas para Host**: Usuários host selecionam o tenant após autenticação (`GetAvailableTenants` / `SelectTenant`)
+- **Shadow Users**: Criação automática e replicação de roles/permissões por tenant via `TenantUserManager`
 - **Tenant Management**: Gerenciamento de inquilinos
 - **Tenant Resolution**: Resolução automática de tenant
 - **Feature Management**: Habilitação/desabilitação de features por tenant
@@ -124,6 +128,7 @@ O **EAF (Enterprise Application Foundation)** é uma implementação open source
 - **Unit of Work**: Gerenciamento de transações
 - **Dependency Injection**: Injeção de dependências configurada
 - **Object Mapping**: AutoMapper integrado
+- **Contratos para Consumidores**: Contratos compartilhados e versionados para integrações realtime, sociais e de moderação (ex.: GameHub)
 - **API Documentation**: Swagger/OpenAPI automático
 
 ### Benefícios do EAF sobre ABP Puro
@@ -225,7 +230,7 @@ O EAF segue os princípios do Domain-Driven Design (DDD) e implementa padrões c
 
 ## Documentação
 
-A documentação técnica detalhada do sistema EAF, cobrindo arquitetura, módulos, guias de desenvolvimento e mais, pode ser encontrada em nosso portal de documentação.
+A documentação técnica detalhada do sistema EAF, cobrindo arquitetura, módulos, guias de desenvolvimento e mais, pode ser encontrada em nosso portal de documentação. Inclui os novos guias de [login multi-tenant em duas etapas](./docs/eaf-multi-tenant-login.md) e [integração com consumidores realtime e sociais](./docs/integration/gamehub-consumer-contracts.md).
 
 [Acesse a Documentação Completa](./docs/README.md) | [DeepWiki - Docs com IA](https://deepwiki.com/afonsoft/EAF)
 
@@ -462,6 +467,8 @@ Este exemplo demonstra vários recursos do EAF:
 - **Próximos passos**: P67 — validar o template Worker em runtime e garantir a integração entre templates.
 
 ### Melhorias Implementadas
+- **Login Multi-Tenant em Duas Etapas (Julho 2026)**: Implementação do fluxo de login em duas etapas para usuários host, com `UserTenantMembership`, `TenantUserManager`, *shadow users* e replicação automática de roles/permissões; endpoints `GetAvailableTenants` e `SelectTenant`; componente Angular `SelectTenantComponent`; testes BDD `TokenAuthControllerMultiTenantBddTests` e plano de testes reais com Docker Compose (PRs #250 e #251)
+- **Contratos Compartilhados para Consumidores (Julho 2026)**: Evolução dos contratos de chat com campos contextuais (`ConversationId`, `GameId`, `MatchId`, `ContextType`), contratos compartilhados para notificações, social, rate limit e auditoria de moderação, além das abstrações `IRateLimitManager` e `IModerationAuditWriter` (PRs #247 e #249)
 - **Expansão de Testes (Julho 2026)**: P58 coverage audit — testes BDD para SerilogLogger, TenantAddress, EafWorkerBase, UserAppService, ChatMessageManager, HostSettingsAppService, EafSqliteCache e EafSqlServerCache
   - **Eaf.Castle.Serilog**: +teste BDD para `SerilogLogger` com logger desabilitado (invoca todos os métodos de log sem chamar o sink)
   - **Eaf.MiddlewareCore**: +teste BDD para `TenantAddress.Tenant` (setter do navigation property)

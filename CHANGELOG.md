@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Added
 
+*   feat(multi-tenancy): Fluxo de login em duas etapas para usuários host, com `UserTenantMembership`, `TenantUserManager`, *shadow users* e replicação automática de roles/permissões; endpoints `GetAvailableTenants` e `SelectTenant` e componente Angular `SelectTenantComponent` (PR #250)
+*   feat: Campos contextuais em `ChatMessage` (`ConversationId`, `GameId`, `MatchId`, `ContextType`) e contratos compartilhados para consumidores realtime e sociais (chat, notificações, social, rate limit, auditoria de moderação) com abstrações `IRateLimitManager` e `IModerationAuditWriter` (PRs #247 e #249)
+*   docs: Guias de login multi-tenant, `TenantUserManager`/shadow users, testes reais e integração com consumidores realtime e sociais (`docs/eaf-multi-tenant-login.md`, `docs/eaf-tenant-user-manager.md`, `docs/eaf-multi-tenant-login-real-tests.md`, `docs/integration/gamehub-consumer-contracts.md`) (PRs #249, #250 e #251)
+*   test: Testes BDD multi-tenant para `TokenAuthController` (`TokenAuthControllerMultiTenantBddTests`) e plano de testes reais com Docker Compose (PRs #250 e #251)
 *   test: Implementação massiva de testes BDD em português (Dado/Quando/Então)
     - 2384 testes totais (era 1289), 100% passando
     - Cobertura de DTOs, Models, Entities, Domain Logic
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Fixed
 
+*   fix(multi-tenancy): Geração de senha Identity-compliant para *shadow users* e execução de testes reais de login multi-tenant (PR #251)
 *   fix: Resolver todos os 70 build warnings da solução (70 → 0)
     - fix(NU5118): Corrigir README duplicado em nupkg
     - fix(CA1416): Adicionar guards `[SupportedOSPlatform]` para LDAP
@@ -38,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Changed
 
+*   chore: Bump dos templates e módulos para a versão 9.3.1 (PRs #248 e #249)
+*   docs: README e documentação atualizados com as novas implementações de login multi-tenant, contratos realtime e sociais, rate limit e moderação
 *   docs: Atualizar README badges com métricas atuais (Line 36.6%, Tests 2384, 0 Warnings)
 *   refactor: Atualizar xunit.runner.visualstudio para 3.1.4 em todos os projetos de teste
 *   refactor: Padronizar PackageReference em Directory.Build.props
