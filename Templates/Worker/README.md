@@ -11,7 +11,7 @@ The EAF (Enterprise Application Framework) Worker Template is a background servi
 - **ASP.NET Core Worker**: Background service template
 - **Hangfire**: Background job scheduling
 - **Entity Framework Core 10.0**: ORM for data access
-- **ASP.NET Boilerplate 10.4.0**: Framework base
+- **ASP.NET Boilerplate 10.5.0**: Framework base
 
 ## Features
 

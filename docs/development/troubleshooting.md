@@ -72,7 +72,7 @@ Este documento fornece soluções para problemas comuns encontrados durante o de
 
 ## 10. Vulnerabilidades Conhecidas
 
-*   **AutoMapper 14.0.0**: A versão 14.0.0 do `AutoMapper` contém uma vulnerabilidade de alta severidade (DoS via recursão não controlada em grafos cíclicos — [GHSA-rvv3-g6hj-g44x](https://github.com/advisories/GHSA-rvv3-g6hj-g44x)). Não é possível atualizar para o `AutoMapper` 15.1.1+ sem quebrar o `Abp.AutoMapper` 10.4.0, pois o AutoMapper 15+ removeu o construtor `MapperConfiguration(Action<IMapperConfigurationExpression>)` usado internamente pelo ABP. Manteve-se o `AutoMapper` 14.0.0 para preservar a compatibilidade com a ABP 10.4.0. A correção definitiva depende de uma futura versão do `Abp.AutoMapper` que seja compatível com o AutoMapper 15+.
+*   **AutoMapper 14.0.0**: A versão 14.0.0 do `AutoMapper` contém uma vulnerabilidade de alta severidade (DoS via recursão não controlada em grafos cíclicos — [GHSA-rvv3-g6hj-g44x](https://github.com/advisories/GHSA-rvv3-g6hj-g44x)). Não é possível atualizar para o `AutoMapper` 15.1.1+ sem quebrar o `Abp.AutoMapper` 10.5.0, pois o AutoMapper 15+ removeu o construtor `MapperConfiguration(Action<IMapperConfigurationExpression>)` usado internamente pelo ABP. Manteve-se o `AutoMapper` 14.0.0 para preservar a compatibilidade com a ABP 10.5.0. A correção definitiva depende de uma futura versão do `Abp.AutoMapper` que seja compatível com o AutoMapper 15+.
 
 ## 11. Dicas Gerais
 

@@ -44,7 +44,7 @@ grep "warning " /tmp/build_output.txt | grep -oP "warning \w+" | sort | uniq -c 
 
 Before upgrading packages for NU1902/NU1903:
 1. Check if the vulnerability is exploitable in the EAF context
-2. Verify compatibility of new version with ABP 10.4.0
+2. Verify compatibility of new version with ABP 10.5.0
 3. Run full test suite after upgrade
 4. Consider suppressing if risk is low and upgrade is breaking
 

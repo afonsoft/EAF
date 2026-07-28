@@ -26,8 +26,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
-		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Abp.Zero.Common" Version="10.5.0" />
+		<PackageReference Include="Abp" Version="10.5.0" />
 		<PackageReference Include="System.DirectoryServices" Version="9.0.8" />
 		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.8" />
 		<PackageReference Include="System.DirectoryServices.Protocols" Version="9.0.8" />

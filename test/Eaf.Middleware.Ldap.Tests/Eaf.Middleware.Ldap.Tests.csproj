@@ -15,7 +15,7 @@
     <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
-    <PackageReference Include="Abp" Version="10.4.0" />
+    <PackageReference Include="Abp" Version="10.5.0" />
   </ItemGroup>
 
   <ItemGroup>

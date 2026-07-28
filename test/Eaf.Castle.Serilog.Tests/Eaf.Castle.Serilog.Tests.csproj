@@ -13,7 +13,7 @@
     <ProjectReference Include="..\..\src\Eaf.Castle.Serilog\Eaf.Castle.Serilog.csproj" />
   </ItemGroup>
   <ItemGroup>
-	  <PackageReference Include="Abp" Version="10.4.0" />
+	  <PackageReference Include="Abp" Version="10.5.0" />
 	  <PackageReference Include="Serilog" Version="4.3.0" />
 	  <PackageReference Include="Shouldly" Version="4.3.0" />
 	  <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />

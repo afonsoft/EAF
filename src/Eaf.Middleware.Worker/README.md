@@ -47,7 +47,7 @@ Classe base abstrata para worker services, fornecendo:
 
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
-- ASP.NET Boilerplate 10.4.0
+- ASP.NET Boilerplate 10.5.0
 
 ### Instalação via NuGet
 ```bash

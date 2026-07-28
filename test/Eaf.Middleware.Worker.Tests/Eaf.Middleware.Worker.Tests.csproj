@@ -14,8 +14,8 @@
     <PackageReference Include="xunit.extensibility.execution" Version="2.9.3" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="Abp" Version="10.4.0" />
-    <PackageReference Include="Abp.ZeroCore" Version="10.4.0" />
+    <PackageReference Include="Abp" Version="10.5.0" />
+    <PackageReference Include="Abp.ZeroCore" Version="10.5.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

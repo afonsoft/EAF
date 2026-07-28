@@ -14,7 +14,7 @@ EAF is an open source middleware platform built on ASP.NET Boilerplate (ABP). Th
 ### Technology Stack
 - **.NET Version**: 10.0
 - **ASP.NET Core**: 10.0
-- **ABP Version**: 10.4.0
+- **ABP Version**: 10.5.0
 - **API Documentation**: Swagger/OpenAPI (Swashbuckle)
 - **Authentication**: JWT Bearer, Cookie-based, Azure AD, LDAP
 - **Authorization**: ABP Permission System

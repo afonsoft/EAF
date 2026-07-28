@@ -6,16 +6,16 @@
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	  <IsPackable>false</IsPackable>
 	  <!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) — no patched 14.x exists;
-	       Abp.AutoMapper 10.4.0 is binary-incompatible with AutoMapper >= 15.0.0 -->
+	       Abp.AutoMapper 10.5.0 is binary-incompatible with AutoMapper >= 15.0.0 -->
 	  <NoWarn>$(NoWarn);NU1903;NU1902</NoWarn>
   </PropertyGroup>
 
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-		<PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
-		<PackageReference Include="Abp.ZeroCore" Version="10.4.0" />
-		<PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="10.4.0" />
+		<PackageReference Include="Abp.AutoMapper" Version="10.5.0" />
+		<PackageReference Include="Abp.ZeroCore" Version="10.5.0" />
+		<PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="10.5.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
 			<PrivateAssets>all</PrivateAssets>
