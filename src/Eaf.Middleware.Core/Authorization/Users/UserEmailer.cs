@@ -110,37 +110,38 @@ namespace Eaf.Middleware.Authorization.Users
                 throw new AbpException("EmailConfirmationCode should be set in order to send email activation link.");
             }
 
-            link = link.Replace("{userId}", user.Id.ToString());
-            link = link.Replace("{confirmationCode}", Uri.EscapeDataString(user.EmailConfirmationCode));
+            var linkBuilder = new StringBuilder(link);
+            linkBuilder.Replace("{userId}", user.Id.ToString());
+            linkBuilder.Replace("{confirmationCode}", Uri.EscapeDataString(user.EmailConfirmationCode));
 
             if (user.TenantId.HasValue)
             {
-                link = link.Replace("{tenantId}", user.TenantId.ToString());
+                linkBuilder.Replace("{tenantId}", user.TenantId.ToString());
             }
 
-            link = EncryptQueryParameters(link);
+            link = EncryptQueryParameters(linkBuilder.ToString());
 
             var tenancyName = GetTenancyNameOrNull(user.TenantId);
             var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("EmailActivation_Title"), L("EmailActivation_SubTitle"));
             var mailMessage = new StringBuilder();
 
-            mailMessage.AppendLine("<b>" + L("NameSurname") + HtmlBoldEndWithColon + user.Name + " " + user.Surname + HtmlBreak);
+            mailMessage.Append("<b>").Append(L("NameSurname")).Append(HtmlBoldEndWithColon).Append(user.Name).Append(" ").Append(user.Surname).AppendLine(HtmlBreak);
 
             if (!tenancyName.IsNullOrEmpty())
             {
-                mailMessage.AppendLine("<b>" + L("TenancyName") + HtmlBoldEndWithColon + tenancyName + HtmlBreak);
+                mailMessage.Append("<b>").Append(L("TenancyName")).Append(HtmlBoldEndWithColon).Append(tenancyName).AppendLine(HtmlBreak);
             }
 
-            mailMessage.AppendLine("<b>" + L("UserName") + HtmlBoldEndWithColon + user.UserName + HtmlBreak);
+            mailMessage.Append("<b>").Append(L("UserName")).Append(HtmlBoldEndWithColon).Append(user.UserName).AppendLine(HtmlBreak);
 
             if (!plainPassword.IsNullOrEmpty())
             {
-                mailMessage.AppendLine("<b>" + L("Password") + HtmlBoldEndWithColon + plainPassword + HtmlBreak);
+                mailMessage.Append("<b>").Append(L("Password")).Append(HtmlBoldEndWithColon).Append(plainPassword).AppendLine(HtmlBreak);
             }
 
             mailMessage.AppendLine(HtmlBreak);
-            mailMessage.AppendLine(L("EmailActivation_ClickTheLinkBelowToVerifyYourEmail") + "<br /><br />");
-            mailMessage.AppendLine("<a href=\"" + link + "\">" + link + "</a>");
+            mailMessage.Append(L("EmailActivation_ClickTheLinkBelowToVerifyYourEmail")).AppendLine("<br /><br />");
+            mailMessage.Append("<a href=\"").Append(link).Append("\">").Append(link).AppendLine("</a>");
 
             await ReplaceBodyAndSend(user.EmailAddress, L("EmailActivation_Subject"), emailTemplate, mailMessage);
         }
@@ -161,33 +162,34 @@ namespace Eaf.Middleware.Authorization.Users
             var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("PasswordResetEmail_Title"), L("PasswordResetEmail_SubTitle"));
             var mailMessage = new StringBuilder();
 
-            mailMessage.AppendLine("<b>" + L("NameSurname") + HtmlBoldEndWithColon + user.Name + " " + user.Surname + HtmlBreak);
+            mailMessage.Append("<b>").Append(L("NameSurname")).Append(HtmlBoldEndWithColon).Append(user.Name).Append(" ").Append(user.Surname).AppendLine(HtmlBreak);
 
             if (!tenancyName.IsNullOrEmpty())
             {
-                mailMessage.AppendLine("<b>" + L("TenancyName") + HtmlBoldEndWithColon + tenancyName + HtmlBreak);
+                mailMessage.Append("<b>").Append(L("TenancyName")).Append(HtmlBoldEndWithColon).Append(tenancyName).AppendLine(HtmlBreak);
             }
 
-            mailMessage.AppendLine("<b>" + L("UserName") + HtmlBoldEndWithColon + user.UserName + HtmlBreak);
-            mailMessage.AppendLine("<b>" + L("ResetCode") + HtmlBoldEndWithColon + user.PasswordResetCode + HtmlBreak);
+            mailMessage.Append("<b>").Append(L("UserName")).Append(HtmlBoldEndWithColon).Append(user.UserName).AppendLine(HtmlBreak);
+            mailMessage.Append("<b>").Append(L("ResetCode")).Append(HtmlBoldEndWithColon).Append(user.PasswordResetCode).AppendLine(HtmlBreak);
 
             if (!link.IsNullOrEmpty())
             {
-                link = link.Replace("{userId}", user.Id.ToString());
-                link = link.Replace("{resetCode}", Uri.EscapeDataString(user.PasswordResetCode));
+                var linkBuilder = new StringBuilder(link);
+                linkBuilder.Replace("{userId}", user.Id.ToString());
+                linkBuilder.Replace("{resetCode}", Uri.EscapeDataString(user.PasswordResetCode));
 
                 if (user.TenantId.HasValue)
                 {
-                    link = link.Replace("{tenantId}", user.TenantId.ToString());
+                    linkBuilder.Replace("{tenantId}", user.TenantId.ToString());
                 }
 
-                link = link.Replace("{authenticationSource}", (string.IsNullOrEmpty(authenticationSource) ? "System" : authenticationSource));
+                linkBuilder.Replace("{authenticationSource}", (string.IsNullOrEmpty(authenticationSource) ? "System" : authenticationSource));
 
-                link = EncryptQueryParameters(link);
+                link = EncryptQueryParameters(linkBuilder.ToString());
 
                 mailMessage.AppendLine(HtmlBreak);
-                mailMessage.AppendLine(L("PasswordResetEmail_ClickTheLinkBelowToResetYourPassword") + "<br /><br />");
-                mailMessage.AppendLine("<a href=\"" + link + "\">" + link + "</a>");
+                mailMessage.Append(L("PasswordResetEmail_ClickTheLinkBelowToResetYourPassword")).AppendLine("<br /><br />");
+                mailMessage.Append("<a href=\"").Append(link).Append("\">").Append(link).AppendLine("</a>");
             }
 
             await ReplaceBodyAndSend(user.EmailAddress, L("PasswordResetEmail_Subject"), emailTemplate, mailMessage);
@@ -207,9 +209,9 @@ namespace Eaf.Middleware.Authorization.Users
                 var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("NewChatMessageEmail_Title"), L("NewChatMessageEmail_SubTitle"));
                 var mailMessage = new StringBuilder();
 
-                mailMessage.AppendLine("<b>" + L("Sender") + HtmlBoldEndWithColon + senderTenancyName + "/" + senderUsername + HtmlBreak);
-                mailMessage.AppendLine("<b>" + L("Time") + HtmlBoldEndWithColon + chatMessage.CreationTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss") + " UTC<br />");
-                mailMessage.AppendLine("<b>" + L("Message") + HtmlBoldEndWithColon + chatMessage.Message + HtmlBreak);
+                mailMessage.Append("<b>").Append(L("Sender")).Append(HtmlBoldEndWithColon).Append(senderTenancyName).Append("/").Append(senderUsername).AppendLine(HtmlBreak);
+                mailMessage.Append("<b>").Append(L("Time")).Append(HtmlBoldEndWithColon).Append(chatMessage.CreationTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")).AppendLine(" UTC<br />");
+                mailMessage.Append("<b>").Append(L("Message")).Append(HtmlBoldEndWithColon).Append(chatMessage.Message).AppendLine(HtmlBreak);
                 mailMessage.AppendLine(HtmlBreak);
 
                 await ReplaceBodyAndSend(user.EmailAddress, L("NewChatMessageEmail_Subject"), emailTemplate, mailMessage);
@@ -244,7 +246,7 @@ namespace Eaf.Middleware.Authorization.Users
                         var emailTemplate = GetTitleAndSubTitle(tenantId, L("SubscriptionExpire_Title"), L("SubscriptionExpire_SubTitle"));
                         var mailMessage = new StringBuilder();
 
-                        mailMessage.AppendLine("<b>" + L("Message") + HtmlBoldEndWithColon + L("SubscriptionExpire_Email_Body", culture, utcNow.ToString("yyyy-MM-dd") + " UTC") + HtmlBreak);
+                        mailMessage.Append("<b>").Append(L("Message")).Append(HtmlBoldEndWithColon).Append(L("SubscriptionExpire_Email_Body", culture, utcNow.ToString("yyyy-MM-dd") + " UTC")).AppendLine(HtmlBreak);
                         mailMessage.AppendLine(HtmlBreak);
 
                         await ReplaceBodyAndSend(tenantAdmin.EmailAddress, L("SubscriptionExpire_Email_Subject"), emailTemplate, mailMessage);

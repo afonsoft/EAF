@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 
 namespace Eaf.Middleware.Logging
 {
@@ -88,9 +89,11 @@ namespace Eaf.Middleware.Logging
 
             const int maxLinesToRead = 1000;
             const int logLinesToReturn = 100;
+            const int estimatedMaxBytesPerLine = 1024;
             var logLevels = new[] { "[IMF]", "INFO", "[DBG]", "DEBUG", "[WRN]", "WARNING", "[ERR]", "ERROR", "[FAT]", "[FTL]", "FATAL" };
 
-            var recentLines = File.ReadLines(lastLogFile.FullName)
+            var recentLines = ReadTailLines(lastLogFile.FullName, maxLinesToRead, estimatedMaxBytesPerLine)
+                .AsEnumerable()
                 .Reverse()
                 .Take(maxLinesToRead)
                 .ToList();
@@ -99,7 +102,7 @@ namespace Eaf.Middleware.Logging
             var lineCount = 0;
             for (int i = 0; i < recentLines.Count; i++)
             {
-                if (logLevels.Any(level => recentLines[i].Contains(level)))
+                if (logLevels.Any(level => recentLines[i].Contains(level, StringComparison.Ordinal)))
                 {
                     logLineCount++;
                 }
@@ -116,6 +119,51 @@ namespace Eaf.Middleware.Logging
             {
                 LatestWebLogLines = recentLines.Take(lineCount).Reverse().ToList()
             };
+        }
+
+        private static List<string> ReadTailLines(string filePath, int maxLines, int estimatedMaxBytesPerLine)
+        {
+            const int maxBufferSize = 1024 * 1024; // 1MB safety cap
+
+            var fileInfo = new FileInfo(filePath);
+            if (!fileInfo.Exists)
+            {
+                return new List<string>();
+            }
+
+            if (fileInfo.Length == 0)
+            {
+                return new List<string>();
+            }
+
+            var estimatedBytes = maxLines * estimatedMaxBytesPerLine;
+            var bytesToRead = (int)Math.Min(estimatedBytes, maxBufferSize);
+            bytesToRead = (int)Math.Min(bytesToRead, fileInfo.Length);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                var startPosition = fileInfo.Length - bytesToRead;
+                var skipFirstLine = startPosition > 0;
+                fileStream.Position = startPosition;
+
+                using (var reader = new StreamReader(fileStream, Encoding.UTF8))
+                {
+                    var lines = new List<string>();
+                    string line;
+
+                    if (skipFirstLine)
+                    {
+                        reader.ReadLine(); // discard potentially truncated first line
+                    }
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        lines.Add(line);
+                    }
+
+                    return lines;
+                }
+            }
         }
 
         private List<FileInfo> GetAllLogFiles()

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.6" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Eaf.Middleware.Application\Eaf.Middleware.Application.csproj" />
+    <ProjectReference Include="..\..\src\Eaf.Middleware.Core\Eaf.Middleware.Core.csproj" />
+    <ProjectReference Include="..\..\src\Eaf.SqlServerCache\Eaf.SqlServerCache.csproj" />
+    <ProjectReference Include="..\..\src\Eaf.Middleware.Web.Core\Eaf.Middleware.Web.Core.csproj" />
+  </ItemGroup>
+
+</Project>

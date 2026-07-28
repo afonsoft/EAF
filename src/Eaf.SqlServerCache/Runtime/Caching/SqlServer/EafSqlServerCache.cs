@@ -1,6 +1,7 @@
 using Abp.Runtime.Caching;
 using Microsoft.Extensions.Caching.Distributed;
 using System;
+using System.Buffers;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -292,6 +293,7 @@ namespace Eaf.Runtime.Caching.SqlServer
 
         /// <summary>
         /// Serializa um objeto para array de bytes usando JSON UTF-8, prefixado com o tipo do objeto.
+        /// Usa ArrayBufferWriter para reduzir alocações intermediárias.
         /// </summary>
         /// <param name="objData">Objeto a serializar.</param>
         /// <returns>Array de bytes representando o objeto serializado.</returns>
@@ -304,12 +306,21 @@ namespace Eaf.Runtime.Caching.SqlServer
             {
                 var typeName = objData.GetType().AssemblyQualifiedName;
                 var typeNameBytes = Encoding.UTF8.GetBytes(typeName);
-                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(objData, objData.GetType(), _jsonOptions);
-                var result = new byte[typeNameBytes.Length + 1 + jsonBytes.Length];
-                Buffer.BlockCopy(typeNameBytes, 0, result, 0, typeNameBytes.Length);
-                result[typeNameBytes.Length] = (byte)'\n';
-                Buffer.BlockCopy(jsonBytes, 0, result, typeNameBytes.Length + 1, jsonBytes.Length);
-                return result;
+
+                var buffer = new ArrayBufferWriter<byte>(typeNameBytes.Length + 64);
+                buffer.Write(typeNameBytes);
+
+                var separatorSpan = buffer.GetSpan(1);
+                separatorSpan[0] = (byte)'\n';
+                buffer.Advance(1);
+
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    JsonSerializer.Serialize(writer, objData, objData.GetType(), _jsonOptions);
+                    writer.Flush();
+                }
+
+                return buffer.WrittenMemory.ToArray();
             }
             catch
             {

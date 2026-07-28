@@ -805,16 +805,6 @@ namespace Eaf.Middleware.Web.Controllers
               slidingExpireTime: expiration,
               absoluteExpireTime: DateTimeOffset.UtcNow.Add(expiration).AddHours(1));
 
-            try
-            {
-                await _userManager.UpdateAsync(user);
-                await CurrentUnitOfWork.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                Logger.WarnFormat(ex, "Error on Update User {0}", user.UserName);
-            }
-
             return claims;
         }
 
