@@ -70,7 +70,7 @@ Expected: `204` with `Access-Control-Allow-Origin`, `Access-Control-Allow-Method
 
 ## Known gotchas
 - The running DB may not match the requested sample passwords. If `admin/NewPass123!` fails, try `admin/TenantPass123!` or check `AbpUsers` directly.
-- The Angular `EafHttpInterceptor` now sends `Abp-TenantId` (dash), matching the backend `TenantIdResolveKey`. If you are testing an older checkout, the mismatch used to cause UI tenant login to fall back to the host context.
+- Tenant header/cookie is now `Abp-TenantId` (dash) everywhere: `EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `eaf.js`, `MiddlewareControllerBase` and `EafCorsConfiguration`. The header is omitted when no tenant is selected to keep the host context; if you see `Abp-TenantId: null` in requests, a client is still using the old hardcoded header.
 - The Angular app lazy-loads the account module. If the login page is blank after navigation, force a hard navigation with `window.location.replace('/account/login')` and wait for the chunk.
 - `topbar.component.ts` depends on `appSessionService` being re-initialized after login; if it stays on the loading spinner, the session was not refreshed.
 

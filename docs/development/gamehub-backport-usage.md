@@ -90,18 +90,21 @@ O `EafHttpConfiguration.handleNonEafErrorResponse` detecta automaticamente corpo
 
 ### O que mudou
 
-A partir do ABP 10.5, a chave padrão de resolução de tenant (`TenantIdResolveKey`) é **`Abp-TenantId`** (traço), não `Abp.TenantId` (ponto). Todos os clientes Angular do EAF foram alinhados:
+A partir do ABP 10.5, a chave padrão de resolução de tenant (`TenantIdResolveKey`) é **`Abp-TenantId`** (traço), não `Abp.TenantId` (ponto). Todos os clientes do EAF foram alinhados para usar o mesmo nome de cookie e header:
 
-- `Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-ng2-module/src/eafHttpInterceptor.ts`
-- `Templates/Angular/Eaf.ProjectName.UI/src/AppPreBootstrap.ts`
-- `Templates/Angular/Eaf.ProjectName.UI/src/app/shared/common/auth/app-auth.service.ts`
-- `Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-web-resources/eaf.js` (cookie `Abp-TenantId`)
+- `Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-web-resources/eaf.js` define `tenantIdCookieName = 'Abp-TenantId'`
+- `Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-ng2-module/src/eafHttpInterceptor.ts` lê o cookie e envia o header usando `eaf.multiTenancy.tenantIdCookieName`
+- `Templates/Angular/Eaf.ProjectName.UI/src/AppPreBootstrap.ts` só envia o header quando existe valor de tenant
+- `Templates/Angular/Eaf.ProjectName.UI/src/app/shared/common/auth/app-auth.service.ts` só envia o header no logout quando existe valor de tenant
+- `src/Eaf.Middleware.Web.Core/Configuration/EafCorsConfiguration.cs` permite apenas `Abp-TenantId`
+- `src/Eaf.Middleware.Web.Core/Controllers/MiddlewareControllerBase.cs` grava o cookie com nome `Abp-TenantId` (anteriormente `Eaf.TenantId`)
+- `Templates/Api/test/Eaf.ProjectName.ConsoleApiClient/Program.cs` envia `Abp-TenantId` (anteriormente `Eaf.TenantId`)
 
 ### Comportamento
 
 - Se houver cookie de tenant, o header `Abp-TenantId` é enviado com o valor do tenant.
 - Se não houver cookie, **nenhum header** é enviado, mantendo o contexto de host.
-- O header `Abp.TenantId` continua sendo permitido na política CORS por compatibilidade, mas não é mais enviado pelo template.
+- O header/cookie nunca é enviado com valor `null`, `undefined` ou string vazia.
 
 ### Problemas comuns
 

@@ -34,9 +34,10 @@ Backport das correções validadas no GameHub para o template EAF, cobrindo CORS
 - `login.component.ts` e `select-tenant.component.*`
   - Fallback para autenticação direta quando o usuário host não tem tenants vinculados.
   - "Login como Host" limpa o cookie de tenant antes de chamar `authenticate`.
-- `EafHttpInterceptor` / `AppPreBootstrap` / `app-auth.service.ts`
-  - Header/cookie de tenant migrado de `Abp.TenantId` (dot) para `Abp-TenantId` (dash), alinhado com o `TenantIdResolveKey` padrão do ABP 10.5.
-  - Não envia mais header de tenant quando o cookie está ausente, evitando fallback acidental para o tenant `1`.
+- Header/cookie de tenant (`Abp-TenantId`)
+  - Todos os clientes e o backend agora usam `Abp-TenantId` (dash), alinhado com o `TenantIdResolveKey` padrão do ABP 10.5.
+  - Arquivos ajustados: `EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `eaf.js`, `MiddlewareControllerBase`, `ConsoleApiClient` e `EafCorsConfiguration`.
+  - Não envia mais header/cookie de tenant quando o cookie está ausente ou com valor `null`, evitando fallback acidental para o tenant `1`.
 - `EafHttpConfiguration`
   - `handleNonEafErrorResponse` detecta `PublicErrorContract` e exibe `message`/`code` em vez do modal genérico.
 - `topbar.component.ts`

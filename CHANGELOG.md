@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Fixed
 
-*   fix(multi-tenancy): Ajustar header/cookie de tenant de `Abp.TenantId` (dot) para `Abp-TenantId` (dash), alinhado com o `TenantIdResolveKey` padrão do ABP 10.5, e remover o fallback forçado para tenant `1` no `EafHttpInterceptor`
+*   fix(multi-tenancy): Padronizar header/cookie de tenant para `Abp-TenantId` (dash) em todos os clientes e no backend (`EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `MiddlewareControllerBase`, `ConsoleApiClient`, `EafCorsConfiguration`); evitar envio de header/cookie com valor `null`/vazio quando não houver tenant selecionado
 *   fix(ui): `EafHttpConfiguration.handleNonEafErrorResponse` agora exibe a mensagem do `PublicErrorContract` em vez do modal genérico
 *   fix(ui): `TopBarComponent.setCurrentLoginInformations` protege o acesso a `appSession.user` para evitar topbar em branco antes da reinicialização da sessão
 *   fix(sonar): Adicionar timeout ao `Regex.IsMatch` do `EafCorsConfiguration` e passar `context.RequestAborted` para `WriteAsJsonAsync` no `EafPublicErrorMiddleware`
