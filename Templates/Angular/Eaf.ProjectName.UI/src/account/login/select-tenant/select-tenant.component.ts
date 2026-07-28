@@ -44,4 +44,19 @@ export class SelectTenantComponent extends AppComponentBase {
       },
     );
   }
+
+  loginAsHost(): void {
+    if (this.submitting) {
+      return;
+    }
+
+    this.submitting = true;
+    this.dataTableHelper.showLoadingIndicator();
+
+    eaf.multiTenancy.setTenantIdCookie(null);
+    this.loginService.authenticate(() => {
+      this.submitting = false;
+      this.dataTableHelper.hideLoadingIndicator();
+    });
+  }
 }

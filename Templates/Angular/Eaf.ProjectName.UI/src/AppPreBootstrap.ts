@@ -50,12 +50,15 @@ export class AppPreBootstrap {
 
     const type = 'GET';
     const url = appRootUrl + 'assets/' + environment.appConfig;
-    const customHeaders = [
-      {
-        name: 'Abp.TenantId',
-        value: eaf.multiTenancy.getTenantIdCookie() + '',
-      },
-    ];
+    const tenantId = eaf.multiTenancy.getTenantIdCookie();
+    const customHeaders = tenantId
+      ? [
+          {
+            name: eaf.multiTenancy.tenantIdCookieName,
+            value: tenantId.toString(),
+          },
+        ]
+      : [];
 
     XmlHttpRequestHelper.ajax(type, url, customHeaders, null, result => {
       const currentOrigin = window.location.origin;
@@ -91,13 +94,17 @@ export class AppPreBootstrap {
   private static impersonatedAuthenticate(impersonationToken: string, tenantId: number, callback: () => void): void {
     eaf.multiTenancy.setTenantIdCookie(tenantId);
     const cookieLangValue = this.storageService.getCookieValue('Abp.Localization.CultureName');
+    const currentTenantId = eaf.multiTenancy.getTenantIdCookie();
 
-    const requestHeaders = {
+    const requestHeaders: any = {
       '.AspNetCore.Culture': 'c=' + cookieLangValue + '|uic=' + cookieLangValue,
-      'Abp.TenantId': eaf.multiTenancy.getTenantIdCookie(),
       'Abp.Localization.CultureName': cookieLangValue,
       'Accept-Language': cookieLangValue,
     };
+
+    if (currentTenantId) {
+      requestHeaders[eaf.multiTenancy.tenantIdCookieName] = currentTenantId.toString();
+    }
 
     XmlHttpRequestHelper.ajax(
       'POST',
@@ -128,13 +135,17 @@ export class AppPreBootstrap {
     }
 
     const token = this.storageService.getCookieValue(eaf.auth.tokenCookieName);
+    const currentTenantId = eaf.multiTenancy.getTenantIdCookie();
 
-    const requestHeaders = {
+    const requestHeaders: any = {
       '.AspNetCore.Culture': 'c=' + cookieLangValue + '|uic=' + cookieLangValue,
-      'Abp.TenantId': eaf.multiTenancy.getTenantIdCookie(),
       'Abp.Localization.CultureName': cookieLangValue,
       'Accept-Language': cookieLangValue,
     };
+
+    if (currentTenantId) {
+      requestHeaders[eaf.multiTenancy.tenantIdCookieName] = currentTenantId.toString();
+    }
 
     if (token) {
       requestHeaders['Authorization'] = 'Bearer ' + token;

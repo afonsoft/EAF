@@ -777,6 +777,11 @@ namespace Eaf.Middleware.Web.Controllers
                 new Claim(MiddlewareCoreConsts.UserIdentifier, userIdentifier.ToUserIdentifierString())
             });
 
+            if (user.TenantId.HasValue)
+            {
+                claims.Add(new Claim("tenantid", user.TenantId.Value.ToString()));
+            }
+
             if (!string.IsNullOrEmpty(externalAuthProviderformation))
                 claims.ReplaceClaim(new Claim(EafClaimTypes.ExternalAuthProviderformation, externalAuthProviderformation));
 

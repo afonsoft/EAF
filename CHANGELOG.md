@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Added
 
+*   feat(cors): `AddEafCors` centralizado em `Eaf.Middleware.Web.Core` com reflexão de origem real, suporte a wildcards de subdomínio e todos os headers enviados pelo `EafHttpInterceptor`
+*   feat(error): Middleware e filtro de public errors (`EafPublicErrorMiddleware`, `EafExceptionFilter`) mapeando `UserFriendlyException` e outras exceções para `PublicErrorContract` com status apropriado
+*   feat(auth): Parsing JWT no frontend via `TokenService.getPayload`, `getUserId`, `getTenantId`, `getUserName`, `getRoles` e `isInRole`; claim `tenantid` adicionada ao token no backend
+*   feat(signalr): Modernização do SignalR para `@microsoft/signalr` com `HubConnectionBuilder`, `accessTokenFactory` e `withAutomaticReconnect`; suporte a `access_token` na query string do JWT
+*   feat(login): Fallback de login para usuários host sem tenants vinculados no two-step login e botão "Login como Host" no `SelectTenantComponent`
+*   feat(ui): Componentes reutilizáveis `app-status-badge` e `app-empty-state` e melhorias de responsividade mobile (`100dvh`, touch targets, drawers)
 *   feat(multi-tenancy): Fluxo de login em duas etapas para usuários host, com `UserTenantMembership`, `TenantUserManager`, *shadow users* e replicação automática de roles/permissões; endpoints `GetAvailableTenants` e `SelectTenant` e componente Angular `SelectTenantComponent` (PR #250)
 *   feat: Campos contextuais em `ChatMessage` (`ConversationId`, `GameId`, `MatchId`, `ContextType`) e contratos compartilhados para consumidores realtime e sociais (chat, notificações, social, rate limit, auditoria de moderação) com abstrações `IRateLimitManager` e `IModerationAuditWriter` (PRs #247 e #249)
 *   docs: Guias de login multi-tenant, `TenantUserManager`/shadow users, testes reais e integração com consumidores realtime e sociais (`docs/eaf-multi-tenant-login.md`, `docs/eaf-tenant-user-manager.md`, `docs/eaf-multi-tenant-login-real-tests.md`, `docs/integration/gamehub-consumer-contracts.md`) (PRs #249, #250 e #251)
@@ -24,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Fixed
 
+*   fix(multi-tenancy): Padronizar header/cookie de tenant para `Abp-TenantId` (dash) em todos os clientes e no backend (`EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `MiddlewareControllerBase`, `ConsoleApiClient`, `EafCorsConfiguration`); evitar envio de header/cookie com valor `null`/vazio quando não houver tenant selecionado
+*   fix(ui): `EafHttpConfiguration.handleNonEafErrorResponse` agora exibe a mensagem do `PublicErrorContract` em vez do modal genérico
+*   fix(ui): `TopBarComponent.setCurrentLoginInformations` protege o acesso a `appSession.user` para evitar topbar em branco antes da reinicialização da sessão
+*   fix(sonar): Adicionar timeout ao `Regex.IsMatch` do `EafCorsConfiguration` e passar `context.RequestAborted` para `WriteAsJsonAsync` no `EafPublicErrorMiddleware`
 *   fix(multi-tenancy): Geração de senha Identity-compliant para *shadow users* e execução de testes reais de login multi-tenant (PR #251)
 *   fix: Resolver todos os 70 build warnings da solução (70 → 0)
     - fix(NU5118): Corrigir README duplicado em nupkg

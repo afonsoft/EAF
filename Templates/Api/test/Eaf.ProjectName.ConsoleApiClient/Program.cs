@@ -19,8 +19,9 @@ namespace Eaf.ProjectName.ConsoleApiClient
     {
         private const string ServerUrlBase = "https://localhost:8001/"; // NOSONAR
 
-        // If you have changed "Configuration.MultiTenancy.TenantIdResolveKey" in your web app, use the same value here.
-        private const string TenantIdResolveKey = "Eaf.TenantId";
+        // Use the same value as Configuration.MultiTenancy.TenantIdResolveKey in the web app.
+        // The ABP 10.5 default (and EAF default) is "Abp-TenantId".
+        private const string TenantIdResolveKey = "Abp-TenantId";
 
         private static void Main(string[] args)
         {
@@ -44,7 +45,7 @@ namespace Eaf.ProjectName.ConsoleApiClient
                 throw new InvalidOperationException(disco.Error);
             }
 
-            client.DefaultRequestHeaders.Add("Eaf.TenantId", "1");  //Set TenantId
+            client.DefaultRequestHeaders.Add(TenantIdResolveKey, "1");  // Set TenantId
             var tokenResponse = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
             {
                 Address = disco.TokenEndpoint,

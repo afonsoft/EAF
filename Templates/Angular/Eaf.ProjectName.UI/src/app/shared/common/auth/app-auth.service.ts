@@ -8,10 +8,14 @@ export class AppAuthService {
   constructor(private readonly storageService: StorageService) {}
 
   logout(reload?: boolean, returnUrl?: string): void {
-    const customHeaders = {
-      'Abp.TenantId': eaf.multiTenancy.getTenantIdCookie(),
+    const currentTenantId = eaf.multiTenancy.getTenantIdCookie();
+    const customHeaders: any = {
       'Authorization': 'Bearer ' + eaf.auth.getToken(),
     };
+
+    if (currentTenantId) {
+      customHeaders[eaf.multiTenancy.tenantIdCookieName] = currentTenantId.toString();
+    }
 
     XmlHttpRequestHelper.ajax('GET', AppConsts.remoteServiceBaseUrl + '/api/TokenAuth/LogOut', customHeaders, null, () => {
       eaf.auth.clearToken();

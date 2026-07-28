@@ -195,6 +195,8 @@ You also need to configure it on the client side:
 abp.multiTenancy.tenantIdCookieName = 'Abp-TenantId';
 ````
 
+> **EAF default:** Starting with ABP 10.5, EAF uses `Abp-TenantId` as the default tenant resolve key. All EAF templates and clients are configured to use `Abp-TenantId` for both cookie and header.
+
 If none of these attempts can resolve a TenantId, then the current requester
 is considered to be the host. Tenant resolvers are extensible. You can add
 resolvers to the **Configuration.MultiTenancy.Resolvers** collection, or

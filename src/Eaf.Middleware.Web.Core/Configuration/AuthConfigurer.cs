@@ -151,6 +151,19 @@ namespace Eaf.Middleware.Web.Startup
 
         private static Task SetToken(MessageReceivedContext context, bool allowAnonymous)
         {
+            var path = context.HttpContext.Request.Path.Value ?? "";
+
+            // SignalR JS client sends the JWT via access_token query string.
+            if (path.StartsWith("/signalr"))
+            {
+                var accessToken = context.HttpContext.Request.Query["access_token"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(accessToken) && accessToken != "null")
+                {
+                    context.Token = accessToken;
+                    return Task.CompletedTask;
+                }
+            }
+
             var qsAuthToken = context.HttpContext.Request.Query["enc_auth_token"].FirstOrDefault();
             if (string.IsNullOrEmpty(qsAuthToken) || qsAuthToken == "null")
             {

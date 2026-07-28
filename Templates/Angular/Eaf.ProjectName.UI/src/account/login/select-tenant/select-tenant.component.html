@@ -23,6 +23,9 @@
         <div *ngIf="tenants.length === 0" class="m-alert m-alert--outline alert alert-info" role="alert">
             {{"NoTenantsAvailable" | localize}}
         </div>
+        <a *ngIf="tenants.length === 0" (click)="loginAsHost()" href="javascript:;" class="list-group-item list-group-item-action text-center mt-2">
+            <span class="text-info">{{"LoginAsHost" | localize}}</span>
+        </a>
         <div class="row m-login__form-action text-right mt-3">
             <div class="col m--align-right">
                 <a routerLink="/account/login" class="btn btn-secondary m-btn m-btn--pill m-btn--custom m-btn--air">

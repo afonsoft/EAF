@@ -13,8 +13,6 @@ import { ReCaptchaV3Service } from 'ngx-captcha';
 import { UrlHelper } from 'shared/helpers/UrlHelper';
 
 import { ExternalLoginProvider, LoginService } from './login.service';
-import { finalize } from 'rxjs/operators';
-
 @Component({
   standalone: false,
   templateUrl: './login.component.html',
@@ -145,27 +143,43 @@ export class LoginComponent extends AppComponentBase implements OnInit {
 
       this.loginService
         .availableTenants(model)
-        .pipe(
-          finalize(() => {
+        .subscribe({
+          next: tenants => {
+            this.loginService.availableTenantsResult = tenants;
+
+            if (tenants.length === 0) {
+              // Host user with no associated tenants: fall back to legacy TokenAuth/Authenticate
+              this.loginService.authenticate(
+                () => {
+                  this.submitting = false;
+                  this.dataTableHelper.hideLoadingIndicator();
+                },
+                undefined,
+                token,
+              );
+            } else if (tenants.length === 1 && AppConsts.autoSelectSingleTenant) {
+              this.loginService
+                .selectTenant({
+                  ...model,
+                  tenantId: tenants[0].tenantId,
+                })
+                .subscribe({
+                  next: result => this.loginService.loginTenant(result, tenants[0].tenantId),
+                  error: () => {
+                    this.submitting = false;
+                    this.dataTableHelper.hideLoadingIndicator();
+                  },
+                });
+            } else {
+              this.submitting = false;
+              this.dataTableHelper.hideLoadingIndicator();
+              this.loginService.navigateToSelectTenant();
+            }
+          },
+          error: () => {
             this.submitting = false;
             this.dataTableHelper.hideLoadingIndicator();
-          }),
-        )
-        .subscribe(tenants => {
-          this.loginService.availableTenantsResult = tenants;
-
-          if (tenants.length === 1 && AppConsts.autoSelectSingleTenant) {
-            this.loginService
-              .selectTenant({
-                ...model,
-                tenantId: tenants[0].tenantId,
-              })
-              .subscribe(result => {
-                this.loginService.loginTenant(result, tenants[0].tenantId);
-              });
-          } else {
-            this.loginService.navigateToSelectTenant();
-          }
+          },
         });
     };
 
