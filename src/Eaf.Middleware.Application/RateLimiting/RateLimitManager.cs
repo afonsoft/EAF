@@ -14,7 +14,11 @@ namespace Eaf.Middleware.Application.RateLimiting
     /// </summary>
     public class RateLimitManager : IRateLimitManager, ITransientDependency
     {
-        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _windowLocks = new ConcurrentDictionary<string, SemaphoreSlim>();
+        private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan _minCleanupThreshold = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan _maxCleanupThreshold = TimeSpan.FromHours(1);
+        private static readonly ConcurrentDictionary<string, SemaphoreHolder> _windowLocks = new ConcurrentDictionary<string, SemaphoreHolder>();
+        private static readonly Timer _cleanupTimer = new Timer(_ => CleanupIdleLocks(), null, _cleanupInterval, _cleanupInterval);
 
         private readonly ICacheManager _cacheManager;
 
@@ -40,8 +44,8 @@ namespace Eaf.Middleware.Application.RateLimiting
             var resetAt = GetWindowReset(window);
             var absoluteExpiry = new DateTimeOffset(resetAt);
 
-            var windowLock = _windowLocks.GetOrAdd(windowKey, _ => new SemaphoreSlim(1, 1));
-            await windowLock.WaitAsync(cancellationToken);
+            var holder = _windowLocks.GetOrAdd(windowKey, _ => new SemaphoreHolder(window));
+            await holder.WaitAsync(cancellationToken);
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -73,7 +77,7 @@ namespace Eaf.Middleware.Application.RateLimiting
             }
             finally
             {
-                windowLock.Release();
+                holder.Release();
             }
         }
 
@@ -87,6 +91,70 @@ namespace Eaf.Middleware.Application.RateLimiting
         {
             var now = Clock.Now;
             return now.Add(window).Subtract(TimeSpan.FromTicks(now.Ticks % window.Ticks));
+        }
+
+        private static void CleanupIdleLocks()
+        {
+            try
+            {
+                var now = Clock.Now;
+                foreach (var kvp in _windowLocks)
+                {
+                    if (kvp.Value.CanCleanup(now, _minCleanupThreshold, _maxCleanupThreshold))
+                    {
+                        if (_windowLocks.TryRemove(kvp.Key, out var removed))
+                        {
+                            removed?.Dispose();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore cleanup errors to avoid crashing the rate limiter.
+            }
+        }
+
+        private class SemaphoreHolder : IDisposable
+        {
+            private const int MaxConcurrency = 1;
+            private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(MaxConcurrency, MaxConcurrency);
+
+            public SemaphoreHolder(TimeSpan window)
+            {
+                Window = window;
+                LastUsed = Clock.Now;
+            }
+
+            public TimeSpan Window { get; }
+
+            public DateTime LastUsed { get; private set; }
+
+            public async Task WaitAsync(CancellationToken cancellationToken)
+            {
+                LastUsed = Clock.Now;
+                await _semaphore.WaitAsync(cancellationToken);
+            }
+
+            public void Release()
+            {
+                LastUsed = Clock.Now;
+                _semaphore.Release();
+            }
+
+            public bool CanCleanup(DateTime now, TimeSpan minThreshold, TimeSpan maxThreshold)
+            {
+                var threshold = TimeSpan.FromTicks(Math.Min(Window.Ticks * 2, maxThreshold.Ticks));
+                if (threshold < minThreshold)
+                    threshold = minThreshold;
+
+                return (now - LastUsed) > threshold && _semaphore.CurrentCount == MaxConcurrency;
+            }
+
+            public void Dispose()
+            {
+                _semaphore.Dispose();
+            }
         }
     }
 }

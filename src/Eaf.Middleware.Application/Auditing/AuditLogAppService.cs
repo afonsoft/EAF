@@ -127,11 +127,16 @@ namespace Eaf.Middleware.Auditing
                         where auditLog.ExecutionTime >= input.StartDate && auditLog.ExecutionTime <= input.EndDate
                         select new AuditLogAndUser { AuditLog = auditLog, User = joinedUser };
 
+            var userNameFilter = input.UserName?.ToLowerInvariant().Trim();
+            var serviceNameFilter = input.ServiceName?.ToLowerInvariant().Trim();
+            var methodNameFilter = input.MethodName?.ToLowerInvariant().Trim();
+            var browserInfoFilter = input.BrowserInfo?.ToLowerInvariant().Trim();
+
             query = query
-                .WhereIf(!input.UserName.IsNullOrWhiteSpace(), item => item.User.UserName.ToLower().Contains(input.UserName.ToLowerInvariant()))
-                .WhereIf(!input.ServiceName.IsNullOrWhiteSpace(), item => item.AuditLog.ServiceName.ToLower().Contains(input.ServiceName.ToLowerInvariant()))
-                .WhereIf(!input.MethodName.IsNullOrWhiteSpace(), item => item.AuditLog.MethodName.ToLower().Contains(input.MethodName.ToLowerInvariant()))
-                .WhereIf(!input.BrowserInfo.IsNullOrWhiteSpace(), item => item.AuditLog.BrowserInfo.ToLower().Contains(input.BrowserInfo.ToLowerInvariant()))
+                .WhereIf(!userNameFilter.IsNullOrWhiteSpace(), item => item.User != null && item.User.UserName.ToLower().Contains(userNameFilter))
+                .WhereIf(!serviceNameFilter.IsNullOrWhiteSpace(), item => item.AuditLog.ServiceName.ToLower().Contains(serviceNameFilter))
+                .WhereIf(!methodNameFilter.IsNullOrWhiteSpace(), item => item.AuditLog.MethodName.ToLower().Contains(methodNameFilter))
+                .WhereIf(!browserInfoFilter.IsNullOrWhiteSpace(), item => item.AuditLog.BrowserInfo.ToLower().Contains(browserInfoFilter))
                 .WhereIf(input.MinExecutionDuration.HasValue && input.MinExecutionDuration > 0, item => item.AuditLog.ExecutionDuration >= input.MinExecutionDuration.Value)
                 .WhereIf(input.MaxExecutionDuration.HasValue && input.MaxExecutionDuration < int.MaxValue, item => item.AuditLog.ExecutionDuration <= input.MaxExecutionDuration.Value)
                 .WhereIf(input.HasException == true, item => item.AuditLog.Exception != null && item.AuditLog.Exception != "")
@@ -228,14 +233,12 @@ namespace Eaf.Middleware.Auditing
         /// <returns>Resultado da operação.</returns>
         public async Task<PagedResultDto<EntityChangeListDto>> GetEntityTypeChanges(GetEntityTypeChangeInput input)
         {
-            var entityChangeSets = await _entityChangeSetRepository.GetAllAsync();
-            var entityChanges = await _entityChangeRepository.GetAllAsync();
-            var users = await _userRepository.GetAllAsync();
+            var filteredEntityChanges = _entityChangeRepository.GetAll()
+                .Where(e => e.EntityTypeFullName == input.EntityTypeFullName && e.EntityId == input.EntityId);
 
-            var query = from entityChangeSet in entityChangeSets
-                        join entityChange in entityChanges on entityChangeSet.Id equals entityChange.EntityChangeSetId
-                        join user in users on entityChangeSet.UserId equals user.Id
-                        where entityChange.EntityTypeFullName == input.EntityTypeFullName && entityChange.EntityId == input.EntityId
+            var query = from entityChange in filteredEntityChanges
+                        join entityChangeSet in _entityChangeSetRepository.GetAll() on entityChange.EntityChangeSetId equals entityChangeSet.Id
+                        join user in _userRepository.GetAll() on entityChangeSet.UserId equals user.Id
                         select new EntityChangeAndUser
                         {
                             EntityChange = entityChange,

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
     - Testes para Authorization, Chat, Friendships, MultiTenancy, Editions, Notifications
     - Testes para Configuration, Sessions, WebHooks, External Auth Providers
     - Testes para Security, Profile, Localization, Timing, UI Customization
+*   feat(perf): Projeto de benchmarks `Eaf.Middleware.Application.Benchmarks` com BenchmarkDotNet (`MemoryDiagnoser`) para `SqlServerCache` e leitura de cauda de logs
+*   docs: Guia de otimizações de performance e memória (`docs/performance-memory-optimizations.md`)
 *   docs: Documentação XML `/// <summary>` adicionada a 48 tipos públicos sem documentação
 *   feat: add repo summary to .openhands/microagents/repo.md
 
@@ -38,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 *   fix: Resolver todos os 70 build warnings da solução (70 → 0)
     - fix(NU5118): Corrigir README duplicado em nupkg
     - fix(CA1416): Adicionar guards `[SupportedOSPlatform]` para LDAP
+*   fix(perf): Evitar materialização total de mensagens não lidas no `ChatAppService` com processamento em lotes de 1.000 registros
+*   fix(perf): Leitura de cauda de logs (`WebLogAppService`) limitada a 1 MB em vez de carregar o arquivo inteiro
+*   fix(perf): Limpeza periódica de semáforos ociosos no `RateLimitManager` para evitar vazamento de `SemaphoreSlim`
+*   fix(perf): Reduzir alocações de serialização no `EafSqlServerCache` com `ArrayBufferWriter<byte>` e `Utf8JsonWriter`
+*   fix(perf): Remover duplicação de `_userManager.UpdateAsync` / `SaveChangesAsync` em `TokenAuthController.CreateJwtClaims`
+*   fix(perf): `UserEmailer` usa `StringBuilder.Replace` e `Append` encadeado, reduzindo strings intermediárias
+*   fix(audit): `AuditLogAppService.GetEntityTypeChanges` filtra `EntityChanges` antes do join e protege `item.User != null`
     - fix(CS8600/CS8602/CS8604): Corrigir nullable reference warnings
     - fix(CA2254): Corrigir interpolação de strings em mensagens de log
     - fix(NU1504): Remover PackageReference duplicados

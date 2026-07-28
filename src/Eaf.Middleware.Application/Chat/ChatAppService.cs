@@ -332,39 +332,38 @@ namespace Eaf.Middleware.Chat
 
         private async Task MarkUserMessagesAsReadAsync(MarkAllUnreadMessagesOfUserAsReadInput input, long userId, int? tenantId)
         {
-            var messages = await (await _chatMessageRepository.GetAllAsync())
+            const int batchSize = 1000;
+
+            var firstDirectionQuery = (await _chatMessageRepository.GetAllAsync())
                 .Where(m =>
                     m.UserId == userId &&
                     m.TargetTenantId == input.TenantId &&
                     m.TargetUserId == input.UserId &&
-                    m.ReadState == ChatMessageReadState.Unread)
-                .ToListAsync();
+                    m.ReadState == ChatMessageReadState.Unread);
 
-            if (!messages.Any())
+            var firstDirectionCount = await MarkMessagesAsReadInBatchesAsync(firstDirectionQuery, m => m.ChangeReadState(ChatMessageReadState.Read), batchSize);
+
+            if (firstDirectionCount == 0)
             {
                 return;
             }
 
-            foreach (var message in messages)
-            {
-                message.ChangeReadState(ChatMessageReadState.Read);
-            }
-
+            int reverseDirectionCount;
             using (CurrentUnitOfWork.SetTenantId(input.TenantId))
             {
-                var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
-                .Where(m => m.UserId == input.UserId && m.TargetTenantId == tenantId && m.TargetUserId == userId)
-                    .ToListAsync();
+                var reverseDirectionQuery = (await _chatMessageRepository.GetAllAsync())
+                    .Where(m =>
+                        m.UserId == input.UserId &&
+                        m.TargetTenantId == tenantId &&
+                        m.TargetUserId == userId &&
+                        m.ReceiverReadState == ChatMessageReadState.Unread);
 
-                if (!reverseMessages.Any())
-                {
-                    return;
-                }
+                reverseDirectionCount = await MarkMessagesAsReadInBatchesAsync(reverseDirectionQuery, m => m.ChangeReceiverReadState(ChatMessageReadState.Read), batchSize);
+            }
 
-                foreach (var message in reverseMessages)
-                {
-                    message.ChangeReceiverReadState(ChatMessageReadState.Read);
-                }
+            if (firstDirectionCount == 0 && reverseDirectionCount == 0)
+            {
+                return;
             }
 
             var userIdentifier = AbpSession.ToUserIdentifier();
@@ -387,42 +386,38 @@ namespace Eaf.Middleware.Chat
 
         private async Task MarkGroupMessagesAsReadAsync(MarkAllUnreadMessagesOfUserAsReadInput input, long userId, int? tenantId)
         {
-            var messages = await (await _chatMessageRepository.GetAllAsync())
+            const int batchSize = 1000;
+
+            var firstDirectionQuery = (await _chatMessageRepository.GetAllAsync())
                 .Where(m =>
                     m.UserId == 0 &&
                     m.TargetTenantId == input.TenantId &&
                     m.TargetUserId == userId &&
-                    m.ReadState == ChatMessageReadState.Unread)
-                .ToListAsync();
+                    m.ReadState == ChatMessageReadState.Unread);
 
-            if (!messages.Any())
+            var messagesCount = await MarkMessagesAsReadInBatchesAsync(firstDirectionQuery, m => m.ChangeReadState(ChatMessageReadState.Read), batchSize);
+
+            if (messagesCount == 0)
             {
                 return;
             }
 
-            foreach (var message in messages)
-            {
-                message.ChangeReadState(ChatMessageReadState.Read);
-            }
-
+            int reverseMessagesCount;
             using (CurrentUnitOfWork.SetTenantId(input.TenantId))
             {
-                var reverseMessages = await (await _chatMessageRepository.GetAllAsync())
-                .Where(m => m.UserId == 0
-                        && m.TargetTenantId == tenantId
-                        && m.TargetUserId == userId
-                        && m.ReadState == ChatMessageReadState.Unread)
-                    .ToListAsync();
+                var reverseDirectionQuery = (await _chatMessageRepository.GetAllAsync())
+                    .Where(m =>
+                        m.UserId == 0 &&
+                        m.TargetTenantId == tenantId &&
+                        m.TargetUserId == userId &&
+                        m.ReadState == ChatMessageReadState.Unread);
 
-                if (!reverseMessages.Any())
-                {
-                    return;
-                }
+                reverseMessagesCount = await MarkMessagesAsReadInBatchesAsync(reverseDirectionQuery, m => m.ChangeReceiverReadState(ChatMessageReadState.Read), batchSize);
+            }
 
-                foreach (var message in reverseMessages)
-                {
-                    message.ChangeReceiverReadState(ChatMessageReadState.Read);
-                }
+            if (messagesCount == 0 && reverseMessagesCount == 0)
+            {
+                return;
             }
 
             var userIdentifier = AbpSession.ToUserIdentifier();
@@ -433,6 +428,34 @@ namespace Eaf.Middleware.Chat
                 await _chatCommunicator.SendAllUnreadMessagesOfUserReadToClients(onlineUserClients, userIdentifier);
                 await _chatCommunicator.SendReadStateChangeToClients(onlineUserClients, userIdentifier);
             }
+        }
+
+        private async Task<int> MarkMessagesAsReadInBatchesAsync(IQueryable<ChatMessage> query, Action<ChatMessage> markAsRead, int batchSize)
+        {
+            int totalMarked = 0;
+
+            while (true)
+            {
+                var batch = await query.Take(batchSize).ToListAsync();
+                if (batch.Count == 0)
+                {
+                    break;
+                }
+
+                for (int i = 0; i < batch.Count; i++)
+                {
+                    markAsRead(batch[i]);
+                }
+
+                totalMarked += batch.Count;
+
+                if (batch.Count < batchSize)
+                {
+                    break;
+                }
+            }
+
+            return totalMarked;
         }
 
         private async Task<int> GetGroupUnreadMessageCountAsync(UserIdentifier userIdentifier)
