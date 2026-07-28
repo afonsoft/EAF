@@ -232,7 +232,7 @@ O EAF segue os princípios do Domain-Driven Design (DDD) e implementa padrões c
 
 A documentação técnica detalhada do sistema EAF, cobrindo arquitetura, módulos, guias de desenvolvimento e mais, pode ser encontrada em nosso portal de documentação. Inclui os novos guias de [login multi-tenant em duas etapas](./docs/eaf-multi-tenant-login.md) e [integração com consumidores realtime e sociais](./docs/integration/gamehub-consumer-contracts.md).
 
-[Acesse a Documentação Completa](./docs/README.md) | [DeepWiki - Docs com IA](https://deepwiki.com/afonsoft/EAF)
+[Acesse a Documentação Completa](./docs/README.md) | [Wiki](./docs/WIKI.md) | [Guia de Uso dos Módulos](./docs/modules/USAGE.md) | [DeepWiki - Docs com IA](https://deepwiki.com/afonsoft/EAF)
 
 ---
 

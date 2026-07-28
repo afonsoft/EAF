@@ -53,7 +53,7 @@ Integração com ASP.NET Core Hosting para:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.KeyVault --version 10.4.0
+dotnet add package Eaf.KeyVault --version 9.3.1
 ```
 
 ### Instalação via Referência de Projeto

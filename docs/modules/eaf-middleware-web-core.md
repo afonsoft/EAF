@@ -17,6 +17,9 @@ Fornecer a camada web core para o middleware EAF, incluindo middleware HTTP, fil
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 [DependsOn(typeof(EafMiddlewareWebCoreModule))]
 public class MyWebModule : AbpModule

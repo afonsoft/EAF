@@ -32,6 +32,9 @@ Fornecer suporte para background jobs e workers usando o sistema de background j
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 [DependsOn(typeof(EafMiddlewareWorkerModule))]
 public class MyWorkerModule : AbpModule

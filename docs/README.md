@@ -9,7 +9,7 @@ O EAF é uma plataforma de middleware open source construída sobre o [ASP.NET B
 Para facilitar a consulta, a documentação está organizada nas seguintes seções principais:
 
 *   **[Arquitetura](./architecture/README.md)**: Visão geral da arquitetura do sistema, incluindo a base do ASP.NET Boilerplate, extensões do EAF, Domain-Driven Design (DDD) e Injeção de Dependência.
-*   **[Módulos](./modules/README.md)**: Detalhamento dos módulos de middleware do EAF (14 módulos) e referência aos módulos base do ASP.NET Boilerplate.
+*   **[Módulos](./modules/README.md)**: Detalhamento dos módulos de middleware do EAF (14 módulos) e referência aos módulos base do ASP.NET Boilerplate. Inclui o [Guia de Uso dos Módulos EAF](./modules/USAGE.md) com exemplos práticos para cada módulo de middleware.
 *   **[Sistema de Módulos](./MODULE_SYSTEM.md)**: Documentação completa do sistema de módulos do ASP.NET Boilerplate, incluindo como usar módulos e criar novos módulos.
 *   **[Templates](./templates/README.md)**: Documentação dos templates fornecidos pelo EAF para iniciar novos projetos.
     *   **[Angular UI Template](../../Templates/Angular/Eaf.ProjectName.UI/README.md)**: Documentação completa do template Angular UI com guias de instalação, módulos, componentes e implementações.

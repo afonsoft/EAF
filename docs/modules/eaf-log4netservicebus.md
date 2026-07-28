@@ -50,6 +50,9 @@ Castle.Core.Logging.Log4NetFactory.UseLog4Net(logRepository.Name);
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 public class MyServiceUsingLog4Net : ITransientDependency
 {

@@ -72,6 +72,29 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 - **Managed Identity**: Suporte nativo para Azure Managed Identity
 - **Secrets Management**: Gerenciamento simplificado de segredos em ambiente web
 
+
+## Uso
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
+### 1. Registrando o Módulo
+
+No `Startup.cs` ou `Program.cs`:
+
+```csharp
+[DependsOn(
+    typeof(EafKeyVaultAspNetCoreModule),
+    typeof(EafKeyVaultModule)
+)]
+public class MyWebModule : AbpModule
+{
+    public override void Initialize()
+    {
+        IocManager.RegisterAssemblyByConvention(Assembly.GetExecutingAssembly());
+    }
+}
+```
+
 ## Troubleshooting
 
 - **Recarga de Segredos**: Verifique o intervalo de recarga se segredos não estão sendo atualizados

@@ -75,6 +75,9 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 public class MyEafTaskService : ApplicationService
 {

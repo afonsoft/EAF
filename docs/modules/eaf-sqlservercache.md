@@ -58,6 +58,9 @@ CREATE TABLE [dbo].[CacheTable] (
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 public class MyService : ApplicationService
 {
