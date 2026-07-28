@@ -68,6 +68,15 @@ curl -s -X OPTIONS http://localhost:5000/api/TokenAuth/Authenticate \
 ```
 Expected: `204` with `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, and `Access-Control-Allow-Headers`.
 
+## UI automation
+
+- Native `computer` mouse clicks on the Angular UI may not trigger buttons reliably because of the `busyIf` overlay and coordinate scaling. Use **Playwright Python** for UI automation and network capture.
+- Use Chrome for Testing binary when launching headless Chromium:
+  ```bash
+  export CHROME_BIN=/opt/.devin/chrome/chrome/linux-133.0.6943.126/chrome-linux64/chrome
+  ```
+- Playwright `context.route`/`page.on('response')` can capture `Abp-TenantId` headers and decode JWTs to verify the tenant flow.
+
 ## Known gotchas
 - The running DB may not match the requested sample passwords. If `admin/NewPass123!` fails, try `admin/TenantPass123!` or check `AbpUsers` directly.
 - Tenant header/cookie is now `Abp-TenantId` (dash) everywhere: `EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `eaf.js`, `MiddlewareControllerBase` and `EafCorsConfiguration`. The header is omitted when no tenant is selected to keep the host context; if you see `Abp-TenantId: null` in requests, a client is still using the old hardcoded header.
