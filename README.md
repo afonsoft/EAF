@@ -82,13 +82,17 @@ The **EAF (Enterprise Application Foundation)** is an open-source implementation
 
 #### Real-time Communication
 - **Chat System**: Chat system between users
+- **Contextual Chat Messages**: Chat messages with conversation, game and match context
 - **SignalR Integration**: WebSockets for bidirectional communication
 - **Push Notifications**: Real-time notification system
 - **Tenant-to-Host Chat**: Chat between tenants and host
 - **Group Chat**: Group chat for collaboration
+- **Rate Limiting and Moderation Audit**: Shared `IRateLimitManager` and `IModerationAuditWriter` abstractions for consumer integrations
 
 #### Multi-Tenancy
 - **Data Isolation**: Complete data separation by tenant
+- **Two-Step Host Login**: Host users select a tenant after authentication (`GetAvailableTenants` / `SelectTenant`)
+- **Shadow Users**: Automatic creation and role/permission replication per tenant via `TenantUserManager`
 - **Tenant Management**: Tenant management
 - **Tenant Resolution**: Automatic tenant resolution
 - **Feature Management**: Enable/disable features by tenant
@@ -124,6 +128,7 @@ The **EAF (Enterprise Application Foundation)** is an open-source implementation
 - **Unit of Work**: Transaction management
 - **Dependency Injection**: Configured dependency injection
 - **Object Mapping**: Integrated AutoMapper
+- **Consumer Contracts**: Versioned shared contracts for real-time, social and moderation integrations (e.g. GameHub)
 - **API Documentation**: Automatic Swagger/OpenAPI
 
 ### Benefits of EAF over Pure ABP
@@ -225,7 +230,7 @@ EAF follows Domain-Driven Design (DDD) principles and implements patterns such a
 
 ## Documentation
 
-The detailed technical documentation of the EAF system, covering architecture, modules, development guides, and more, can be found in our documentation portal.
+The detailed technical documentation of the EAF system, covering architecture, modules, development guides, and more, can be found in our documentation portal. Recent additions include the [multi-tenant two-step login](./docs/eaf-multi-tenant-login.md) and [realtime consumer contracts](./docs/integration/gamehub-consumer-contracts.md) guides.
 
 [Access Complete Documentation](./docs/README.md) | [DeepWiki - AI-Powered Docs](https://deepwiki.com/afonsoft/EAF)
 

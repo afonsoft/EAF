@@ -223,6 +223,11 @@ O EAF/ABP permite que features e configurações da aplicação sejam específic
 
 ## 6. Considerações de Multi-Tenancy Específicas do EAF
 
+*   **Login Multi-Tenant em Duas Etapas**:
+    *   O EAF introduz um fluxo de autenticação em duas etapas para usuários host que pertencem a múltiplos tenants. O usuário autentica primeiro no host e, em seguida, seleciona o tenant desejado. Para cada associação, o EAF cria um *shadow user* dentro do tenant e replica as roles/permissões do host automaticamente.
+    *   Principais componentes: `UserTenantMembership` (entidade host-level), `TenantUserManager` (serviço de domínio), `TenantRolePermissionReplicationService`, endpoints `TokenAuth` (`GetAvailableTenants` e `SelectTenant`) e o componente Angular `SelectTenantComponent`.
+    *   Consulte os guias [Login Multi-Tenant em Duas Etapas](../eaf-multi-tenant-login.md), [TenantUserManager e Shadow Users](../eaf-tenant-user-manager.md) e [Testes Reais](../eaf-multi-tenant-login-real-tests.md) para detalhes de configuração, fluxo e execução de testes.
+
 *   **Autenticação Externa por Tenant**:
     *   O EAF fornece extensões para permitir que cada tenant configure seus próprios provedores de identidade externos (e.g., Azure AD, SAML2, OpenID Connect).
     *   Consulte `docs/architecture/eaf-extensions.md` para detalhes sobre `TenantBasedOpenIdConnectExternalLoginInfoProvider` e similares.
