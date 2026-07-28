@@ -52,7 +52,7 @@ export class AppPreBootstrap {
     const url = appRootUrl + 'assets/' + environment.appConfig;
     const customHeaders = [
       {
-        name: 'Abp.TenantId',
+        name: 'Abp-TenantId',
         value: eaf.multiTenancy.getTenantIdCookie() + '',
       },
     ];
@@ -94,7 +94,7 @@ export class AppPreBootstrap {
 
     const requestHeaders = {
       '.AspNetCore.Culture': 'c=' + cookieLangValue + '|uic=' + cookieLangValue,
-      'Abp.TenantId': eaf.multiTenancy.getTenantIdCookie(),
+      'Abp-TenantId': eaf.multiTenancy.getTenantIdCookie(),
       'Abp.Localization.CultureName': cookieLangValue,
       'Accept-Language': cookieLangValue,
     };
@@ -131,7 +131,7 @@ export class AppPreBootstrap {
 
     const requestHeaders = {
       '.AspNetCore.Culture': 'c=' + cookieLangValue + '|uic=' + cookieLangValue,
-      'Abp.TenantId': eaf.multiTenancy.getTenantIdCookie(),
+      'Abp-TenantId': eaf.multiTenancy.getTenantIdCookie(),
       'Abp.Localization.CultureName': cookieLangValue,
       'Accept-Language': cookieLangValue,
     };

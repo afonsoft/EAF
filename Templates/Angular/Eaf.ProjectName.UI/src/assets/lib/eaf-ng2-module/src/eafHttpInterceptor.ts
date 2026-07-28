@@ -88,8 +88,19 @@ export class EafHttpConfiguration {
     }
   }
 
-  handleNonEafErrorResponse(response: HttpResponse<any>) {
-
+  handleNonEafErrorResponse(response: any) {
+    const body = response.error ?? response.body;
+    if (body && body.message) {
+      const error = <IErrorInfo>{
+        message: body.message,
+        details: body.message,
+        code: body.code,
+        validationErrors: [],
+      };
+      this.logError(error);
+      this.showError(error);
+      return;
+    }
 
     switch (response.status) {
       case 401:
@@ -386,11 +397,10 @@ export class EafHttpInterceptor implements HttpInterceptor {
   }
 
   protected addTenantIdHeader(headers: HttpHeaders): HttpHeaders {
-    const cookieTenantIdValue = this._storageService.getCookieValue('Abp.TenantId');
-    if (cookieTenantIdValue && headers && !headers.has('Abp.TenantId')) {
-      headers = headers.set('Abp.TenantId', cookieTenantIdValue);
-    } else if (headers && !headers.has('Abp.TenantId')) {
-      headers = headers.set('Abp.TenantId', '1'); //Default TenantId
+    const tenantIdCookieName = (window as any).eaf?.multiTenancy?.tenantIdCookieName || 'Abp-TenantId';
+    const cookieTenantIdValue = this._storageService.getCookieValue(tenantIdCookieName);
+    if (cookieTenantIdValue && headers && !headers.has('Abp-TenantId')) {
+      headers = headers.set('Abp-TenantId', cookieTenantIdValue);
     }
 
     return headers;

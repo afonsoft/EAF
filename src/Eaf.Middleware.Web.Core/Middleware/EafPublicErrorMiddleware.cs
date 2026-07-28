@@ -56,7 +56,7 @@ namespace Eaf.Middleware.Web.Middleware
 
                 if (!context.Response.HasStarted)
                 {
-                    await context.Response.WriteAsJsonAsync(error);
+                    await context.Response.WriteAsJsonAsync(error, context.RequestAborted);
                 }
             }
         }

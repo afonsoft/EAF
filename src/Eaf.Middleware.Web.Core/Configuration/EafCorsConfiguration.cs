@@ -70,6 +70,7 @@ namespace Eaf.Middleware.Web.Startup
                             "Pragma",
                             "X-Requested-With",
                             "X-Correlation-ID",
+                            "Abp-TenantId",
                             "Abp.TenantId",
                             "Abp.Localization.CultureName",
                             ".AspNetCore.Culture",
@@ -119,7 +120,7 @@ namespace Eaf.Middleware.Web.Startup
                 {
                     var escaped = Regex.Escape(allowed).Replace("\\*", "[^./]+");
                     var pattern = "^" + escaped + "$";
-                    if (Regex.IsMatch(origin, pattern, RegexOptions.IgnoreCase))
+                    if (Regex.IsMatch(origin, pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1)))
                         return true;
                 }
             }

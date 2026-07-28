@@ -9,7 +9,7 @@ export class AppAuthService {
 
   logout(reload?: boolean, returnUrl?: string): void {
     const customHeaders = {
-      'Abp.TenantId': eaf.multiTenancy.getTenantIdCookie(),
+      'Abp-TenantId': eaf.multiTenancy.getTenantIdCookie() || '',
       'Authorization': 'Bearer ' + eaf.auth.getToken(),
     };
 
