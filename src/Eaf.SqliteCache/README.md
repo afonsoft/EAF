@@ -39,7 +39,7 @@ Configuração do cache:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SqliteCache --version 9.3.1
+dotnet add package Eaf.SqliteCache --version 9.4.0
 ```
 
 ### Instalação via Referência de Projeto

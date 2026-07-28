@@ -28,6 +28,10 @@ Quick reference summaries for major version changes:
 - **[Angular 19 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_19.md)**: Summary of changes in Angular 19
 - **[Angular 20 Migration Summary](../../Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_SUMMARY_20.md)**: Summary of changes in Angular 20
 
+## EAF Version Migrations
+
+- **[EAF 9.3.1 to 9.4.0 Migration Spec](../../.specs/eaf-template-migration-9.4.0.md)**: Step-by-step guide for updating existing API and Angular template projects to EAF 9.4.0, including CORS, public errors, two-step multi-tenant login, modern SignalR, responsive UI and required EF Core migrations.
+
 ## .NET Framework Migrations
 
 ### ASP.NET Core Upgrades

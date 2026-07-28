@@ -9,6 +9,10 @@ Esta seção detalha os templates fornecidos pelo EAF para iniciar novos projeto
 * [Worker Template](./worker-template.md) - Template para serviços de background
 * [Contratos para consumidores realtime e sociais](../integration/gamehub-consumer-contracts.md) - Guia de integração para consumidores EAF
 
+## Migração de Templates Existentes
+
+Para atualizar projetos gerados a partir de versões anteriores dos templates, consulte o [Spec de Migração EAF 9.3.1 → 9.4.0](../../.specs/eaf-template-migration-9.4.0.md).
+
 ## Visão Geral
 
 O EAF fornece templates para facilitar a criação de novos projetos baseados no framework. Cada template inclui:

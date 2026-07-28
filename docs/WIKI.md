@@ -11,6 +11,8 @@ Bem-vindo à wiki do EAF. Esta página serve como portal para toda a documentaç
 * [Templates](./templates/README.md) — templates para novos projetos.
 * [Desenvolvimento](./development/README.md) — guias, boas práticas e troubleshooting.
 * [Backport GameHub — Guia de Uso](./development/gamehub-backport-usage.md) — novas funcionalidades do backport GameHub para EAF.
+* [Otimizações de Performance e Memória](../docs/performance-memory-optimizations.md) — melhorias de performance e memória da versão 9.4.0.
+* [Migração EAF 9.3.1 → 9.4.0](../.specs/eaf-template-migration-9.4.0.md) — spec para atualizar projetos que usam os templates API e Angular.
 * [Implantação](./deployment/README.md) — configuração de ambiente, migrações e produção.
 
 ## Módulos de Middleware
