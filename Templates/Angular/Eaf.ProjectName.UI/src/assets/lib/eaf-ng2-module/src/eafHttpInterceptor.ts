@@ -90,7 +90,7 @@ export class EafHttpConfiguration {
 
   handleNonEafErrorResponse(response: any) {
     const body = response.error ?? response.body;
-    if (body && body.message) {
+    if (body?.message) {
       const error = <IErrorInfo>{
         message: body.message,
         details: body.message,
