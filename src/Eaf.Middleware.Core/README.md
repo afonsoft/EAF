@@ -51,7 +51,7 @@ Este módulo implementa os padrões de Domain-Driven Design (DDD) e segue a arqu
 
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
-- ASP.NET Boilerplate 10.4.0
+- ASP.NET Boilerplate 10.5.0
 
 ### Instalação via NuGet
 ```bash

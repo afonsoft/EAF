@@ -38,7 +38,7 @@
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 		<Nullable>disable</Nullable>
 		<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched 14.x exists;
-		     Abp.AutoMapper 10.4.0 is binary-incompatible with AutoMapper >= 15.0.0 -->
+		     Abp.AutoMapper 10.5.0 is binary-incompatible with AutoMapper >= 15.0.0 -->
 		<NoWarn>$(NoWarn);NU1903;NU1902</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>

@@ -37,7 +37,7 @@ Configurações de conexão LDAP:
 
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
-- ASP.NET Boilerplate 10.4.0
+- ASP.NET Boilerplate 10.5.0
 - Servidor LDAP ou Active Directory configurado
 
 ### Instalação via NuGet

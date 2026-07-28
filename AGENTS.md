@@ -9,7 +9,7 @@ EAF é uma plataforma middleware enterprise open-source construída sobre ASP.NE
 | Camada | Tecnologia | Versão |
 |--------|-----------|--------|
 | Runtime | .NET | 10.0 |
-| Framework | ASP.NET Boilerplate (ABP) | 10.4.0 |
+| Framework | ASP.NET Boilerplate (ABP) | 10.5.0 |
 | ORM | Entity Framework Core | 10.0 |
 | DI | Castle Windsor | — |
 | Frontend | Angular | 18 (Templates) |

@@ -25,7 +25,7 @@
 		<PublishAot>false</PublishAot>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	</PropertyGroup>
-	<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched free 14.x exists; Abp.AutoMapper 10.4.0 is binary-incompatible with AutoMapper >= 15.0.0. -->
+	<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched free 14.x exists; Abp.AutoMapper 10.5.0 is binary-incompatible with AutoMapper >= 15.0.0. -->
 	<ItemGroup>
 		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
 	</ItemGroup>

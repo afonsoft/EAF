@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Abp" Version="10.4.0" />
+		<PackageReference Include="Abp" Version="10.5.0" />
 		<PackageReference Include="ExtendedXmlSerializer" Version="3.10.0" />
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
 		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />

@@ -51,7 +51,7 @@ Este módulo segue os padrões de Application Layer do Domain-Driven Design (DDD
 
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
-- ASP.NET Boilerplate 10.4.0
+- ASP.NET Boilerplate 10.5.0
 - Eaf.Middleware.Core 10.4.0
 
 ### Instalação via NuGet

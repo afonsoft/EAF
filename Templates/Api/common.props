@@ -26,7 +26,7 @@
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	</PropertyGroup>
 	<!-- NU1608: Pomelo.EntityFrameworkCore.MySql 9.0.0 requires Microsoft.EntityFrameworkCore.Relational (>= 9.0.0 && <= 9.0.999), but the template targets EF Core 10. No stable Pomelo version supports EF Core 10 yet; suppress until a compatible version is available. -->
-	<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched free 14.x exists; Abp.AutoMapper 10.4.0 is binary-incompatible with AutoMapper >= 15.0.0. -->
+	<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched free 14.x exists; Abp.AutoMapper 10.5.0 is binary-incompatible with AutoMapper >= 15.0.0. -->
 	<ItemGroup>
 		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
 	</ItemGroup>

@@ -13,13 +13,13 @@
 		<EmbeddedResource Include="Localization\Source\*.xml;Net\Emailing\EmailTemplates\default.html" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Abp" Version="10.4.0" />
-		<PackageReference Include="Abp.ZeroCore" Version="10.4.0" />
-		<PackageReference Include="Abp.Zero.Common" Version="10.4.0" />
-		<PackageReference Include="Abp.AutoMapper" Version="10.4.0" />
+		<PackageReference Include="Abp" Version="10.5.0" />
+		<PackageReference Include="Abp.ZeroCore" Version="10.5.0" />
+		<PackageReference Include="Abp.Zero.Common" Version="10.5.0" />
+		<PackageReference Include="Abp.AutoMapper" Version="10.5.0" />
 		<PackageReference Include="AutoMapper" Version="14.0.0" />
-		<PackageReference Include="Abp.MailKit" Version="10.4.0" />
-		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.4.0" />
+		<PackageReference Include="Abp.MailKit" Version="10.5.0" />
+		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.5.0" />
 		<PackageReference Include="MimeKit" Version="4.16.0" />
 
 	</ItemGroup>

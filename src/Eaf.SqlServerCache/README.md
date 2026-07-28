@@ -36,7 +36,7 @@ Configuração do cache:
 
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
-- ASP.NET Boilerplate 10.4.0
+- ASP.NET Boilerplate 10.5.0
 - SQL Server 2012 ou superior
 
 ### Instalação via NuGet
