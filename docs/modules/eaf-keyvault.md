@@ -77,6 +77,29 @@ public class MySecureService : ITransientDependency
 }
 ```
 
+
+## Uso
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
+### 1. Registrando o Módulo
+
+No seu módulo principal, herde de `EafKeyVaultModule`:
+
+```csharp
+[DependsOn(
+    typeof(EafKeyVaultModule),
+    typeof(AbpModule)
+)]
+public class MyApplicationModule : AbpModule
+{
+    public override void Initialize()
+    {
+        IocManager.RegisterAssemblyByConvention(Assembly.GetExecutingAssembly());
+    }
+}
+```
+
 ## Troubleshooting
 
 - **Permissões Insuficientes**: Verifique as roles e policies no portal Azure

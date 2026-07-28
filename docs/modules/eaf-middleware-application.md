@@ -17,6 +17,9 @@ Fornecer a camada de aplicação para o middleware EAF, incluindo serviços base
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 [DependsOn(typeof(EafMiddlewareApplicationModule))]
 public class MyModule : AbpModule

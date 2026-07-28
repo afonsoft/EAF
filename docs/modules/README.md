@@ -4,6 +4,8 @@ Esta seção detalha os módulos de middleware do EAF. O EAF é uma plataforma d
 
 ## Módulos de Middleware
 
+Para exemplos práticos de uso de cada módulo, consulte o [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 * [Eaf.Castle.Serilog](./eaf-castle-serilog.md) - Integração do Serilog com Castle Windsor para logging estruturado
 * [Eaf.KeyVault](./eaf-keyvault.md) - Integração com Azure Key Vault para gerenciamento de segredos
 * [Eaf.KeyVault.AspNetCore](./eaf-keyvault-aspnetcore.md) - Integração do Azure Key Vault com ASP.NET Core

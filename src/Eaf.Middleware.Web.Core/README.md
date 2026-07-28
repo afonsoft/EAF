@@ -63,11 +63,11 @@ Este módulo serve como a camada de apresentação web, integrando todos os comp
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.Middleware.Application 10.4.0
+- Eaf.Middleware.Application 9.3.1
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Web.Core --version 10.4.0
+dotnet add package Eaf.Middleware.Web.Core --version 9.3.1
 ```
 
 ### Instalação via Referência de Projeto

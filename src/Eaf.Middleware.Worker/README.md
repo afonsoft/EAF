@@ -51,7 +51,7 @@ Classe base abstrata para worker services, fornecendo:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Worker --version 10.4.0
+dotnet add package Eaf.Middleware.Worker --version 9.3.1
 ```
 
 ### Instalação via Referência de Projeto

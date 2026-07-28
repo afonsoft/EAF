@@ -55,6 +55,8 @@ services.AddAuthentication(options =>
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
 Após a autenticação, os claims do Azure AD estão disponíveis no `HttpContext.User.Claims`:
 
 ```csharp

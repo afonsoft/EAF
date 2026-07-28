@@ -17,6 +17,8 @@ Fornecer a base para os módulos de middleware EAF, incluindo configurações co
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
 Este módulo é automaticamente incluído quando você usa qualquer outro módulo de middleware EAF.
 
 ```csharp
@@ -38,7 +40,7 @@ public class MyModule : AbpModule
   "EafMiddleware": {
     "Core": {
       "Enabled": true,
-      "Version": "10.0.0"
+      "Version": "9.3.1"
     }
   }
 }

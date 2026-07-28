@@ -50,6 +50,9 @@ services.AddScoped<ILdapAuthenticationService, LdapAuthenticationService>();
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 public class LdapAuthenticationService : ILdapAuthenticationService
 {

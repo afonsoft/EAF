@@ -70,6 +70,9 @@ builder.Services.AddOpenTelemetry()
 
 ## Uso
 
+
+Veja exemplos completos e variações no [Guia de Uso dos Módulos EAF](./USAGE.md).
+
 ```csharp
 using System.Diagnostics;
 
