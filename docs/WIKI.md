@@ -10,6 +10,7 @@ Bem-vindo à wiki do EAF. Esta página serve como portal para toda a documentaç
 * [Sistema de Módulos](./MODULE_SYSTEM.md) — como criar e usar módulos no ASP.NET Boilerplate.
 * [Templates](./templates/README.md) — templates para novos projetos.
 * [Desenvolvimento](./development/README.md) — guias, boas práticas e troubleshooting.
+* [Backport GameHub — Guia de Uso](./development/gamehub-backport-usage.md) — novas funcionalidades do backport GameHub para EAF.
 * [Implantação](./deployment/README.md) — configuração de ambiente, migrações e produção.
 
 ## Módulos de Middleware

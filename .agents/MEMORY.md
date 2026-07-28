@@ -489,7 +489,10 @@ Current coverage (after P70): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests
 - Public error handling: `EafErrorCodes`, `EafPublicErrorMiddleware`, `PublicErrorApplicationBuilderExtensions`, and `EafExceptionFilter` (IExceptionFilter + IAsyncExceptionFilter, Order = 1000 because exception filters execute in reverse order) return `PublicErrorContract` 400 for `UserFriendlyException`.
 - Multi-tenant login fallback: `login.component.ts` calls `loginService.authenticate` when `availableTenants` returns empty; `select-tenant` component exposes a "Login as Host" link.
 - JWT parsing: `TokenService` in the Angular eaf-ng2-module decodes `sub`, `unique_name`, `name`, `role`, `tenantid`, etc.; backend `TokenAuthController.CreateJwtClaims` adds a `tenantid` claim from `user.TenantId`.
+- Tenant header: ABP 10.5 default `TenantIdResolveKey` is `Abp-TenantId` (dash). The Angular `EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service` and the `Abp-TenantId` cookie name in `eaf.js` must all use the dash form. Do not default to tenant 1 when no cookie is set; omit the header to keep the host context.
 - SignalR modernization: `SignalRHelper` uses `@microsoft/signalr` `HubConnectionBuilder` with `accessTokenFactory`; backend `AuthConfigurer.SetToken` reads `access_token` query parameter for `/signalr*` paths.
+- Public error UI: `EafHttpConfiguration.handleNonEafErrorResponse` detects `PublicErrorContract` bodies (`message`/`code`) and shows the server message instead of the generic `An error has occurred!` modal.
+- Topbar session: `TopBarComponent.setCurrentLoginInformations` guards `appSession.user` so the topbar no longer stays blank when the session is not yet re-initialized.
 - Mobile responsiveness: `styles.css` gains `100dvh`, touch targets, centered login drawer.
 - Admin UX: reusable `app-status-badge` and `app-empty-state` components; `p-table` loading state in tenants/users components.
 - Docker full-stack (`docker-compose.all.yml`) validated: host admin login, tenant creation, tenant admin login with `Abp-TenantId: 2`, `GetAvailableTenants` returns `PublicErrorContract` 400 on invalid credentials, token contains `tenantid`.
