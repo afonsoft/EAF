@@ -14,6 +14,7 @@ using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Swagger;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Eaf.Middleware.Web.Serilog;
+using Eaf.Middleware.Web.Filters;
 using Eaf.Middleware.Web.Startup;
 using Eaf.Middleware.Web.Swagger;
 using Eaf.ProjectName.Application.Extensions;
@@ -59,6 +60,7 @@ namespace Eaf.ProjectName.Web.Startup
             {
                 options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
                 options.Filters.Add<SerilogMvcLoggingAttribute>();
+                options.Filters.Add(typeof(EafExceptionFilter), 1000);
                 options.Filters.Add(new ResponseCacheAttribute() { NoStore = true, Location = ResponseCacheLocation.None });
             }).AddNewtonsoftJson();
 
@@ -88,38 +90,7 @@ namespace Eaf.ProjectName.Web.Startup
             // Add OpenTelemetry and configure it to use Azure Monitor.
 
             //Configure CORS for angular2 UI
-            services.AddCors(options =>
-            {
-                options.AddPolicy(ProjectNameConsts.DefaultCorsPolicyName, builder =>
-                {
-                    var corsOrigins = _appConfiguration["App:CorsOrigins"];
-                    var isDevelopment = _hostingEnvironment.IsDevelopment();
-
-                    if (!isDevelopment && (string.IsNullOrWhiteSpace(corsOrigins) || corsOrigins == "*"))
-                    {
-                        throw new InvalidOperationException("App:CorsOrigins must be configured with explicit origins in production.");
-                    }
-
-                    if (isDevelopment && corsOrigins == "*")
-                    {
-                        builder.SetIsOriginAllowed((host) => true);
-                    }
-                    else
-                    {
-                        builder.WithOrigins(
-                                corsOrigins
-                                    .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(o => o.RemovePostFix("/"))
-                                    .ToArray()
-                            )
-                            .SetIsOriginAllowedToAllowWildcardSubdomains();
-                    }
-
-                    builder.AllowAnyMethod()
-                           .AllowCredentials()
-                           .WithHeaders("Authorization", "Content-Type", "X-Requested-With", "Accept", "X-XSRF-TOKEN");
-                });
-            });
+            services.AddEafCors(_appConfiguration, _hostingEnvironment.IsDevelopment(), ProjectNameConsts.DefaultCorsPolicyName);
 
             // GDPR / Data Protection
             services.AddDataProtection()
@@ -218,6 +189,7 @@ namespace Eaf.ProjectName.Web.Startup
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/Error");
+            app.UseEafPublicErrorMiddleware();
             app.UseCors(ProjectNameConsts.DefaultCorsPolicyName); //Enable CORS!
             app.UseJwtTokenMiddleware();
             app.UseAbpRequestLocalization();

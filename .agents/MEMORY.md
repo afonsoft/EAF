@@ -484,6 +484,17 @@ Current coverage (after P70): Line 97.9%, Branch 90.5%, Method 99.8% (4605 tests
 - `BinaryObject` constructor formats `FileName` as `{Id}_{fileName}`, so `FileDownloadName` assertions must use the constructed name.
 - `ChatHub.Dispose` uses `WindsorContainer` injection; capture the container substitute in the test setup to assert `Release`.
 
+## GameHub backport (feature/eaf-gamehub-backport)
+- Centralized CORS in `Eaf.Middleware.Web.Core.Configuration.EafCorsConfiguration.AddEafCors` with origin reflection, wildcard subdomain support, and all headers sent by `EafHttpInterceptor`; template API `Startup.cs` registers it.
+- Public error handling: `EafErrorCodes`, `EafPublicErrorMiddleware`, `PublicErrorApplicationBuilderExtensions`, and `EafExceptionFilter` (IExceptionFilter + IAsyncExceptionFilter, Order = 1000 because exception filters execute in reverse order) return `PublicErrorContract` 400 for `UserFriendlyException`.
+- Multi-tenant login fallback: `login.component.ts` calls `loginService.authenticate` when `availableTenants` returns empty; `select-tenant` component exposes a "Login as Host" link.
+- JWT parsing: `TokenService` in the Angular eaf-ng2-module decodes `sub`, `unique_name`, `name`, `role`, `tenantid`, etc.; backend `TokenAuthController.CreateJwtClaims` adds a `tenantid` claim from `user.TenantId`.
+- SignalR modernization: `SignalRHelper` uses `@microsoft/signalr` `HubConnectionBuilder` with `accessTokenFactory`; backend `AuthConfigurer.SetToken` reads `access_token` query parameter for `/signalr*` paths.
+- Mobile responsiveness: `styles.css` gains `100dvh`, touch targets, centered login drawer.
+- Admin UX: reusable `app-status-badge` and `app-empty-state` components; `p-table` loading state in tenants/users components.
+- Docker full-stack (`docker-compose.all.yml`) validated: host admin login, tenant creation, tenant admin login with `Abp-TenantId: 2`, `GetAvailableTenants` returns `PublicErrorContract` 400 on invalid credentials, token contains `tenantid`.
+- Test notes: `Eaf.Middleware.Web.Core.Tests` gained `EafCorsConfigurationBddTests`, `EafPublicErrorMiddlewareBddTests`, `EafExceptionFilterBddTests` and new SignalR query-string tests in `AuthConfigurerBddTests`; Angular got `token.service.spec.ts` and `login.service.spec.ts` plus updated `login.component.spec.ts`.
+
 ## Sonar fix (2026-07-12)
 Branch: `feature/devin-20260712-fix-sonar-jwt`
 - `src/Eaf.Middleware.Web.Core/Authentication/JwtBearer/MiddlewareJwtSecurityTokenHandler.cs`:

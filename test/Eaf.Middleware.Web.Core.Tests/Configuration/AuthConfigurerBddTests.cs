@@ -268,6 +268,51 @@ namespace Eaf.Middleware.Tests.WebCore.Configuration
             tokenAuthConfig.SecurityKey.ShouldNotBeNull();
         }
 
+        [Fact]
+        public async Task Dado_SignalRComAccessTokenNaQuery_Quando_QueryStringTokenResolver_Entao_DeveSetarToken()
+        {
+            // Dado
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Path = "/signalr";
+            httpContext.Request.QueryString = new QueryString("?access_token=expected-jwt-token");
+
+            var scheme = new AuthenticationScheme(
+                JwtBearerDefaults.AuthenticationScheme,
+                JwtBearerDefaults.AuthenticationScheme,
+                typeof(JwtBearerHandler));
+
+            var options = new JwtBearerOptions();
+            var context = new MessageReceivedContext(httpContext, scheme, options);
+
+            // Quando
+            await AuthConfigurer.QueryStringTokenResolver(context);
+
+            // Então
+            context.Token.ShouldBe("expected-jwt-token");
+        }
+
+        [Fact]
+        public async Task Dado_SignalRSemAccessTokenNaQuery_Quando_QueryStringTokenResolver_Entao_NaoDeveSetarToken()
+        {
+            // Dado
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Path = "/signalr";
+
+            var scheme = new AuthenticationScheme(
+                JwtBearerDefaults.AuthenticationScheme,
+                JwtBearerDefaults.AuthenticationScheme,
+                typeof(JwtBearerHandler));
+
+            var options = new JwtBearerOptions();
+            var context = new MessageReceivedContext(httpContext, scheme, options);
+
+            // Quando
+            await AuthConfigurer.QueryStringTokenResolver(context);
+
+            // Então
+            context.Token.ShouldBeNull();
+        }
+
         private static MessageReceivedContext CriarMessageReceivedContext(
             string path,
             string? token = null,
