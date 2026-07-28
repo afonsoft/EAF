@@ -1,4 +1,5 @@
 using Abp.Authorization;
+using Abp.Domain.Entities;
 using Abp.Runtime.Validation;
 using Abp.UI;
 using Eaf.Middleware.Contracts;
@@ -44,11 +45,7 @@ namespace Eaf.Middleware.Web.Middleware
                 if (context.RequestAborted.IsCancellationRequested)
                     throw;
 
-                _logger.LogError(
-                    ex,
-                    "Unhandled exception caught by {MiddlewareName}. CorrelationId: {CorrelationId}",
-                    nameof(EafPublicErrorMiddleware),
-                    context.TraceIdentifier);
+                LogException(ex, context.TraceIdentifier);
 
                 var error = MapToPublicError(ex, context.TraceIdentifier);
                 context.Response.StatusCode = GetStatusCode(ex);
@@ -58,6 +55,29 @@ namespace Eaf.Middleware.Web.Middleware
                 {
                     await context.Response.WriteAsJsonAsync(error, context.RequestAborted);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Logs the exception with the appropriate severity.
+        /// </summary>
+        private void LogException(Exception ex, string correlationId)
+        {
+            if (ex is UserFriendlyException or AbpValidationException or ArgumentException or ArgumentNullException or FormatException or AbpAuthorizationException or EntityNotFoundException)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Expected exception caught by {MiddlewareName}. CorrelationId: {CorrelationId}",
+                    nameof(EafPublicErrorMiddleware),
+                    correlationId);
+            }
+            else
+            {
+                _logger.LogError(
+                    ex,
+                    "Unhandled exception caught by {MiddlewareName}. CorrelationId: {CorrelationId}",
+                    nameof(EafPublicErrorMiddleware),
+                    correlationId);
             }
         }
 
@@ -96,6 +116,13 @@ namespace Eaf.Middleware.Web.Middleware
                     Retryable = false,
                     CorrelationId = correlationId
                 },
+                EntityNotFoundException => new PublicErrorContract
+                {
+                    Code = EafErrorCodes.ValidationFailed,
+                    Message = "The requested resource was not found.",
+                    Retryable = false,
+                    CorrelationId = correlationId
+                },
                 InvalidOperationException => new PublicErrorContract
                 {
                     Code = EafErrorCodes.TemporarilyUnavailable,
@@ -131,6 +158,7 @@ namespace Eaf.Middleware.Web.Middleware
                 AbpValidationException => StatusCodes.Status400BadRequest,
                 ArgumentException or ArgumentNullException or FormatException => StatusCodes.Status400BadRequest,
                 AbpAuthorizationException => StatusCodes.Status403Forbidden,
+                EntityNotFoundException => StatusCodes.Status404NotFound,
                 InvalidOperationException => StatusCodes.Status500InternalServerError,
                 TimeoutException => StatusCodes.Status500InternalServerError,
                 _ => StatusCodes.Status500InternalServerError

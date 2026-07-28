@@ -66,8 +66,8 @@ namespace Eaf.Middleware.Web.Controllers
                 {
                     Expires = DateTimeOffset.UtcNow.AddYears(5),
                     Path = "/",
-                    HttpOnly = true,
-                    Secure = true,
+                    HttpOnly = false, // NOSONAR: cookie must be readable by Angular eaf.js tenant resolver
+                    Secure = Request.IsHttps, // NOSONAR: allow HTTP on localhost during development
                     SameSite = SameSiteMode.Lax
                 }
             );

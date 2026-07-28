@@ -55,11 +55,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value);
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.Contains(key)),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -74,11 +73,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value, slidingExpiration);
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.Contains(key)),
                 Arg.Any<byte[]>(),
-                Arg.Is<DistributedCacheEntryOptions>(o => o.SlidingExpiration == slidingExpiration),
-                Arg.Any<CancellationToken>());
+                Arg.Is<DistributedCacheEntryOptions>(o => o.SlidingExpiration == slidingExpiration));
         }
 
         [Fact]
@@ -93,11 +91,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value, null, absoluteExpiration);
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.Contains(key)),
                 Arg.Any<byte[]>(),
-                Arg.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpiration == absoluteExpiration),
-                Arg.Any<CancellationToken>());
+                Arg.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpiration == absoluteExpiration));
         }
 
         [Fact]
@@ -133,8 +130,7 @@ namespace Eaf.SqlServerCache.Tests
             var key = "test-key";
             var serializedValue = System.Text.Encoding.UTF8.GetBytes("serialized-value");
 
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]?>(serializedValue));
+            _distributedCache.Get(Arg.Any<string>()).Returns(serializedValue);
 
             // Act
             var result = _cache.TryGetValue(key, out var retrievedValue);
@@ -149,8 +145,7 @@ namespace Eaf.SqlServerCache.Tests
             // Arrange
             var key = "non-existent-key";
 
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]?>(null));
+            _distributedCache.Get(Arg.Any<string>()).Returns((byte[]?)null);
 
             // Act
             var result = _cache.TryGetValue(key, out var value);
@@ -166,8 +161,7 @@ namespace Eaf.SqlServerCache.Tests
             // Arrange
             var key = "test-key";
 
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromException<byte[]?>(new Exception("Test exception")));
+            _distributedCache.Get(Arg.Any<string>()).Returns(_ => throw new Exception("Test exception"));
 
             // Act
             var result = _cache.TryGetValue(key, out var value);
@@ -187,9 +181,8 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Remove(key);
 
             // Assert
-            _distributedCache.Received(1).RemoveAsync(
-                Arg.Is<string>(k => k.Contains(key)),
-                Arg.Any<CancellationToken>());
+            _distributedCache.Received(1).Remove(
+                Arg.Is<string>(k => k.Contains(key)));
         }
 
         [Fact]
@@ -251,11 +244,10 @@ namespace Eaf.SqlServerCache.Tests
             cache.Set(key, "value");
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.StartsWith("MyCache_")),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -269,11 +261,10 @@ namespace Eaf.SqlServerCache.Tests
             cache.Set(key, "value");
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k == key),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -287,11 +278,10 @@ namespace Eaf.SqlServerCache.Tests
             cache.Set(key, "value");
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k == "MyCache_key"),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -318,19 +308,16 @@ namespace Eaf.SqlServerCache.Tests
             }
 
             // Assert
-            _distributedCache.Received(keys.Length).SetAsync(
+            _distributedCache.Received(keys.Length).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
 
-            _distributedCache.Received(keys.Length).GetAsync(
-                Arg.Any<string>(),
-                Arg.Any<CancellationToken>());
+            _distributedCache.Received(keys.Length).Get(
+                Arg.Any<string>());
 
-            _distributedCache.Received(keys.Length).RemoveAsync(
-                Arg.Any<string>(),
-                Arg.Any<CancellationToken>());
+            _distributedCache.Received(keys.Length).Remove(
+                Arg.Any<string>());
         }
 
         [Fact]
@@ -346,13 +333,12 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value, slidingExpiration, absoluteExpiration);
 
             // Assert
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.Contains(key)),
                 Arg.Any<byte[]>(),
                 Arg.Is<DistributedCacheEntryOptions>(o =>
                     o.SlidingExpiration == slidingExpiration &&
-                    o.AbsoluteExpiration == absoluteExpiration),
-                Arg.Any<CancellationToken>());
+                    o.AbsoluteExpiration == absoluteExpiration));
         }
 
         [Fact]
@@ -362,8 +348,7 @@ namespace Eaf.SqlServerCache.Tests
             var key = "test-key";
             var emptyArray = new byte[0];
 
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]?>(emptyArray));
+            _distributedCache.Get(Arg.Any<string>()).Returns(emptyArray);
 
             // Act
             var result = _cache.TryGetValue(key, out var value);
@@ -413,11 +398,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value, null);
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -431,11 +415,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value, TimeSpan.FromMinutes(5), null);
 
             // Então - Verify SetAsync was called
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -462,11 +445,10 @@ namespace Eaf.SqlServerCache.Tests
             }
 
             // Então
-            _distributedCache.Received(3).SetAsync(
+            _distributedCache.Received(3).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -502,11 +484,10 @@ namespace Eaf.SqlServerCache.Tests
             cache.Set(key, "value");
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.Contains(key)),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -521,11 +502,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set(key, value, null, pastExpiration);
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpiration == pastExpiration),
-                Arg.Any<CancellationToken>());
+                Arg.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpiration == pastExpiration));
         }
 
         [Fact]
@@ -539,11 +519,10 @@ namespace Eaf.SqlServerCache.Tests
             cache.Set(key, "value");
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k.StartsWith("My_Cache_")),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -557,11 +536,10 @@ namespace Eaf.SqlServerCache.Tests
             cache.Set(key, "value");
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Is<string>(k => k == "MyCache_Key"),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -609,16 +587,15 @@ namespace Eaf.SqlServerCache.Tests
             var value = "test-value";
             byte[]? capturedBytes = null;
 
-            _distributedCache.When(x => x.SetAsync(
+            _distributedCache.When(x => x.Set(
                     Arg.Is<string>(k => k == "test-cache_test-key"),
                     Arg.Any<byte[]>(),
-                    Arg.Any<DistributedCacheEntryOptions>(),
-                    Arg.Any<CancellationToken>()))
+                    Arg.Any<DistributedCacheEntryOptions>()))
                 .Do(call => capturedBytes = call.ArgAt<byte[]>(1));
 
             // Act
             _cache.Set(key, value);
-            _distributedCache.GetAsync("test-cache_test-key").Returns(Task.FromResult<byte[]?>(capturedBytes));
+            _distributedCache.Get("test-cache_test-key").Returns(_ => capturedBytes);
 
             var result = _cache.TryGetValue(key, out var retrievedValue);
 
@@ -632,8 +609,7 @@ namespace Eaf.SqlServerCache.Tests
         {
             // Arrange
             var key = "test-key-throws";
-            _distributedCache.GetAsync(Arg.Is<string>(k => k.Contains(key)), Arg.Any<CancellationToken>())
-                .Returns(Task.FromException<byte[]?>(new Exception("cache error")));
+            _distributedCache.Get(Arg.Is<string>(k => k.Contains(key))).Returns(_ => throw new Exception("cache error"));
 
             // Act
             var result = _cache.TryGetValue(key, out var value);
@@ -648,8 +624,7 @@ namespace Eaf.SqlServerCache.Tests
         {
             // Arrange
             var key = "test-key-empty";
-            _distributedCache.GetAsync(Arg.Is<string>(k => k.Contains(key)), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]?>(Array.Empty<byte>()));
+            _distributedCache.Get(Arg.Is<string>(k => k.Contains(key))).Returns(Array.Empty<byte>());
 
             // Act
             var result = _cache.TryGetValue(key, out var value);

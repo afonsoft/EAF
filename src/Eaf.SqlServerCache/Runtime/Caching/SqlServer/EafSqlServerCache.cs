@@ -172,11 +172,11 @@ namespace Eaf.Runtime.Caching.SqlServer
         {
             try
             {
-                var encodedCached = _cache.GetAsync(FixKey(key)).GetAwaiter().GetResult();
+                var encodedCached = _cache.Get(FixKey(key));
 
                 if (encodedCached != null)
                 {
-                    var cached = ByteArrayToObject(DecompressBytesAsync(encodedCached).GetAwaiter().GetResult());
+                    var cached = ByteArrayToObject(DecompressBytes(encodedCached));
                     if (cached != null)
                     {
                         value = cached;
@@ -232,10 +232,9 @@ namespace Eaf.Runtime.Caching.SqlServer
         public override void Set(string key, object value, TimeSpan? slidingExpireTime = null, DateTimeOffset? absoluteExpireTime = null)
         {
             var encodedCurrent = ObjectToByteArray(value);
-            var compressedData = CompressBytesAsync(encodedCurrent).GetAwaiter().GetResult();
+            var compressedData = CompressBytes(encodedCurrent);
 
-            // CacheBase do ABP não define SetAsync; sync-over-async é necessário para manter compatibilidade com IDistributedCache.
-            _cache.SetAsync(FixKey(key), compressedData, CreateOptions(slidingExpireTime, absoluteExpireTime)).GetAwaiter().GetResult();
+            _cache.Set(FixKey(key), compressedData, CreateOptions(slidingExpireTime, absoluteExpireTime));
         }
 
         /// <summary>
@@ -255,7 +254,7 @@ namespace Eaf.Runtime.Caching.SqlServer
         /// <param name="key">Parâmetro key.</param>
         public override void Remove(string key)
         {
-            _cache.RemoveAsync(FixKey(key)).GetAwaiter().GetResult();
+            _cache.Remove(FixKey(key));
         }
 
         /// <summary>

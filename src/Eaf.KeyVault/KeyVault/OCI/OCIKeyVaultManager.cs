@@ -1,3 +1,4 @@
+using Abp.Threading;
 using Castle.Core.Logging;
 using Eaf.Hosting.Configuration;
 using System;
@@ -67,7 +68,7 @@ namespace Eaf.KeyVault
         /// <returns>Resultado da operação.</returns>
         public IDictionary<string, string> GetKeyValues()
         {
-            return GetKeyValuesAsync().GetAwaiter().GetResult();
+            return AsyncHelper.RunSync(() => GetKeyValuesAsync());
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace Eaf.KeyVault
         /// <returns>Resultado da operação.</returns>
         public string GetValue(string key)
         {
-            return GetValueAsync(key).GetAwaiter().GetResult();
+            return AsyncHelper.RunSync(() => GetValueAsync(key));
         }
 
         /// <summary>

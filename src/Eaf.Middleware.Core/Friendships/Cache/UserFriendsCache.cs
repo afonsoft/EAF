@@ -4,8 +4,10 @@ using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.MultiTenancy;
 using Abp.Runtime.Caching;
+using Castle.Core.Logging;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,6 +26,11 @@ namespace Eaf.Middleware.Friendships.Cache
         private readonly ITenantCache _tenantCache;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         private readonly UserStore _userStore;
+
+        /// <summary>
+        /// Logger injetado pelo Castle Windsor.
+        /// </summary>
+        public ILogger Logger { get; set; }
 
         /// <summary>
         /// UserFriendsCache.
@@ -213,8 +220,9 @@ namespace Eaf.Middleware.Friendships.Cache
                         .Where(u => friendUserIds.Contains(u.Id))
                         .ToDictionary(u => u.Id);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger?.Error("Erro ao carregar usuários amigos via repositório.", ex);
                     friendUsers = new Dictionary<long, User>();
                 }
 
@@ -228,9 +236,9 @@ namespace Eaf.Middleware.Friendships.Cache
                             if (userFriend != null)
                                 friendUsers[friendUserId] = userFriend;
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            // ignore
+                            Logger?.Error($"Erro ao carregar usuário amigo {friendUserId} via UserStore.", ex);
                         }
                     }
                 }

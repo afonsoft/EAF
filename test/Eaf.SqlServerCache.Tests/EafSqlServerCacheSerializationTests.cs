@@ -37,11 +37,10 @@ namespace Eaf.SqlServerCache.Tests
 
             // Quando & Então
             Should.NotThrow(() => _cache.Set(key, value));
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
@@ -149,50 +148,40 @@ namespace Eaf.SqlServerCache.Tests
         public void Dado_DistributedCacheQueRetornaTask_Quando_Set_Entao_DeveAguardarComGetAwaiterGetResult()
         {
             // Dado
-            _distributedCache.SetAsync(
-                Arg.Any<string>(),
-                Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>())
-                .Returns(Task.CompletedTask);
+            
 
             // Quando
             _cache.Set("sync-test", "value");
 
             // Então — Se não aguardasse, SetAsync não seria chamado de forma síncrona
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>());
+                Arg.Any<DistributedCacheEntryOptions>());
         }
 
         [Fact]
         public void Dado_DistributedCacheQueRetornaTask_Quando_Remove_Entao_DeveAguardarComGetAwaiterGetResult()
         {
             // Dado
-            _distributedCache.RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.CompletedTask);
+            
 
             // Quando
             _cache.Remove("remove-test");
 
             // Então
-            _distributedCache.Received(1).RemoveAsync(
-                Arg.Any<string>(),
-                Arg.Any<CancellationToken>());
+            _distributedCache.Received(1).Remove(
+                Arg.Any<string>());
         }
 
         [Fact]
         public void Dado_DistributedCacheQueLancaExcecaoNoSet_Quando_Set_Entao_DevePropagar()
         {
             // Dado
-            _distributedCache.SetAsync(
+            _distributedCache.When(x => x.Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Any<DistributedCacheEntryOptions>(),
-                Arg.Any<CancellationToken>())
-                .Returns(Task.FromException(new InvalidOperationException("DB connection failed")));
+                Arg.Any<DistributedCacheEntryOptions>())).Do(_ => { throw new InvalidOperationException("DB connection failed"); });
 
             // Quando & Então
             Should.Throw<InvalidOperationException>(() => _cache.Set("fail-key", "value"));
@@ -206,8 +195,7 @@ namespace Eaf.SqlServerCache.Tests
         public void Dado_CacheComDadosNulos_Quando_TryGetValue_Entao_DeveRetornarFalse()
         {
             // Dado
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]?>(null));
+            _distributedCache.Get(Arg.Any<string>()).Returns((byte[]?)null);
 
             // Quando
             var result = _cache.TryGetValue("missing-key", out var value);
@@ -221,8 +209,7 @@ namespace Eaf.SqlServerCache.Tests
         public void Dado_CacheComBytesVazios_Quando_TryGetValue_Entao_DeveRetornarFalse()
         {
             // Dado
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<byte[]?>(Array.Empty<byte>()));
+            _distributedCache.Get(Arg.Any<string>()).Returns(Array.Empty<byte>());
 
             // Quando
             var result = _cache.TryGetValue("empty-key", out var value);
@@ -236,8 +223,7 @@ namespace Eaf.SqlServerCache.Tests
         public void Dado_CacheQueLancaExcecaoNoGet_Quando_TryGetValue_Entao_DeveRetornarFalse()
         {
             // Dado
-            _distributedCache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromException<byte[]?>(new TimeoutException("Connection timeout")));
+            _distributedCache.Get(Arg.Any<string>()).Returns(_ => throw new TimeoutException("Connection timeout"));
 
             // Quando
             var result = _cache.TryGetValue("timeout-key", out var value);
@@ -261,11 +247,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set("custom-sliding", "value", slidingExpiration);
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Is<DistributedCacheEntryOptions>(o => o.SlidingExpiration == slidingExpiration),
-                Arg.Any<CancellationToken>());
+                Arg.Is<DistributedCacheEntryOptions>(o => o.SlidingExpiration == slidingExpiration));
         }
 
         [Fact]
@@ -278,11 +263,10 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set("custom-absolute", "value", null, absoluteExpiration);
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
-                Arg.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpiration == absoluteExpiration),
-                Arg.Any<CancellationToken>());
+                Arg.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpiration == absoluteExpiration));
         }
 
         [Fact]
@@ -296,13 +280,12 @@ namespace Eaf.SqlServerCache.Tests
             _cache.Set("both-exp", "value", sliding, absolute);
 
             // Então
-            _distributedCache.Received(1).SetAsync(
+            _distributedCache.Received(1).Set(
                 Arg.Any<string>(),
                 Arg.Any<byte[]>(),
                 Arg.Is<DistributedCacheEntryOptions>(o =>
                     o.SlidingExpiration == sliding &&
-                    o.AbsoluteExpiration == absolute),
-                Arg.Any<CancellationToken>());
+                    o.AbsoluteExpiration == absolute));
         }
 
         #endregion
