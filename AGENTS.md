@@ -47,7 +47,7 @@ Templates/                    # Templates de projeto
 └── Eaf.Gateways.API/        # Template API Gateway
 docs/                         # Documentação técnica
 .agents/                      # Infraestrutura de agentes
-├── skills/                   # 13 SKILL.md files
+├── skills/                   # 25 SKILL.md files
 ├── CONTEXT.md                # Estratégias de carregamento de contexto
 ├── RULES.md                  # Guardrails (hard/soft rules)
 ├── MEMORY.md                 # Estado cross-session
@@ -153,6 +153,6 @@ npx ng test --no-watch --browsers=ChromeHeadlessNoSandbox
 - `.agents/TOOLS.md` — Ferramentas e MCP
 - `.agents/WORKFLOWS.md` — Automação CI/CD
 - `.agents/MEMORY.md` — Estado cross-session
-- `.agents/skills/` — Skills on-demand (13 disponíveis)
+- `.agents/skills/` — Skills on-demand (25 disponíveis)
 - `rules/` — Rules por domínio com `applyTo`
 - `docs/` — Documentação técnica
