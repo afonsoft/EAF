@@ -70,6 +70,7 @@ namespace Eaf.Middleware.Web.Startup
                             "Pragma",
                             "X-Requested-With",
                             "X-Correlation-ID",
+                            "X-SignalR-User-Agent",
                             "Abp-TenantId",
                             "Abp.Localization.CultureName",
                             ".AspNetCore.Culture",
