@@ -11,7 +11,7 @@
   >
     <header class="bs-canvas-header p-3 bg-primary overflow-auto">
       <button (click)="reversePinned()" [attr.aria-label]="'Pinned' | localize" class="bs-canvas-close float-left close pinned" type="button">
-        <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-hidden="true" class="fa fa-map-pin"> </i>
+        <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-hidden="true" class="fa fa-map-pin text-light"> </i>
       </button>
       <button (click)="closeChat()" aria-label="Close" class="bs-canvas-close float-left close" type="button">
         <span aria-hidden="true" class="text-light">&times;</span>
@@ -200,10 +200,9 @@
                         </div>
                         <div>
                           <span
-                            class="text-dark-75 text-hover-primary font-weight-bold font-size-h6"
+                            class="text-dark-75 text-hover-primary font-weight-bold font-size-h6 text-primary"
                             data-placement="top"
                             data-toggle="tooltip"
-                            style="color: #ff7020"
                             title="{{ getTitle(currentUser) }}"
                           >
                             {{ currentUser.name }}
@@ -233,10 +232,9 @@
                           </time>
                           <div [innerHTML]="getReadStateHtml(message)" class="d-inline"></div>
                           <span
-                            class="text-dark-75 text-hover-primary font-weight-bold font-size-h6"
+                            class="text-dark-75 text-hover-primary font-weight-bold font-size-h6 text-primary"
                             data-placement="top"
                             data-toggle="tooltip"
-                            style="color: #ff7020"
                             title="{{ getTitle(selectedUser, message) }}"
                           >
                             {{ getFriendName(selectedUser, message) }}

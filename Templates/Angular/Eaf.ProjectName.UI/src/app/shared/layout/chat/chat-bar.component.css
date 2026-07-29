@@ -27,9 +27,9 @@
 
 .chat-context-banner {
     align-items: center;
-    background: rgba(98, 93, 187, 0.08);
-    border-bottom: 1px solid rgba(98, 93, 187, 0.16);
-    color: #3f3a75;
+    background: rgba(255, 112, 32, 0.08);
+    border-bottom: 1px solid rgba(255, 112, 32, 0.16);
+    color: var(--primary, #FF7020);
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
@@ -107,7 +107,7 @@ span.flaticon2-website.icon-lg{
     margin-top: 15px;
     text-align: left;
     padding: 5px;
-    background-color: #625dbb;
+    background-color: var(--primary, #FF7020);
     display: block;
     color: #fff;
 }
@@ -136,11 +136,12 @@ span.flaticon2-website.icon-lg{
     margin-top: 15px;
     text-align: left;
     padding: 5px;
-    background-color: #6bc0f9;
-    color: #000;
+    background-color: rgba(255, 112, 32, 0.08);
+    color: var(--primary, #FF7020);
+    border-left: 3px solid var(--primary, #FF7020);
 }
 
-.card {
+#chatSideRight .card {
     box-shadow:none !important;
     border:none !important;
 }
@@ -256,4 +257,68 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
 }
 .scroll-pull{
     padding-left: 10px;
+}
+
+/* Theme-aligned colors for the EAF Angular template ------------------------------ */
+#chatSideRight .bs-canvas-header {
+    background-color: var(--primary, #FF7020) !important;
+    color: #fff !important;
+}
+
+#chatSideRight .bs-canvas-header .close,
+#chatSideRight .bs-canvas-header .pinned,
+#chatSideRight .bs-canvas-header h4 {
+    color: #fff !important;
+}
+
+#chatSideRight .bg-light-primary {
+    background-color: rgba(255, 112, 32, 0.1) !important;
+    color: #212529 !important;
+}
+
+#chatSideRight .bg-light-success {
+    background-color: rgba(52, 191, 163, 0.1) !important;
+    color: #212529 !important;
+}
+
+#chatSideRight .messages > .d-flex {
+    background-color: transparent !important;
+}
+
+#chatSideRight .text-primary,
+#chatSideRight .chat-message-sender {
+    color: var(--primary, #FF7020) !important;
+}
+
+#chatSideRight .label-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+#chatSideRight .label-success {
+    background-color: #34bfa3 !important;
+}
+
+#chatSideRight .label-secondary {
+    background-color: #9c9c9c !important;
+}
+
+#chatSideRight #EmptyFriendListInfo,
+#chatSideRight #EmptyBlockedFriendListInfo {
+    text-align: center;
+    color: #6c757d;
+    padding: 1rem 0;
+}
+
+#chatSideRight .chat-attachment-actions .btn {
+    color: var(--primary, #FF7020);
+    border-color: var(--primary, #FF7020);
+    background-color: #fff;
+}
+
+#chatSideRight .chat-attachment-actions .btn:hover {
+    background-color: var(--primary, #FF7020);
+    color: #fff;
 }
