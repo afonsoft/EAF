@@ -28,7 +28,19 @@ CLAUDE.md                 ← Delta para Claude Code (@import AGENTS.md)
     ├── aspnet-boilerplate-modules/
     ├── dotnet-backend-patterns/
     ├── dotnet-best-practices/
-    └── dotnet-design-pattern-review/
+    ├── dotnet-design-pattern-review/
+    ├── abp-multi-tenancy/
+    ├── abp-microservice/
+    ├── security-jwt/
+    ├── sql-code-review/
+    ├── sql-optimization/
+    ├── dotnet-github-actions/
+    ├── systematic-debugging/
+    ├── test-driven-development/
+    ├── verification-before-completion/
+    ├── design-patterns/
+    ├── writing-plans/
+    └── using-git-worktrees/
 rules/
 ├── csharp-eaf.instructions.md        ← Rules C#/EAF (applyTo: **/*.cs)
 ├── angular-eaf.instructions.md       ← Rules Angular (applyTo: **/*.ts)
