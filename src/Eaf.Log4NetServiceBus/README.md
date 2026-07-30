@@ -40,7 +40,7 @@ Appender do log4net para Service Bus:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Log4NetServiceBus --version 9.4.0
+dotnet add package Eaf.Log4NetServiceBus --version 9.4.1
 ```
 
 ### Instalação via Referência de Projeto

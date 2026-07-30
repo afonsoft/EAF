@@ -1,8 +1,8 @@
-# Spec de Migração — Templates EAF 9.3.1 → 9.4.0
+# Spec de Migração — Templates EAF 9.3.1 → 9.4.1
 
 ## Objetivo
 
-Este documento descreve como atualizar projetos que já foram gerados a partir dos templates EAF (API .NET 10 e Angular) da versão **9.3.1** para **9.4.0**. A versão 9.4.0 agrega as funcionalidades do backport GameHub (CORS, public errors, login multi-tenant, SignalR moderno, responsividade), otimizações de performance/memória e a versão 9.4.0 dos pacotes/módulos EAF.
+Este documento descreve como atualizar projetos que já foram gerados a partir dos templates EAF (API .NET 10 e Angular) da versão **9.3.1** para **9.4.1**. A versão 9.4.1 agrega as funcionalidades do backport GameHub (CORS, public errors, login multi-tenant, SignalR moderno, responsividade), otimizações de performance/memória e a versão 9.4.1 dos pacotes/módulos EAF.
 
 ## Escopo
 
@@ -13,7 +13,7 @@ Este documento descreve como atualizar projetos que já foram gerados a partir d
 ## Pré-requisitos
 
 - [ ] Backup do código e do banco de dados de produção.
-- [ ] Branch de migração: `git checkout -b migration/eaf-9.4.0`.
+- [ ] Branch de migração: `git checkout -b migration/eaf-9.4.1`.
 - [ ] .NET 10 SDK e Node.js 18+.
 - [ ] Banco de dados SQL Server/PostgreSQL acessível.
 - [ ] Solução compila na versão atual (`dotnet build Eaf.ProjectName.sln`).
@@ -26,18 +26,18 @@ A centralização da versão acontece em `common.props` do repositório EAF. Em 
 
 ```xml
 <!-- Templates/Api/src/Eaf.ProjectName.Web.Host/Eaf.ProjectName.Web.Host.csproj -->
-<!--<PackageReference Include="Eaf.Castle.Serilog" Version="9.4.0" />
-<PackageReference Include="Eaf.Middleware.Web.Core" Version="9.4.0" />
-<PackageReference Include="Eaf.OpenTelemetry" Version="9.4.0" />-->
+<!--<PackageReference Include="Eaf.Castle.Serilog" Version="9.4.1" />
+<PackageReference Include="Eaf.Middleware.Web.Core" Version="9.4.1" />
+<PackageReference Include="Eaf.OpenTelemetry" Version="9.4.1" />-->
 
 <!-- Templates/Api/src/Eaf.ProjectName.Core/Eaf.ProjectName.Core.csproj -->
-<!--<PackageReference Include="Eaf.Middleware.Core" Version="9.4.0" />-->
+<!--<PackageReference Include="Eaf.Middleware.Core" Version="9.4.1" />-->
 
 <!-- Templates/Api/src/Eaf.ProjectName.Application/Eaf.ProjectName.Application.csproj -->
-<!--<PackageReference Include="Eaf.Middleware.Application" Version="9.4.0" />-->
+<!--<PackageReference Include="Eaf.Middleware.Application" Version="9.4.1" />-->
 ```
 
-> Projetos que referenciam os projetos-fonte do EAF via `<ProjectReference>` continuam usando a origem local e herdam a versão `9.4.0` do `common.props`.
+> Projetos que referenciam os projetos-fonte do EAF via `<ProjectReference>` continuam usando a origem local e herdam a versão `9.4.1` do `common.props`.
 
 ---
 
@@ -45,7 +45,7 @@ A centralização da versão acontece em `common.props` do repositório EAF. Em 
 
 ### 2.1 CORS seguro (`AddEafCors`)
 
-O EAF 9.4.0 substitui a configuração CORS aberta por uma política refletiva de origem, suporte a wildcard de subdomínio e exposição dos headers usados pelo interceptor Angular.
+O EAF 9.4.1 substitui a configuração CORS aberta por uma política refletiva de origem, suporte a wildcard de subdomínio e exposição dos headers usados pelo interceptor Angular.
 
 **Ações:**
 
@@ -161,7 +161,7 @@ modelBuilder.Entity<UserTenantMembership>(b =>
 
 ### 2.5 Migrations EF Core obrigatórias
 
-O template 9.4.0 inclui duas migrations. Para projetos existentes, gere equivalentes ou aplique as migrations do template (se o modelo coincidir):
+O template 9.4.1 inclui duas migrations. Para projetos existentes, gere equivalentes ou aplique as migrations do template (se o modelo coincidir):
 
 ```bash
 # Na pasta do projeto EntityFrameworkCore
@@ -195,7 +195,7 @@ Consulte `docs/integration/gamehub-consumer-contracts.md` para regras de version
 
 ### 2.7 Otimizações de performance e memória
 
-A versão 9.4.0 inclui otimizações nos módulos EAF. Projetos gerados não precisam de mudanças de código, apenas atualizar a versão dos pacotes/referências. Detalhes técnicos estão em `docs/performance-memory-optimizations.md`.
+A versão 9.4.1 inclui otimizações nos módulos EAF. Projetos gerados não precisam de mudanças de código, apenas atualizar a versão dos pacotes/referências. Detalhes técnicos estão em `docs/performance-memory-optimizations.md`.
 
 Pontos principais:
 
@@ -287,7 +287,7 @@ console.log(this.tokenService.getRoles());
 
 ### 3.4 Login em duas etapas
 
-**Arquivos que precisam ser sincronizados com o template 9.4.0:**
+**Arquivos que precisam ser sincronizados com o template 9.4.1:**
 
 - `src/account/login/login.service.ts` — adiciona `availableTenantsResult`, `availableTenants(model)`, `selectTenant(model)` e `loginTenant(result, tenantId)`.
 - `src/account/login/login.component.ts` — `login()` decide entre `normalLogin()` e `twoStepLogin()`; `twoStepLogin()` trata 0, 1 ou N tenants.
@@ -384,7 +384,7 @@ export class AppCommonModule {}
 <app-empty-state [message]="'NoData' | localize"></app-empty-state>
 ```
 
-Atualize `tenants.component.html` e `users.component.html` para usar `[loading]`, `emptyMessage`, `app-status-badge` e `app-empty-state` conforme o template 9.4.0.
+Atualize `tenants.component.html` e `users.component.html` para usar `[loading]`, `emptyMessage`, `app-status-badge` e `app-empty-state` conforme o template 9.4.1.
 
 ### 3.8 Responsividade mobile
 
@@ -427,7 +427,7 @@ npm run service-update  # executa nswag
 Projetos baseados em `Templates/Worker` devem:
 
 - Garantir que `ProjectNameCoreModule` dependa de `MiddlewareCoreModule`.
-- Alinhar `common.props` com a versão 9.4.0 dos módulos EAF (caso referencie NuGet).
+- Alinhar `common.props` com a versão 9.4.1 dos módulos EAF (caso referencie NuGet).
 - Verificar `WorkerModule.cs` para incluir `MiddlewareWorkerModule`.
 
 ---

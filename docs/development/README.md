@@ -8,5 +8,5 @@ Esta seção fornece um guia para desenvolvedores que trabalham com o Sistema EA
 * [Best Practices](./best-practices.md)
 * [Advanced Configurations](./advanced-configurations.md)
 * [Performance Optimization](./performance-optimization.md)
-* [Migração EAF 9.3.1 → 9.4.0](../../.specs/eaf-template-migration-9.4.0.md)
+* [Migração EAF 9.3.1 → 9.4.1](../../.specs/eaf-template-migration-9.4.1.md)
 * [Troubleshooting](./troubleshooting.md)

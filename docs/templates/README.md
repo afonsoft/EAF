@@ -11,7 +11,7 @@ Esta seção detalha os templates fornecidos pelo EAF para iniciar novos projeto
 
 ## Migração de Templates Existentes
 
-Para atualizar projetos gerados a partir de versões anteriores dos templates, consulte o [Spec de Migração EAF 9.3.1 → 9.4.0](../../.specs/eaf-template-migration-9.4.0.md).
+Para atualizar projetos gerados a partir de versões anteriores dos templates, consulte o [Spec de Migração EAF 9.3.1 → 9.4.1](../../.specs/eaf-template-migration-9.4.1.md).
 
 ## Visão Geral
 

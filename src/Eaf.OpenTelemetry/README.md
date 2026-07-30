@@ -47,7 +47,7 @@ Este módulo segue os padrões do OpenTelemetry e se integra perfeitamente com A
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.OpenTelemetry --version 9.4.0
+dotnet add package Eaf.OpenTelemetry --version 9.4.1
 ```
 
 ### Instalação via Referência de Projeto

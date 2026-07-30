@@ -44,7 +44,7 @@ Configurações de conexão Azure AD:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.AzureActiveDirectory --version 9.4.0
+dotnet add package Eaf.Middleware.AzureActiveDirectory --version 9.4.1
 ```
 
 ### Instalação via Referência de Projeto

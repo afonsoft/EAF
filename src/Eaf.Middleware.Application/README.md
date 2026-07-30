@@ -52,11 +52,11 @@ Este módulo segue os padrões de Application Layer do Domain-Driven Design (DDD
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.Middleware.Core 9.4.0
+- Eaf.Middleware.Core 9.4.1
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Application --version 9.4.0
+dotnet add package Eaf.Middleware.Application --version 9.4.1
 ```
 
 ### Instalação via Referência de Projeto
