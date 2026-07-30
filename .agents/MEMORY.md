@@ -1,5 +1,26 @@
 # EAF Coverage Audit Memory
 
+## P71: full Docker stack multi-tenant / chat test (2026-07-30)
+- Stack: `docker-compose.all.yml` with `eaf-sqlserver`, `eaf-migrator`, `eaf-api`, `eaf-worker`, `eaf-angular` all healthy on `localhost:5000` and `localhost:4200`.
+- Default admin password is `123qwe` and forces reset; set it to `TenantPass123!` via `/api/services/app/Account/ResetPassword` before any other calls.
+- Created tenants `tenantA` (id 2) and `tenantB` (id 3) with `CreateTenant`; each tenant gets its own `admin` user and isolated user store.
+- Enabled chat features for both tenants via `PUT /api/services/app/Tenant/UpdateTenantFeatures`:
+  - `App.ChatFeature`
+  - `App.ChatFeature.TenantToTenant`
+  - `App.ChatFeature.GroupChat`
+- Test users:
+  - `shareduser` in both tenantA and tenantB (same credentials, different `sub`/user ids).
+  - `alice` only in tenantA.
+  - `bob` only in tenantB.
+- Verified tenant data isolation: tenantA user list contains `admin`, `alice`, `shareduser` and does **not** contain `bob`.
+- Verified cross-tenant SignalR chat:
+  - Created friendship from tenantA admin to tenantB admin with `POST /api/services/app/Friendship/CreateFriendshipRequestByUserName`.
+  - Sent message via `/signalr-chat` `SendMessage` from tenantA admin.
+  - Confirmed tenantB admin can retrieve the message via `GET /api/services/app/Chat/GetUserChatMessages?UserId=<sender>&TenantId=<senderTenant>`.
+- Full automation: `.agents/skills/testing-eaf-docker/scripts/eaf-fullstack-test.py` (23/23 checks passing).
+- Manual routine documented in `.agents/skills/testing-eaf-docker/SKILL.md`.
+- Use this script for any new feature affecting multi-tenancy, auth, users, SignalR or CORS.
+
 Last session branch: `feature/devin-20260718-priority69-compose-hardening`
 Baseline coverage (P40): Line 93.1%, Branch 76.9%, Method 98.1%.
 Current coverage (after P42): Line 95.5%, Branch 80.9%, Method 98.6%.
