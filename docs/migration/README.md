@@ -31,6 +31,7 @@ Quick reference summaries for major version changes:
 ## EAF Version Migrations
 
 - **[EAF 9.3.1 to 9.4.1 Migration Spec](../../.specs/eaf-template-migration-9.4.1.md)**: Step-by-step guide for updating existing API and Angular template projects to EAF 9.4.1, including CORS, public errors, two-step multi-tenant login, modern SignalR, responsive UI and required EF Core migrations.
+- **[Prompt de migração EAF 9.4.0 → 9.4.1](./prompt-migracao-eaf-9.4.0-para-9.4.1.md)**: Prompt para agentes aplicarem os ajustes de template (Angular + API) em projetos gerados que já estejam na versão 9.4.0.
 
 ## .NET Framework Migrations
 
