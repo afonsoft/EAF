@@ -10,9 +10,11 @@ Use this skill when asked to end-to-end test the `afonsoft/EAF` repository, espe
 
 ## Quick start
 
+Set the required passwords as environment variables and start the full stack:
+
 ```bash
 cd /home/ubuntu/repos/EAF
-export MSSQL_SA_PASSWORD='EafDocker2026!'
+export MSSQL_SA_PASSWORD='<your-sql-sa-password>'
 docker compose -f docker-compose.all.yml up -d --build
 ```
 
@@ -26,18 +28,20 @@ Expected: `eaf-sqlserver`, `eaf-migrator` (exited), `eaf-api`, `eaf-worker` and 
 
 ## Automated smoke test
 
-A single Python script runs the whole scenario:
+A single Python script runs the whole scenario. It needs the admin password that will be used for all test users and, on the first run, the current initial admin password (for a fresh ABP seed this is the default sample password):
 
 ```bash
 pip3 install signalrcore   # only needed for the chat step
 cd /home/ubuntu/repos/EAF
+export EAF_INITIAL_PASSWORD='<current-admin-password>'
+export EAF_DEFAULT_PASSWORD='<desired-admin-password>'
 python3 .agents/skills/testing-eaf-docker/scripts/eaf-fullstack-test.py
 ```
 
 The script exercises:
 
 1. API and Angular health checks.
-2. Host admin login (resets default password on first run).
+2. Host admin login (resets the admin password on the first run).
 3. Tenant CRUD: creates `tenantA` and `tenantB`.
 4. Tenant admin login with `Abp-TenantId` header.
 5. Enables `App.ChatFeature`, `App.ChatFeature.TenantToTenant` and `App.ChatFeature.GroupChat` for both tenants.
@@ -53,7 +57,7 @@ The script exercises:
 
 ```bash
 cd /home/ubuntu/repos/EAF
-export MSSQL_SA_PASSWORD='EafDocker2026!'
+export MSSQL_SA_PASSWORD='<your-sql-sa-password>'
 docker compose -f docker-compose.all.yml up -d --build
 ```
 
@@ -66,12 +70,15 @@ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:4200
 
 ### 3. Host admin first login
 
-The seeded admin password is `123qwe` and forces a reset. Login first to get the `passwordResetCode`:
+The seeded admin password forces a reset on the first login. Use the current initial password to authenticate and get the `passwordResetCode`:
 
 ```bash
+export INITIAL_PASSWORD='<current-admin-password>'
+export ADMIN_PASSWORD='<desired-admin-password>'
+
 curl -s -X POST http://localhost:5000/api/TokenAuth/Authenticate \
   -H 'Content-Type: application/json' \
-  -d '{"userNameOrEmailAddress":"admin","password":"123qwe","rememberClient":false}'
+  -d "{\"userNameOrEmailAddress\":\"admin\",\"password\":\"$INITIAL_PASSWORD\",\"rememberClient\":false}"
 ```
 
 Reset the password:
@@ -79,7 +86,7 @@ Reset the password:
 ```bash
 curl -s -X POST http://localhost:5000/api/services/app/Account/ResetPassword \
   -H 'Content-Type: application/json' \
-  -d '{"userId":2,"password":"TenantPass123!","resetCode":"<passwordResetCode>"}'
+  -d "{\"userId\":2,\"password\":\"$ADMIN_PASSWORD\",\"resetCode\":\"<passwordResetCode>\"}"
 ```
 
 Then login with the new password:
@@ -87,7 +94,7 @@ Then login with the new password:
 ```bash
 curl -s -X POST http://localhost:5000/api/TokenAuth/Authenticate \
   -H 'Content-Type: application/json' \
-  -d '{"userNameOrEmailAddress":"admin","password":"TenantPass123!","rememberClient":false}'
+  -d "{\"userNameOrEmailAddress\":\"admin\",\"password\":\"$ADMIN_PASSWORD\",\"rememberClient\":false}"
 ```
 
 Decode the JWT payload (second dot-separated segment) and confirm `tenantid` is absent (host context).
@@ -98,15 +105,16 @@ Create two tenants:
 
 ```bash
 TOKEN=<host-jwt>
+TENANT_ADMIN_PASSWORD='<tenant-admin-password>'
 curl -s -X POST http://localhost:5000/api/services/app/Tenant/CreateTenant \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"tenancyName":"tenantA","name":"tenantA","adminEmailAddress":"admin@tenantA.com","adminPassword":"TenantPass123!","isActive":true,"shouldChangePasswordOnNextLogin":false}'
+  -d "{\"tenancyName\":\"tenantA\",\"name\":\"tenantA\",\"adminEmailAddress\":\"admin@tenantA.com\",\"adminPassword\":\"$TENANT_ADMIN_PASSWORD\",\"isActive\":true,\"shouldChangePasswordOnNextLogin\":false}"
 
 curl -s -X POST http://localhost:5000/api/services/app/Tenant/CreateTenant \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"tenancyName":"tenantB","name":"tenantB","adminEmailAddress":"admin@tenantB.com","adminPassword":"TenantPass123!","isActive":true,"shouldChangePasswordOnNextLogin":false}'
+  -d "{\"tenancyName\":\"tenantB\",\"name\":\"tenantB\",\"adminEmailAddress\":\"admin@tenantB.com\",\"adminPassword\":\"$TENANT_ADMIN_PASSWORD\",\"isActive\":true,\"shouldChangePasswordOnNextLogin\":false}"
 ```
 
 List tenants:
@@ -124,7 +132,7 @@ Login to `tenantA` and `tenantB` and decode the JWT `tenantid` claim:
 curl -s -X POST http://localhost:5000/api/TokenAuth/Authenticate \
   -H 'Content-Type: application/json' \
   -H 'Abp-TenantId: 2' \
-  -d '{"userNameOrEmailAddress":"admin","password":"TenantPass123!","rememberClient":false}'
+  -d "{\"userNameOrEmailAddress\":\"admin\",\"password\":\"$ADMIN_PASSWORD\",\"rememberClient\":false}"
 ```
 
 ### 6. Various users per tenant
@@ -132,18 +140,20 @@ curl -s -X POST http://localhost:5000/api/TokenAuth/Authenticate \
 As the tenant admin, create a shared user in both tenants and unique users in each tenant:
 
 ```bash
+USER_PASSWORD='<test-user-password>'
+
 # tenantA (Abp-TenantId: 2)
 curl -s -X POST http://localhost:5000/api/services/app/User/CreateOrUpdateUser \
   -H 'Content-Type: application/json' \
   -H 'Abp-TenantId: 2' \
   -H "Authorization: Bearer $tenantA_token" \
-  -d '{"assignedRoleNames":["Admin"],"setRandomPassword":false,"sendActivationEmail":false,"user":{"userName":"shareduser","name":"Shared","surname":"User","emailAddress":"shared@tenantA.com","isActive":true,"password":"TenantPass123!","shouldChangePasswordOnNextLogin":false}}'
+  -d "{\"assignedRoleNames\":[\"Admin\"],\"setRandomPassword\":false,\"sendActivationEmail\":false,\"user\":{\"userName\":\"shareduser\",\"name\":\"Shared\",\"surname\":\"User\",\"emailAddress\":\"shared@tenantA.com\",\"isActive\":true,\"password\":\"$USER_PASSWORD\",\"shouldChangePasswordOnNextLogin\":false}}"
 
 curl -s -X POST http://localhost:5000/api/services/app/User/CreateOrUpdateUser \
   -H 'Content-Type: application/json' \
   -H 'Abp-TenantId: 2' \
   -H "Authorization: Bearer $tenantA_token" \
-  -d '{"assignedRoleNames":["Admin"],"setRandomPassword":false,"sendActivationEmail":false,"user":{"userName":"alice","name":"Alice","surname":"A","emailAddress":"alice@tenantA.com","isActive":true,"password":"TenantPass123!","shouldChangePasswordOnNextLogin":false}}'
+  -d "{\"assignedRoleNames\":[\"Admin\"],\"setRandomPassword\":false,\"sendActivationEmail\":false,\"user\":{\"userName\":\"alice\",\"name\":\"Alice\",\"surname\":\"A\",\"emailAddress\":\"alice@tenantA.com\",\"isActive\":true,\"password\":\"$USER_PASSWORD\",\"shouldChangePasswordOnNextLogin\":false}}"
 ```
 
 Repeat for `tenantB` with `shareduser` and `bob`.
@@ -156,12 +166,12 @@ The same username (`shareduser`) can exist independently in multiple tenants. Lo
 curl -s -X POST http://localhost:5000/api/TokenAuth/Authenticate \
   -H 'Content-Type: application/json' \
   -H 'Abp-TenantId: 2' \
-  -d '{"userNameOrEmailAddress":"shareduser","password":"TenantPass123!","rememberClient":false}'
+  -d "{\"userNameOrEmailAddress\":\"shareduser\",\"password\":\"$USER_PASSWORD\",\"rememberClient\":false}"
 
 curl -s -X POST http://localhost:5000/api/TokenAuth/Authenticate \
   -H 'Content-Type: application/json' \
   -H 'Abp-TenantId: 3' \
-  -d '{"userNameOrEmailAddress":"shareduser","password":"TenantPass123!","rememberClient":false}'
+  -d "{\"userNameOrEmailAddress\":\"shareduser\",\"password\":\"$USER_PASSWORD\",\"rememberClient\":false}"
 ```
 
 Each token has a different `sub` and a different `tenantid`, confirming that tenants are isolated identity stores.
@@ -267,7 +277,7 @@ Expected: `204` with `Access-Control-Allow-Origin`, `Access-Control-Allow-Method
 - Playwright `context.route`/`page.on('response')` can capture `Abp-TenantId` headers and decode JWTs to verify the tenant flow.
 
 ## Known gotchas
-- The running DB may not match the requested sample passwords. If `admin/NewPass123!` fails, try `admin/TenantPass123!` or check `AbpUsers` directly.
+- The running DB may not match the requested sample passwords. If the admin login fails, verify the current `AbpUsers` password hash directly or reset it through `/api/services/app/Account/ResetPassword`.
 - Tenant header/cookie is now `Abp-TenantId` (dash) everywhere: `EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `eaf.js`, `MiddlewareControllerBase` and `EafCorsConfiguration`. The header is omitted when no tenant is selected to keep the host context; if you see `Abp-TenantId: null` in requests, a client is still using the old hardcoded header.
 - The Angular app lazy-loads the account module. If the login page is blank after navigation, force a hard navigation with `window.location.replace('/account/login')` and wait for the chunk.
 - `topbar.component.ts` depends on `appSessionService` being re-initialized after login; if it stays on the loading spinner, the session was not refreshed.

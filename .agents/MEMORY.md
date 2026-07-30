@@ -2,7 +2,7 @@
 
 ## P71: full Docker stack multi-tenant / chat test (2026-07-30)
 - Stack: `docker-compose.all.yml` with `eaf-sqlserver`, `eaf-migrator`, `eaf-api`, `eaf-worker`, `eaf-angular` all healthy on `localhost:5000` and `localhost:4200`.
-- Default admin password is `123qwe` and forces reset; set it to `TenantPass123!` via `/api/services/app/Account/ResetPassword` before any other calls.
+- Default ABP seed admin password forces a reset on first login; use `/api/services/app/Account/ResetPassword` to set a real password before any other calls.
 - Created tenants `tenantA` (id 2) and `tenantB` (id 3) with `CreateTenant`; each tenant gets its own `admin` user and isolated user store.
 - Enabled chat features for both tenants via `PUT /api/services/app/Tenant/UpdateTenantFeatures`:
   - `App.ChatFeature`

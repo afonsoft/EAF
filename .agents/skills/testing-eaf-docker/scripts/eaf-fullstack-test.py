@@ -8,8 +8,10 @@ Covers:
 - Unique users per tenant
 - Cross-tenant SignalR chat
 
-Requires the full stack up:
-    export MSSQL_SA_PASSWORD='EafDocker2026!'
+Requires the full stack up and a few environment variables:
+    export MSSQL_SA_PASSWORD='<your-sql-sa-password>'
+    export EAF_INITIAL_PASSWORD='<current-admin-password>'
+    export EAF_DEFAULT_PASSWORD='<desired-admin-password>'
     docker compose -f docker-compose.all.yml up -d --build
 
 Optional dependency for the chat step:
@@ -18,7 +20,6 @@ Optional dependency for the chat step:
 import base64
 import json
 import os
-import subprocess
 import sys
 import time
 import urllib.error
@@ -26,7 +27,13 @@ import urllib.request
 
 API = os.environ.get("EAF_API_URL", "http://localhost:5000")
 ANGULAR = os.environ.get("EAF_ANGULAR_URL", "http://localhost:4200")
-DEFAULT_PASSWORD = os.environ.get("EAF_DEFAULT_PASSWORD", "TenantPass123!")
+
+INITIAL_PASSWORD = os.environ.get("EAF_INITIAL_PASSWORD")
+DEFAULT_PASSWORD = os.environ.get("EAF_DEFAULT_PASSWORD")
+
+if not DEFAULT_PASSWORD:
+    print("ERROR: set EAF_DEFAULT_PASSWORD to the desired admin password", file=sys.stderr)
+    sys.exit(1)
 
 RESULTS = []
 
@@ -73,7 +80,16 @@ def login(username, password, tenant_id=None):
 
 def ensure_admin_password(username, password):
     """Reset default admin password on the first run."""
+    # Try the target password first in case it was already reset.
     code, r = login(username, password)
+    if code == 200 and r.get("result", {}).get("accessToken"):
+        return code, r
+
+    if not INITIAL_PASSWORD:
+        print("ERROR: host admin requires a password reset but EAF_INITIAL_PASSWORD is not set", file=sys.stderr)
+        sys.exit(1)
+
+    code, r = login(username, INITIAL_PASSWORD)
     if code == 200 and r.get("result", {}).get("shouldResetPassword"):
         reset_code = r["result"]["passwordResetCode"]
         user_id = r["result"]["userId"]
