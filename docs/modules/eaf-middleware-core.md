@@ -40,7 +40,7 @@ public class MyModule : AbpModule
   "EafMiddleware": {
     "Core": {
       "Enabled": true,
-      "Version": "9.4.0"
+      "Version": "9.4.1"
     }
   }
 }

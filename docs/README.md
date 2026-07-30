@@ -16,8 +16,8 @@ Para facilitar a consulta, a documentação está organizada nas seguintes seç�
     *   **[ASP.NET Core API Template](../../Templates/Api/README.md)**: Documentação completa do template API com guias de instalação, módulos e implementações.
     *   **[Worker Template](../../Templates/Worker/README.md)**: Documentação completa do template Worker para serviços de background com guias de instalação, módulos e implementações.
 *   **[Desenvolvimento](./development/README.md)**: Informações para desenvolvedores, incluindo como começar, melhores práticas, configurações avançadas, otimização de performance e troubleshooting.
-*   **[Migração](./migration/README.md)**: Guias de migração entre versões do EAF e frameworks. Inclui o [spec de migração 9.3.1 → 9.4.0](../.specs/eaf-template-migration-9.4.0.md) para projetos baseados nos templates API e Angular.
-*   **[Otimizações de Performance e Memória](../docs/performance-memory-optimizations.md)**: Detalhamento das otimizações de performance e memória introduzidas na versão 9.4.0.
+*   **[Migração](./migration/README.md)**: Guias de migração entre versões do EAF e frameworks. Inclui o [spec de migração 9.3.1 → 9.4.1](../.specs/eaf-template-migration-9.4.1.md) para projetos baseados nos templates API e Angular.
+*   **[Otimizações de Performance e Memória](../docs/performance-memory-optimizations.md)**: Detalhamento das otimizações de performance e memória introduzidas na versão 9.4.1.
 *   **[API](./api/README.md)**: Documentação da API do sistema, cobrindo Controllers, Application Services, Domain Services, Repositórios e Entidades.
 *   **[Implantação](./deployment/README.md)**: Guias sobre configuração de ambiente, migrações de banco de dados e considerações para produção.
 *   **[Multi-Tenancy Avançado](./eaf-multi-tenant-login.md)**: Fluxo de login em duas etapas para usuários host, `TenantUserManager`, *shadow users* e replicação de roles/permissões. Veja também [TenantUserManager e Shadow Users](./eaf-tenant-user-manager.md) e [Testes Reais](./eaf-multi-tenant-login-real-tests.md).
@@ -26,7 +26,7 @@ Para facilitar a consulta, a documentação está organizada nas seguintes seç�
 ## Changelog
 
 *   **[Changelog v2.0](./development/CHANGELOG-v2.md)**: Melhorias de performance backend, suporte multi-database, otimizações Angular e refatoração SOLID (21 especificações implementadas — PR #61).
-*   **[CHANGELOG.md](../../CHANGELOG.md)**: Histórico completo de mudanças, incluindo a versão 9.4.0.
+*   **[CHANGELOG.md](../../CHANGELOG.md)**: Histórico completo de mudanças, incluindo a versão 9.4.1.
 
 ## Contribuindo
 

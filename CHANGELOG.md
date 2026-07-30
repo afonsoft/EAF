@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
     - Testes para Security, Profile, Localization, Timing, UI Customization
 *   feat(perf): Projeto de benchmarks `Eaf.Middleware.Application.Benchmarks` com BenchmarkDotNet (`MemoryDiagnoser`) para `SqlServerCache` e leitura de cauda de logs
 *   docs: Guia de otimizações de performance e memória (`docs/performance-memory-optimizations.md`)
-*   docs: Spec de migração dos templates EAF da versão 9.3.1 para 9.4.0 (`.specs/eaf-template-migration-9.4.0.md`) e atualização dos índices de documentação/wiki
+*   docs: Spec de migração dos templates EAF da versão 9.3.1 para 9.4.1 (`.specs/eaf-template-migration-9.4.1.md`) e atualização dos índices de documentação/wiki
 *   docs: Documentação XML `/// <summary>` adicionada a 48 tipos públicos sem documentação
 *   feat: add repo summary to .openhands/microagents/repo.md
 
@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Changed
 
-*   chore: Bump dos módulos EAF para a versão 9.4.0 e atualização das documentações de instalação dos pacotes NuGet
+*   chore: Bump dos módulos EAF para a versão 9.4.1 e atualização das documentações de instalação dos pacotes NuGet
 *   chore: Bump dos templates e módulos para a versão 9.3.1 (PRs #248 e #249)
 *   docs: README e documentação atualizados com as novas implementações de login multi-tenant, contratos realtime e sociais, rate limit e moderação
 *   docs: Atualizar README badges com métricas atuais (Line 36.6%, Tests 2384, 0 Warnings)
