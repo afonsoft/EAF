@@ -169,7 +169,7 @@ export class PaymentServiceProxy {
     updateGatewaySettings(input: IPaymentGatewaySettingsDto): Observable<void> {
         const url_ = this.baseUrl + '/api/services/app/Payment/UpdateGatewaySettings';
         const options: unknown = { body: input, headers: { 'Content-Type': 'application/json' }, observe: 'response', responseType: 'blob' };
-        return this.http.request('post', url_, options).pipe(_observableMergeMap((response: any) => this.processAction(response))).pipe(_observableCatch((response: any) => {
+        return this.http.request('put', url_, options).pipe(_observableMergeMap((response: any) => this.processAction(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);
         }));
