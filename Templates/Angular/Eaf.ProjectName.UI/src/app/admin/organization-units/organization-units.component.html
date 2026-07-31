@@ -33,7 +33,7 @@
             </ng-template>
             <ng-template let-record="$implicit" pTemplate="body">
               <tr>
-                <td style="width: 50%" [style]="indent(record.level)">
+                <td style="width: 50%" [ngStyle]="indent(record.level)">
                   <i class="flaticon-folder-1 mr-2"></i>{{ record.displayName }}
                 </td>
                 <td style="width: 15%">{{ record.code }}</td>

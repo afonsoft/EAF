@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { DashboardComponent } from './dashboard.component';
-import { DashboardServiceProxy } from '@shared/service-proxies/dashboard.service-proxy';
+import { PaymentsComponent } from './payments.component';
+import { PaymentServiceProxy } from '@shared/service-proxies/payment.service-proxy';
+import { EditionServiceProxy } from '@shared/service-proxies/edition.service-proxy';
 import { LocalizationService } from '@eaf/localization/localization.service';
 import { PermissionCheckerService } from '@eaf/auth/permission-checker.service';
 import { FeatureCheckerService } from '@eaf/features/feature-checker.service';
@@ -13,7 +14,8 @@ import { AppSessionService } from '@shared/common/session/app-session.service';
 import { AppUiCustomizationService } from '@shared/common/ui/app-ui-customization.service';
 import { AppUrlService } from '@shared/common/nav/app-url.service';
 import {
-  MockDashboardServiceProxy,
+  MockPaymentServiceProxy,
+  MockEditionServiceProxy,
   MockLocalizationService,
   MockPermissionCheckerService,
   MockFeatureCheckerService,
@@ -28,16 +30,17 @@ import {
   setupEafGlobals,
 } from '../../../test-helpers/mock-services';
 
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+describe('PaymentsComponent', () => {
+  let component: PaymentsComponent;
+  let fixture: ComponentFixture<PaymentsComponent>;
 
   beforeEach(() => {
     setupEafGlobals();
     TestBed.configureTestingModule({
-      declarations: [DashboardComponent, MockLocalizePipe],
+      declarations: [PaymentsComponent, MockLocalizePipe],
       providers: [
-        { provide: DashboardServiceProxy, useClass: MockDashboardServiceProxy },
+        { provide: PaymentServiceProxy, useClass: MockPaymentServiceProxy },
+        { provide: EditionServiceProxy, useClass: MockEditionServiceProxy },
         { provide: LocalizationService, useClass: MockLocalizationService },
         { provide: PermissionCheckerService, useClass: MockPermissionCheckerService },
         { provide: FeatureCheckerService, useClass: MockFeatureCheckerService },
@@ -52,7 +55,7 @@ describe('DashboardComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(PaymentsComponent);
     component = fixture.componentInstance;
   });
 
@@ -60,12 +63,25 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should return empty tiles array by default', () => {
-    expect(component.tiles).toEqual([]);
+  it('should return edition display name from lookup', () => {
+    component.editions = [{ id: 1, displayName: 'Standard' } as any];
+    expect(component.getEditionDisplayName(1)).toBe('Standard');
   });
 
-  it('should expose tiles from dashboard', () => {
-    component.dashboard = { tiles: [{ title: 'Test', value: 10, description: 'tile' } as any] } as any;
-    expect(component.tiles.length).toBe(1);
+  it('should fallback to id when edition not found', () => {
+    expect(component.getEditionDisplayName(99)).toBe('99');
+  });
+
+  it('should map status classes correctly', () => {
+    expect(component.getStatusClass('Pending')).toContain('badge-warning');
+    expect(component.getStatusClass('Completed')).toContain('badge-success');
+    expect(component.getStatusClass('Failed')).toContain('badge-danger');
+  });
+
+  it('should reset filters on init', () => {
+    component.filters = { filterText: 'test', status: 'Pending' };
+    component.resetFilters();
+    expect(component.filters.filterText).toBe('');
+    expect(component.filters.status).toBe('');
   });
 });

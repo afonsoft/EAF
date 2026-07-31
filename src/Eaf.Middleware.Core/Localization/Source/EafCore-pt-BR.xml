@@ -5,6 +5,7 @@
 		<text name="ModificationTime">Data de atualização</text>
 		<text name="AdminEmailAddress">Email responsável</text>
 		<text name="ThisFieldIsRequired">Campo obrigatório</text>
+		<text name="RequiredField">{0} é obrigatório.</text>
 		<text name="InvalidPattern">Formato inválido</text>
 		<text name="Unlock">Desbloquear</text>
 		<text name="UnlockedTheUser">Usuário {0} desbloqueado com sucesso.</text>
@@ -444,6 +445,7 @@
 		<text name="MassNotificationsHeaderInfo">Envie notificações para usuários, perfis ou unidades organizacionais.</text>
 		<text name="UserDelegationsHeaderInfo">Gerencie delegações de usuário por um período de tempo.</text>
 		<text name="PaymentsHeaderInfo">Gerencie pagamentos de assinatura e processe retornos de gateways.</text>
+		<text name="Gateway">Gateway</text>
 		<text name="Subject">Assunto</text>
 		<text name="Severity">Severidade</text>
 		<text name="SendToAllUsers">Enviar para todos os usuários</text>

@@ -126,8 +126,8 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
         this.modal.hide();
     }
 
-    indent(level: number): string {
-        return 'padding-left: ' + level * 24 + 'px;';
+    indent(level: number): { 'padding-left': string } {
+        return { 'padding-left': level * 24 + 'px' };
     }
 
     // Members management

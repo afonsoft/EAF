@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { DashboardComponent } from './dashboard.component';
-import { DashboardServiceProxy } from '@shared/service-proxies/dashboard.service-proxy';
+import { UserDelegationsComponent } from './user-delegations.component';
+import { UserDelegationServiceProxy } from '@shared/service-proxies/user-delegation.service-proxy';
+import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 import { LocalizationService } from '@eaf/localization/localization.service';
 import { PermissionCheckerService } from '@eaf/auth/permission-checker.service';
 import { FeatureCheckerService } from '@eaf/features/feature-checker.service';
@@ -13,7 +14,8 @@ import { AppSessionService } from '@shared/common/session/app-session.service';
 import { AppUiCustomizationService } from '@shared/common/ui/app-ui-customization.service';
 import { AppUrlService } from '@shared/common/nav/app-url.service';
 import {
-  MockDashboardServiceProxy,
+  MockUserDelegationServiceProxy,
+  MockUserServiceProxy,
   MockLocalizationService,
   MockPermissionCheckerService,
   MockFeatureCheckerService,
@@ -28,16 +30,17 @@ import {
   setupEafGlobals,
 } from '../../../test-helpers/mock-services';
 
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+describe('UserDelegationsComponent', () => {
+  let component: UserDelegationsComponent;
+  let fixture: ComponentFixture<UserDelegationsComponent>;
 
   beforeEach(() => {
     setupEafGlobals();
     TestBed.configureTestingModule({
-      declarations: [DashboardComponent, MockLocalizePipe],
+      declarations: [UserDelegationsComponent, MockLocalizePipe],
       providers: [
-        { provide: DashboardServiceProxy, useClass: MockDashboardServiceProxy },
+        { provide: UserDelegationServiceProxy, useClass: MockUserDelegationServiceProxy },
+        { provide: UserServiceProxy, useClass: MockUserServiceProxy },
         { provide: LocalizationService, useClass: MockLocalizationService },
         { provide: PermissionCheckerService, useClass: MockPermissionCheckerService },
         { provide: FeatureCheckerService, useClass: MockFeatureCheckerService },
@@ -52,7 +55,7 @@ describe('DashboardComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(UserDelegationsComponent);
     component = fixture.componentInstance;
   });
 
@@ -60,12 +63,19 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should return empty tiles array by default', () => {
-    expect(component.tiles).toEqual([]);
+  it('should default to myDelegations tab', () => {
+    expect(component.activeTab).toBe('myDelegations');
   });
 
-  it('should expose tiles from dashboard', () => {
-    component.dashboard = { tiles: [{ title: 'Test', value: 10, description: 'tile' } as any] } as any;
-    expect(component.tiles.length).toBe(1);
+  it('should not save without target user', () => {
+    component.newDelegation = { targetUserId: undefined, startTime: '2026-01-01T00:00', endTime: '2026-01-02T00:00', description: '' } as any;
+    component.save();
+    expect(component.saving).toBe(false);
+  });
+
+  it('should validate start before end', () => {
+    component.newDelegation = { targetUserId: 1, startTime: '2026-01-02T00:00', endTime: '2026-01-01T00:00', description: '' } as any;
+    component.save();
+    expect(component.saving).toBe(false);
   });
 });

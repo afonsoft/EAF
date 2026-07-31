@@ -422,6 +422,87 @@ export class MockAirplanesServiceProxy {
   }
 }
 
+export class MockPaymentServiceProxy {
+  getAll(...args: any[]): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  createPayment(input: any): Observable<any> {
+    return of({});
+  }
+  processPayment(id: number, input: any): Observable<any> {
+    return of({});
+  }
+}
+
+export class MockOrganizationUnitServiceProxy {
+  getOrganizationUnits(...args: any[]): Observable<any> {
+    return of({ items: [] });
+  }
+  createOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+  updateOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+  deleteOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+  getOrganizationUnitUsers(input: any): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  addUserToOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+  removeUserFromOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+  getOrganizationUnitRoles(input: any): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  addRoleToOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+  removeRoleFromOrganizationUnit(input: any): Observable<any> {
+    return of({});
+  }
+}
+
+export class MockUserDelegationServiceProxy {
+  getMyDelegations(input: any): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  getDelegatedUsers(input: any): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  create(input: any): Observable<any> {
+    return of({});
+  }
+  cancel(id: number): Observable<any> {
+    return of({});
+  }
+}
+
+export class MockMassNotificationServiceProxy {
+  getAll(...args: any[]): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  create(input: any): Observable<any> {
+    return of({});
+  }
+  cancel(input: any): Observable<any> {
+    return of({});
+  }
+}
+
+export class MockDashboardServiceProxy {
+  getHostDashboard(): Observable<any> {
+    return of({ tiles: [] });
+  }
+  getTenantDashboard(): Observable<any> {
+    return of({ tiles: [] });
+  }
+}
+
 // ===== Utility Mocks =====
 
 export class MockFileDownloadService {

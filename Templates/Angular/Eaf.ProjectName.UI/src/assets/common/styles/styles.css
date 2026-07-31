@@ -3128,3 +3128,33 @@ a:focus:not(:focus-visible) {
     }
 }
 
+/* Admin pages responsive tweaks (Payments, Organization Units, User Delegations, Mass Notifications) */
+@media (max-width: 768px) {
+    .primeng-datatable-container .p-datatable table {
+        min-width: 600px;
+    }
+
+    .primeng-datatable-container .p-datatable-tbody > tr > td,
+    .primeng-datatable-container .p-datatable-thead > tr > th {
+        white-space: nowrap;
+    }
+
+    .btn-sm {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100vw - 1rem);
+    }
+
+    .modal-body .form-row .col-md-8,
+    .modal-body .form-row .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
