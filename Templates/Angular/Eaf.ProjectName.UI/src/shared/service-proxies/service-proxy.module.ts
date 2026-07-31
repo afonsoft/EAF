@@ -6,6 +6,9 @@ import * as ApiServiceProxies from './service-proxies';
 import { EditionServiceProxy } from './edition.service-proxy';
 import { DashboardServiceProxy } from './dashboard.service-proxy';
 import { OrganizationUnitServiceProxy } from './organization-unit.service-proxy';
+import { MassNotificationServiceProxy } from './mass-notification.service-proxy';
+import { UserDelegationServiceProxy } from './user-delegation.service-proxy';
+import { PaymentServiceProxy } from './payment.service-proxy';
 
 @NgModule({
   providers: [
@@ -37,6 +40,9 @@ import { OrganizationUnitServiceProxy } from './organization-unit.service-proxy'
     EditionServiceProxy,
     DashboardServiceProxy,
     OrganizationUnitServiceProxy,
+    MassNotificationServiceProxy,
+    UserDelegationServiceProxy,
+    PaymentServiceProxy,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],
 })

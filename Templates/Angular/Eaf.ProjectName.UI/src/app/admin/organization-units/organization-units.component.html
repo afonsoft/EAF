@@ -1,0 +1,95 @@
+﻿<div [@routerTransition]>
+  <div class="m-subheader">
+    <div class="row align-items-center">
+      <div class="mr-auto col-auto">
+        <h3 class="m-subheader__title m-subheader__title--separator">
+          <span>{{ 'OrganizationUnits' | localize }}</span>
+        </h3>
+        <span class="m-section__sub">
+          {{ 'OrganizationUnitsHeaderInfo' | localize }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="m-content">
+    <div class="m-portlet m-portlet--mobile">
+      <div class="m-portlet__head">
+        <div class="m-portlet__head-tools">
+          <button *ngIf="isGranted('Pages.Administration.OrganizationUnits.Create')" (click)="showCreateModal()" class="btn btn-primary">
+            <i class="flaticon-add"></i>
+            {{ 'Create' | localize }}
+          </button>
+        </div>
+      </div>
+      <div class="m-portlet__body">
+        <div [busyIf]="loading" class="primeng-datatable-container">
+          <p-table [value]="flatOrganizationUnits" [scrollable]="true" ScrollWidth="100%">
+            <ng-template pTemplate="header">
+              <tr>
+                <th scope="col" style="width: 60%">{{ 'Name' | localize }}</th>
+                <th scope="col" style="width: 20%">{{ 'Code' | localize }}</th>
+                <th scope="col" style="width: 20%">{{ 'Actions' | localize }}</th>
+              </tr>
+            </ng-template>
+            <ng-template let-record="$implicit" pTemplate="body">
+              <tr>
+                <td style="width: 60%" [style]="indent(record.level)">
+                  <i class="flaticon-folder-1 mr-2"></i>{{ record.displayName }}
+                </td>
+                <td style="width: 20%">{{ record.code }}</td>
+                <td style="width: 20%">
+                  <button *ngIf="isGranted('Pages.Administration.OrganizationUnits.Create')" (click)="showCreateModal(record.id)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Create')">
+                    <i class="flaticon-add"></i>
+                  </button>
+                  <button *ngIf="isGranted('Pages.Administration.OrganizationUnits.Edit')" (click)="showEditModal(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Edit')">
+                    <i class="flaticon-edit"></i>
+                  </button>
+                  <button *ngIf="isGranted('Pages.Administration.OrganizationUnits.Delete')" (click)="deleteOu(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Delete')">
+                    <i class="flaticon-delete-1"></i>
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <app-empty-state *ngIf="flatOrganizationUnits.length === 0 && !loading" [message]="'NoData' | localize"></app-empty-state>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #createOrEditModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <span *ngIf="!isEdit">{{ 'CreatingNewOrganizationUnit' | localize }}</span>
+          <span *ngIf="isEdit">{{ 'EditingOrganizationUnit' | localize }}</span>
+        </h5>
+        <button type="button" class="close" (click)="closeModal()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="OrganizationUnitDisplayName">{{ 'Name' | localize }}</label>
+          <input id="OrganizationUnitDisplayName" class="form-control" [(ngModel)]="activeOu.displayName" name="displayName" type="text" />
+        </div>
+        <div class="form-group" *ngIf="!isEdit">
+          <label for="OrganizationUnitParent">{{ 'Parent' | localize }}</label>
+          <select id="OrganizationUnitParent" class="form-control" [(ngModel)]="activeOu.parentId" name="parentId">
+            <option [ngValue]="undefined">{{ 'Select' | localize }}</option>
+            <option *ngFor="let ou of flatOrganizationUnits" [ngValue]="ou.id">{{ ou.displayName }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'Cancel' | localize }}</button>
+        <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">
+          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          {{ 'Save' | localize }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
