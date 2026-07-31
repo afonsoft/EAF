@@ -1,3 +1,4 @@
+using Abp.Application.Editions;
 using Abp.Application.Features;
 using Abp.Auditing;
 using Abp.Authorization;
@@ -76,6 +77,11 @@ namespace Eaf.Middleware
             configuration.CreateMap<Tenant, TenantListDto>();
             configuration.CreateMap<TenantEditDto, Tenant>().ReverseMap();
             configuration.CreateMap<CurrentTenantInfoDto, Tenant>().ReverseMap();
+
+            //Edition
+            configuration.CreateMap<Edition, EditionDto>();
+            configuration.CreateMap<CreateEditionInput, Edition>();
+            configuration.CreateMap<UpdateEditionInput, Edition>();
 
             //User
             configuration.CreateMap<User, UserEditDto>()

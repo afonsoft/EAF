@@ -4,6 +4,8 @@
     mHeader
     id="m_header"
     #mHeader
+    role="banner"
+    aria-label="{{ 'MainHeader' | localize }}"
     class="m-grid__item m-header m-grid__item-{{ currentTheme.baseSettings.header.headerSkin }}"
     [attr.m-minimize]="currentTheme.baseSettings.header.desktopFixedHeader ? 'minimize' : ''"
     [attr.m-minimize-mobile]="currentTheme.baseSettings.header.mobileFixedHeader ? 'minimize' : ''"
@@ -46,9 +48,9 @@
       currentTheme.baseSettings.header.headerSkin
     }}"
   >
-    <div class="m-grid__item m-grid__item--fluid m-wrapper">
+    <main class="m-grid__item m-grid__item--fluid m-wrapper" role="main">
       <router-outlet></router-outlet>
-    </div>
+    </main>
   </div>
   <!-- end:: Body -->
 </div>

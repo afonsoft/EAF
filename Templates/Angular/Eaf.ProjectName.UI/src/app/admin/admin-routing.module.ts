@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { AuditLogsComponent } from './audit-logs/audit-logs.component';
 import { LanguageTextsComponent } from './languages/language-texts.component';
 import { LanguagesComponent } from './languages/languages.component';
+import { EditionsComponent } from './editions/editions.component';
 import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { RolesComponent } from './roles/roles.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -27,6 +28,7 @@ import { UsersComponent } from './users/users.component';
             data: { permission: 'Pages.Administration.Languages.ChangeTexts' },
           },
           { path: 'tenants', component: TenantsComponent, data: { permission: 'Pages.Tenants' } },
+          { path: 'editions', component: EditionsComponent, data: { permission: 'Pages.Administration.Editions' } },
           { path: 'settings', component: SettingsComponent, data: { permission: 'Pages.Administration.Settings' } },
           { path: 'maintenance', component: MaintenanceComponent, data: { permission: 'Pages.Administration.Maintenance' } },
           { path: 'ui-customization', component: UiCustomizationComponent, data: { permission: 'Pages.Administration.UiCustomization' } },

@@ -38,5 +38,10 @@ namespace Eaf.Middleware.Authorization
         public const string Pages_Tenants_Delete = "Pages.Tenants.Delete";
         public const string Pages_Tenants_Edit = "Pages.Tenants.Edit";
         public const string Pages_Tenants_Impersonation = "Pages.Tenants.Impersonation";
+
+        public const string Pages_Administration_Editions = "Pages.Administration.Editions";
+        public const string Pages_Administration_Editions_Create = "Pages.Administration.Editions.Create";
+        public const string Pages_Administration_Editions_Delete = "Pages.Administration.Editions.Delete";
+        public const string Pages_Administration_Editions_Edit = "Pages.Administration.Editions.Edit";
     }
 }

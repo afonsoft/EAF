@@ -2,14 +2,25 @@
 <div id="m_header_topbar" class="m-topbar  m-stack m-stack--ver m-stack--general header-{{ currentTheme.baseSettings.header.headerSkin }}">
   <nav class="m-stack__item m-topbar__nav-wrapper" [attr.aria-label]="l('TopMenu')">
     <ul class="m-topbar__nav m-nav m-nav--inline" aria-label="TopMenu">
+      <li class="m-nav__item m-topbar__menu-toggle d-lg-none">
+        <button
+          (click)="toggleMobileMenu()"
+          type="button"
+          class="btn m-btn--icon m-btn--icon-only m--hide-desktop"
+          [attr.aria-label]="l('ToggleMenu')"
+        >
+          <i class="flaticon-menu" aria-hidden="true"></i>
+        </button>
+      </li>
       <li
         *ngIf="languages.length > 1"
         class="m-nav__item m-topbar__languages m-dropdown m-dropdown--small m-dropdown--arrow m-dropdown--align-right m-dropdown--mobile-full-width m-dropdown--skin-{{
           currentTheme.baseSettings.header.headerSkin
         }} m-list-search--skin-{{ currentTheme.baseSettings.header.headerSkin }}"
         m-dropdown-toggle="click"
+        [attr.aria-expanded]="languageDropdownExpanded"
       >
-        <a href="javascript:;" class="m-nav__link m-dropdown__toggle" style="padding: 15px">
+        <a href="javascript:;" class="m-nav__link m-dropdown__toggle" style="padding: 15px" role="button" aria-haspopup="true" tabindex="0" [attr.aria-expanded]="languageDropdownExpanded" aria-label="{{ 'SelectLanguage' | localize }}" (click)="toggleLanguageDropdown()" (keydown.enter)="toggleLanguageDropdown()">
           <span class="m-nav__link-text">
             <i [class]="currentLanguage.icon"></i>
             <span class="m-menu__link-text">
@@ -61,11 +72,15 @@
         m-dropdown-toggle="click"
         data-dropdown-persistent="true"
         id="header_notification_bar"
+        role="menuitem"
+        [attr.aria-label]="l('Notifications')"
       ></li>
 
       <li
         id="chat_is_connecting_icon"
         class="m-nav__item m-topbar__user-profile m-topbar__user-profile--img m-dropdown m-dropdown--medium m-dropdown--arrow m-dropdown--header-bg-fill m-dropdown--align-right m-dropdown--mobile-full-width m-dropdown--skin-light"
+        [attr.aria-label]="l('Chat')"
+        role="menuitem"
       >
         <a
           id="kt_quick_sidebar_toggle"
@@ -74,6 +89,7 @@
           class="m-nav__link m-dropdown__toggle"
           style="text-decoration: none"
           [ngClass]="{ 'm--hide': !this.showChatMenu }"
+          [attr.aria-label]="chatConnected ? l('OpenChat') : l('ChatIsConnecting')"
         >
           <span class="m-nav__link-badge m-badge m-badge--dot m-badge--dot-small m-badge--danger" *ngIf="unreadChatMessageCount"></span>
           <span class="m-nav__link-icon">
@@ -95,7 +111,7 @@
                 style="text-decoration: none"
               >
                 <div id="chatIcon">
-                  <i class="flaticon-chat-2"></i>
+                  <i class="flaticon-chat-2" aria-hidden="true"></i>
                 </div>
               </a>
             </span>
@@ -106,11 +122,13 @@
       <li
         class="m-nav__item m-topbar__user-profile m-topbar__user-profile--img m-dropdown m-dropdown--medium m-dropdown--arrow m-dropdown--header-bg-fill m-dropdown--align-right m-dropdown--mobile-full-width m-dropdown--skin-light"
         m-dropdown-toggle="click"
+        [attr.aria-expanded]="userDropdownExpanded"
+        [attr.aria-label]="l('UserProfile')"
       >
-        <a href="javascript:;" class="m-nav__link m-dropdown__toggle">
+        <a href="javascript:;" class="m-nav__link m-dropdown__toggle" role="button" aria-haspopup="true" tabindex="0" [attr.aria-expanded]="userDropdownExpanded" [attr.aria-label]="l('OpenUserProfileMenu')" (click)="toggleUserDropdown()" (keydown.enter)="toggleUserDropdown()">
           <span class="m-nav__link-icon">
             <span class="m-nav__link-icon-wrapper">
-              <i class="flaticon-profile-1"></i>
+              <i class="flaticon-profile-1" aria-hidden="true"></i>
             </span>
           </span>
         </a>
@@ -123,7 +141,7 @@
             >
               <div class="m-card-user m-card-user--skin-dark">
                 <div class="m-card-user__pic">
-                  <img alt="" class="header-profile-picture m--img-rounded m--marginless m--img-centered" [src]="profilePicture" />
+                  <img alt="{{ 'ProfilePicture' | localize }}" class="header-profile-picture m--img-rounded m--marginless m--img-centered" [src]="profilePicture" />
                 </div>
                 <div class="m-card-user__details">
                   <span class="m-card-user__name m--font-weight-500"> {{ shownFullName }} ({{ shownLoginName }}) </span>
@@ -138,7 +156,8 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="backToMyAccount()"
-                      tabindex="-1"
+                      tabindex="0"
+                      role="button"
                     >
                       <i class="m-nav__link-icon fa fa-reply m--font-danger"></i>
                       <span class="m-nav__link-title">
@@ -161,7 +180,8 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="changePassword()"
-                      tabindex="-1"
+                      tabindex="0"
+                      role="button"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-more-v6"></i>
                       <span class="m-nav__link-title">
@@ -178,7 +198,8 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="showLoginAttempts()"
-                      tabindex="-1"
+                      tabindex="0"
+                      role="button"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-list"></i>
                       <span class="m-nav__link-title">
@@ -195,7 +216,8 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="changeProfilePicture()"
-                      tabindex="-1"
+                      tabindex="0"
+                      role="button"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-profile-1"></i>
                       <span class="m-nav__link-title">
@@ -212,7 +234,8 @@
                       href="javascript:;"
                       class="m-nav__link"
                       (click)="changeMySettings()"
-                      tabindex="-1"
+                      tabindex="0"
+                      role="button"
                     >
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-cogwheel"></i>
                       <span class="m-nav__link-title">
@@ -230,7 +253,8 @@
                       href="javascript:;"
                       (click)="logout()"
                       class="btn m-btn--pill btn-primary m-btn m-btn--custom m-btn--label-brand m-btn--bolder"
-                      tabindex="-1"
+                      tabindex="0"
+                      role="button"
                       >{{ 'Logout' | localize }}</a
                     >
                   </li>
