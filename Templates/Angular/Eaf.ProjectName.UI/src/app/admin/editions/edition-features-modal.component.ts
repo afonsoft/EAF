@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { EditionServiceProxy, IGetEditionFeaturesEditOutput, INameValueDto, IUpdateEditionFeaturesInput } from '@shared/service-proxies/edition.service-proxy';
+import { EditionServiceProxy, INameValueDto, IUpdateEditionFeaturesInput } from '@shared/service-proxies/edition.service-proxy';
 import { FeatureTreeEditModel } from '@app/admin/shared/feature-tree-edit.model';
 import { FeatureTreeComponent } from '@app/admin/shared/feature-tree.component';
 import { ModalDirective } from 'ngx-bootstrap/modal';

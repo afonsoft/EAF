@@ -27,6 +27,8 @@ namespace Eaf.Middleware.Dashboard
         private readonly IRepository<Edition, int> _editionRepository;
         private readonly IRepository<SubscriptionPayment, long> _subscriptionPaymentRepository;
 
+        private const string SuccessStyle = "success";
+
         /// <summary>
         /// DashboardAppService.
         /// </summary>
@@ -68,7 +70,7 @@ namespace Eaf.Middleware.Dashboard
                 Id = "totalUsers",
                 Title = L("TotalUsers"),
                 Count = await _userRepository.CountAsync(),
-                Style = "success",
+                Style = SuccessStyle,
                 Icon = "flaticon-users"
             });
 
@@ -105,7 +107,7 @@ namespace Eaf.Middleware.Dashboard
                     Id = "totalUsers",
                     Title = L("TotalUsers"),
                     Count = await _userRepository.CountAsync(),
-                    Style = "success",
+                    Style = SuccessStyle,
                     Icon = "flaticon-users"
                 });
 
@@ -179,7 +181,7 @@ namespace Eaf.Middleware.Dashboard
                     Id = "completedPayments",
                     Title = L("CompletedPayments"),
                     Count = completed,
-                    Style = "success",
+                    Style = SuccessStyle,
                     Icon = "flaticon-check"
                 },
                 new DashboardTileDto
@@ -208,7 +210,7 @@ namespace Eaf.Middleware.Dashboard
                     Id = "tenantsWithActiveSubscription",
                     Title = L("TenantsWithActiveSubscription"),
                     Count = active,
-                    Style = "success",
+                    Style = SuccessStyle,
                     Icon = "flaticon-users-1"
                 },
                 new DashboardTileDto

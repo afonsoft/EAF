@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { EditionServiceProxy, IEditionDto, IUpdateEditionInput } from '@shared/service-proxies/edition.service-proxy';
+import { EditionServiceProxy, IUpdateEditionInput } from '@shared/service-proxies/edition.service-proxy';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
