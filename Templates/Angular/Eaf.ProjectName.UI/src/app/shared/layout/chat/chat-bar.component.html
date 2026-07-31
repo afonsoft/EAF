@@ -9,14 +9,14 @@
     aria-labelledby="chatPanelTitle"
     aria-modal="false"
   >
-    <header class="bs-canvas-header p-3 bg-primary overflow-auto">
+    <header class="bs-canvas-header p-3 overflow-auto header-{{ headerSkin }}">
       <button (click)="reversePinned()" [attr.aria-label]="'Pinned' | localize" class="bs-canvas-close float-left close pinned" type="button">
-        <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-hidden="true" class="fa fa-map-pin text-light"> </i>
+        <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-hidden="true" class="fa fa-map-pin text-{{ headerTextColor }}"> </i>
       </button>
       <button (click)="closeChat()" aria-label="Close" class="bs-canvas-close float-left close" type="button">
-        <span aria-hidden="true" class="text-light">&times;</span>
+        <span aria-hidden="true" class="text-{{ headerTextColor }}">&times;</span>
       </button>
-      <h4 class="d-inline-block text-light mb-0 float-right" id="chatPanelTitle">{{ 'Chat' | localize }}</h4>
+      <h4 class="d-inline-block text-{{ headerTextColor }} mb-0 float-right" id="chatPanelTitle">{{ 'Chat' | localize }}</h4>
     </header>
     <div class="bs-canvas-content chat-shell">
       <div class="chat-context-banner" *ngIf="chatContext.gameId || chatContext.matchId || chatContext.conversationId">
