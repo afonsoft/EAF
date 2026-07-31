@@ -471,6 +471,8 @@
 		<text name="MyDelegations">Minhas delegações</text>
 		<text name="DelegatedUsers">Usuários delegados</text>
 		<text name="CreatingNewUserDelegation">Criando nova delegação de usuário</text>
+		<text name="UserDelegationCancelWarningMessage">Deseja cancelar a delegação para o usuário {0}?</text>
+		<text name="StartTimeMustBeLessThanEndTime">A data/hora inicial deve ser menor que a data/hora final.</text>
 		<text name="Description">Descrição</text>
 		<text name="Amount">Valor</text>
 		<text name="ExternalPaymentId">Id de pagamento externo</text>

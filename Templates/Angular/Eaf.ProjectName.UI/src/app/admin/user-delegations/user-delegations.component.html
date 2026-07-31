@@ -81,7 +81,10 @@
       <div class="modal-body">
         <div class="form-group">
           <label for="DelegationTargetUserId">{{ 'TargetUser' | localize }}</label>
-          <input id="DelegationTargetUserId" class="form-control" [(ngModel)]="newDelegation.targetUserId" name="targetUserId" type="number" />
+          <select id="DelegationTargetUserId" class="form-control" [(ngModel)]="newDelegation.targetUserId" name="targetUserId">
+            <option [ngValue]="undefined">{{ 'Select' | localize }}</option>
+            <option *ngFor="let user of allUsers" [ngValue]="user.id">{{ user.name }} {{ user.surname }} ({{ user.userName }})</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="DelegationStartTime">{{ 'StartTime' | localize }}</label>
