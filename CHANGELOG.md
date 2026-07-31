@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ### Changed
 
-*   chore: Bump dos módulos EAF para a versão 9.4.1 e atualização das documentações de instalação dos pacotes NuGet
+*   chore: Bump dos módulos EAF para a versão 9.4.2 e atualização das documentações de instalação dos pacotes NuGet
 *   chore: Bump dos templates e módulos para a versão 9.3.1 (PRs #248 e #249)
 *   docs: README e documentação atualizados com as novas implementações de login multi-tenant, contratos realtime e sociais, rate limit e moderação
 *   docs: Atualizar README badges com métricas atuais (Line 36.6%, Tests 2384, 0 Warnings)

@@ -43,7 +43,7 @@ Integração entre Castle Windsor e Serilog:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Castle.Serilog --version 9.4.1
+dotnet add package Eaf.Castle.Serilog --version 9.4.2
 ```
 
 ### Instalação via Referência de Projeto
