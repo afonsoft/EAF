@@ -66,6 +66,6 @@ describe('DashboardComponent', () => {
 
   it('should expose tiles from dashboard', () => {
     component.dashboard = { tiles: [{ title: 'Test', value: 10, description: 'tile' } as any] } as any;
-    expect(component.tiles.length).toBe(1);
+    expect(component.tiles).toHaveSize(1);
   });
 });
