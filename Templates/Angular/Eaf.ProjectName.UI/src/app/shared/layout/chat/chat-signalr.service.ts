@@ -1,7 +1,6 @@
 import { Injectable, Injector, NgZone } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { HubConnection } from '@microsoft/signalr';
-import { SignalRHelper } from 'shared/helpers/SignalRHelper';
 
 @Injectable()
 export class ChatSignalrService extends AppComponentBase {

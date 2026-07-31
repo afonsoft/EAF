@@ -1,4 +1,4 @@
 ﻿export const environment = {
-  production: false,
+  production: true,
   appConfig: 'appconfig.' + window['env']['ASPNETCORE_ENVIRONMENT'] + '.json',
 };
