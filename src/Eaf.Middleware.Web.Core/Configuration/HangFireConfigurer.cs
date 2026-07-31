@@ -53,6 +53,7 @@ namespace Eaf.Middleware.Web.Startup
 
         /// <summary>
         /// Determina o tipo de armazenamento do Hangfire com base na configuracao.
+        /// Permite override explicito via Hangfire:Storage.
         /// SQL Server habilitado -> SQL Server
         /// Nao SQL Server + Redis habilitado -> Redis
         /// Nao SQL Server + Redis desabilitado -> InMemory
@@ -63,6 +64,13 @@ namespace Eaf.Middleware.Web.Startup
 
             if (forceInMemory)
                 return HangfireStorageType.InMemory;
+
+            var storageSetting = configuration["Hangfire:Storage"];
+            if (!string.IsNullOrWhiteSpace(storageSetting) &&
+                Enum.TryParse<HangfireStorageType>(storageSetting, true, out var explicitStorage))
+            {
+                return explicitStorage;
+            }
 
             var databaseProvider = configuration["Database:Provider"] ?? "SqlServer";
             var isSqlServer = databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase) ||

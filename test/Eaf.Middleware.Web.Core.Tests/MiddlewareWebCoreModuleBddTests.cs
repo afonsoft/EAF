@@ -485,7 +485,7 @@ namespace Eaf.Middleware.Tests.WebCore
 
             try
             {
-                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"Hangfire\":{\"IsEnabled\":true}}");
+                File.WriteAllText(Path.Combine(tempDirectory, "appsettings.json"), "{\"Hangfire\":{\"IsEnabled\":true,\"Storage\":\"SqlServer\"}}");
 
                 var env = Substitute.For<IHostEnvironment>();
                 env.ContentRootPath.Returns(tempDirectory);

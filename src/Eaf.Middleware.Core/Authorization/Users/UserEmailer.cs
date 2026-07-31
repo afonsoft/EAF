@@ -282,7 +282,7 @@ namespace Eaf.Middleware.Authorization.Users
 
             using (_unitOfWorkProvider.Current.SetTenantId(null))
             {
-                return _tenantRepository.Get(tenantId.Value).TenancyName;
+                return _tenantRepository.Get(tenantId.Value)?.TenancyName;
             }
         }
 
