@@ -84,9 +84,9 @@
               </ng-template>
               <ng-template let-record="$implicit" pTemplate="body">
                 <tr>
-                  <td style="width: 15%">{{ record.editionId }}</td>
+                  <td style="width: 15%">{{ getEditionDisplayName(record.editionId) }}</td>
                   <td style="width: 15%">{{ record.amount | number: '1.2-2' }}</td>
-                  <td style="width: 15%">{{ record.status }}</td>
+                  <td style="width: 15%"><span [ngClass]="getStatusClass(record.status)">{{ getStatusLabel(record.status) }}</span></td>
                   <td style="width: 15%">{{ record.gateway }}</td>
                   <td style="width: 20%">{{ record.externalPaymentId }}</td>
                   <td style="width: 15%">{{ record.paymentTime | momentFormat: 'L LT' }}</td>

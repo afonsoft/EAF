@@ -120,6 +120,31 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
             });
     }
 
+    getEditionDisplayName(editionId: number): string {
+        return this.editions.find(e => e.id === editionId)?.displayName ?? String(editionId);
+    }
+
+    getStatusClass(status: string): string {
+        switch (status) {
+            case 'Pending':
+                return 'badge badge-warning';
+            case 'Processing':
+                return 'badge badge-info';
+            case 'Completed':
+                return 'badge badge-success';
+            case 'Canceled':
+                return 'badge badge-secondary';
+            case 'Failed':
+                return 'badge badge-danger';
+            default:
+                return 'badge badge-light';
+        }
+    }
+
+    getStatusLabel(status: string): string {
+        return this.l(status) ?? status;
+    }
+
     showProcessModal(payment: ISubscriptionPaymentDto): void {
         this.processInput = {
             paymentId: payment.id,

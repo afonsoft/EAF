@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { DashboardComponent } from './dashboard.component';
-import { DashboardServiceProxy } from '@shared/service-proxies/dashboard.service-proxy';
+import { MassNotificationsComponent } from './mass-notifications.component';
+import { MassNotificationServiceProxy } from '@shared/service-proxies/mass-notification.service-proxy';
 import { LocalizationService } from '@eaf/localization/localization.service';
 import { PermissionCheckerService } from '@eaf/auth/permission-checker.service';
 import { FeatureCheckerService } from '@eaf/features/feature-checker.service';
@@ -13,7 +13,7 @@ import { AppSessionService } from '@shared/common/session/app-session.service';
 import { AppUiCustomizationService } from '@shared/common/ui/app-ui-customization.service';
 import { AppUrlService } from '@shared/common/nav/app-url.service';
 import {
-  MockDashboardServiceProxy,
+  MockMassNotificationServiceProxy,
   MockLocalizationService,
   MockPermissionCheckerService,
   MockFeatureCheckerService,
@@ -28,16 +28,16 @@ import {
   setupEafGlobals,
 } from '../../../test-helpers/mock-services';
 
-describe('DashboardComponent', () => {
-  let component: DashboardComponent;
-  let fixture: ComponentFixture<DashboardComponent>;
+describe('MassNotificationsComponent', () => {
+  let component: MassNotificationsComponent;
+  let fixture: ComponentFixture<MassNotificationsComponent>;
 
   beforeEach(() => {
     setupEafGlobals();
     TestBed.configureTestingModule({
-      declarations: [DashboardComponent, MockLocalizePipe],
+      declarations: [MassNotificationsComponent, MockLocalizePipe],
       providers: [
-        { provide: DashboardServiceProxy, useClass: MockDashboardServiceProxy },
+        { provide: MassNotificationServiceProxy, useClass: MockMassNotificationServiceProxy },
         { provide: LocalizationService, useClass: MockLocalizationService },
         { provide: PermissionCheckerService, useClass: MockPermissionCheckerService },
         { provide: FeatureCheckerService, useClass: MockFeatureCheckerService },
@@ -52,7 +52,7 @@ describe('DashboardComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DashboardComponent);
+    fixture = TestBed.createComponent(MassNotificationsComponent);
     component = fixture.componentInstance;
   });
 
@@ -60,12 +60,16 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should return empty tiles array by default', () => {
-    expect(component.tiles).toEqual([]);
+  it('should reset filters on init', () => {
+    component.filters = { filterText: 'test', status: 'Pending' };
+    component.resetFilters();
+    expect(component.filters.filterText).toBe('');
+    expect(component.filters.status).toBe('');
   });
 
-  it('should expose tiles from dashboard', () => {
-    component.dashboard = { tiles: [{ title: 'Test', value: 10, description: 'tile' } as any] } as any;
-    expect(component.tiles).toHaveSize(1);
+  it('should not save without subject and message', () => {
+    component.newMassNotification = { subject: '', message: '', severity: 0, sendToAllUsers: false };
+    component.save();
+    expect(component.saving).toBe(false);
   });
 });

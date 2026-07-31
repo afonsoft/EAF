@@ -308,6 +308,7 @@
 		<text name="UiCustomization_Mobile">Mobile</text>
 		<text name="UiCustomization_Desktop">Desktop</text>
 		<text name="ThisFieldIsRequired">This field is required.</text>
+		<text name="RequiredField">{0} is required.</text>
 		<text name="PleaseEnterAtLeastNCharacter">Please enter at least {0} characters.</text>
 		<text name="PleaseEnterNoMoreThanNCharacter">Please enter no more than {0} characters.</text>
 		<text name="OperationLogs">Operation logs</text>
@@ -436,6 +437,7 @@
 		<text name="MassNotificationsHeaderInfo">Send notifications to users, roles or organization units.</text>
 		<text name="UserDelegationsHeaderInfo">Manage user delegations for a period of time.</text>
 		<text name="PaymentsHeaderInfo">Manage subscription payments and process gateway responses.</text>
+		<text name="Gateway">Gateway</text>
 		<text name="Subject">Subject</text>
 		<text name="Severity">Severity</text>
 		<text name="SendToAllUsers">Send to all users</text>
