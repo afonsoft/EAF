@@ -88,7 +88,7 @@ namespace Eaf.Middleware.MassNotifications
             return userIds;
         }
 
-        private async Task AddUserIdsAsync(string ids, HashSet<long> userIds, Func<string, HashSet<long>, Task> addAction)
+        private static async Task AddUserIdsAsync(string ids, HashSet<long> userIds, Func<string, HashSet<long>, Task> addAction)
         {
             if (string.IsNullOrWhiteSpace(ids))
                 return;
@@ -96,7 +96,7 @@ namespace Eaf.Middleware.MassNotifications
             await addAction(ids, userIds);
         }
 
-        private Task AddDirectUserIds(string ids, HashSet<long> userIds)
+        private static Task AddDirectUserIds(string ids, HashSet<long> userIds)
         {
             foreach (var id in ParseLongIds(ids))
                 userIds.Add(id);
