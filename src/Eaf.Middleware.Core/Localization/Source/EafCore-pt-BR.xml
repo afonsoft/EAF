@@ -516,5 +516,24 @@
 		<text name="PlanFeaturesMaxOrganizationUnitCount">Quantidade máxima de unidades organizacionais</text>
 		<text name="PlanFeaturesApiCallLimit">Limite de chamadas de API</text>
 		<text name="PlanFeaturesStorageLimitGb">Limite de armazenamento (GB)</text>
+		<text name="ExtendSubscription">Estender assinatura</text>
+		<text name="Assign">Atribuir</text>
+		<text name="EditionDeleteWarningMessage">Tem certeza que deseja excluir a edição {0}?</text>
+		<text name="Metrics">Métricas</text>
+		<text name="NotSelected">Não selecionado</text>
+		<text name="NotAssigned">Não atribuído</text>
+		<text name="NotSet">Não definido</text>
+		<text name="N/A">N/A</text>
+		<text name="SecretKey">Chave secreta</text>
+		<text name="PublishableKey">Chave pública</text>
+		<text name="WebhookSecret">Segredo do webhook</text>
+		<text name="ClientId">ID do cliente</text>
+		<text name="ClientSecret">Segredo do cliente</text>
+		<text name="WebhookId">ID do webhook</text>
+		<text name="AccessToken">Token de acesso</text>
+		<text name="PublicKey">Chave pública</text>
+		<text name="GatewaySettings">Configuração de gateway</text>
+		<text name="DefaultGateway">Gateway padrão</text>
+		<text name="SubscriptionEndDate">Data de término da assinatura</text>
 	</texts>
 </localizationDictionary>

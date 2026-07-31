@@ -26,6 +26,8 @@ import { TreeModule } from 'primeng/tree';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AuditLogDetailModalComponent } from './audit-logs/audit-log-detail-modal.component';
 import { AuditLogsComponent } from './audit-logs/audit-logs.component';
+import { CreateOrEditEditionModalComponent } from './editions/create-or-edit-edition-modal.component';
+import { EditionFeaturesModalComponent } from './editions/edition-features-modal.component';
 import { EditionsComponent } from './editions/editions.component';
 import { CreateOrEditLanguageModalComponent } from './languages/create-or-edit-language-modal.component';
 import { EditTextModalComponent } from './languages/edit-text-modal.component';
@@ -35,6 +37,7 @@ import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { MassNotificationsComponent } from './mass-notifications/mass-notifications.component';
 import { CreateOrEditRoleModalComponent } from './roles/create-or-edit-role-modal.component';
 import { OrganizationUnitsComponent } from './organization-units/organization-units.component';
+import { PaymentGatewaySettingsModalComponent } from './payments/payment-gateway-settings-modal.component';
 import { PaymentsComponent } from './payments/payments.component';
 import { UserDelegationsComponent } from './user-delegations/user-delegations.component';
 import { RolesComponent } from './roles/roles.component';
@@ -46,6 +49,7 @@ import { RoleComboComponent } from './shared/role-combo.component';
 import { CreateTenantModalComponent } from './tenants/create-tenant-modal.component';
 import { EditTenantModalComponent } from './tenants/edit-tenant-modal.component';
 import { TenantFeaturesModalComponent } from './tenants/tenant-features-modal.component';
+import { TenantSubscriptionModalComponent } from './tenants/tenant-subscription-modal.component';
 import { TenantsComponent } from './tenants/tenants.component';
 import { DefaultThemeUiSettingsComponent } from './ui-customization/default-theme-ui-settings.component';
 import { Theme2ThemeUiSettingsComponent } from './ui-customization/theme2-theme-ui-settings.component';
@@ -97,9 +101,12 @@ import { UsersComponent } from './users/users.component';
     AuditLogsComponent,
     AuditLogDetailModalComponent,
     EditionsComponent,
+    CreateOrEditEditionModalComponent,
+    EditionFeaturesModalComponent,
     MassNotificationsComponent,
     OrganizationUnitsComponent,
     PaymentsComponent,
+    PaymentGatewaySettingsModalComponent,
     SettingsComponent,
     UserDelegationsComponent,
     LanguagesComponent,
@@ -109,6 +116,7 @@ import { UsersComponent } from './users/users.component';
     CreateTenantModalComponent,
     EditTenantModalComponent,
     TenantFeaturesModalComponent,
+    TenantSubscriptionModalComponent,
     CreateOrEditLanguageModalComponent,
     EditTextModalComponent,
     UiCustomizationComponent,

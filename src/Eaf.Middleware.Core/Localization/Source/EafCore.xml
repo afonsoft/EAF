@@ -509,5 +509,24 @@
 		<text name="PlanFeaturesMaxOrganizationUnitCount">Maximum organization unit count</text>
 		<text name="PlanFeaturesApiCallLimit">API call limit</text>
 		<text name="PlanFeaturesStorageLimitGb">Storage limit (GB)</text>
+		<text name="ExtendSubscription">Extend subscription</text>
+		<text name="Assign">Assign</text>
+		<text name="EditionDeleteWarningMessage">Are you sure you want to delete edition {0}?</text>
+		<text name="Metrics">Metrics</text>
+		<text name="NotSelected">Not selected</text>
+		<text name="NotAssigned">Not assigned</text>
+		<text name="NotSet">Not set</text>
+		<text name="N/A">N/A</text>
+		<text name="SecretKey">Secret key</text>
+		<text name="PublishableKey">Publishable key</text>
+		<text name="WebhookSecret">Webhook secret</text>
+		<text name="ClientId">Client ID</text>
+		<text name="ClientSecret">Client secret</text>
+		<text name="WebhookId">Webhook ID</text>
+		<text name="AccessToken">Access token</text>
+		<text name="PublicKey">Public key</text>
+		<text name="GatewaySettings">Gateway settings</text>
+		<text name="DefaultGateway">Default gateway</text>
+		<text name="SubscriptionEndDate">Subscription end date</text>
 	</texts>
 </localizationDictionary>

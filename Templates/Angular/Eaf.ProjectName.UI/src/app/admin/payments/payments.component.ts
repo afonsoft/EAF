@@ -2,7 +2,8 @@ import { Component, Injector, OnInit, ViewChild, ViewEncapsulation } from '@angu
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { IEditionDto, EditionServiceProxy } from '@shared/service-proxies/edition.service-proxy';
-import { ICreateSubscriptionPaymentInput, IProcessPaymentInput, ISubscriptionPaymentDto, PaymentServiceProxy } from '@shared/service-proxies/payment.service-proxy';
+import { ICreateSubscriptionPaymentInput, IProcessPaymentInput, IPaymentGatewayDto, ISubscriptionPaymentDto, PaymentServiceProxy } from '@shared/service-proxies/payment.service-proxy';
+import { PaymentGatewaySettingsModalComponent } from './payment-gateway-settings-modal.component';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { LazyLoadEvent } from 'primeng/api';
 import { Paginator } from 'primeng/paginator';
@@ -20,23 +21,25 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
     @ViewChild('paginator', { static: true }) paginator: Paginator;
     @ViewChild('createModal', { static: true }) createModal: ModalDirective;
     @ViewChild('processModal', { static: true }) processModal: ModalDirective;
+    @ViewChild('paymentGatewaySettingsModal', { static: true }) paymentGatewaySettingsModal: PaymentGatewaySettingsModalComponent;
 
     filters: { filterText: string; status: string } = { filterText: '', status: '' };
     payments: ISubscriptionPaymentDto[] = [];
     editions: IEditionDto[] = [];
+    gateways: IPaymentGatewayDto[] = [];
     saving = false;
 
     newPayment: ICreateSubscriptionPaymentInput = {
         editionId: 0,
         editionPaymentType: 1,
         paymentPeriodType: 30,
-        gateway: 'Null',
+        gateway: '',
     };
 
     processInput: IProcessPaymentInput & { paymentId: number } = {
         paymentId: 0,
         externalPaymentId: '',
-        gateway: 'Null',
+        gateway: '',
         gatewayResponse: '',
         isSuccess: true,
     };
@@ -52,6 +55,7 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
     ngOnInit(): void {
         this.resetFilters();
         this.loadEditions();
+        this.loadGateways();
     }
 
     resetFilters(): void {
@@ -63,6 +67,16 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
             this.editions = result.items ?? [];
             if (this.editions.length > 0 && this.newPayment.editionId === 0) {
                 this.newPayment.editionId = this.editions[0].id;
+            }
+        });
+    }
+
+    loadGateways(): void {
+        this._paymentService.getGatewayList().subscribe(result => {
+            this.gateways = result ?? [];
+            const defaultGateway = this.gateways.find(g => g.isDefault);
+            if (this.newPayment.gateway === '') {
+                this.newPayment.gateway = defaultGateway?.name ?? (this.gateways.length > 0 ? this.gateways[0].name : '');
             }
         });
     }
@@ -89,12 +103,16 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
             });
     }
 
+    showGatewaySettings(): void {
+        this.paymentGatewaySettingsModal.show();
+    }
+
     showCreateModal(): void {
         this.newPayment = {
             editionId: this.editions.length > 0 ? this.editions[0].id : 0,
             editionPaymentType: 1,
             paymentPeriodType: 30,
-            gateway: 'Null',
+            gateway: this.gateways.find(g => g.isDefault)?.name ?? (this.gateways.length > 0 ? this.gateways[0].name : ''),
         };
         this.createModal.show();
     }
@@ -149,7 +167,7 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
         this.processInput = {
             paymentId: payment.id,
             externalPaymentId: payment.externalPaymentId ?? '',
-            gateway: payment.gateway ?? 'Null',
+            gateway: payment.gateway ?? '',
             gatewayResponse: '',
             isSuccess: true,
         };

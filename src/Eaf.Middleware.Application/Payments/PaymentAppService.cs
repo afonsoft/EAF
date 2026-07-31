@@ -70,20 +70,6 @@ namespace Eaf.Middleware.Payments
             var edition = await _editionRepository.GetAsync(input.EditionId);
             var amount = edition.GetPaymentAmount(input.PaymentPeriodType);
 
-            var payment = new SubscriptionPayment
-            {
-                TenantId = AbpSession.TenantId,
-                EditionId = input.EditionId,
-                EditionPaymentType = input.EditionPaymentType,
-                PaymentPeriodType = input.PaymentPeriodType,
-                Amount = amount,
-                Status = SubscriptionPaymentStatus.Pending,
-                Gateway = input.Gateway,
-                Description = input.Description,
-            };
-
-            await _subscriptionPaymentRepository.InsertAsync(payment);
-
             var gateway = _paymentGatewayResolver.Resolve(input.Gateway);
             var request = await gateway.CreatePaymentAsync(new CreatePaymentRequestInput
             {
@@ -95,8 +81,20 @@ namespace Eaf.Middleware.Payments
                 Gateway = input.Gateway,
             });
 
-            payment.ExternalPaymentId = request.PaymentId;
-            await _subscriptionPaymentRepository.UpdateAsync(payment);
+            var payment = new SubscriptionPayment
+            {
+                TenantId = AbpSession.TenantId,
+                EditionId = input.EditionId,
+                EditionPaymentType = input.EditionPaymentType,
+                PaymentPeriodType = input.PaymentPeriodType,
+                Amount = amount,
+                Status = SubscriptionPaymentStatus.Pending,
+                Gateway = input.Gateway,
+                Description = input.Description,
+                ExternalPaymentId = request.PaymentId,
+            };
+
+            await _subscriptionPaymentRepository.InsertAsync(payment);
 
             return request;
         }
