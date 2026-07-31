@@ -44,6 +44,46 @@ namespace Eaf.Middleware.Web.Features
                inputType: new CheckboxInputType(),
                scope: FeatureScopes.Tenant
            );
+
+            var planFeatures = context.Create(
+                AppFeatures.PlanFeatures,
+                defaultValue: "true",
+                displayName: L(AppFeatures.PlanFeatures),
+                inputType: new CheckboxInputType(),
+                scope: FeatureScopes.Edition
+            );
+
+            planFeatures.CreateChildFeature(
+                AppFeatures.PlanFeaturesMaxUserCount,
+                defaultValue: "0",
+                displayName: L(AppFeatures.PlanFeaturesMaxUserCount),
+                inputType: new SingleLineStringInputType(),
+                scope: FeatureScopes.Edition
+            );
+
+            planFeatures.CreateChildFeature(
+                AppFeatures.PlanFeaturesMaxOrganizationUnitCount,
+                defaultValue: "0",
+                displayName: L(AppFeatures.PlanFeaturesMaxOrganizationUnitCount),
+                inputType: new SingleLineStringInputType(),
+                scope: FeatureScopes.Edition
+            );
+
+            planFeatures.CreateChildFeature(
+                AppFeatures.PlanFeaturesApiCallLimit,
+                defaultValue: "0",
+                displayName: L(AppFeatures.PlanFeaturesApiCallLimit),
+                inputType: new SingleLineStringInputType(),
+                scope: FeatureScopes.Edition
+            );
+
+            planFeatures.CreateChildFeature(
+                AppFeatures.PlanFeaturesStorageLimitGb,
+                defaultValue: "0",
+                displayName: L(AppFeatures.PlanFeaturesStorageLimitGb),
+                inputType: new SingleLineStringInputType(),
+                scope: FeatureScopes.Edition
+            );
         }
 
         private static ILocalizableString L(string name)

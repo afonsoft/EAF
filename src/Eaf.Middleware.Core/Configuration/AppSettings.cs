@@ -83,6 +83,40 @@ namespace Eaf.Middleware.Configuration
         }
 
         /// <summary>
+        /// Representa as configurações de pagamento.
+        /// </summary>
+        public static class Payment
+        {
+            public const string DefaultGateway = "App.Payment.DefaultGateway";
+
+            public static class Stripe
+            {
+                public const string SecretKey = "App.Payment.Stripe.SecretKey";
+                public const string PublishableKey = "App.Payment.Stripe.PublishableKey";
+                public const string WebhookSecret = "App.Payment.Stripe.WebhookSecret";
+            }
+
+            public static class PayPal
+            {
+                public const string ClientId = "App.Payment.PayPal.ClientId";
+                public const string ClientSecret = "App.Payment.PayPal.ClientSecret";
+                public const string WebhookId = "App.Payment.PayPal.WebhookId";
+            }
+
+            public static class MercadoPago
+            {
+                public const string AccessToken = "App.Payment.MercadoPago.AccessToken";
+                public const string PublicKey = "App.Payment.MercadoPago.PublicKey";
+            }
+
+            public static class PagSeguro
+            {
+                public const string Token = "App.Payment.PagSeguro.Token";
+                public const string Email = "App.Payment.PagSeguro.Email";
+            }
+        }
+
+        /// <summary>
         /// Representa a classe UserManagement.
         /// </summary>
         public static class UserManagement

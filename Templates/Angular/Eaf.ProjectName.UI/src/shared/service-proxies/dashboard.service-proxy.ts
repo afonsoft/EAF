@@ -28,7 +28,7 @@ export class DashboardServiceProxy {
     }
 
     getHostDashboard(): Observable<IDashboardOutput> {
-        let url_ = this.baseUrl + '/api/services/app/DashboardAppService/GetHostDashboard';
+        let url_ = this.baseUrl + '/api/services/app/Dashboard/GetHostDashboard';
         url_ = url_.replace(/[?&]$/, '');
         const options: unknown = { observe: 'response', responseType: 'json' };
         return this.http.request('get', url_, options).pipe(_observableMergeMap((response: any) => this.processDashboard(response))).pipe(_observableCatch((response: any) => {
@@ -38,7 +38,7 @@ export class DashboardServiceProxy {
     }
 
     getTenantDashboard(): Observable<IDashboardOutput> {
-        let url_ = this.baseUrl + '/api/services/app/DashboardAppService/GetTenantDashboard';
+        let url_ = this.baseUrl + '/api/services/app/Dashboard/GetTenantDashboard';
         url_ = url_.replace(/[?&]$/, '');
         const options: unknown = { observe: 'response', responseType: 'json' };
         return this.http.request('get', url_, options).pipe(_observableMergeMap((response: any) => this.processDashboard(response))).pipe(_observableCatch((response: any) => {

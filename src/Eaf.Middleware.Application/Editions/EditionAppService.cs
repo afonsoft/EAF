@@ -5,6 +5,7 @@ using Abp.Domain.Repositories;
 using Abp.Extensions;
 using Abp.Linq.Extensions;
 using Eaf.Middleware.Authorization;
+using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.Editions.Dto;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -20,15 +21,18 @@ namespace Eaf.Middleware.Editions
     [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Editions)]
     public class EditionAppService : MiddlewareAppServiceBase, IEditionAppService
     {
-        private readonly IRepository<Edition> _editionRepository;
+        private readonly IRepository<SubscribableEdition, int> _editionRepository;
+        private readonly EditionManager _editionManager;
 
         /// <summary>
         /// EditionAppService.
         /// </summary>
         /// <param name="editionRepository">Repositório de edições.</param>
-        public EditionAppService(IRepository<Edition> editionRepository)
+        /// <param name="editionManager">Gerenciador de edições.</param>
+        public EditionAppService(IRepository<SubscribableEdition, int> editionRepository, EditionManager editionManager)
         {
             _editionRepository = editionRepository;
+            _editionManager = editionManager;
         }
 
         /// <summary>
@@ -67,7 +71,7 @@ namespace Eaf.Middleware.Editions
         [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Editions_Create)]
         public async Task CreateEdition(CreateEditionInput input)
         {
-            var edition = ObjectMapper.Map<Edition>(input);
+            var edition = ObjectMapper.Map<SubscribableEdition>(input);
             await _editionRepository.InsertAsync(edition);
         }
 
@@ -93,6 +97,38 @@ namespace Eaf.Middleware.Editions
         public async Task DeleteEdition(EntityDto input)
         {
             await _editionRepository.DeleteAsync(input.Id);
+        }
+
+        /// <summary>
+        /// Obtém as features da edição para edição.
+        /// </summary>
+        /// <param name="input">Identificador da edição.</param>
+        /// <returns>Features e valores da edição.</returns>
+        [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Editions_Features)]
+        public async Task<GetEditionFeaturesEditOutput> GetEditionFeaturesForEdit(EntityDto input)
+        {
+            var features = FeatureManager.GetAll()
+                .Where(f => f.Scope.HasFlag(Abp.Application.Features.FeatureScopes.Edition));
+            var featureValues = await _editionManager.GetFeatureValuesAsync(input.Id);
+
+            return new GetEditionFeaturesEditOutput
+            {
+                Features = ObjectMapper.Map<List<FlatFeatureDto>>(features).OrderBy(f => f.DisplayName).ToList(),
+                FeatureValues = featureValues.Select(fv => new NameValueDto(fv)).ToList()
+            };
+        }
+
+        /// <summary>
+        /// Atualiza as features de uma edição.
+        /// </summary>
+        /// <param name="input">Identificador da edição e valores de features.</param>
+        /// <returns>Task.</returns>
+        [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Editions_Features)]
+        public async Task UpdateEditionFeatures(UpdateEditionFeaturesInput input)
+        {
+            await _editionManager.SetFeatureValuesAsync(
+                input.Id,
+                input.FeatureValues.Select(fv => new Abp.NameValue(fv.Name, fv.Value)).ToArray());
         }
     }
 }

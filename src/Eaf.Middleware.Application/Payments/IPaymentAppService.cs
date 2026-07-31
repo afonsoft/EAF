@@ -1,5 +1,7 @@
+using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Eaf.Middleware.Payments.Dto;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Payments
@@ -7,7 +9,7 @@ namespace Eaf.Middleware.Payments
     /// <summary>
     /// Serviço de aplicação para pagamentos de assinatura.
     /// </summary>
-    public interface IPaymentAppService
+    public interface IPaymentAppService : IApplicationService
     {
         /// <summary>
         /// Obtém os pagamentos de assinatura paginados.
@@ -23,5 +25,20 @@ namespace Eaf.Middleware.Payments
         /// Processa o retorno de pagamento e ativa a assinatura.
         /// </summary>
         Task<SubscriptionPaymentDto> ProcessPaymentAsync(long paymentId, ProcessPaymentInput input);
+
+        /// <summary>
+        /// Lista os gateways de pagamento disponíveis e suas configurações.
+        /// </summary>
+        Task<List<PaymentGatewayDto>> GetGatewayListAsync();
+
+        /// <summary>
+        /// Obtém as configurações dos gateways de pagamento.
+        /// </summary>
+        Task<PaymentGatewaySettingsDto> GetGatewaySettingsAsync();
+
+        /// <summary>
+        /// Atualiza as configurações dos gateways de pagamento.
+        /// </summary>
+        Task UpdateGatewaySettingsAsync(PaymentGatewaySettingsDto input);
     }
 }

@@ -19,12 +19,13 @@ export class AppNavigationService {
   getMenu(): AppMenu {
     return new AppMenu('MainMenu', 'MainMenu', [
       new AppMenuItem('Dashboard', 'Pages.Dashboard', 'flaticon-line-graph', '/app/main/dashboard'),
-      new AppMenuItem('Tenants', 'Pages.Tenants', 'flaticon-squares-4', '/app/admin/tenants'),
+      new AppMenuItem('Metrics', 'Pages.Dashboard', 'flaticon-graph', '/app/main/dashboard'),
     ]);
   }
 
   getAdminMenu(): AppMenu {
     return new AppMenu('AdminMenu', 'AdminMenu', [
+      new AppMenuItem('Tenants', 'Pages.Tenants', 'flaticon-squares-4', '/app/admin/tenants'),
       new AppMenuItem('Roles', 'Pages.Administration.Roles', 'flaticon-suitcase', '/app/admin/roles'),
       new AppMenuItem('Users', 'Pages.Administration.Users', 'flaticon-users', '/app/admin/users'),
       new AppMenuItem('OrganizationUnits', 'Pages.Administration.OrganizationUnits', 'flaticon-network', '/app/admin/organization-units'),

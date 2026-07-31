@@ -3,9 +3,13 @@ using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Core.Cache;
+using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.Friendships;
+using Eaf.Middleware.MassNotifications;
 using Eaf.Middleware.MultiTenancy;
+using Eaf.Middleware.Payments;
 using Eaf.Middleware.Storage;
+using Eaf.Middleware.UserDelegations;
 using Eaf.ProjectName.Airplanes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -25,6 +29,11 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         /// </summary>
         public static bool IsDesignTime { get; set; }
 
+        /// <summary>
+        /// Quando <c>true</c>, desabilita a aplicação automática de migrations em runtime (usado nos testes).
+        /// </summary>
+        public static bool SkipMigrate { get; set; }
+
         public ProjectNameDbContext(DbContextOptions<ProjectNameDbContext> options)
             : base(options)
         {
@@ -37,7 +46,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         /// <param name="context">Contexto do Entity Framework a ser migrado.</param>
         private static void EnsureMigrated(DbContext context)
         {
-            if (IsDesignTime)
+            if (IsDesignTime || SkipMigrate)
                 return;
 
             if (_migrated)
@@ -62,6 +71,10 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<EafCache> EafCaches { get; set; }
         public virtual DbSet<TenantAddress> TenantAddress { get; set; }
         public virtual DbSet<UserTenantMembership> UserTenantMemberships { get; set; }
+        public virtual DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
+        public virtual DbSet<MassNotification> MassNotifications { get; set; }
+        public virtual DbSet<UserDelegation> UserDelegations { get; set; }
+        public virtual DbSet<SubscribableEdition> SubscribableEditions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

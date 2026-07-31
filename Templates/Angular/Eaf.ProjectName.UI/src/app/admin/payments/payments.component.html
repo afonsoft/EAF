@@ -15,9 +15,13 @@
     <div class="m-portlet m-portlet--mobile">
       <div class="m-portlet__head">
         <div class="m-portlet__head-tools">
-          <button *ngIf="isGranted('Pages.Administration.Payments.Create')" (click)="showCreateModal()" class="btn btn-primary">
+          <button *ngIf="isGranted('Pages.Administration.Payments.Create')" (click)="showCreateModal()" class="btn btn-primary mr-2">
             <i class="flaticon-add"></i>
             {{ 'Create' | localize }}
+          </button>
+          <button *ngIf="isGranted('Pages.Administration.Payments.GatewaySettings')" (click)="showGatewaySettings()" class="btn btn-info">
+            <i class="flaticon-settings-1"></i>
+            {{ 'GatewaySettings' | localize }}
           </button>
         </div>
       </div>
@@ -144,12 +148,17 @@
             <option [ngValue]="1">{{ 'Daily' | localize }}</option>
             <option [ngValue]="7">{{ 'Weekly' | localize }}</option>
             <option [ngValue]="30">{{ 'Monthly' | localize }}</option>
+            <option [ngValue]="90">{{ 'Quarterly' | localize }}</option>
+            <option [ngValue]="180">{{ 'Biannual' | localize }}</option>
             <option [ngValue]="365">{{ 'Annual' | localize }}</option>
+            <option [ngValue]="99999">{{ 'Permanent' | localize }}</option>
           </select>
         </div>
         <div class="form-group">
           <label for="PaymentGateway">{{ 'Gateway' | localize }}</label>
-          <input id="PaymentGateway" class="form-control" [(ngModel)]="newPayment.gateway" name="gateway" type="text" />
+          <select id="PaymentGateway" class="form-control" [(ngModel)]="newPayment.gateway" name="gateway">
+            <option *ngFor="let gateway of gateways" [ngValue]="gateway.name">{{ gateway.displayName }}</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="PaymentDescription">{{ 'Description' | localize }}</label>
@@ -204,3 +213,5 @@
     </div>
   </div>
 </div>
+
+<paymentGatewaySettingsModal #paymentGatewaySettingsModal (modalSave)="loadGateways()"></paymentGatewaySettingsModal>

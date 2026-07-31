@@ -19,6 +19,7 @@ using Eaf.Middleware.Authorization.Users.Dto;
 using Eaf.Middleware.Authorization.Users.Profile.Dto;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Chat.Dto;
+using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.Dashboard.Dto;
 using Eaf.Middleware.Editions.Dto;
 using Eaf.Middleware.Friendships;
@@ -88,9 +89,9 @@ namespace Eaf.Middleware
             configuration.CreateMap<CurrentTenantInfoDto, Tenant>().ReverseMap();
 
             //Edition
-            configuration.CreateMap<Edition, EditionDto>();
-            configuration.CreateMap<CreateEditionInput, Edition>();
-            configuration.CreateMap<UpdateEditionInput, Edition>();
+            configuration.CreateMap<SubscribableEdition, EditionDto>();
+            configuration.CreateMap<CreateEditionInput, SubscribableEdition>();
+            configuration.CreateMap<UpdateEditionInput, SubscribableEdition>();
 
             //OrganizationUnit
             configuration.CreateMap<OrganizationUnit, OrganizationUnitDto>();

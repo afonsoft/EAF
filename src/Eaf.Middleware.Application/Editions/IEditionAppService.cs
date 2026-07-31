@@ -1,6 +1,7 @@
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Eaf.Middleware.Editions.Dto;
+using Eaf.Middleware.MultiTenancy.Dto;
 using System.Threading.Tasks;
 
 namespace Eaf.Middleware.Editions
@@ -44,5 +45,19 @@ namespace Eaf.Middleware.Editions
         /// <param name="input">Identificador da edição.</param>
         /// <returns>Task.</returns>
         Task DeleteEdition(EntityDto input);
+
+        /// <summary>
+        /// Obtém as features da edição para edição.
+        /// </summary>
+        /// <param name="input">Identificador da edição.</param>
+        /// <returns>Features e valores da edição.</returns>
+        Task<GetEditionFeaturesEditOutput> GetEditionFeaturesForEdit(EntityDto input);
+
+        /// <summary>
+        /// Atualiza as features de uma edição.
+        /// </summary>
+        /// <param name="input">Identificador da edição e valores de features.</param>
+        /// <returns>Task.</returns>
+        Task UpdateEditionFeatures(UpdateEditionFeaturesInput input);
     }
 }

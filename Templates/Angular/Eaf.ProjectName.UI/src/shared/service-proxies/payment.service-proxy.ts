@@ -22,7 +22,7 @@ export interface IProcessPaymentInput {
 export interface IPaymentRequestDto {
     paymentId: string;
     gateway: string;
-    checkoutUrl: string;
+    checkoutUrl?: string;
     isSuccess: boolean;
 }
 
@@ -54,6 +54,43 @@ export interface IPagedResultDtoOfSubscriptionPaymentDto {
     items: ISubscriptionPaymentDto[];
 }
 
+export interface IPaymentGatewayDto {
+    name: string;
+    displayName: string;
+    isConfigured: boolean;
+    isDefault: boolean;
+}
+
+export interface IStripePaymentGatewaySettingsDto {
+    secretKey?: string;
+    publishableKey?: string;
+    webhookSecret?: string;
+}
+
+export interface IPayPalPaymentGatewaySettingsDto {
+    clientId?: string;
+    clientSecret?: string;
+    webhookId?: string;
+}
+
+export interface IMercadoPagoPaymentGatewaySettingsDto {
+    accessToken?: string;
+    publicKey?: string;
+}
+
+export interface IPagSeguroPaymentGatewaySettingsDto {
+    token?: string;
+    email?: string;
+}
+
+export interface IPaymentGatewaySettingsDto {
+    defaultGateway?: string;
+    stripe: IStripePaymentGatewaySettingsDto;
+    payPal: IPayPalPaymentGatewaySettingsDto;
+    mercadoPago: IMercadoPagoPaymentGatewaySettingsDto;
+    pagSeguro: IPagSeguroPaymentGatewaySettingsDto;
+}
+
 @Injectable()
 export class PaymentServiceProxy {
     private readonly http: HttpClient;
@@ -65,7 +102,7 @@ export class PaymentServiceProxy {
     }
 
     getAll(input: IGetSubscriptionPaymentsInput): Observable<IPagedResultDtoOfSubscriptionPaymentDto> {
-        let url_ = this.baseUrl + '/api/services/app/PaymentAppService/GetAll?';
+        let url_ = this.baseUrl + '/api/services/app/Payment/GetAll?';
         if (input.filter !== undefined && input.filter !== null) url_ += 'Filter=' + encodeURIComponent('' + input.filter) + '&';
         if (input.status !== undefined && input.status !== null) url_ += 'Status=' + encodeURIComponent('' + input.status) + '&';
         if (input.sorting !== undefined && input.sorting !== null) url_ += 'Sorting=' + encodeURIComponent('' + input.sorting) + '&';
@@ -80,7 +117,7 @@ export class PaymentServiceProxy {
     }
 
     createPayment(input: ICreateSubscriptionPaymentInput): Observable<IPaymentRequestDto> {
-        const url_ = this.baseUrl + '/api/services/app/PaymentAppService/CreatePayment';
+        const url_ = this.baseUrl + '/api/services/app/Payment/CreatePayment';
         const options: unknown = { observe: 'response', responseType: 'json', body: input };
         return this.http.request('post', url_, options).pipe(_observableMergeMap((response: any) => this.processPaymentRequest(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
@@ -89,9 +126,50 @@ export class PaymentServiceProxy {
     }
 
     processPayment(paymentId: number, input: IProcessPaymentInput): Observable<ISubscriptionPaymentDto> {
-        const url_ = this.baseUrl + '/api/services/app/PaymentAppService/ProcessPayment?paymentId=' + encodeURIComponent('' + paymentId);
+        const url_ = this.baseUrl + '/api/services/app/Payment/ProcessPayment?paymentId=' + encodeURIComponent('' + paymentId);
         const options: unknown = { observe: 'response', responseType: 'json', body: input };
         return this.http.request('post', url_, options).pipe(_observableMergeMap((response: any) => this.processSubscriptionPayment(response))).pipe(_observableCatch((response: any) => {
+            if (response instanceof Error) throw response;
+            return _observableThrow(response);
+        }));
+    }
+
+    getGatewayList(): Observable<IPaymentGatewayDto[]> {
+        const url_ = this.baseUrl + '/api/services/app/Payment/GetGatewayList';
+        const options: unknown = { observe: 'response', responseType: 'json' };
+        return this.http.request('get', url_, options).pipe(_observableMergeMap((response: any) => {
+            const status = response.status;
+            const body = response.body ?? [];
+            if (status === 200) {
+                return _observableOf(body as IPaymentGatewayDto[]);
+            }
+            return _observableThrow(new Error('Unexpected response: ' + status));
+        })).pipe(_observableCatch((response: any) => {
+            if (response instanceof Error) throw response;
+            return _observableThrow(response);
+        }));
+    }
+
+    getGatewaySettings(): Observable<IPaymentGatewaySettingsDto> {
+        const url_ = this.baseUrl + '/api/services/app/Payment/GetGatewaySettings';
+        const options: unknown = { observe: 'response', responseType: 'json' };
+        return this.http.request('get', url_, options).pipe(_observableMergeMap((response: any) => {
+            const status = response.status;
+            const body = response.body ?? {};
+            if (status === 200) {
+                return _observableOf(body as IPaymentGatewaySettingsDto);
+            }
+            return _observableThrow(new Error('Unexpected response: ' + status));
+        })).pipe(_observableCatch((response: any) => {
+            if (response instanceof Error) throw response;
+            return _observableThrow(response);
+        }));
+    }
+
+    updateGatewaySettings(input: IPaymentGatewaySettingsDto): Observable<void> {
+        const url_ = this.baseUrl + '/api/services/app/Payment/UpdateGatewaySettings';
+        const options: unknown = { body: input, headers: { 'Content-Type': 'application/json' }, observe: 'response', responseType: 'blob' };
+        return this.http.request('post', url_, options).pipe(_observableMergeMap((response: any) => this.processAction(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);
         }));
@@ -120,6 +198,14 @@ export class PaymentServiceProxy {
         const responseBlob = response.body ?? new Blob();
         if (status === 200) {
             return _observableOf(responseBlob as ISubscriptionPaymentDto);
+        }
+        return _observableThrow(new Error('Unexpected response: ' + status));
+    }
+
+    private processAction(response: HttpResponse<any>): Observable<void> {
+        const status = response.status;
+        if (status === 200) {
+            return _observableOf(undefined as any);
         }
         return _observableThrow(new Error('Unexpected response: ' + status));
     }

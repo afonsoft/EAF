@@ -45,7 +45,8 @@ namespace Eaf.Middleware.Configuration
                 .Union(GetTheme2Settings())
                 .Union(GetTheme3Settings())
                 .Union(GetTheme4Settings())
-                .Union(GetExternalLoginProviderSettings());
+                .Union(GetExternalLoginProviderSettings())
+                .Union(GetPaymentSettings());
         }
 
         private IEnumerable<SettingDefinition> GetDefaultThemeSettings()
@@ -80,6 +81,24 @@ namespace Eaf.Middleware.Configuration
         private string GetFromAppSettings(string name, string defaultValue = null)
         {
             return GetFromSettings("App:" + name, defaultValue);
+        }
+
+        private IEnumerable<SettingDefinition> GetPaymentSettings()
+        {
+            return new[]
+            {
+                new SettingDefinition(AppSettings.Payment.DefaultGateway, GetFromAppSettings(AppSettings.Payment.DefaultGateway, ""), isVisibleToClients: true, scopes: SettingScopes.Application),
+                new SettingDefinition(AppSettings.Payment.Stripe.SecretKey, GetFromAppSettings(AppSettings.Payment.Stripe.SecretKey, ""), isVisibleToClients: false, scopes: SettingScopes.Application, isEncrypted: true),
+                new SettingDefinition(AppSettings.Payment.Stripe.PublishableKey, GetFromAppSettings(AppSettings.Payment.Stripe.PublishableKey, ""), isVisibleToClients: true, scopes: SettingScopes.Application),
+                new SettingDefinition(AppSettings.Payment.Stripe.WebhookSecret, GetFromAppSettings(AppSettings.Payment.Stripe.WebhookSecret, ""), isVisibleToClients: false, scopes: SettingScopes.Application, isEncrypted: true),
+                new SettingDefinition(AppSettings.Payment.PayPal.ClientId, GetFromAppSettings(AppSettings.Payment.PayPal.ClientId, ""), isVisibleToClients: true, scopes: SettingScopes.Application),
+                new SettingDefinition(AppSettings.Payment.PayPal.ClientSecret, GetFromAppSettings(AppSettings.Payment.PayPal.ClientSecret, ""), isVisibleToClients: false, scopes: SettingScopes.Application, isEncrypted: true),
+                new SettingDefinition(AppSettings.Payment.PayPal.WebhookId, GetFromAppSettings(AppSettings.Payment.PayPal.WebhookId, ""), isVisibleToClients: false, scopes: SettingScopes.Application),
+                new SettingDefinition(AppSettings.Payment.MercadoPago.AccessToken, GetFromAppSettings(AppSettings.Payment.MercadoPago.AccessToken, ""), isVisibleToClients: false, scopes: SettingScopes.Application, isEncrypted: true),
+                new SettingDefinition(AppSettings.Payment.MercadoPago.PublicKey, GetFromAppSettings(AppSettings.Payment.MercadoPago.PublicKey, ""), isVisibleToClients: true, scopes: SettingScopes.Application),
+                new SettingDefinition(AppSettings.Payment.PagSeguro.Token, GetFromAppSettings(AppSettings.Payment.PagSeguro.Token, ""), isVisibleToClients: false, scopes: SettingScopes.Application, isEncrypted: true),
+                new SettingDefinition(AppSettings.Payment.PagSeguro.Email, GetFromAppSettings(AppSettings.Payment.PagSeguro.Email, ""), isVisibleToClients: true, scopes: SettingScopes.Application)
+            };
         }
 
         private string GetFromSettings(string name, string defaultValue = null)

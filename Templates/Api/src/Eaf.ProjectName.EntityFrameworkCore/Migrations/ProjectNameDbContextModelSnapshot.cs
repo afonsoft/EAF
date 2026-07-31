@@ -42,6 +42,11 @@ namespace Eaf.ProjectName.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -64,6 +69,10 @@ namespace Eaf.ProjectName.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AbpEditions");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Edition");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Abp.Application.Features.FeatureSetting", b =>
@@ -1741,6 +1750,77 @@ namespace Eaf.ProjectName.Migrations
                     b.ToTable("EafFriendships");
                 });
 
+            modelBuilder.Entity("Eaf.Middleware.MassNotifications.MassNotification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime?>("ScheduledTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("SendToAllUsers")
+                        .HasColumnType("bit");
+
+                    b.Property<byte>("Severity")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("TargetOrganizationUnitIds")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("TargetRoleIds")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("TargetUserIds")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EafMassNotifications");
+                });
+
             modelBuilder.Entity("Eaf.Middleware.MultiTenancy.Tenant", b =>
                 {
                     b.Property<int>("Id")
@@ -1784,6 +1864,9 @@ namespace Eaf.ProjectName.Migrations
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime?>("SubscriptionEndDateUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TenancyName")
                         .IsRequired()
@@ -1932,6 +2015,83 @@ namespace Eaf.ProjectName.Migrations
                     b.ToTable("AbpUserTenantMemberships");
                 });
 
+            modelBuilder.Entity("Eaf.Middleware.Payments.SubscriptionPayment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<int>("EditionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EditionPaymentType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExternalPaymentId")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Gateway")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("GatewayResponse")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("PaymentPeriodType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PaymentTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SubscriptionEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SubscriptionStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EafSubscriptionPayments");
+                });
+
             modelBuilder.Entity("Eaf.Middleware.Storage.BinaryObject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1964,6 +2124,59 @@ namespace Eaf.ProjectName.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("EafBinaryObjects");
+                });
+
+            modelBuilder.Entity("Eaf.Middleware.UserDelegations.UserDelegation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SourceUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("TargetUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EafUserDelegations");
                 });
 
             modelBuilder.Entity("Eaf.ProjectName.Airplanes.Airplane", b =>
@@ -2010,6 +2223,48 @@ namespace Eaf.ProjectName.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EafAirplanes");
+                });
+
+            modelBuilder.Entity("Eaf.Middleware.Core.Editions.SubscribableEdition", b =>
+                {
+                    b.HasBaseType("Abp.Application.Editions.Edition");
+
+                    b.Property<decimal?>("AnnualPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("BiannualPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DailyPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("DefaultPaymentPeriodType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExpiringEditionId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("MonthlyPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("PermanentPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("QuarterlyPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("TrialDayCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WaitingDayAfterExpire")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("WeeklyPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.ToTable("AbpEditions");
+
+                    b.HasDiscriminator().HasValue("SubscribableEdition");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
