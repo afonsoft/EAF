@@ -171,7 +171,7 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     app.setUpPwa();
-    const swUpdate = TestBed.inject(SwUpdate) as MockSwUpdate;
+    const swUpdate = TestBed.inject(SwUpdate) as unknown as MockSwUpdate;
     swUpdate.versionUpdates.next({ type: 'VERSION_READY', latestVersion: { hash: 'abc123' }, currentVersion: { hash: 'old' } });
     expect(app.updateAvailable).toBeTrue();
     expect(app.updateVersion).toBe('abc123');
