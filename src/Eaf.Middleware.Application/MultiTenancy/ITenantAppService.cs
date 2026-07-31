@@ -27,5 +27,20 @@ namespace Eaf.Middleware.MultiTenancy
         Task UpdateTenant(TenantEditDto input);
 
         Task UpdateTenantFeatures(UpdateTenantFeaturesInput input);
+
+        /// <summary>
+        /// Obtém a assinatura de um tenant.
+        /// </summary>
+        Task<TenantSubscriptionDto> GetTenantSubscriptionAsync(EntityDto input);
+
+        /// <summary>
+        /// Atribui uma edição a um tenant.
+        /// </summary>
+        Task AssignEditionToTenantAsync(AssignEditionToTenantInput input);
+
+        /// <summary>
+        /// Estende a assinatura de um tenant.
+        /// </summary>
+        Task ExtendTenantSubscriptionAsync(ExtendTenantSubscriptionInput input);
     }
 }

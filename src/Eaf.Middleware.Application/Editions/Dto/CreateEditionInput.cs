@@ -31,6 +31,26 @@ namespace Eaf.Middleware.Editions.Dto
         public decimal? AnnualPrice { get; set; }
 
         /// <summary>
+        /// Valor trimestral da assinatura.
+        /// </summary>
+        public decimal? QuarterlyPrice { get; set; }
+
+        /// <summary>
+        /// Valor semestral da assinatura.
+        /// </summary>
+        public decimal? BiannualPrice { get; set; }
+
+        /// <summary>
+        /// Valor permanente da assinatura.
+        /// </summary>
+        public decimal? PermanentPrice { get; set; }
+
+        /// <summary>
+        /// Período de pagamento padrão.
+        /// </summary>
+        public int? DefaultPaymentPeriodType { get; set; }
+
+        /// <summary>
         /// Dias de trial.
         /// </summary>
         public int? TrialDayCount { get; set; }

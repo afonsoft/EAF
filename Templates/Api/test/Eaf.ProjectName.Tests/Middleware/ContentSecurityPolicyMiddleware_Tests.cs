@@ -1,5 +1,6 @@
 using Eaf.ProjectName.Web.Middleware;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Shouldly;
 using System.Threading.Tasks;
 using Xunit;
@@ -17,7 +18,7 @@ namespace Eaf.ProjectName.Tests.Middleware
             {
                 nextCalled = true;
                 return Task.CompletedTask;
-            });
+            }, new ConfigurationBuilder().Build());
 
             await middleware.Invoke(context);
 
@@ -33,7 +34,7 @@ namespace Eaf.ProjectName.Tests.Middleware
             context.Response.Headers["Content-Security-Policy"] = "existing-policy";
             context.Response.Headers["X-Content-Security-Policy"] = "existing-x-policy";
 
-            var middleware = new ContentSecurityPolicyMiddleware(_ => Task.CompletedTask);
+            var middleware = new ContentSecurityPolicyMiddleware(_ => Task.CompletedTask, new ConfigurationBuilder().Build());
 
             await middleware.Invoke(context);
 
@@ -50,7 +51,7 @@ namespace Eaf.ProjectName.Tests.Middleware
             {
                 nextCalled = true;
                 return Task.CompletedTask;
-            });
+            }, new ConfigurationBuilder().Build());
 
             await middleware.Invoke(context);
 
@@ -61,7 +62,7 @@ namespace Eaf.ProjectName.Tests.Middleware
         public async Task Dado_Middleware_Quando_CSPAdicionado_Entao_DeveConterDefaultSrc()
         {
             var context = new DefaultHttpContext();
-            var middleware = new ContentSecurityPolicyMiddleware(_ => Task.CompletedTask);
+            var middleware = new ContentSecurityPolicyMiddleware(_ => Task.CompletedTask, new ConfigurationBuilder().Build());
 
             await middleware.Invoke(context);
 

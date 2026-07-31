@@ -30,5 +30,20 @@ namespace Eaf.Middleware.MultiTenancy.Dto
         /// Obtém ou define TenancyName.
         /// </summary>
         public string TenancyName { get; set; }
+
+        /// <summary>
+        /// Identificador da edição associada ao tenant.
+        /// </summary>
+        public int? EditionId { get; set; }
+
+        /// <summary>
+        /// Nome exibido da edição associada ao tenant.
+        /// </summary>
+        public string EditionDisplayName { get; set; }
+
+        /// <summary>
+        /// Data de término da assinatura do tenant (UTC).
+        /// </summary>
+        public DateTime? SubscriptionEndDateUtc { get; set; }
     }
 }

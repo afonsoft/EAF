@@ -22,6 +22,26 @@ namespace Eaf.Middleware.Core.Editions
 
         public decimal? AnnualPrice { get; set; }
 
+        /// <summary>
+        /// Valor da assinatura trimestral.
+        /// </summary>
+        public decimal? QuarterlyPrice { get; set; }
+
+        /// <summary>
+        /// Valor da assinatura semestral.
+        /// </summary>
+        public decimal? BiannualPrice { get; set; }
+
+        /// <summary>
+        /// Valor da assinatura permanente.
+        /// </summary>
+        public decimal? PermanentPrice { get; set; }
+
+        /// <summary>
+        /// Tipo de período de pagamento padrão da edição.
+        /// </summary>
+        public int? DefaultPaymentPeriodType { get; set; }
+
         public int? TrialDayCount { get; set; }
 
         /// <summary>
@@ -30,7 +50,7 @@ namespace Eaf.Middleware.Core.Editions
         public int? WaitingDayAfterExpire { get; set; }
 
         [NotMapped]
-        public bool IsFree => !DailyPrice.HasValue && !WeeklyPrice.HasValue && !MonthlyPrice.HasValue && !AnnualPrice.HasValue;
+        public bool IsFree => !DailyPrice.HasValue && !WeeklyPrice.HasValue && !MonthlyPrice.HasValue && !QuarterlyPrice.HasValue && !BiannualPrice.HasValue && !AnnualPrice.HasValue && !PermanentPrice.HasValue;
 
         /// <summary>
         /// HasTrial.
@@ -80,8 +100,17 @@ namespace Eaf.Middleware.Core.Editions
                 case PaymentPeriodType.Monthly:
                     return MonthlyPrice;
 
+                case PaymentPeriodType.Quarterly:
+                    return QuarterlyPrice;
+
+                case PaymentPeriodType.Biannual:
+                    return BiannualPrice;
+
                 case PaymentPeriodType.Annual:
                     return AnnualPrice;
+
+                case PaymentPeriodType.Permanent:
+                    return PermanentPrice;
 
                 default:
                     return null;

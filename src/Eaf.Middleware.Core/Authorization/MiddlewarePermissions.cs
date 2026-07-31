@@ -44,6 +44,10 @@ namespace Eaf.Middleware.Authorization
         public const string Pages_Administration_Editions_Create = "Pages.Administration.Editions.Create";
         public const string Pages_Administration_Editions_Delete = "Pages.Administration.Editions.Delete";
         public const string Pages_Administration_Editions_Edit = "Pages.Administration.Editions.Edit";
+        public const string Pages_Administration_Editions_Features = "Pages.Administration.Editions.Features";
+
+        public const string Pages_Administration_Payments_GatewaySettings = "Pages.Administration.Payments.GatewaySettings";
+        public const string Pages_Tenants_Subscription = "Pages.Tenants.Subscription";
 
         public const string Pages_Administration_OrganizationUnits = "Pages.Administration.OrganizationUnits";
         public const string Pages_Administration_OrganizationUnits_Create = "Pages.Administration.OrganizationUnits.Create";

@@ -77,11 +77,13 @@ namespace Eaf.Middleware.Authorization
             tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_ChangeFeatures, L("ChangingFeatures"), multiTenancySides: MultiTenancySides.Host);
             tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_Delete, L("DeletingTenant"), multiTenancySides: MultiTenancySides.Host);
             tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_Impersonation, L("LoginForTenants"), multiTenancySides: MultiTenancySides.Host);
+            tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_Subscription, L("TenantSubscription"), multiTenancySides: MultiTenancySides.Host);
 
             var editions = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions, L("Editions"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Create, L("CreatingNewEdition"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Edit, L("EditingEdition"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Delete, L("DeletingEdition"), multiTenancySides: MultiTenancySides.Host);
+            editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Features, L("EditionFeatures"), multiTenancySides: MultiTenancySides.Host);
 
             var organizationUnits = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits, L("OrganizationUnits"));
             organizationUnits.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits_Create, L("CreatingNewOrganizationUnit"));
@@ -97,6 +99,7 @@ namespace Eaf.Middleware.Authorization
             var payments = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments, L("Payments"));
             payments.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments_Create, L("CreatingNewPayment"));
             payments.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments_Process, L("ProcessingPayment"));
+            payments.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments_GatewaySettings, L("PaymentGatewaySettings"), multiTenancySides: MultiTenancySides.Host);
         }
 
         private static ILocalizableString L(string name)

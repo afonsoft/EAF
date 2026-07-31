@@ -1,8 +1,11 @@
 using Abp.Application.Editions;
+using Abp.Application.Features;
 using Abp.Application.Services.Dto;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.ObjectMapping;
 using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.Editions;
 using Eaf.Middleware.Editions.Dto;
 using NSubstitute;
@@ -20,44 +23,58 @@ namespace Eaf.Middleware.Application.Tests.Editions
     public class EditionAppServiceBddTests
     {
         private readonly EditionAppService _sut;
-        private readonly IRepository<Edition> _editionRepository;
+        private readonly IRepository<SubscribableEdition, int> _editionRepository;
 
         public EditionAppServiceBddTests()
         {
-            _editionRepository = Substitute.For<IRepository<Edition>>();
-            _sut = new EditionAppService(_editionRepository);
+            _editionRepository = Substitute.For<IRepository<SubscribableEdition, int>>();
+            _sut = new EditionAppService(_editionRepository, CreateEditionManager());
             _sut.ObjectMapper = CreateObjectMapper();
+        }
+
+        private static EditionManager CreateEditionManager()
+        {
+            var baseEditionRepository = Substitute.For<IRepository<Edition>>();
+            var featureValueStore = Substitute.For<IAbpZeroFeatureValueStore>();
+            var unitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
+
+            return Substitute.For<EditionManager>(new object[]
+            {
+                baseEditionRepository,
+                featureValueStore,
+                unitOfWorkManager
+            });
         }
 
         private static IObjectMapper CreateObjectMapper()
         {
             var mapper = Substitute.For<IObjectMapper>();
-            mapper.Map<EditionDto>(Arg.Any<Edition>()).Returns(ci =>
+            mapper.Map<EditionDto>(Arg.Any<SubscribableEdition>()).Returns(ci =>
             {
-                var edition = ci.Arg<Edition>();
+                var edition = ci.Arg<SubscribableEdition>();
                 return new EditionDto
                 {
                     Id = edition.Id,
                     DisplayName = edition.DisplayName,
                 };
             });
-            mapper.Map<List<EditionDto>>(Arg.Any<IEnumerable<Edition>>()).Returns(ci =>
+            mapper.Map<List<EditionDto>>(Arg.Any<IEnumerable<SubscribableEdition>>()).Returns(ci =>
             {
-                var editions = ci.Arg<IEnumerable<Edition>>();
+                var editions = ci.Arg<IEnumerable<SubscribableEdition>>();
                 return editions.Select(e => mapper.Map<EditionDto>(e)).ToList();
             });
-            mapper.Map<Edition>(Arg.Any<CreateEditionInput>()).Returns(ci =>
+            mapper.Map<SubscribableEdition>(Arg.Any<CreateEditionInput>()).Returns(ci =>
             {
                 var input = ci.Arg<CreateEditionInput>();
-                return new Edition
+                return new SubscribableEdition
                 {
                     DisplayName = input.DisplayName,
                 };
             });
-            mapper.Map(Arg.Any<UpdateEditionInput>(), Arg.Any<Edition>()).Returns(ci =>
+            mapper.Map(Arg.Any<UpdateEditionInput>(), Arg.Any<SubscribableEdition>()).Returns(ci =>
             {
                 var input = ci.Arg<UpdateEditionInput>();
-                var edition = ci.Arg<Edition>();
+                var edition = ci.Arg<SubscribableEdition>();
                 edition.DisplayName = input.DisplayName;
                 return edition;
             });
@@ -80,10 +97,10 @@ namespace Eaf.Middleware.Application.Tests.Editions
         public async Task Dado_EditionsCadastradas_Quando_GetEditions_Entao_DeveRetornarListaPaginada()
         {
             // Dado
-            var editions = new List<Edition>
+            var editions = new List<SubscribableEdition>
             {
-                new Edition { Id = 1, DisplayName = "Free" },
-                new Edition { Id = 2, DisplayName = "Pro" },
+                new SubscribableEdition { Id = 1, DisplayName = "Free" },
+                new SubscribableEdition { Id = 2, DisplayName = "Pro" },
             }.AsAsyncQueryable();
 
             _editionRepository.GetAllAsync().Returns(editions);
@@ -103,10 +120,10 @@ namespace Eaf.Middleware.Application.Tests.Editions
         public async Task Dado_FiltroPeloNome_Quando_GetEditions_Entao_DeveFiltrarPorDisplayName()
         {
             // Dado
-            var editions = new List<Edition>
+            var editions = new List<SubscribableEdition>
             {
-                new Edition { Id = 1, DisplayName = "Free" },
-                new Edition { Id = 2, DisplayName = "Pro" },
+                new SubscribableEdition { Id = 1, DisplayName = "Free" },
+                new SubscribableEdition { Id = 2, DisplayName = "Pro" },
             }.AsAsyncQueryable();
 
             _editionRepository.GetAllAsync().Returns(editions);
@@ -127,7 +144,7 @@ namespace Eaf.Middleware.Application.Tests.Editions
         public async Task Dado_EditionExistente_Quando_GetEditionForEdit_Entao_DeveRetornarEditionDto()
         {
             // Dado
-            var edition = new Edition { Id = 1, DisplayName = "Free" };
+            var edition = new SubscribableEdition { Id = 1, DisplayName = "Free" };
             _editionRepository.GetAsync(1).Returns(edition);
 
             // Quando
@@ -156,7 +173,7 @@ namespace Eaf.Middleware.Application.Tests.Editions
             await _sut.CreateEdition(input);
 
             // Então
-            await _editionRepository.Received(1).InsertAsync(Arg.Is<Edition>(e => e.DisplayName == "Enterprise"));
+            await _editionRepository.Received(1).InsertAsync(Arg.Is<SubscribableEdition>(e => e.DisplayName == "Enterprise"));
         }
 
         #endregion
@@ -167,7 +184,7 @@ namespace Eaf.Middleware.Application.Tests.Editions
         public async Task Dado_InputValido_Quando_UpdateEdition_Entao_DeveAtualizarNoRepositorio()
         {
             // Dado
-            var edition = new Edition { Id = 1, DisplayName = "Old" };
+            var edition = new SubscribableEdition { Id = 1, DisplayName = "Old" };
             _editionRepository.GetAsync(1).Returns(edition);
 
             var input = new UpdateEditionInput
@@ -192,7 +209,7 @@ namespace Eaf.Middleware.Application.Tests.Editions
         public async Task Dado_EditionExistente_Quando_DeleteEdition_Entao_DeveRemoverDoRepositorio()
         {
             // Dado
-            _editionRepository.GetAsync(1).Returns(new Edition { Id = 1, DisplayName = "ToDelete" });
+            _editionRepository.GetAsync(1).Returns(new SubscribableEdition { Id = 1, DisplayName = "ToDelete" });
 
             // Quando
             await _sut.DeleteEdition(new EntityDto(1));
