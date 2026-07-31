@@ -88,6 +88,7 @@
           style="text-decoration: none"
           [ngClass]="{ 'm--hide': !this.showChatMenu }"
           [attr.aria-label]="chatConnected ? l('OpenChat') : l('ChatIsConnecting')"
+          (click)="showChat('chatSideRight')"
         >
           <span class="m-nav__link-badge m-badge m-badge--dot m-badge--dot-small m-badge--danger" *ngIf="unreadChatMessageCount"></span>
           <span class="m-nav__link-icon">
@@ -103,7 +104,6 @@
             </span>
             <span class="m-nav__link-icon-wrapper" *ngIf="chatConnected">
               <span
-                (click)="showChat('chatSideRight')"
                 class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-desktop-inline-block ng-star-inserted pull-bs-canvas-right d-block text-primary text-decoration-none"
                 style="text-decoration: none"
               >

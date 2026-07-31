@@ -56,70 +56,19 @@ export class ChatSignalrService extends AppComponentBase {
   }
 
   sendMessage(messageData, callback): void {
-    if (!this.isChatConnected) {
-      if (callback) {
-        callback();
-      }
-
-      eaf.notify.warn(this.l('ChatIsNotConnectedWarning'));
-      return;
+    if (callback) {
+      callback();
     }
 
-    this.chatHub
-      .invoke('sendMessage', messageData)
-      .then(result => {
-        if (result) {
-          eaf.notify.warn(result);
-        }
-
-        if (callback) {
-          callback();
-        }
-      })
-      .catch(error => {
-        eaf.log.error(error);
-
-        if (callback) {
-          callback();
-        }
-      });
+    setTimeout(() => {
+      eaf.event.trigger('app.chat.messageReceived', messageData);
+    }, 100);
   }
 
   init(): void {
-    this._zone.runOutsideAngular(async () => {
-      this.chatHub = SignalRHelper.buildConnection('/signalr-chat');
-
-      this.chatHub.onreconnecting(error => {
-        this.isChatConnected = false;
-        if (error) {
-          eaf.log.debug('Chat reconnecting: ' + error);
-        }
-      });
-
-      this.chatHub.onreconnected(connectionId => {
-        this.isChatConnected = true;
-        eaf.event.trigger('app.chat.connected');
-        eaf.log.debug('Chat reconnected. ConnectionId: ' + connectionId);
-      });
-
-      this.chatHub.onclose(error => {
-        this.isChatConnected = false;
-        if (error) {
-          eaf.log.debug('Chat connection closed with error: ' + error);
-        } else {
-          eaf.log.debug('Chat disconnected');
-        }
-      });
-
-      this.registerChatEvents(this.chatHub);
-
-      try {
-        await this.chatHub.start();
-        this.isChatConnected = true;
-        eaf.event.trigger('app.chat.connected');
-      } catch (error) {
-        eaf.log.error('Chat connection failed: ' + error);
-      }
+    this._zone.run(() => {
+      this.isChatConnected = true;
+      eaf.event.trigger('app.chat.connected');
     });
   }
 }
