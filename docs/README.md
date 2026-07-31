@@ -26,7 +26,7 @@ Para facilitar a consulta, a documentação está organizada nas seguintes seç�
 ## Changelog
 
 *   **[Changelog v2.0](./development/CHANGELOG-v2.md)**: Melhorias de performance backend, suporte multi-database, otimizações Angular e refatoração SOLID (21 especificações implementadas — PR #61).
-*   **[CHANGELOG.md](../../CHANGELOG.md)**: Histórico completo de mudanças, incluindo a versão 9.4.1.
+*   **[CHANGELOG.md](../../CHANGELOG.md)**: Histórico completo de mudanças, incluindo a versão 9.4.2.
 
 ## Contribuindo
 

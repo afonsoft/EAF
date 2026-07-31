@@ -4,19 +4,25 @@
 
 English | **[Português](README_pt.md)**
 
-![Line Coverage](https://img.shields.io/badge/Line%20Coverage-97.9%25-brightgreen)
-![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-90.5%25-brightgreen)
-![Method Coverage](https://img.shields.io/badge/Method%20Coverage-99.8%25-brightgreen)
-![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-100%25-brightgreen)
-![Total Tests](https://img.shields.io/badge/Total%20Tests-4605-blue)
-![Passing Tests](https://img.shields.io/badge/Passing%20Tests-4604-brightgreen)
+![Line Coverage](https://img.shields.io/badge/Line%20Coverage-88%25-brightgreen)
+![Branch Coverage](https://img.shields.io/badge/Branch%20Coverage-78%25-brightgreen)
+![Method Coverage](https://img.shields.io/badge/Method%20Coverage-N%2FA-lightgrey)
+![Test Success Rate](https://img.shields.io/badge/Test%20Success%20Rate-99.94%25-brightgreen)
+![Total Tests](https://img.shields.io/badge/Total%20Tests-1732-blue)
+![Passing Tests](https://img.shields.io/badge/Passing%20Tests-1731-brightgreen)
 ![Skipped Tests](https://img.shields.io/badge/Skipped%20Tests-0-yellow)
 ![Build Warnings](https://img.shields.io/badge/Build%20Warnings-0-brightgreen)
-![Angular Tests](https://img.shields.io/badge/Angular%20Tests-222%20Passed-brightgreen)
+![Angular Tests](https://img.shields.io/badge/Angular%20Tests-254%20Passed-brightgreen)
 ![API Template Tests](https://img.shields.io/badge/API%20Template%20Tests-212%20Total-blue)
 ![API Template Passing](https://img.shields.io/badge/API%20Template%20Passing-211%20Success-brightgreen)
 ![Worker Runtime](https://img.shields.io/badge/Worker%20Runtime-Validated-brightgreen)
 ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Validated-brightgreen)
+[![Sonar Bugs](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=bugs)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
+[![Sonar Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=vulnerabilities)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
+[![Sonar Code Smells](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=code_smells)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
+[![Sonar Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=duplicated_lines_density)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
+[![Sonar Security Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=security_rating)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
+[![Sonar Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=afonsoft_EAF2&metric=sqale_rating)](https://sonarcloud.io/project/overview?id=afonsoft_EAF2)
 
 ## Table of Contents
 

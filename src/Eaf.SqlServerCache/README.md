@@ -41,7 +41,7 @@ Configuração do cache:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SqlServerCache --version 9.4.1
+dotnet add package Eaf.SqlServerCache --version 9.4.2
 ```
 
 ### Instalação via Referência de Projeto
