@@ -276,6 +276,27 @@ body .p-fileupload .p-fileupload-buttonbar.p-widget-header {
     background-color: #ff7020 !important;
 }
 
+#chatSideRight .bs-canvas-header.header-dark h4,
+#chatSideRight .bs-canvas-header.header-dark .close span,
+#chatSideRight .bs-canvas-header.header-color h4,
+#chatSideRight .bs-canvas-header.header-color .close span {
+    color: #fff !important;
+}
+
+#chatSideRight .bs-canvas-header.header-light h4,
+#chatSideRight .bs-canvas-header.header-light .close span {
+    color: #212529 !important;
+}
+
+#chatSideRight .bs-canvas-header.header-dark .pinned i,
+#chatSideRight .bs-canvas-header.header-color .pinned i {
+    color: #fff !important;
+}
+
+#chatSideRight .bs-canvas-header.header-light .pinned i {
+    color: #212529 !important;
+}
+
 #chatSideRight .bg-light-primary {
     background-color: rgba(255, 112, 32, 0.1) !important;
     color: #212529 !important;

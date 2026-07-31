@@ -11,9 +11,10 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 The EAF project is an enterprise application framework based on ASP.NET Boilerplate (ABP) with Angular frontend. The project structure includes:
 - **Backend**: .NET 10.0 with ASP.NET Core
-- **Frontend**: Angular 18 in `Templates/Angular/Eaf.ProjectName.UI`
-- **UI Libraries**: PrimeNG, ngx-bootstrap, Angular Material (planned)
-- **Integration**: SignalR for real-time, jQuery for legacy components, EAF.js framework
+- **Frontend**: Angular 20 in `Templates/Angular/Eaf.ProjectName.UI` (package.json shows ^20.x)
+- **UI Libraries**: PrimeNG 17, ngx-bootstrap 12, Metronic theme bundles (legacy Metronic 5/6 style, migration to Metronic 8 + Bootstrap 5 planned), EAF.js framework
+- **Integration**: SignalR for real-time, jQuery for legacy components, Service Worker / PWA packages present but not fully configured
+- **Responsiveness**: Minimal custom media queries; mobile improvements planned (see `.specs/eaf-angular-mobile-responsive-layout.spec.md`)
 
 ## TypeScript Best Practices
 
@@ -93,10 +94,23 @@ The EAF project is an enterprise application framework based on ASP.NET Boilerpl
 - Real-time features may break with Angular 19's change detection
 
 ### PrimeNG Components
-- PrimeNG 17.0.0 is currently used
+- PrimeNG 17.17.0 is currently used in `Templates/Angular/Eaf.ProjectName.UI`
 - Test all PrimeNG components visually and functionally after upgrades
-- PrimeNG 19 may have breaking changes
-- Consider migrating to Angular Material for better Angular 19 compatibility
+- Consider standardizing on PrimeNG instead of `ngx-bootstrap` and legacy jQuery widgets
+- Prefer PrimeNG theming v17+ (styled/unstyled modes, design tokens) for future migrations
+
+### Responsiveness and Mobile
+- The current layout is desktop-first with Metronic legacy bundles
+- Mobile improvements are planned; use Bootstrap 5 grid and CSS custom properties for new components
+- Add `@media` breakpoints for critical components (chat, sidebar, tables, forms)
+- Ensure touch targets >= 44x44px and avoid hover-only interactions on touch
+- See `.specs/eaf-angular-mobile-responsive-layout.spec.md` for the roadmap
+
+### PWA / Offline
+- `@angular/pwa` and `@angular/service-worker` are already in `package.json`
+- Configure `ngsw-config.json`, `manifest.webmanifest` and register the service worker
+- Use `localforage` (already present) for offline data queue and cache
+- See `.specs/eaf-angular-pwa-offline.spec.md`
 
 ## File Structure Conventions
 
@@ -115,20 +129,25 @@ The EAF project is an enterprise application framework based on ASP.NET Boilerpl
 
 ## Migration Guidelines
 
-### Angular 17 to 19 Migration
-- Follow the automated migration guide in `Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_17_TO_19.md`
+### Angular 18/19/20 Migration
+- Follow the automated migration guide in `Templates/Angular/Eaf.ProjectName.UI/docs/MIGRATION_ANGULAR_17_TO_19.md` if available
 - Use Angular CLI schematics for automatic migrations where possible
 - Migrate control flow syntax: `*ngIf` → `@if`, `*ngFor` → `@for`, `*ngSwitch` → `@switch`
 - Gradually migrate to standalone components
-- Update TypeScript to 5.5 for Angular 19
+- The project is already on Angular 20 packages; verify runtime and build compatibility
 - Test EAF framework integration after each migration step
 
+### Metronic 8 + Bootstrap 5 Migration
+- This is a long-term UI modernization (see `.specs/eaf-angular-metronic8-bootstrap5-migration.spec.md`)
+- Avoid adding new code using legacy Metronic classes (`m-stack`, `m-grid__item`)
+- Prefer Bootstrap 5 utilities (`d-flex`, `flex-*`, `gap-*`, `offcanvas`) and CSS Grid
+- Migrate `ngx-bootstrap` usage to PrimeNG native components before removing `ngx-bootstrap`
+- Replace Font Awesome 5 / Line Awesome / Flaticon mix with a single icon library (Font Awesome 6 or Bootstrap Icons)
+
 ### Material Design Implementation
-- Install Angular Material 19: `npm install @angular/material@^19.0.0 @angular/cdk@^19.0.0`
-- Configure Material theme in `src/styles.scss`
-- Replace PrimeNG components with Material equivalents gradually
-- Test visual consistency during migration
-- Maintain existing EAF theming system
+- Consider PrimeNG 17+ as the primary component library instead of migrating to Angular Material
+- If Angular Material is introduced, configure theme in `src/styles.scss`
+- Maintain existing EAF theming system (`currentTheme.baseSettings.header.headerSkin`, `menu.asideSkin`)
 
 ## Testing Guidelines
 
