@@ -1,5 +1,21 @@
 # EAF Coverage Audit Memory
 
+## P72: EAF Angular UI modernization analysis and .specs (2026-07-31)
+- Reanalyzed `afonsoft/EAF`, `aspnetboilerplate/aspnetboilerplate` (dev) and `aspnetzero.com` for mobile/responsive layouts and new features.
+- Created `.specs/` migration roadmap in `afonsoft/EAF`:
+  - `eaf-angular-mobile-responsive-layout.spec.md`
+  - `eaf-angular-metronic8-bootstrap5-migration.spec.md`
+  - `eaf-angular-modern-primeng-components.spec.md`
+  - `eaf-angular-pwa-offline.spec.md`
+  - `eaf-angular-dark-mode-theming.spec.md`
+  - `eaf-angular-accessibility-a11y.spec.md`
+  - `eaf-aspnetzero-feature-adoption.spec.md`
+  - `eaf-abp-feature-parity.spec.md`
+  - `eaf-backend-modularization.spec.md`
+- Updated `.agents/skills/angular-development/SKILL.md` and `.agents/skills/eaf-ui/SKILL.md` to reflect Angular 20 / PrimeNG 17 / legacy Metronic stack and planned mobile-first migrations.
+- New `eaf-angular` skill added to `afonsoft/agents-skills` (PR #27) and `abp-angular` refreshed with responsive/mobile guidance.
+- Related PRs: `afonsoft/EAF#267`, `afonsoft/agents-skills#27`.
+
 ## P71: full Docker stack multi-tenant / chat test (2026-07-30)
 - Stack: `docker-compose.all.yml` with `eaf-sqlserver`, `eaf-migrator`, `eaf-api`, `eaf-worker`, `eaf-angular` all healthy on `localhost:5000` and `localhost:4200`.
 - Default ABP seed admin password forces a reset on first login; use `/api/services/app/Account/ResetPassword` to set a real password before any other calls.

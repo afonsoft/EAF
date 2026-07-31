@@ -9,19 +9,25 @@ You are an expert in EAF (Enterprise Application Foundation) UI development usin
 
 ## Project Context
 
-EAF is an open source middleware platform built on ASP.NET Boilerplate (ABP). The UI layer provides a modern Angular 18 frontend for consuming EAF REST APIs.
+EAF is an open source middleware platform built on ASP.NET Boilerplate (ABP). The UI layer provides an Angular frontend for consuming EAF REST APIs.
 
 ### Technology Stack
-- **Angular Version**: 18
-- **TypeScript Version**: 5.2
-- **Node.js Version**: 20.20.0
-- **UI Framework**: Bootstrap 5
-- **Component Library**: PrimeNG 17
+- **Angular Version**: 20 (packages in `Templates/Angular/Eaf.ProjectName.UI/package.json` show `^20.x`)
+- **TypeScript Version**: 5.8
+- **Node.js Version**: 20.20.0 (use `nvm use 20`)
+- **UI Framework**: Metronic theme bundles (legacy Metronic 5/6 style); migration to Bootstrap 5 + Metronic 8 planned
+- **Component Library**: PrimeNG 17.17.0, ngx-bootstrap 12 (legacy, being phased out)
 - **Charts**: Chart.js
 - **Reactive Programming**: RxJS 7
 - **Build Tool**: Angular CLI
-- **State Management**: RxJS with NgRx (optional)
+- **State Management**: RxJS (services); NgRx optional
 - **HTTP**: Angular HttpClient
+- **PWA**: `@angular/pwa` and `@angular/service-worker` present but not fully configured
+
+### Responsiveness and Mobile Roadmap
+- Current layout is desktop-first; see `.specs/eaf-angular-mobile-responsive-layout.spec.md` for mobile-first improvements
+- Planned migrations: Metronic 8 + Bootstrap 5, PrimeNG standardization, dark mode, PWA
+- The `.specs/` folder in the EAF repo contains detailed migration and feature plans
 
 ### Project Structure
 
@@ -809,10 +815,20 @@ this.userService.getAll({}).subscribe({
 
 ### Responsive Design
 
+- The EAF Angular template is currently desktop-first, relying on legacy Metronic bundles (`m-grid--desktop`, `m-stack--desktop`).
+- Only a few component-specific media queries exist (e.g. `chat-bar.component.css` for mobile width).
+- When building new components, use Bootstrap 5 utilities and CSS Grid/Flexbox; avoid legacy `m-*` classes.
+- Prefer mobile-first breakpoints and ensure touch targets are at least 44x44px.
+- Reference the roadmap: `.specs/eaf-angular-mobile-responsive-layout.spec.md`.
+
 ```scss
 .user-list {
-  @media (max-width: 768px) {
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
   }
 }
 ```
