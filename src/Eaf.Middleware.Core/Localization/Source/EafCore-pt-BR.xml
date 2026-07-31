@@ -461,6 +461,9 @@
 		<text name="ManageMembers">Gerenciar membros</text>
 		<text name="ManageRoles">Gerenciar perfis</text>
 		<text name="OrganizationUnitDeleteWarningMessage">A unidade organizacional {0} será excluída.</text>
+		<text name="OrganizationUnitUserRemoveWarningMessage">O usuário {0} será removido desta unidade organizacional.</text>
+		<text name="OrganizationUnitRoleRemoveWarningMessage">O perfil {0} será removido desta unidade organizacional.</text>
+		<text name="Add">Adicionar</text>
 		<text name="Pending">Pendente</text>
 		<text name="Processing">Processando</text>
 		<text name="Completed">Concluído</text>

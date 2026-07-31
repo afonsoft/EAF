@@ -454,6 +454,9 @@
 		<text name="ManageRoles">Manage roles</text>
 		<text name="Create">Create</text>
 		<text name="OrganizationUnitDeleteWarningMessage">Organization unit {0} will be deleted.</text>
+		<text name="OrganizationUnitUserRemoveWarningMessage">User {0} will be removed from this organization unit.</text>
+		<text name="OrganizationUnitRoleRemoveWarningMessage">Role {0} will be removed from this organization unit.</text>
+		<text name="Add">Add</text>
 		<text name="Pending">Pending</text>
 		<text name="Processing">Processing</text>
 		<text name="Completed">Completed</text>
