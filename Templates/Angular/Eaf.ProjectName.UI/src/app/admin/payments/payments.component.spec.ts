@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ModalModule } from 'ngx-bootstrap/modal';
 import { PaymentsComponent } from './payments.component';
 import { PaymentServiceProxy } from '@shared/service-proxies/payment.service-proxy';
 import { EditionServiceProxy } from '@shared/service-proxies/edition.service-proxy';
@@ -37,6 +39,7 @@ describe('PaymentsComponent', () => {
   beforeEach(() => {
     setupEafGlobals();
     TestBed.configureTestingModule({
+      imports: [FormsModule, ModalModule.forRoot()],
       declarations: [PaymentsComponent, MockLocalizePipe],
       providers: [
         { provide: PaymentServiceProxy, useClass: MockPaymentServiceProxy },

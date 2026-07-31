@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ModalModule } from 'ngx-bootstrap/modal';
 import { MassNotificationsComponent } from './mass-notifications.component';
 import { MassNotificationServiceProxy } from '@shared/service-proxies/mass-notification.service-proxy';
 import { LocalizationService } from '@eaf/localization/localization.service';
@@ -35,6 +37,7 @@ describe('MassNotificationsComponent', () => {
   beforeEach(() => {
     setupEafGlobals();
     TestBed.configureTestingModule({
+      imports: [FormsModule, ModalModule.forRoot()],
       declarations: [MassNotificationsComponent, MockLocalizePipe],
       providers: [
         { provide: MassNotificationServiceProxy, useClass: MockMassNotificationServiceProxy },

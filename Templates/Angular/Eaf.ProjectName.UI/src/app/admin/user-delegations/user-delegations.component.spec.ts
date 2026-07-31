@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ModalModule } from 'ngx-bootstrap/modal';
 import { UserDelegationsComponent } from './user-delegations.component';
 import { UserDelegationServiceProxy } from '@shared/service-proxies/user-delegation.service-proxy';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
@@ -37,6 +39,7 @@ describe('UserDelegationsComponent', () => {
   beforeEach(() => {
     setupEafGlobals();
     TestBed.configureTestingModule({
+      imports: [FormsModule, ModalModule.forRoot()],
       declarations: [UserDelegationsComponent, MockLocalizePipe],
       providers: [
         { provide: UserDelegationServiceProxy, useClass: MockUserDelegationServiceProxy },
