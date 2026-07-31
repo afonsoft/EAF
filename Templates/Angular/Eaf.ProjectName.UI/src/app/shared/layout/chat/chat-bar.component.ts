@@ -152,6 +152,14 @@ export class ChatBarComponent extends AppComponentBase implements OnInit, AfterV
     return this._selectedUser;
   }
 
+  get headerSkin(): string {
+    return this.currentTheme?.baseSettings?.header?.headerSkin || 'dark';
+  }
+
+  get headerTextColor(): string {
+    return this.headerSkin === 'light' ? 'dark' : 'light';
+  }
+
   constructor(
     private readonly el: ElementRef,
     injector: Injector,
