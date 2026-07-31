@@ -231,7 +231,7 @@ jobs:
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
       run: |
         echo "Uploading app_offline.htm to take site offline..."
-        curl -s --ssl-reqd -T .github/app_offline/app_offline.htm \
+        curl -s --insecure --ssl-reqd -T .github/app_offline/app_offline.htm \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/app_offline.htm"
         echo "app_offline.htm uploaded."
@@ -246,14 +246,14 @@ jobs:
         FTP_URL="${FTP_BASE_URL}/"
 
         echo "Listing remote files..."
-        FILE_LIST=$(curl -s --ssl-reqd -l -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}")
+        FILE_LIST=$(curl -s --insecure --ssl-reqd -l -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}")
 
         echo "Deleting *.dll, *.json, *.config files from server root..."
         for FILE in $FILE_LIST; do
           case "$FILE" in
             *.dll|*.json|*.config)
               echo "  Deleting $FILE ..."
-              curl -s --ssl-reqd -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}" \
+              curl -s --insecure --ssl-reqd -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}" \
                 -Q "DELE /demo-eaf-api.afonsoft.com.br/$FILE" \
                 -o /dev/null 2>&1 || echo "  Warning: could not delete $FILE"
               ;;
@@ -272,11 +272,11 @@ jobs:
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
       run: |
         echo "Uploading web.config.offline to force IIS app pool recycle..."
-        curl -s --ssl-reqd -T .github/app_offline/web.config.offline \
+        curl -s --insecure --ssl-reqd -T .github/app_offline/web.config.offline \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/web.config"
         echo "Uploading appsettings.json.offline..."
-        curl -s --ssl-reqd -T .github/app_offline/appsettings.json.offline \
+        curl -s --insecure --ssl-reqd -T .github/app_offline/appsettings.json.offline \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/appsettings.json"
         echo "Offline config files uploaded."
@@ -294,6 +294,7 @@ jobs:
         server: ftp.afonsoft.com.br
         port: 21
         protocol: ftps
+        security: loose
         local-dir: publish/
         server-dir: /demo-eaf-api.afonsoft.com.br/
         log-level: minimal
@@ -315,6 +316,7 @@ jobs:
         server: ftp.afonsoft.com.br
         port: 21
         protocol: ftps
+        security: loose
         local-dir: publish/
         server-dir: /demo-eaf-api.afonsoft.com.br/
         log-level: minimal
@@ -331,11 +333,11 @@ jobs:
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
       run: |
         echo "Both deploy attempts failed — restoring web.config and appsettings.json from build output..."
-        curl -s --ssl-reqd -T publish/web.config \
+        curl -s --insecure --ssl-reqd -T publish/web.config \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/web.config" \
           && echo "web.config restored" || echo "Warning: could not restore web.config"
-        curl -s --ssl-reqd -T publish/appsettings.json \
+        curl -s --insecure --ssl-reqd -T publish/appsettings.json \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/appsettings.json" \
           && echo "appsettings.json restored" || echo "Warning: could not restore appsettings.json"
@@ -346,7 +348,7 @@ jobs:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
       run: |
-        curl -s --ssl-reqd --ftp-create-dirs \
+        curl -s --insecure --ssl-reqd --ftp-create-dirs \
           -u "${FTP_PUBLISH_USER}:${FTP_PUBLISH_PASSWORD}" \
           "${FTP_BASE_URL}/app_offline.htm" \
           -Q "DELE /demo-eaf-api.afonsoft.com.br/app_offline.htm" \
@@ -408,6 +410,7 @@ jobs:
         server: ftp.afonsoft.com.br
         port: 21
         protocol: ftps
+        security: loose
         local-dir: Templates/Angular/Eaf.ProjectName.UI/dist/
         server-dir: /demo-eaf.afonsoft.com.br/
         log-level: minimal
