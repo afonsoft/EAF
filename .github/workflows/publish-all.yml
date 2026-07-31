@@ -225,6 +225,7 @@ jobs:
           --ignore-failed-sources
 
     - name: 🛑 Take site offline (upload app_offline.htm)
+      continue-on-error: true
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
