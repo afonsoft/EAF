@@ -3,7 +3,6 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { IOrganizationUnitDto, OrganizationUnitServiceProxy } from '@shared/service-proxies/organization-unit.service-proxy';
 import { ModalDirective } from 'ngx-bootstrap/modal';
-import { LazyLoadEvent } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 
 interface IFlatOrganizationUnit extends IOrganizationUnitDto {

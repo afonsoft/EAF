@@ -64,7 +64,7 @@ namespace Eaf.Middleware.Payments
                     await NotifyTenantSubscriptionExpiredAsync(tenant);
                 }
 
-                uow.Complete();
+                await uow.CompleteAsync();
             }
         }
 

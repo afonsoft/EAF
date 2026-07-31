@@ -54,53 +54,79 @@ namespace Eaf.Middleware.MassNotifications
             if (massNotification == null || massNotification.Status == MassNotificationStatus.Canceled)
                 return;
 
-            if (massNotification.ScheduledTime.HasValue && massNotification.ScheduledTime.Value > Clock.Now)
-            {
-                var delay = massNotification.ScheduledTime.Value - Clock.Now;
-                if (delay > TimeSpan.Zero)
-                {
-                    await _backgroundJobManager.EnqueueAsync<MassNotificationJob, MassNotificationJobArgs>(
-                        args,
-                        delay: delay);
-                }
+            if (await TryRescheduleAsync(massNotification, args))
                 return;
-            }
 
+            var userIds = await CollectTargetUserIdsAsync(massNotification);
+            await PublishAsync(massNotification, userIds);
+
+            massNotification.Status = MassNotificationStatus.Sent;
+            await _massNotificationRepository.UpdateAsync(massNotification);
+        }
+
+        private async Task<bool> TryRescheduleAsync(MassNotification massNotification, MassNotificationJobArgs args)
+        {
+            if (!massNotification.ScheduledTime.HasValue || massNotification.ScheduledTime.Value <= Clock.Now)
+                return false;
+
+            var delay = massNotification.ScheduledTime.Value - Clock.Now;
+            if (delay <= TimeSpan.Zero)
+                return false;
+
+            await _backgroundJobManager.EnqueueAsync<MassNotificationJob, MassNotificationJobArgs>(args, delay: delay);
+            return true;
+        }
+
+        private async Task<HashSet<long>> CollectTargetUserIdsAsync(MassNotification massNotification)
+        {
             var userIds = new HashSet<long>();
 
-            if (!string.IsNullOrWhiteSpace(massNotification.TargetUserIds))
-            {
-                foreach (var id in ParseLongIds(massNotification.TargetUserIds))
-                {
-                    userIds.Add(id);
-                }
-            }
+            await AddUserIdsAsync(massNotification.TargetUserIds, userIds, AddDirectUserIds);
+            await AddUserIdsAsync(massNotification.TargetOrganizationUnitIds, userIds, AddOrganizationUnitUserIds);
+            await AddUserIdsAsync(massNotification.TargetRoleIds, userIds, AddRoleUserIds);
 
-            if (!string.IsNullOrWhiteSpace(massNotification.TargetOrganizationUnitIds))
-            {
-                foreach (var ouId in ParseLongIds(massNotification.TargetOrganizationUnitIds))
-                {
-                    var users = await _userManager.GetUsersInOrganizationUnitAsync(new OrganizationUnit { Id = ouId }, false);
-                    foreach (var user in users)
-                    {
-                        userIds.Add(user.Id);
-                    }
-                }
-            }
+            return userIds;
+        }
 
-            if (!string.IsNullOrWhiteSpace(massNotification.TargetRoleIds))
-            {
-                foreach (var roleId in ParseIntIds(massNotification.TargetRoleIds))
-                {
-                    var role = await _roleManager.GetRoleByIdAsync(roleId);
-                    var users = await _userManager.GetUsersInRoleAsync(role.Name);
-                    foreach (var user in users)
-                    {
-                        userIds.Add(user.Id);
-                    }
-                }
-            }
+        private async Task AddUserIdsAsync(string ids, HashSet<long> userIds, Func<string, HashSet<long>, Task> addAction)
+        {
+            if (string.IsNullOrWhiteSpace(ids))
+                return;
 
+            await addAction(ids, userIds);
+        }
+
+        private Task AddDirectUserIds(string ids, HashSet<long> userIds)
+        {
+            foreach (var id in ParseLongIds(ids))
+                userIds.Add(id);
+
+            return Task.CompletedTask;
+        }
+
+        private async Task AddOrganizationUnitUserIds(string ids, HashSet<long> userIds)
+        {
+            foreach (var ouId in ParseLongIds(ids))
+            {
+                var users = await _userManager.GetUsersInOrganizationUnitAsync(new OrganizationUnit { Id = ouId }, false);
+                foreach (var user in users)
+                    userIds.Add(user.Id);
+            }
+        }
+
+        private async Task AddRoleUserIds(string ids, HashSet<long> userIds)
+        {
+            foreach (var roleId in ParseIntIds(ids))
+            {
+                var role = await _roleManager.GetRoleByIdAsync(roleId);
+                var users = await _userManager.GetUsersInRoleAsync(role.Name);
+                foreach (var user in users)
+                    userIds.Add(user.Id);
+            }
+        }
+
+        private async Task PublishAsync(MassNotification massNotification, HashSet<long> userIds)
+        {
             var identifiers = userIds.Select(id => new UserIdentifier(massNotification.TenantId, id)).ToArray();
 
             var data = new MassNotificationData
@@ -122,25 +148,20 @@ namespace Eaf.Middleware.MassNotifications
                     userIds: identifiers,
                     tenantIds: tenantIds);
             }
-
-            massNotification.Status = MassNotificationStatus.Sent;
-            await _massNotificationRepository.UpdateAsync(massNotification);
         }
 
         private static IEnumerable<long> ParseLongIds(string value)
         {
             return value.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(v => long.TryParse(v.Trim(), out var id) ? id : (long?)null)
-                .Where(id => id.HasValue)
-                .Select(id => id.Value);
+                .Select(v => long.TryParse(v.Trim(), out var id) ? (long?)id : null)
+                .OfType<long>();
         }
 
         private static IEnumerable<int> ParseIntIds(string value)
         {
             return value.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(v => int.TryParse(v.Trim(), out var id) ? id : (int?)null)
-                .Where(id => id.HasValue)
-                .Select(id => id.Value);
+                .Select(v => int.TryParse(v.Trim(), out var id) ? (int?)id : null)
+                .OfType<int>();
         }
     }
 }

@@ -33,7 +33,8 @@ namespace Eaf.Middleware.Application.Tests.MassNotifications
             _sut.ObjectMapper = CreateObjectMapper();
             _sut.UnitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
             var abpSession = Substitute.For<IAbpSession>();
-            abpSession.TenantId.Returns((int?)null);
+            int? tenantId = null;
+            abpSession.TenantId.Returns(tenantId);
             _sut.AbpSession = abpSession;
         }
 

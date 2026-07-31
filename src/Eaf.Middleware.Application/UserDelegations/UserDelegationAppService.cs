@@ -1,7 +1,6 @@
 using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Domain.Repositories;
-using Abp.Linq.Extensions;
 using Abp.Timing;
 using Eaf.Middleware.Authorization;
 using Eaf.Middleware.Authorization.Users;
@@ -42,8 +41,8 @@ namespace Eaf.Middleware.UserDelegations
         /// </summary>
         public virtual async Task<ListResultDto<UserDelegationDto>> GetMyDelegationsAsync(GetUserDelegationsInput input)
         {
-            var sourceUserId = AbpSession.UserId.Value;
-            return await GetDelegationsAsync(sourceUserId, null, input);
+            input.SourceUserId = AbpSession.UserId.Value;
+            return await GetDelegationsAsync(input, activeOnly: false);
         }
 
         /// <summary>
@@ -51,14 +50,8 @@ namespace Eaf.Middleware.UserDelegations
         /// </summary>
         public virtual async Task<ListResultDto<UserDelegationDto>> GetDelegatedUsersAsync(GetUserDelegationsInput input)
         {
-            var targetUserId = AbpSession.UserId.Value;
-            var query = (await _userDelegationRepository.GetAllAsync())
-                .Where(d => d.TargetUserId == targetUserId && !d.IsDeleted)
-                .Where(d => d.StartTime <= Clock.Now && d.EndTime >= Clock.Now)
-                .WhereIf(input.SourceUserId.HasValue, d => d.SourceUserId == input.SourceUserId.Value);
-
-            var items = await query.OrderByDescending(d => d.CreationTime).ToListAsync();
-            return new ListResultDto<UserDelegationDto>(ObjectMapper.Map<List<UserDelegationDto>>(items));
+            input.TargetUserId = AbpSession.UserId.Value;
+            return await GetDelegationsAsync(input, activeOnly: true);
         }
 
         /// <summary>
@@ -98,15 +91,29 @@ namespace Eaf.Middleware.UserDelegations
             await _userDelegationRepository.DeleteAsync(userDelegation);
         }
 
-        private async Task<ListResultDto<UserDelegationDto>> GetDelegationsAsync(long? sourceUserId, long? targetUserId, GetUserDelegationsInput input)
+        private async Task<ListResultDto<UserDelegationDto>> GetDelegationsAsync(GetUserDelegationsInput input, bool activeOnly)
         {
-            var query = (await _userDelegationRepository.GetAllAsync())
-                .WhereIf(sourceUserId.HasValue, d => d.SourceUserId == sourceUserId.Value)
-                .WhereIf(targetUserId.HasValue, d => d.TargetUserId == targetUserId.Value)
-                .WhereIf(input.TargetUserId.HasValue, d => d.TargetUserId == input.TargetUserId.Value)
-                .Where(d => !d.IsDeleted);
+            var query = await _userDelegationRepository.GetAllAsync();
 
-            var items = await query.OrderByDescending(d => d.CreationTime).ToListAsync();
+            if (input.SourceUserId.HasValue)
+            {
+                var sourceUserId = input.SourceUserId.Value;
+                query = query.Where(d => d.SourceUserId == sourceUserId);
+            }
+
+            if (input.TargetUserId.HasValue)
+            {
+                var targetUserId = input.TargetUserId.Value;
+                query = query.Where(d => d.TargetUserId == targetUserId);
+            }
+
+            if (activeOnly)
+            {
+                var now = Clock.Now;
+                query = query.Where(d => d.StartTime <= now && d.EndTime >= now);
+            }
+
+            var items = await query.Where(d => !d.IsDeleted).OrderByDescending(d => d.CreationTime).ToListAsync();
             var dtos = ObjectMapper.Map<List<UserDelegationDto>>(items);
 
             foreach (var dto in dtos)

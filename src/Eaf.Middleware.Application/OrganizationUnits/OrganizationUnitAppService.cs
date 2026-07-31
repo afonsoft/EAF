@@ -53,9 +53,8 @@ namespace Eaf.Middleware.OrganizationUnits
             var rootItems = new List<OrganizationUnitDto>();
             foreach (var item in lookup.Values)
             {
-                if (item.ParentId.HasValue && lookup.ContainsKey(item.ParentId.Value))
+                if (item.ParentId.HasValue && lookup.TryGetValue(item.ParentId.Value, out var parent))
                 {
-                    var parent = lookup[item.ParentId.Value];
                     parent.Children ??= new List<OrganizationUnitDto>();
                     parent.Children.Add(item);
                 }
