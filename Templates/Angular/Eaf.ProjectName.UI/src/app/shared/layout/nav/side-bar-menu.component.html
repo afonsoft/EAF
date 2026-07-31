@@ -33,6 +33,7 @@
     class="{{ ui.getSideBarMenuItemClass(item, isMenuItemIsActive(item)) }}"
     m-menu-submenu-toggle="hover"
     role="treeitem"
+    [attr.aria-selected]="isMenuItemIsActive(item) ? 'true' : 'false'"
     [attr.aria-expanded]="isMenuItemIsActive(item) ? 'true' : 'false'"
     [attr.aria-haspopup]="item.items.length ? 'true' : null"
   >
@@ -51,19 +52,19 @@
     </a>
 
     <!-- if menu item has submenu child  -->
-    <a href="javascript:;" *ngIf="item.items.length" class="m-menu__link m-menu__toggle" role="button" tabindex="0" [attr.aria-expanded]="isMenuItemIsActive(item) ? 'true' : 'false'">
+    <button type="button" *ngIf="item.items.length" class="m-menu__link m-menu__toggle" [attr.aria-expanded]="isMenuItemIsActive(item) ? 'true' : 'false'">
       <ng-container [ngTemplateOutlet]="mMenuItemText" [ngTemplateOutletContext]="{ item: item, parentItem: parentItem }"></ng-container>
-    </a>
+    </button>
 
     <!-- if menu item has submenu child then recursively call new menu item component -->
-    <div *ngIf="item.items.length" class="m-menu__submenu" role="group" [attr.aria-hidden]="isMenuItemIsActive(item) ? 'false' : 'true'">
+    <section *ngIf="item.items.length" class="m-menu__submenu" [attr.aria-hidden]="isMenuItemIsActive(item) ? 'false' : 'true'">
       <span class="m-menu__arrow"></span>
-      <ul class="m-menu__subnav" role="group">
+      <ul class="m-menu__subnav">
         <ng-container *ngFor="let child of item.items">
           <ng-container [ngTemplateOutlet]="mMenuItem" [ngTemplateOutletContext]="{ item: child, parentItem: item }"></ng-container>
         </ng-container>
       </ul>
-    </div>
+    </section>
   </li>
 </ng-template>
 

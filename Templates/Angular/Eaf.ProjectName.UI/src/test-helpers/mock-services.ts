@@ -266,6 +266,24 @@ export class MockTenantServiceProxy {
   }
 }
 
+export class MockEditionServiceProxy {
+  getEditions(filter?: string, sorting?: string, maxResultCount?: number, skipCount?: number): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  deleteEdition(id: number): Observable<void> {
+    return of(undefined);
+  }
+  createEdition(input: any): Observable<void> {
+    return of(undefined);
+  }
+  updateEdition(input: any): Observable<void> {
+    return of(undefined);
+  }
+  getEditionForEdit(id: number): Observable<any> {
+    return of({});
+  }
+}
+
 export class MockAuditLogServiceProxy {
   getAuditLogs(...args: any[]): Observable<any> {
     return of({ totalCount: 0, items: [] });

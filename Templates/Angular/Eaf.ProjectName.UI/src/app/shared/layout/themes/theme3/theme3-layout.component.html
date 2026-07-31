@@ -24,7 +24,7 @@
   <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body m-page__container">
     <!-- BEGIN: Left Aside -->
 
-    <aside id="m_aside_left" #mAsideLeft [class]="'m-grid__item m-aside-left m-aside-left--skin-' + currentTheme.baseSettings.menu.asideSkin" role="complementary" aria-label="{{ 'SidebarMenu' | localize }}">
+    <aside id="m_aside_left" #mAsideLeft [class]="'m-grid__item m-aside-left m-aside-left--skin-' + currentTheme.baseSettings.menu.asideSkin" aria-label="{{ 'SidebarMenu' | localize }}">
       <div class="m-brand m-brand--skin-{{ currentTheme.baseSettings.menu.asideSkin }}">
         <a routerLink="/" class="m-brand__logo">
           <img [src]="defaultLogo" alt="{{ 'ApplicationLogo' | localize }}" height="38" />

@@ -34,7 +34,8 @@
                       class="m--img-rounded m--marginless m--img-centered"
                       width="50"
                       height="50"
-                      alt="{{ 'ProfilePicture' | localize }}"
+                      alt=""
+                      role="presentation"
                     /><br />
                     <img
                       *ngIf="!profilePicture || userLoginAttempt.result != 'Success'"
@@ -42,7 +43,8 @@
                       class="m--img-rounded m--marginless m--img-centered"
                       width="50"
                       height="50"
-                      alt="{{ 'ProfilePicture' | localize }}"
+                      alt=""
+                      role="presentation"
                     /><br />
                     <span></span>
                     <small class="label"> {{ userLoginAttempt.result == 'Success' ? l('Success') : l('Failed') }} </small>

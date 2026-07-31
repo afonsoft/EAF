@@ -1,17 +1,17 @@
-import { Injectable, Inject, Optional } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse, HttpEvent } from '@angular/common/http';
-import { Observable, throwError as _observableThrow, of as _observableOf } from 'rxjs';
-import { mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
+import { Inject, Injectable, Optional } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { Observable, of as _observableOf, throwError as _observableThrow } from 'rxjs';
+import { catchError as _observableCatch, mergeMap as _observableMergeMap } from 'rxjs/operators';
 import { API_BASE_URL } from '@shared/service-proxies/service-proxies';
 
 export interface ICreateEditionInput {
     displayName: string;
     isFree: boolean;
-    monthlyPrice?: number | undefined;
-    annualPrice?: number | undefined;
-    trialDayCount?: number | undefined;
-    waitingDayAfterExpire?: number | undefined;
-    expiringEditionId?: number | undefined;
+    monthlyPrice?: number;
+    annualPrice?: number;
+    trialDayCount?: number;
+    waitingDayAfterExpire?: number;
+    expiringEditionId?: number;
 }
 
 export interface IUpdateEditionInput extends ICreateEditionInput {
@@ -21,11 +21,11 @@ export interface IUpdateEditionInput extends ICreateEditionInput {
 export interface IEditionDto {
     displayName: string;
     isFree: boolean;
-    monthlyPrice?: number | undefined;
-    annualPrice?: number | undefined;
-    trialDayCount?: number | undefined;
-    waitingDayAfterExpire?: number | undefined;
-    expiringEditionId?: number | undefined;
+    monthlyPrice?: number;
+    annualPrice?: number;
+    trialDayCount?: number;
+    waitingDayAfterExpire?: number;
+    expiringEditionId?: number;
     id: number;
 }
 
@@ -36,12 +36,12 @@ export interface IPagedResultDtoOfEditionDto {
 
 @Injectable()
 export class EditionServiceProxy {
-    private http: HttpClient;
-    private baseUrl: string;
+    private readonly http: HttpClient;
+    private readonly baseUrl: string;
 
     constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
         this.http = http;
-        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : '';
+        this.baseUrl = baseUrl ?? '';
     }
 
     getEditions(filter: string | undefined, sorting: string | undefined, maxResultCount: number | undefined, skipCount: number | undefined): Observable<IPagedResultDtoOfEditionDto> {
@@ -52,7 +52,7 @@ export class EditionServiceProxy {
         if (maxResultCount !== undefined && maxResultCount !== null) url_ += 'MaxResultCount=' + encodeURIComponent('' + maxResultCount) + '&';
         url_ = url_.replace(/[?&]$/, '');
 
-        const options: any = { observe: 'response', responseType: 'json' };
+        const options: unknown = { observe: 'response', responseType: 'json' };
         return this.http.request('get', url_, options).pipe(_observableMergeMap((response: any) => this.processGetEditions(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);
@@ -61,7 +61,7 @@ export class EditionServiceProxy {
 
     private processGetEditions(response: HttpResponse<any>): Observable<IPagedResultDtoOfEditionDto> {
         const status = response.status;
-        const responseBlob = (response as any).body || new Blob();
+        const responseBlob = response.body ?? new Blob();
         if (status === 200) {
             return _observableOf(responseBlob as IPagedResultDtoOfEditionDto);
         }
@@ -73,7 +73,7 @@ export class EditionServiceProxy {
         url_ += 'Id=' + encodeURIComponent('' + id) + '&';
         url_ = url_.replace(/[?&]$/, '');
 
-        const options: any = { observe: 'response', responseType: 'json' };
+        const options: unknown = { observe: 'response', responseType: 'json' };
         return this.http.request('get', url_, options).pipe(_observableMergeMap((response: any) => this.processEdition(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);
@@ -82,7 +82,7 @@ export class EditionServiceProxy {
 
     private processEdition(response: HttpResponse<any>): Observable<IEditionDto> {
         const status = response.status;
-        const responseBlob = (response as any).body || new Blob();
+        const responseBlob = response.body ?? new Blob();
         if (status === 200) {
             return _observableOf(responseBlob as IEditionDto);
         }
@@ -94,7 +94,7 @@ export class EditionServiceProxy {
         url_ = url_.replace(/[?&]$/, '');
 
         const content_ = JSON.stringify(input);
-        const options: any = { body: content_, headers: { 'Content-Type': 'application/json' }, observe: 'response', responseType: 'blob' };
+        const options: unknown = { body: content_, headers: { 'Content-Type': 'application/json' }, observe: 'response', responseType: 'blob' };
         return this.http.request('post', url_, options).pipe(_observableMergeMap((response: any) => this.processAction(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);
@@ -106,7 +106,7 @@ export class EditionServiceProxy {
         url_ = url_.replace(/[?&]$/, '');
 
         const content_ = JSON.stringify(input);
-        const options: any = { body: content_, headers: { 'Content-Type': 'application/json' }, observe: 'response', responseType: 'blob' };
+        const options: unknown = { body: content_, headers: { 'Content-Type': 'application/json' }, observe: 'response', responseType: 'blob' };
         return this.http.request('put', url_, options).pipe(_observableMergeMap((response: any) => this.processAction(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);
@@ -118,7 +118,7 @@ export class EditionServiceProxy {
         url_ += 'Id=' + encodeURIComponent('' + id) + '&';
         url_ = url_.replace(/[?&]$/, '');
 
-        const options: any = { observe: 'response', responseType: 'blob' };
+        const options: unknown = { observe: 'response', responseType: 'blob' };
         return this.http.request('delete', url_, options).pipe(_observableMergeMap((response: any) => this.processAction(response))).pipe(_observableCatch((response: any) => {
             if (response instanceof Error) throw response;
             return _observableThrow(response);

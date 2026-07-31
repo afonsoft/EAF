@@ -38,7 +38,7 @@ namespace Eaf.Middleware.Editions
         /// <returns>Lista paginada de edições.</returns>
         public async Task<PagedResultDto<EditionDto>> GetEditions(GetEditionsInput input)
         {
-            var query = _editionRepository.GetAll()
+            var query = (await _editionRepository.GetAllAsync())
                 .WhereIf(!input.Filter.IsNullOrWhiteSpace(), e => e.DisplayName.Contains(input.Filter));
 
             var total = await query.CountAsync();
