@@ -76,6 +76,11 @@ namespace Eaf.Middleware.Authorization
             tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_ChangeFeatures, L("ChangingFeatures"), multiTenancySides: MultiTenancySides.Host);
             tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_Delete, L("DeletingTenant"), multiTenancySides: MultiTenancySides.Host);
             tenants.CreateChildPermission(MiddlewarePermissions.Pages_Tenants_Impersonation, L("LoginForTenants"), multiTenancySides: MultiTenancySides.Host);
+
+            var editions = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions, L("Editions"), multiTenancySides: MultiTenancySides.Host);
+            editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Create, L("CreatingNewEdition"), multiTenancySides: MultiTenancySides.Host);
+            editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Edit, L("EditingEdition"), multiTenancySides: MultiTenancySides.Host);
+            editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Delete, L("DeletingEdition"), multiTenancySides: MultiTenancySides.Host);
         }
 
         private static ILocalizableString L(string name)

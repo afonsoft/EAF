@@ -1,0 +1,206 @@
+using Abp.Application.Editions;
+using Abp.Application.Services.Dto;
+using Abp.Domain.Repositories;
+using Abp.ObjectMapping;
+using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Editions;
+using Eaf.Middleware.Editions.Dto;
+using NSubstitute;
+using Shouldly;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Eaf.Middleware.Application.Tests.Editions
+{
+    /// <summary>
+    /// Testes BDD para EditionAppService seguindo o padrão Dado/Quando/Então
+    /// </summary>
+    public class EditionAppServiceBddTests
+    {
+        private readonly EditionAppService _sut;
+        private readonly IRepository<Edition> _editionRepository;
+
+        public EditionAppServiceBddTests()
+        {
+            _editionRepository = Substitute.For<IRepository<Edition>>();
+            _sut = new EditionAppService(_editionRepository);
+            _sut.ObjectMapper = CreateObjectMapper();
+        }
+
+        private static IObjectMapper CreateObjectMapper()
+        {
+            var mapper = Substitute.For<IObjectMapper>();
+            mapper.Map<EditionDto>(Arg.Any<Edition>()).Returns(ci =>
+            {
+                var edition = ci.Arg<Edition>();
+                return new EditionDto
+                {
+                    Id = edition.Id,
+                    DisplayName = edition.DisplayName,
+                };
+            });
+            mapper.Map<List<EditionDto>>(Arg.Any<IEnumerable<Edition>>()).Returns(ci =>
+            {
+                var editions = ci.Arg<IEnumerable<Edition>>();
+                return editions.Select(e => mapper.Map<EditionDto>(e)).ToList();
+            });
+            mapper.Map<Edition>(Arg.Any<CreateEditionInput>()).Returns(ci =>
+            {
+                var input = ci.Arg<CreateEditionInput>();
+                return new Edition
+                {
+                    DisplayName = input.DisplayName,
+                };
+            });
+            mapper.Map(Arg.Any<UpdateEditionInput>(), Arg.Any<Edition>()).Returns(ci =>
+            {
+                var input = ci.Arg<UpdateEditionInput>();
+                var edition = ci.Arg<Edition>();
+                edition.DisplayName = input.DisplayName;
+                return edition;
+            });
+            return mapper;
+        }
+
+        #region Construtor
+
+        [Fact]
+        public void Dado_RepositorioEdition_Quando_CriarInstancia_Entao_DeveSerValido()
+        {
+            _sut.ShouldNotBeNull();
+        }
+
+        #endregion
+
+        #region GetEditions
+
+        [Fact]
+        public async Task Dado_EditionsCadastradas_Quando_GetEditions_Entao_DeveRetornarListaPaginada()
+        {
+            // Dado
+            var editions = new List<Edition>
+            {
+                new Edition { Id = 1, DisplayName = "Free" },
+                new Edition { Id = 2, DisplayName = "Pro" },
+            }.AsAsyncQueryable();
+
+            _editionRepository.GetAllAsync().Returns(editions);
+
+            // Quando
+            var result = await _sut.GetEditions(new GetEditionsInput { MaxResultCount = 10, SkipCount = 0 });
+
+            // Então
+            result.ShouldNotBeNull();
+            result.TotalCount.ShouldBe(2);
+            result.Items.Count.ShouldBe(2);
+            result.Items[0].DisplayName.ShouldBe("Free");
+            result.Items[1].DisplayName.ShouldBe("Pro");
+        }
+
+        [Fact]
+        public async Task Dado_FiltroPeloNome_Quando_GetEditions_Entao_DeveFiltrarPorDisplayName()
+        {
+            // Dado
+            var editions = new List<Edition>
+            {
+                new Edition { Id = 1, DisplayName = "Free" },
+                new Edition { Id = 2, DisplayName = "Pro" },
+            }.AsAsyncQueryable();
+
+            _editionRepository.GetAllAsync().Returns(editions);
+
+            // Quando
+            var result = await _sut.GetEditions(new GetEditionsInput { Filter = "Pro", MaxResultCount = 10, SkipCount = 0 });
+
+            // Então
+            result.TotalCount.ShouldBe(1);
+            result.Items[0].DisplayName.ShouldBe("Pro");
+        }
+
+        #endregion
+
+        #region GetEditionForEdit
+
+        [Fact]
+        public async Task Dado_EditionExistente_Quando_GetEditionForEdit_Entao_DeveRetornarEditionDto()
+        {
+            // Dado
+            var edition = new Edition { Id = 1, DisplayName = "Free" };
+            _editionRepository.GetAsync(1).Returns(edition);
+
+            // Quando
+            var result = await _sut.GetEditionForEdit(new EntityDto(1));
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Id.ShouldBe(1);
+            result.DisplayName.ShouldBe("Free");
+        }
+
+        #endregion
+
+        #region CreateEdition
+
+        [Fact]
+        public async Task Dado_InputValido_Quando_CreateEdition_Entao_DeveInserirNoRepositorio()
+        {
+            // Dado
+            var input = new CreateEditionInput
+            {
+                DisplayName = "Enterprise",
+            };
+
+            // Quando
+            await _sut.CreateEdition(input);
+
+            // Então
+            await _editionRepository.Received(1).InsertAsync(Arg.Is<Edition>(e => e.DisplayName == "Enterprise"));
+        }
+
+        #endregion
+
+        #region UpdateEdition
+
+        [Fact]
+        public async Task Dado_InputValido_Quando_UpdateEdition_Entao_DeveAtualizarNoRepositorio()
+        {
+            // Dado
+            var edition = new Edition { Id = 1, DisplayName = "Old" };
+            _editionRepository.GetAsync(1).Returns(edition);
+
+            var input = new UpdateEditionInput
+            {
+                Id = 1,
+                DisplayName = "Updated",
+            };
+
+            // Quando
+            await _sut.UpdateEdition(input);
+
+            // Então
+            await _editionRepository.Received(1).UpdateAsync(edition);
+            edition.DisplayName.ShouldBe("Updated");
+        }
+
+        #endregion
+
+        #region DeleteEdition
+
+        [Fact]
+        public async Task Dado_EditionExistente_Quando_DeleteEdition_Entao_DeveRemoverDoRepositorio()
+        {
+            // Dado
+            _editionRepository.GetAsync(1).Returns(new Edition { Id = 1, DisplayName = "ToDelete" });
+
+            // Quando
+            await _sut.DeleteEdition(new EntityDto(1));
+
+            // Então
+            await _editionRepository.Received(1).DeleteAsync(1);
+        }
+
+        #endregion
+    }
+}

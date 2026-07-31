@@ -1,5 +1,6 @@
-﻿import { AfterViewInit, Component, Injector, OnInit, ViewChild } from '@angular/core';
+﻿import { AfterViewInit, Component, HostListener, Injector, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { LoginAttemptsModalComponent } from '@app/shared/layout/login-attempts-modal.component';
 import { NotificationSettingsModalComponent } from '@app/shared/layout/notifications/notification-settings-modal.component';
 import { UserNotificationHelper } from '@app/shared/layout/notifications/UserNotificationHelper';
@@ -18,7 +19,7 @@ import { SignalRHelper } from 'shared/helpers/SignalRHelper';
 import { CommonLookupModalComponent } from './shared/common/lookup/common-lookup-modal.component';
 import { ChatBarComponent } from './shared/layout/chat/chat-bar.component';
 
-declare let gtag: Function;
+declare let gtag: (...args: any[]) => void;
 
 @Component({
   standalone: false,
@@ -27,6 +28,9 @@ declare let gtag: Function;
 export class AppComponent extends AppComponentBase implements OnInit, AfterViewInit {
   theme: string;
   chatConnected = false;
+  isOnline = true;
+  updateAvailable = false;
+  updateVersion = '';
 
   @ViewChild('loginAttemptsModal', { static: true }) loginAttemptsModal: LoginAttemptsModalComponent;
   @ViewChild('changePasswordModal', { static: true }) changePasswordModal: ChangePasswordModalComponent;
@@ -42,8 +46,9 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     private readonly _userNotificationHelper: UserNotificationHelper,
     private readonly _appAuthenticationService: AppAuthenticationService,
     private readonly _tokenService: TokenService,
+    private readonly _swUpdate: SwUpdate,
     private readonly router: Router,
-      ) {
+  ) {
     super(injector);
   }
 
@@ -59,6 +64,7 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     }
     this.setUpAnalytics();
     this.setUpTagManager();
+    this.setUpPwa();
   }
 
   ngAfterViewInit(): void {
@@ -85,6 +91,38 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
         }
       });
     }
+  }
+
+  setUpPwa(): void {
+    this.isOnline = navigator.onLine;
+
+    if (this._swUpdate.isEnabled) {
+      this._swUpdate.versionUpdates
+        .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
+        .subscribe(event => {
+          this.updateAvailable = true;
+          this.updateVersion = event.latestVersion.hash;
+          (window as any).eaf.log.info('PWA update available: ' + event.latestVersion.hash);
+        });
+    }
+  }
+
+  @HostListener('window:online')
+  onOnline(): void {
+    this.isOnline = true;
+    this.notify.info(this.l('YouAreOnline'));
+  }
+
+  @HostListener('window:offline')
+  onOffline(): void {
+    this.isOnline = false;
+    this.notify.warn(this.l('YouAreOffline'));
+  }
+
+  applyUpdate(): void {
+    this._swUpdate.activateUpdate().then(() => {
+      window.location.reload();
+    });
   }
 
   registerModalOpenEvents(): void {

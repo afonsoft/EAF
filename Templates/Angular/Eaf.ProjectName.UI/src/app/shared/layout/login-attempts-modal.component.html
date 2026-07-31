@@ -7,7 +7,7 @@
   aria-labelledby="myLargeModalLabel"
 >
   <div class="modal-dialog modal-lg">
-    <div class="modal-content">
+    <div class="modal-content" cdkTrapFocus cdkTrapFocusAutoCapture>
       <div class="modal-header">
         <h5 class="modal-title">
           <span>{{ 'LoginAttempts' | localize }}</span>
@@ -34,7 +34,8 @@
                       class="m--img-rounded m--marginless m--img-centered"
                       width="50"
                       height="50"
-                      alt="logo"
+                      alt=""
+                      role="presentation"
                     /><br />
                     <img
                       *ngIf="!profilePicture || userLoginAttempt.result != 'Success'"
@@ -42,7 +43,8 @@
                       class="m--img-rounded m--marginless m--img-centered"
                       width="50"
                       height="50"
-                      alt="logo"
+                      alt=""
+                      role="presentation"
                     /><br />
                     <span></span>
                     <small class="label"> {{ userLoginAttempt.result == 'Success' ? l('Success') : l('Failed') }} </small>

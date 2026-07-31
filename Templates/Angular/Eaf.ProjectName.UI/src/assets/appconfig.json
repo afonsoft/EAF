@@ -1,6 +1,6 @@
 ﻿{
-  "remoteServiceBaseUrl": "https://demo-eaf-api.afonsoft.com.br/",
-  "appBaseUrl": "http://localhost:8000",
+  "remoteServiceBaseUrl": "http://localhost:3000",
+  "appBaseUrl": "http://localhost:4200",
   "localeMappings": [
     {
       "from": "pt-BR",

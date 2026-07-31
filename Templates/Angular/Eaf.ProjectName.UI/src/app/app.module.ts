@@ -1,5 +1,6 @@
 ﻿import * as ngCommon from '@angular/common';
 import { HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
+import { A11yModule } from '@angular/cdk/a11y';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ServiceWorkerModule, SwUpdate, VersionReadyEvent } from '@angular/service-worker';
@@ -91,6 +92,7 @@ export const googleTagManager = () => AppConsts.googleTagManager;
   ],
   imports: [
     ngCommon.CommonModule,
+    A11yModule,
     FormsModule,
     HttpClientModule,
     HttpClientJsonpModule,
