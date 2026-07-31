@@ -202,6 +202,7 @@
 		<text name="SelectAUser" value="Selecione um usuário" />
 		<text name="Select" value="Selecione" />
 		<text name="LoginForUsers" value="Login para usuários" />
+		<text name="UserDelegation" value="Delegação de usuário" />
 		<text name="BackToMyAccount" value="Voltar para minha conta" />
 		<text name="LoginForTenants" value="Login em canais" />
 		<text name="LoginAsThisTenant" value="Logar como este canal" />
@@ -292,7 +293,6 @@
 		<text name="TotalRecordsCount">Total: {0}</text>
 		<text name="Status">Status</text>
 		<text name="LastModificationTime">Última hora de modificação</text>
-		<text name="OrganizationUnits">Unidades Organizacionais</text>
 		<text name="Remove">Remover</text>
 		<text name="File">Arquivo</text>
 		<text name="UiCustomizationHeaderInfo">Gerenciar as configurações visuais da tela</text>
@@ -423,5 +423,22 @@
 		<text name="FailedToCreateShadowUser">Falha ao criar usuário sombra.</text>
 		<text name="FailedToAddRoleToShadowUser">Falha ao adicionar role ao usuário sombra.</text>
 		<text name="FailedToCreateTenantRole">Falha ao criar role no tenant.</text>
+		<text name="TotalTenants">Total de tenants</text>
+		<text name="TotalUsers">Total de usuários</text>
+		<text name="TotalEditions">Total de edições</text>
+		<text name="HostDashboard">Dashboard do host</text>
+		<text name="TenantDashboard">Dashboard do tenant</text>
+		<text name="OrganizationUnits">Unidades organizacionais</text>
+		<text name="CreatingNewOrganizationUnit">Criando nova unidade organizacional</text>
+		<text name="EditingOrganizationUnit">Editando unidade organizacional</text>
+		<text name="DeletingOrganizationUnit">Excluindo unidade organizacional</text>
+		<text name="ManagingOrganizationUnitMembers">Gerenciando membros da unidade organizacional</text>
+		<text name="ManagingOrganizationUnitRoles">Gerenciando perfis da unidade organizacional</text>
+		<text name="MassNotifications">Notificações em massa</text>
+		<text name="CreatingNewMassNotification">Criando nova notificação em massa</text>
+		<text name="CancelingMassNotification">Cancelando notificação em massa</text>
+		<text name="Payments">Pagamentos</text>
+		<text name="CreatingNewPayment">Criando novo pagamento</text>
+		<text name="ProcessingPayment">Processando pagamento</text>
 	</texts>
 </localizationDictionary>

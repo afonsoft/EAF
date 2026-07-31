@@ -187,6 +187,7 @@
 		<text name="SelectAUser">Select a user</text>
 		<text name="Select">Select</text>
 		<text name="LoginForUsers">Login for users</text>
+		<text name="UserDelegation">User delegation</text>
 		<text name="BackToMyAccount">Back to my account</text>
 		<text name="LoginForTenants">Login for tenants</text>
 		<text name="LoginAsThisTenant">Login as this tenant</text>
@@ -285,7 +286,6 @@
 		<text name="TotalRecordsCount">Total: {0}</text>
 		<text name="Status">Status</text>
 		<text name="LastModificationTime">Last modification time</text>
-		<text name="OrganizationUnits">Organization Units</text>
 		<text name="Remove">Remove</text>
 		<text name="File">File</text>
 		<text name="UiCustomizationHeaderInfo">Change the look of UI</text>
@@ -415,5 +415,22 @@
 		<text name="FailedToCreateShadowUser">Failed to create shadow user.</text>
 		<text name="FailedToAddRoleToShadowUser">Failed to add role to shadow user.</text>
 		<text name="FailedToCreateTenantRole">Failed to create tenant role.</text>
+		<text name="TotalTenants">Total tenants</text>
+		<text name="TotalUsers">Total users</text>
+		<text name="TotalEditions">Total editions</text>
+		<text name="HostDashboard">Host dashboard</text>
+		<text name="TenantDashboard">Tenant dashboard</text>
+		<text name="OrganizationUnits">Organization units</text>
+		<text name="CreatingNewOrganizationUnit">Creating new organization unit</text>
+		<text name="EditingOrganizationUnit">Editing organization unit</text>
+		<text name="DeletingOrganizationUnit">Deleting organization unit</text>
+		<text name="ManagingOrganizationUnitMembers">Managing organization unit members</text>
+		<text name="ManagingOrganizationUnitRoles">Managing organization unit roles</text>
+		<text name="MassNotifications">Mass notifications</text>
+		<text name="CreatingNewMassNotification">Creating new mass notification</text>
+		<text name="CancelingMassNotification">Canceling mass notification</text>
+		<text name="Payments">Payments</text>
+		<text name="CreatingNewPayment">Creating new payment</text>
+		<text name="ProcessingPayment">Processing payment</text>
 	</texts>
 </localizationDictionary>

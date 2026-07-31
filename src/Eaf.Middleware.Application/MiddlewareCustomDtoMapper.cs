@@ -6,6 +6,7 @@ using Abp.Authorization.Users;
 using Abp.EntityHistory;
 using Abp.Localization;
 using Abp.Notifications;
+using Abp.Organizations;
 using Abp.UI.Inputs;
 using AutoMapper;
 using Eaf.Middleware.Auditing.Dto;
@@ -18,14 +19,22 @@ using Eaf.Middleware.Authorization.Users.Dto;
 using Eaf.Middleware.Authorization.Users.Profile.Dto;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Chat.Dto;
+using Eaf.Middleware.Dashboard.Dto;
 using Eaf.Middleware.Editions.Dto;
 using Eaf.Middleware.Friendships;
 using Eaf.Middleware.Friendships.Dto;
 using Eaf.Middleware.Localization.Dto;
+using Eaf.Middleware.MassNotifications;
+using Eaf.Middleware.MassNotifications.Dto;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.MultiTenancy.Dto;
 using Eaf.Middleware.Notifications.Dto;
+using Eaf.Middleware.OrganizationUnits.Dto;
+using Eaf.Middleware.Payments;
+using Eaf.Middleware.Payments.Dto;
 using Eaf.Middleware.Sessions.Dto;
+using Eaf.Middleware.UserDelegations;
+using Eaf.Middleware.UserDelegations.Dto;
 
 namespace Eaf.Middleware
 {
@@ -83,7 +92,21 @@ namespace Eaf.Middleware
             configuration.CreateMap<CreateEditionInput, Edition>();
             configuration.CreateMap<UpdateEditionInput, Edition>();
 
-            //User
+            //OrganizationUnit
+            configuration.CreateMap<OrganizationUnit, OrganizationUnitDto>();
+            configuration.CreateMap<User, OrganizationUnitUserListDto>();
+            configuration.CreateMap<Role, OrganizationUnitRoleListDto>();
+
+            //MassNotification
+            configuration.CreateMap<MassNotification, MassNotificationDto>();
+            configuration.CreateMap<CreateMassNotificationInput, MassNotification>();
+
+            //UserDelegation
+            configuration.CreateMap<UserDelegation, UserDelegationDto>();
+
+            //Payments
+            configuration.CreateMap<SubscriptionPayment, SubscriptionPaymentDto>();
+
             configuration.CreateMap<User, UserEditDto>()
                 .ForMember(dto => dto.Password, options => options.Ignore())
                 .ReverseMap()

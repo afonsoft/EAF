@@ -29,6 +29,7 @@ namespace Eaf.Middleware.Authorization
         public const string Pages_Administration_Users_Delete = "Pages.Administration.Users.Delete";
         public const string Pages_Administration_Users_Edit = "Pages.Administration.Users.Edit";
         public const string Pages_Administration_Users_Impersonation = "Pages.Administration.Users.Impersonation";
+        public const string Pages_Administration_Users_Delegation = "Pages.Administration.Users.Delegation";
         public const string Pages_Dashboard = "Pages.Dashboard";
         //HOST-SPECIFIC PERMISSIONS
 
@@ -43,5 +44,20 @@ namespace Eaf.Middleware.Authorization
         public const string Pages_Administration_Editions_Create = "Pages.Administration.Editions.Create";
         public const string Pages_Administration_Editions_Delete = "Pages.Administration.Editions.Delete";
         public const string Pages_Administration_Editions_Edit = "Pages.Administration.Editions.Edit";
+
+        public const string Pages_Administration_OrganizationUnits = "Pages.Administration.OrganizationUnits";
+        public const string Pages_Administration_OrganizationUnits_Create = "Pages.Administration.OrganizationUnits.Create";
+        public const string Pages_Administration_OrganizationUnits_Delete = "Pages.Administration.OrganizationUnits.Delete";
+        public const string Pages_Administration_OrganizationUnits_Edit = "Pages.Administration.OrganizationUnits.Edit";
+        public const string Pages_Administration_OrganizationUnits_ManageMembers = "Pages.Administration.OrganizationUnits.ManageMembers";
+        public const string Pages_Administration_OrganizationUnits_ManageRoles = "Pages.Administration.OrganizationUnits.ManageRoles";
+
+        public const string Pages_Administration_MassNotifications = "Pages.Administration.MassNotifications";
+        public const string Pages_Administration_MassNotifications_Create = "Pages.Administration.MassNotifications.Create";
+        public const string Pages_Administration_MassNotifications_Delete = "Pages.Administration.MassNotifications.Delete";
+
+        public const string Pages_Administration_Payments = "Pages.Administration.Payments";
+        public const string Pages_Administration_Payments_Create = "Pages.Administration.Payments.Create";
+        public const string Pages_Administration_Payments_Process = "Pages.Administration.Payments.Process";
     }
 }
