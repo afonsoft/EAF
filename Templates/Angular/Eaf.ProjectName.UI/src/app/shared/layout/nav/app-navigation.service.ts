@@ -27,6 +27,10 @@ export class AppNavigationService {
     return new AppMenu('AdminMenu', 'AdminMenu', [
       new AppMenuItem('Roles', 'Pages.Administration.Roles', 'flaticon-suitcase', '/app/admin/roles'),
       new AppMenuItem('Users', 'Pages.Administration.Users', 'flaticon-users', '/app/admin/users'),
+      new AppMenuItem('OrganizationUnits', 'Pages.Administration.OrganizationUnits', 'flaticon-network', '/app/admin/organization-units'),
+      new AppMenuItem('MassNotifications', 'Pages.Administration.MassNotifications', 'flaticon-speech-bubble', '/app/admin/mass-notifications'),
+      new AppMenuItem('UserDelegation', 'Pages.Administration.Users.Delegation', 'flaticon-user-ok', '/app/admin/user-delegations'),
+      new AppMenuItem('Payments', 'Pages.Administration.Payments', 'flaticon-coins', '/app/admin/payments'),
       new AppMenuItem('Languages', 'Pages.Administration.Languages', 'flaticon-tabs', '/app/admin/languages'),
       new AppMenuItem('Editions', 'Pages.Administration.Editions', 'flaticon-layers', '/app/admin/editions'),
       new AppMenuItem('AuditLogs', 'Pages.Administration.AuditLogs', 'flaticon-folder-1', '/app/admin/auditLogs'),

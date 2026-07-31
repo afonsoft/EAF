@@ -32,7 +32,11 @@ import { EditTextModalComponent } from './languages/edit-text-modal.component';
 import { LanguageTextsComponent } from './languages/language-texts.component';
 import { LanguagesComponent } from './languages/languages.component';
 import { MaintenanceComponent } from './maintenance/maintenance.component';
+import { MassNotificationsComponent } from './mass-notifications/mass-notifications.component';
 import { CreateOrEditRoleModalComponent } from './roles/create-or-edit-role-modal.component';
+import { OrganizationUnitsComponent } from './organization-units/organization-units.component';
+import { PaymentsComponent } from './payments/payments.component';
+import { UserDelegationsComponent } from './user-delegations/user-delegations.component';
 import { RolesComponent } from './roles/roles.component';
 import { SettingsComponent } from './settings/settings.component';
 import { FeatureTreeComponent } from './shared/feature-tree.component';
@@ -93,7 +97,11 @@ import { UsersComponent } from './users/users.component';
     AuditLogsComponent,
     AuditLogDetailModalComponent,
     EditionsComponent,
+    MassNotificationsComponent,
+    OrganizationUnitsComponent,
+    PaymentsComponent,
     SettingsComponent,
+    UserDelegationsComponent,
     LanguagesComponent,
     LanguageTextsComponent,
     CreateOrEditLanguageModalComponent,

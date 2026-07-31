@@ -202,6 +202,7 @@
 		<text name="SelectAUser" value="Selecione um usuário" />
 		<text name="Select" value="Selecione" />
 		<text name="LoginForUsers" value="Login para usuários" />
+		<text name="UserDelegation" value="Delegação de usuário" />
 		<text name="BackToMyAccount" value="Voltar para minha conta" />
 		<text name="LoginForTenants" value="Login em canais" />
 		<text name="LoginAsThisTenant" value="Logar como este canal" />
@@ -292,7 +293,6 @@
 		<text name="TotalRecordsCount">Total: {0}</text>
 		<text name="Status">Status</text>
 		<text name="LastModificationTime">Última hora de modificação</text>
-		<text name="OrganizationUnits">Unidades Organizacionais</text>
 		<text name="Remove">Remover</text>
 		<text name="File">Arquivo</text>
 		<text name="UiCustomizationHeaderInfo">Gerenciar as configurações visuais da tela</text>
@@ -423,5 +423,66 @@
 		<text name="FailedToCreateShadowUser">Falha ao criar usuário sombra.</text>
 		<text name="FailedToAddRoleToShadowUser">Falha ao adicionar role ao usuário sombra.</text>
 		<text name="FailedToCreateTenantRole">Falha ao criar role no tenant.</text>
+		<text name="TotalTenants">Total de tenants</text>
+		<text name="TotalUsers">Total de usuários</text>
+		<text name="TotalEditions">Total de edições</text>
+		<text name="HostDashboard">Dashboard do host</text>
+		<text name="TenantDashboard">Dashboard do tenant</text>
+		<text name="OrganizationUnits">Unidades organizacionais</text>
+		<text name="CreatingNewOrganizationUnit">Criando nova unidade organizacional</text>
+		<text name="EditingOrganizationUnit">Editando unidade organizacional</text>
+		<text name="DeletingOrganizationUnit">Excluindo unidade organizacional</text>
+		<text name="ManagingOrganizationUnitMembers">Gerenciando membros da unidade organizacional</text>
+		<text name="ManagingOrganizationUnitRoles">Gerenciando perfis da unidade organizacional</text>
+		<text name="MassNotifications">Notificações em massa</text>
+		<text name="CreatingNewMassNotification">Criando nova notificação em massa</text>
+		<text name="CancelingMassNotification">Cancelando notificação em massa</text>
+		<text name="Payments">Pagamentos</text>
+		<text name="CreatingNewPayment">Criando novo pagamento</text>
+		<text name="ProcessingPayment">Processando pagamento</text>
+		<text name="OrganizationUnitsHeaderInfo">Gerencie as unidades organizacionais e seus membros.</text>
+		<text name="MassNotificationsHeaderInfo">Envie notificações para usuários, perfis ou unidades organizacionais.</text>
+		<text name="UserDelegationsHeaderInfo">Gerencie delegações de usuário por um período de tempo.</text>
+		<text name="PaymentsHeaderInfo">Gerencie pagamentos de assinatura e processe retornos de gateways.</text>
+		<text name="Subject">Assunto</text>
+		<text name="Severity">Severidade</text>
+		<text name="SendToAllUsers">Enviar para todos os usuários</text>
+		<text name="ScheduledTime">Data/hora agendada</text>
+		<text name="TargetUserIds">Ids de usuários alvo</text>
+		<text name="TargetRoleIds">Ids de perfis alvo</text>
+		<text name="TargetOrganizationUnitIds">Ids de unidades organizacionais alvo</text>
+		<text name="StartTime">Data/hora inicial</text>
+		<text name="EndTime">Data/hora final</text>
+		<text name="ProcessPayment">Processar pagamento</text>
+		<text name="CheckoutUrl">URL de checkout</text>
+		<text name="SourceUser">Usuário origem</text>
+		<text name="TargetUser">Usuário destino</text>
+		<text name="Parent">Pai</text>
+		<text name="ManageMembers">Gerenciar membros</text>
+		<text name="ManageRoles">Gerenciar perfis</text>
+		<text name="OrganizationUnitDeleteWarningMessage">A unidade organizacional {0} será excluída.</text>
+		<text name="Pending">Pendente</text>
+		<text name="Processing">Processando</text>
+		<text name="Completed">Concluído</text>
+		<text name="Canceled">Cancelado</text>
+		<text name="MyDelegations">Minhas delegações</text>
+		<text name="DelegatedUsers">Usuários delegados</text>
+		<text name="CreatingNewUserDelegation">Criando nova delegação de usuário</text>
+		<text name="Description">Descrição</text>
+		<text name="Amount">Valor</text>
+		<text name="ExternalPaymentId">Id de pagamento externo</text>
+		<text name="PaymentTime">Data do pagamento</text>
+		<text name="PaymentType">Tipo de pagamento</text>
+		<text name="NewRegistration">Nova inscrição</text>
+		<text name="BuyNow">Comprar agora</text>
+		<text name="Upgrade">Atualizar</text>
+		<text name="Extend">Estender</text>
+		<text name="PaymentPeriod">Período de pagamento</text>
+		<text name="Daily">Diário</text>
+		<text name="Weekly">Semanal</text>
+		<text name="Monthly">Mensal</text>
+		<text name="Annual">Anual</text>
+		<text name="GatewayResponse">Resposta do gateway</text>
+		<text name="IsSuccess">Sucesso</text>
 	</texts>
 </localizationDictionary>

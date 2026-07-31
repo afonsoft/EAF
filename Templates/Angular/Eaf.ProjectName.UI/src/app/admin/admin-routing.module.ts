@@ -6,7 +6,11 @@ import { LanguageTextsComponent } from './languages/language-texts.component';
 import { LanguagesComponent } from './languages/languages.component';
 import { EditionsComponent } from './editions/editions.component';
 import { MaintenanceComponent } from './maintenance/maintenance.component';
+import { MassNotificationsComponent } from './mass-notifications/mass-notifications.component';
+import { OrganizationUnitsComponent } from './organization-units/organization-units.component';
+import { PaymentsComponent } from './payments/payments.component';
 import { RolesComponent } from './roles/roles.component';
+import { UserDelegationsComponent } from './user-delegations/user-delegations.component';
 import { SettingsComponent } from './settings/settings.component';
 import { TenantsComponent } from './tenants/tenants.component';
 import { UiCustomizationComponent } from './ui-customization/ui-customization.component';
@@ -29,6 +33,10 @@ import { UsersComponent } from './users/users.component';
           },
           { path: 'tenants', component: TenantsComponent, data: { permission: 'Pages.Tenants' } },
           { path: 'editions', component: EditionsComponent, data: { permission: 'Pages.Administration.Editions' } },
+          { path: 'organization-units', component: OrganizationUnitsComponent, data: { permission: 'Pages.Administration.OrganizationUnits' } },
+          { path: 'mass-notifications', component: MassNotificationsComponent, data: { permission: 'Pages.Administration.MassNotifications' } },
+          { path: 'user-delegations', component: UserDelegationsComponent, data: { permission: 'Pages.Administration.Users.Delegation' } },
+          { path: 'payments', component: PaymentsComponent, data: { permission: 'Pages.Administration.Payments' } },
           { path: 'settings', component: SettingsComponent, data: { permission: 'Pages.Administration.Settings' } },
           { path: 'maintenance', component: MaintenanceComponent, data: { permission: 'Pages.Administration.Maintenance' } },
           { path: 'ui-customization', component: UiCustomizationComponent, data: { permission: 'Pages.Administration.UiCustomization' } },

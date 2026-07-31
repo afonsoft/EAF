@@ -55,6 +55,7 @@ namespace Eaf.Middleware.Authorization
             users.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Users_Delete, L("DeletingUser"));
             users.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Users_ChangePermissions, L("ChangingPermissions"));
             users.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Users_Impersonation, L("LoginForUsers"));
+            users.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Users_Delegation, L("UserDelegation"));
 
             var languages = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Languages, L("Languages"));
             languages.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Languages_Create, L("CreatingNewLanguage"));
@@ -81,6 +82,21 @@ namespace Eaf.Middleware.Authorization
             editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Create, L("CreatingNewEdition"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Edit, L("EditingEdition"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Editions_Delete, L("DeletingEdition"), multiTenancySides: MultiTenancySides.Host);
+
+            var organizationUnits = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits, L("OrganizationUnits"));
+            organizationUnits.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits_Create, L("CreatingNewOrganizationUnit"));
+            organizationUnits.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits_Edit, L("EditingOrganizationUnit"));
+            organizationUnits.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits_Delete, L("DeletingOrganizationUnit"));
+            organizationUnits.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits_ManageMembers, L("ManagingOrganizationUnitMembers"));
+            organizationUnits.CreateChildPermission(MiddlewarePermissions.Pages_Administration_OrganizationUnits_ManageRoles, L("ManagingOrganizationUnitRoles"));
+
+            var massNotifications = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_MassNotifications, L("MassNotifications"));
+            massNotifications.CreateChildPermission(MiddlewarePermissions.Pages_Administration_MassNotifications_Create, L("CreatingNewMassNotification"));
+            massNotifications.CreateChildPermission(MiddlewarePermissions.Pages_Administration_MassNotifications_Delete, L("CancelingMassNotification"));
+
+            var payments = administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments, L("Payments"));
+            payments.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments_Create, L("CreatingNewPayment"));
+            payments.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Payments_Process, L("ProcessingPayment"));
         }
 
         private static ILocalizableString L(string name)

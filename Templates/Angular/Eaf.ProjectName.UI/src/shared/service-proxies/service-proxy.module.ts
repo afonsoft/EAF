@@ -4,6 +4,11 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { EafHttpInterceptor } from '../../assets/lib/eaf-ng2-module/src/eafHttpInterceptor';
 import * as ApiServiceProxies from './service-proxies';
 import { EditionServiceProxy } from './edition.service-proxy';
+import { DashboardServiceProxy } from './dashboard.service-proxy';
+import { OrganizationUnitServiceProxy } from './organization-unit.service-proxy';
+import { MassNotificationServiceProxy } from './mass-notification.service-proxy';
+import { UserDelegationServiceProxy } from './user-delegation.service-proxy';
+import { PaymentServiceProxy } from './payment.service-proxy';
 
 @NgModule({
   providers: [
@@ -33,6 +38,11 @@ import { EditionServiceProxy } from './edition.service-proxy';
     ApiServiceProxies.TenantAddressServiceProxy,
     ApiServiceProxies.WebhookSubscriptionServiceProxy,
     EditionServiceProxy,
+    DashboardServiceProxy,
+    OrganizationUnitServiceProxy,
+    MassNotificationServiceProxy,
+    UserDelegationServiceProxy,
+    PaymentServiceProxy,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],
 })
