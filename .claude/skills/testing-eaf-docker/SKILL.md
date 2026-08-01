@@ -278,6 +278,46 @@ Expected: `204` with `Access-Control-Allow-Origin`, `Access-Control-Allow-Method
   ```
 - Playwright `context.route`/`page.on('response')` can capture `Abp-TenantId` headers and decode JWTs to verify the tenant flow.
 
+### Verifying Angular admin proxy routes with Playwright
+
+To skip the login form and test admin pages that call the service proxies, inject the host admin JWT as the `Eaf.AuthToken` cookie before navigation:
+
+```python
+context.add_cookies([{
+    'name': 'Eaf.AuthToken',
+    'value': host_jwt,
+    'domain': 'localhost',
+    'path': '/',
+    'httpOnly': False,
+    'secure': False,
+    'sameSite': 'Lax',
+    'expires': int(time.time()) + 3600
+}])
+```
+
+Useful admin routes and the proxy calls they exercise:
+
+| Route | Proxy method(s) triggered |
+|---|---|
+| `/app/admin/editions` | `EditionServiceProxy.getEditions()` |
+| `/app/admin/mass-notifications` | `MassNotificationServiceProxy.getAll()` |
+| `/app/admin/user-delegations` | `UserDelegationServiceProxy.getMyDelegations()` and `getDelegatedUsers()` |
+| `/app/admin/organization-units` | `OrganizationUnitServiceProxy.getOrganizationUnits()` |
+| `/app/admin/payments` | `PaymentServiceProxy.getAll()` and `getGatewayList()`, plus `EditionServiceProxy.getEditions()` |
+| `/app/admin/tenants` + *Subscription* action | `TenantSubscriptionServiceProxy.getTenantSubscription(id)` and `EditionServiceProxy.getEditions()` |
+
+For the tenant subscription action, open the row's dropdown and click the item labeled `Subscription` (English fallback key), then capture the resulting `/api/services/app/Tenant/GetTenantSubscription` request.
+
+Regenerating `service-proxies.ts` against a running local API:
+
+```bash
+cd Templates/Angular/Eaf.ProjectName.UI
+# Node 20 environment and npm install are assumed
+# Create a temporary .nswag config with documentGenerator.fromDocument.url = http://localhost:5000/swagger/v1/swagger.json
+# and codeGenerators.openApiToTypeScriptClient.output = /tmp/service-proxies-generated.ts, then:
+dotnet --roll-forward Major node_modules/nswag/bin/binaries/Net60/dotnet-nswag.dll run service.config.docker.nswag
+```
+
 ## Known gotchas
 - The running DB may not match the requested sample passwords. If the admin login fails, verify the current `AbpUsers` password hash directly or reset it through `/api/services/app/Account/ResetPassword`.
 - Tenant header/cookie is now `Abp-TenantId` (dash) everywhere: `EafHttpInterceptor`, `AppPreBootstrap`, `app-auth.service`, `eaf.js`, `MiddlewareControllerBase` and `EafCorsConfiguration`. The header is omitted when no tenant is selected to keep the host context; if you see `Abp-TenantId: null` in requests, a client is still using the old hardcoded header.
