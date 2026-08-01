@@ -8029,6 +8029,300 @@ export class TenantAddressServiceProxy {
 }
 
 @Injectable()
+export class TenantJoinRequestServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAvailableTenants(): Observable<AvailableTenantDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/TenantJoinRequest/GetAvailableTenants";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAvailableTenants(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAvailableTenants(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AvailableTenantDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AvailableTenantDto[]>;
+        }));
+    }
+
+    protected processGetAvailableTenants(response: HttpResponseBase): Observable<AvailableTenantDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(AvailableTenantDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createRequest(body: CreateTenantJoinRequestInput | undefined): Observable<TenantJoinRequestDto> {
+        let url_ = this.baseUrl + "/api/services/app/TenantJoinRequest/CreateRequest";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json-patch+json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateRequest(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateRequest(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TenantJoinRequestDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TenantJoinRequestDto>;
+        }));
+    }
+
+    protected processCreateRequest(response: HttpResponseBase): Observable<TenantJoinRequestDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TenantJoinRequestDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getMyRequests(): Observable<TenantJoinRequestDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/TenantJoinRequest/GetMyRequests";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetMyRequests(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetMyRequests(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TenantJoinRequestDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TenantJoinRequestDto[]>;
+        }));
+    }
+
+    protected processGetMyRequests(response: HttpResponseBase): Observable<TenantJoinRequestDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(TenantJoinRequestDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getPendingRequestsForCurrentTenant(): Observable<TenantJoinRequestDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/TenantJoinRequest/GetPendingRequestsForCurrentTenant";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetPendingRequestsForCurrentTenant(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetPendingRequestsForCurrentTenant(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TenantJoinRequestDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TenantJoinRequestDto[]>;
+        }));
+    }
+
+    protected processGetPendingRequestsForCurrentTenant(response: HttpResponseBase): Observable<TenantJoinRequestDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(TenantJoinRequestDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    approve(body: ApproveTenantJoinRequestInput | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/TenantJoinRequest/Approve";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json-patch+json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processApprove(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processApprove(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processApprove(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class TimingServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -11434,6 +11728,46 @@ export interface IApplicationLanguageListDto {
     id: number;
 }
 
+export class ApproveTenantJoinRequestInput implements IApproveTenantJoinRequestInput {
+    requestId!: number;
+    isApproved!: boolean;
+
+    constructor(data?: IApproveTenantJoinRequestInput) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.requestId = _data["requestId"];
+            this.isApproved = _data["isApproved"];
+        }
+    }
+
+    static fromJS(data: any): ApproveTenantJoinRequestInput {
+        data = typeof data === 'object' ? data : {};
+        let result = new ApproveTenantJoinRequestInput();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["requestId"] = this.requestId;
+        data["isApproved"] = this.isApproved;
+        return data;
+    }
+}
+
+export interface IApproveTenantJoinRequestInput {
+    requestId: number;
+    isApproved: boolean;
+}
+
 export class AssignEditionToTenantInput implements IAssignEditionToTenantInput {
     tenantId!: number;
     editionId!: number;
@@ -11620,6 +11954,7 @@ export class AuthenticateModel implements IAuthenticateModel {
     rememberClient!: boolean;
     returnUrl!: string | undefined;
     singleSignIn!: boolean | undefined;
+    tenancyName!: string | undefined;
     twoFactorRememberClientToken!: string | undefined;
     twoFactorVerificationCode!: string | undefined;
     userNameOrEmailAddress!: string;
@@ -11640,6 +11975,7 @@ export class AuthenticateModel implements IAuthenticateModel {
             this.rememberClient = _data["rememberClient"];
             this.returnUrl = _data["returnUrl"];
             this.singleSignIn = _data["singleSignIn"];
+            this.tenancyName = _data["tenancyName"];
             this.twoFactorRememberClientToken = _data["twoFactorRememberClientToken"];
             this.twoFactorVerificationCode = _data["twoFactorVerificationCode"];
             this.userNameOrEmailAddress = _data["userNameOrEmailAddress"];
@@ -11660,6 +11996,7 @@ export class AuthenticateModel implements IAuthenticateModel {
         data["rememberClient"] = this.rememberClient;
         data["returnUrl"] = this.returnUrl;
         data["singleSignIn"] = this.singleSignIn;
+        data["tenancyName"] = this.tenancyName;
         data["twoFactorRememberClientToken"] = this.twoFactorRememberClientToken;
         data["twoFactorVerificationCode"] = this.twoFactorVerificationCode;
         data["userNameOrEmailAddress"] = this.userNameOrEmailAddress;
@@ -11673,6 +12010,7 @@ export interface IAuthenticateModel {
     rememberClient: boolean;
     returnUrl: string | undefined;
     singleSignIn: boolean | undefined;
+    tenancyName: string | undefined;
     twoFactorRememberClientToken: string | undefined;
     twoFactorVerificationCode: string | undefined;
     userNameOrEmailAddress: string;
@@ -11756,6 +12094,50 @@ export interface IAuthenticateResultModel {
     twoFactorAuthProviders: string[] | undefined;
     twoFactorRememberClientToken: string | undefined;
     userId: number;
+}
+
+export class AvailableTenantDto implements IAvailableTenantDto {
+    tenancyName!: string | undefined;
+    name!: string | undefined;
+    id!: number;
+
+    constructor(data?: IAvailableTenantDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tenancyName = _data["tenancyName"];
+            this.name = _data["name"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): AvailableTenantDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailableTenantDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tenancyName"] = this.tenancyName;
+        data["name"] = this.name;
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface IAvailableTenantDto {
+    tenancyName: string | undefined;
+    name: string | undefined;
+    id: number;
 }
 
 export class AvailableTenantResult implements IAvailableTenantResult {
@@ -12897,6 +13279,46 @@ export interface ICreateTenantInput {
     sendActivationEmail: boolean;
     shouldChangePasswordOnNextLogin: boolean;
     tenancyName: string;
+}
+
+export class CreateTenantJoinRequestInput implements ICreateTenantJoinRequestInput {
+    tenantId!: number;
+    message!: string | undefined;
+
+    constructor(data?: ICreateTenantJoinRequestInput) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tenantId = _data["tenantId"];
+            this.message = _data["message"];
+        }
+    }
+
+    static fromJS(data: any): CreateTenantJoinRequestInput {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTenantJoinRequestInput();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tenantId"] = this.tenantId;
+        data["message"] = this.message;
+        return data;
+    }
+}
+
+export interface ICreateTenantJoinRequestInput {
+    tenantId: number;
+    message: string | undefined;
 }
 
 export class CreateUserDelegationInput implements ICreateUserDelegationInput {
@@ -15349,6 +15771,7 @@ export class HostSettingsEditDto implements IHostSettingsEditDto {
     google!: GoogleSettingsEditDto;
     ldap!: LdapSettingsEditDto;
     security!: SecuritySettingsEditDto;
+    tenantManagement!: TenantManagementSettingsEditDto;
     userManagement!: HostUserManagementSettingsEditDto;
     logDeleter!: ExpiredEntityLogDeleterSettingsEditDto;
     loginImpersonator!: ExpiredEntityLoginImpersonatorSettingsEditDto;
@@ -15364,6 +15787,7 @@ export class HostSettingsEditDto implements IHostSettingsEditDto {
             this.email = new EmailSettingsEditDto();
             this.general = new GeneralSettingsEditDto();
             this.security = new SecuritySettingsEditDto();
+            this.tenantManagement = new TenantManagementSettingsEditDto();
             this.userManagement = new HostUserManagementSettingsEditDto();
         }
     }
@@ -15377,6 +15801,7 @@ export class HostSettingsEditDto implements IHostSettingsEditDto {
             this.google = _data["google"] ? GoogleSettingsEditDto.fromJS(_data["google"]) : <any>undefined;
             this.ldap = _data["ldap"] ? LdapSettingsEditDto.fromJS(_data["ldap"]) : <any>undefined;
             this.security = _data["security"] ? SecuritySettingsEditDto.fromJS(_data["security"]) : new SecuritySettingsEditDto();
+            this.tenantManagement = _data["tenantManagement"] ? TenantManagementSettingsEditDto.fromJS(_data["tenantManagement"]) : new TenantManagementSettingsEditDto();
             this.userManagement = _data["userManagement"] ? HostUserManagementSettingsEditDto.fromJS(_data["userManagement"]) : new HostUserManagementSettingsEditDto();
             this.logDeleter = _data["logDeleter"] ? ExpiredEntityLogDeleterSettingsEditDto.fromJS(_data["logDeleter"]) : <any>undefined;
             this.loginImpersonator = _data["loginImpersonator"] ? ExpiredEntityLoginImpersonatorSettingsEditDto.fromJS(_data["loginImpersonator"]) : <any>undefined;
@@ -15399,6 +15824,7 @@ export class HostSettingsEditDto implements IHostSettingsEditDto {
         data["google"] = this.google ? this.google.toJSON() : <any>undefined;
         data["ldap"] = this.ldap ? this.ldap.toJSON() : <any>undefined;
         data["security"] = this.security ? this.security.toJSON() : <any>undefined;
+        data["tenantManagement"] = this.tenantManagement ? this.tenantManagement.toJSON() : <any>undefined;
         data["userManagement"] = this.userManagement ? this.userManagement.toJSON() : <any>undefined;
         data["logDeleter"] = this.logDeleter ? this.logDeleter.toJSON() : <any>undefined;
         data["loginImpersonator"] = this.loginImpersonator ? this.loginImpersonator.toJSON() : <any>undefined;
@@ -15414,6 +15840,7 @@ export interface IHostSettingsEditDto {
     google: GoogleSettingsEditDto;
     ldap: LdapSettingsEditDto;
     security: SecuritySettingsEditDto;
+    tenantManagement: TenantManagementSettingsEditDto;
     userManagement: HostUserManagementSettingsEditDto;
     logDeleter: ExpiredEntityLogDeleterSettingsEditDto;
     loginImpersonator: ExpiredEntityLoginImpersonatorSettingsEditDto;
@@ -18358,9 +18785,11 @@ export interface IProviderModel {
 }
 
 export class RegisterInput implements IRegisterInput {
+    tenantSelectionMode!: TenantSelectionMode;
     tenancyName!: string | undefined;
     tenantName!: string | undefined;
-    tenantId!: number | undefined;
+    existingTenantId!: number | undefined;
+    joinRequestMessage!: string | undefined;
     name!: string;
     surname!: string;
     userName!: string;
@@ -18378,9 +18807,11 @@ export class RegisterInput implements IRegisterInput {
 
     init(_data?: any) {
         if (_data) {
+            this.tenantSelectionMode = _data["tenantSelectionMode"];
             this.tenancyName = _data["tenancyName"];
             this.tenantName = _data["tenantName"];
-            this.tenantId = _data["tenantId"];
+            this.existingTenantId = _data["existingTenantId"];
+            this.joinRequestMessage = _data["joinRequestMessage"];
             this.name = _data["name"];
             this.surname = _data["surname"];
             this.userName = _data["userName"];
@@ -18398,9 +18829,11 @@ export class RegisterInput implements IRegisterInput {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["tenantSelectionMode"] = this.tenantSelectionMode;
         data["tenancyName"] = this.tenancyName;
         data["tenantName"] = this.tenantName;
-        data["tenantId"] = this.tenantId;
+        data["existingTenantId"] = this.existingTenantId;
+        data["joinRequestMessage"] = this.joinRequestMessage;
         data["name"] = this.name;
         data["surname"] = this.surname;
         data["userName"] = this.userName;
@@ -18411,9 +18844,11 @@ export class RegisterInput implements IRegisterInput {
 }
 
 export interface IRegisterInput {
+    tenantSelectionMode: TenantSelectionMode;
     tenancyName: string | undefined;
     tenantName: string | undefined;
-    tenantId: number | undefined;
+    existingTenantId: number | undefined;
+    joinRequestMessage: string | undefined;
     name: string;
     surname: string;
     userName: string;
@@ -18423,6 +18858,8 @@ export interface IRegisterInput {
 
 export class RegisterOutput implements IRegisterOutput {
     canLogin!: boolean;
+    tenantId!: number | undefined;
+    tenancyName!: string | undefined;
 
     constructor(data?: IRegisterOutput) {
         if (data) {
@@ -18436,6 +18873,8 @@ export class RegisterOutput implements IRegisterOutput {
     init(_data?: any) {
         if (_data) {
             this.canLogin = _data["canLogin"];
+            this.tenantId = _data["tenantId"];
+            this.tenancyName = _data["tenancyName"];
         }
     }
 
@@ -18449,12 +18888,16 @@ export class RegisterOutput implements IRegisterOutput {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["canLogin"] = this.canLogin;
+        data["tenantId"] = this.tenantId;
+        data["tenancyName"] = this.tenancyName;
         return data;
     }
 }
 
 export interface IRegisterOutput {
     canLogin: boolean;
+    tenantId: number | undefined;
+    tenancyName: string | undefined;
 }
 
 export class ResetPasswordInput implements IResetPasswordInput {
@@ -19346,6 +19789,88 @@ export interface ITenantEditDto {
     id: number;
 }
 
+export class TenantJoinRequestDto implements ITenantJoinRequestDto {
+    userId!: number;
+    userName!: string | undefined;
+    tenantId!: number;
+    tenantName!: string | undefined;
+    tenantUserId!: number;
+    status!: TenantJoinRequestStatus;
+    message!: string | undefined;
+    approverUserId!: number | undefined;
+    creationTime!: moment.Moment;
+    creatorUserId!: number | undefined;
+    id!: number;
+
+    constructor(data?: ITenantJoinRequestDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.userName = _data["userName"];
+            this.tenantId = _data["tenantId"];
+            this.tenantName = _data["tenantName"];
+            this.tenantUserId = _data["tenantUserId"];
+            this.status = _data["status"];
+            this.message = _data["message"];
+            this.approverUserId = _data["approverUserId"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): TenantJoinRequestDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TenantJoinRequestDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["userName"] = this.userName;
+        data["tenantId"] = this.tenantId;
+        data["tenantName"] = this.tenantName;
+        data["tenantUserId"] = this.tenantUserId;
+        data["status"] = this.status;
+        data["message"] = this.message;
+        data["approverUserId"] = this.approverUserId;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["id"] = this.id;
+        return data;
+    }
+}
+
+export interface ITenantJoinRequestDto {
+    userId: number;
+    userName: string | undefined;
+    tenantId: number;
+    tenantName: string | undefined;
+    tenantUserId: number;
+    status: TenantJoinRequestStatus;
+    message: string | undefined;
+    approverUserId: number | undefined;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    id: number;
+}
+
+export enum TenantJoinRequestStatus {
+    Pending = 0,
+    Approved = 1,
+    Rejected = 2,
+}
+
 export class TenantListDto implements ITenantListDto {
     isActive!: boolean;
     readonly lastModificationDate!: moment.Moment;
@@ -19486,6 +20011,50 @@ export interface ITenantLoginInfoDto {
     id: number;
 }
 
+export class TenantManagementSettingsEditDto implements ITenantManagementSettingsEditDto {
+    allowSelfRegistration!: boolean;
+    allowTenantCreation!: boolean;
+    allowJoinRequests!: boolean;
+
+    constructor(data?: ITenantManagementSettingsEditDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.allowSelfRegistration = _data["allowSelfRegistration"];
+            this.allowTenantCreation = _data["allowTenantCreation"];
+            this.allowJoinRequests = _data["allowJoinRequests"];
+        }
+    }
+
+    static fromJS(data: any): TenantManagementSettingsEditDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TenantManagementSettingsEditDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["allowSelfRegistration"] = this.allowSelfRegistration;
+        data["allowTenantCreation"] = this.allowTenantCreation;
+        data["allowJoinRequests"] = this.allowJoinRequests;
+        return data;
+    }
+}
+
+export interface ITenantManagementSettingsEditDto {
+    allowSelfRegistration: boolean;
+    allowTenantCreation: boolean;
+    allowJoinRequests: boolean;
+}
+
 export class TenantModal implements ITenantModal {
     name!: string | undefined;
     tenancyName!: string | undefined;
@@ -19592,6 +20161,12 @@ export interface ITenantNotification {
     severity: NotificationSeverity;
     creationTime: moment.Moment;
     id: string;
+}
+
+export enum TenantSelectionMode {
+    DefaultTenant = 0,
+    CreateNew = 1,
+    JoinExisting = 2,
 }
 
 export class TenantSubscriptionDto implements ITenantSubscriptionDto {

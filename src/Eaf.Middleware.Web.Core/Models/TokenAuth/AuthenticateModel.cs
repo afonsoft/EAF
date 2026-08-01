@@ -1,5 +1,6 @@
 using Abp.Auditing;
 using Abp.Authorization.Users;
+using Abp.MultiTenancy;
 using System.ComponentModel.DataAnnotations;
 
 namespace Eaf.Middleware.Web.Models.TokenAuth
@@ -28,6 +29,13 @@ namespace Eaf.Middleware.Web.Models.TokenAuth
         public string ReturnUrl { get; set; }
 
         public bool? SingleSignIn { get; set; }
+
+        /// <summary>
+        /// Obtém ou define o nome técnico do tenant para login em um tenant específico.
+        /// Quando nulo, o login considera o tenant resolvido pela sessão ou o host.
+        /// </summary>
+        [MaxLength(AbpTenantBase.MaxTenancyNameLength)]
+        public string TenancyName { get; set; }
 
         /// <summary>
         /// Obtém ou define TwoFactorRememberClientToken.

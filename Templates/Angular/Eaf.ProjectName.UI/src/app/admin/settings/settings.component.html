@@ -290,6 +290,53 @@
               </div>
             </div>
           </tab>
+          <tab *ngIf="hostSettings.tenantManagement" customClass="m-tabs__item" heading="{{ 'TenantManagement' | localize }}">
+            <div class="m-checkbox-list">
+              <h5>{{ 'TenantRegistrationSettings' | localize }}</h5>
+              <span class="m-switch m-switch--icon-check">
+                <label>
+                  <input
+                    [(ngModel)]="hostSettings.tenantManagement.allowSelfRegistration"
+                    id="Setting_AllowSelfRegistration"
+                    name="AllowSelfRegistration"
+                    type="checkbox"
+                  />
+                  <span></span>
+                  <span class="m-switch-label">
+                    {{ 'AllowSelfRegistration' | localize }}
+                  </span>
+                </label>
+              </span>
+              <span class="m-switch m-switch--icon-check">
+                <label>
+                  <input
+                    [(ngModel)]="hostSettings.tenantManagement.allowTenantCreation"
+                    id="Setting_AllowTenantCreation"
+                    name="AllowTenantCreation"
+                    type="checkbox"
+                  />
+                  <span></span>
+                  <span class="m-switch-label">
+                    {{ 'AllowTenantCreation' | localize }}
+                  </span>
+                </label>
+              </span>
+              <span class="m-switch m-switch--icon-check">
+                <label>
+                  <input
+                    [(ngModel)]="hostSettings.tenantManagement.allowJoinRequests"
+                    id="Setting_AllowJoinRequests"
+                    name="AllowJoinRequests"
+                    type="checkbox"
+                  />
+                  <span></span>
+                  <span class="m-switch-label">
+                    {{ 'AllowJoinRequests' | localize }}
+                  </span>
+                </label>
+              </span>
+            </div>
+          </tab>
           <tab *ngIf="hostSettings.security" customClass="m-tabs__item" heading="{{ 'Security' | localize }}">
             <div>
               <h5>{{ 'PasswordComplexity' | localize }}</h5>
@@ -795,7 +842,7 @@
                   [(ngModel)]="hostSettings.externalLoginProviderSettings.openIdConnect.validateIssuer"
                   class="check"
                   id="Setting_OpenIdConnect_ValidateIssuer"
-                  name="AllowSelfRegistration"
+                  name="OpenIdConnectValidateIssuer"
                   type="checkbox"
                 />
                 <span></span>

@@ -175,9 +175,11 @@ namespace Eaf.Middleware.MultiTenancy
 
         /// <summary>
         /// Cria um shadow user inativo e uma solicitação de ingresso pendente no tenant.
+        /// Quando a senha em texto plano do usuário host for informada, o shadow user é
+        /// criado com a mesma senha, permitindo login direto no tenant após aprovação.
         /// </summary>
         [UnitOfWork]
-        public virtual async Task<TenantJoinRequest> CreatePendingMembershipAsync(long hostUserId, int tenantId, string message = null)
+        public virtual async Task<TenantJoinRequest> CreatePendingMembershipAsync(long hostUserId, int tenantId, string message = null, string plainPassword = null)
         {
             var tenantList = await _tenantRepository.GetAllListAsync(t => t.Id == tenantId);
             if (!tenantList.Any())
@@ -218,7 +220,7 @@ namespace Eaf.Middleware.MultiTenancy
                     };
                     shadowUser.SetNormalizedNames();
 
-                    var createResult = await _userManager.CreateAsync(shadowUser, GenerateShadowPassword());
+                    var createResult = await _userManager.CreateAsync(shadowUser, plainPassword ?? GenerateShadowPassword());
                     if (!createResult.Succeeded)
                         throw new UserFriendlyException(createResult.Errors.FirstOrDefault()?.Description ?? L("FailedToCreateShadowUser"));
                 }

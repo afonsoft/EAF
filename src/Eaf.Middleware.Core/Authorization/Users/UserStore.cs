@@ -5,6 +5,7 @@ using Eaf.Middleware.Authorization.Roles;
 using Abp.Organizations;
 using System.Linq;
 using Abp;
+using System.Threading.Tasks;
 
 
 namespace Eaf.Middleware.Authorization.Users
@@ -14,6 +15,8 @@ namespace Eaf.Middleware.Authorization.Users
     /// </summary>
     public class UserStore : AbpUserStore<Role, User>
     {
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
+
         /// <summary>
         /// UserStore.
         /// </summary>
@@ -40,6 +43,7 @@ namespace Eaf.Middleware.Authorization.Users
             organizationUnitRoleRepository,
             userTokenRepository)
         {
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
         /// <summary>
@@ -54,6 +58,39 @@ namespace Eaf.Middleware.Authorization.Users
                 throw new AbpException("There is no user: " + id);
 
             return user;
+        }
+
+        /// <summary>
+        /// Busca o username do usuário pelo id sem restringir pelo tenant atual.
+        /// A busca por chave primária não deve depender do filtro de multi-tenancy,
+        /// pois o método pode ser chamado dentro de uma nova unidade de trabalho
+        /// sem o contexto de tenant do usuário.
+        /// </summary>
+        /// <param name="userId">Parâmetro userId.</param>
+        /// <returns>Resultado da operação.</returns>
+        public override async Task<string> GetUserNameFromDatabaseAsync(long userId)
+        {
+            using (_unitOfWorkManager.Current.SetTenantId(null, switchMustHaveTenantEnableDisable: false))
+            using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                var user = await UserRepository.GetAsync(userId);
+                return user.UserName;
+            }
+        }
+
+        /// <summary>
+        /// Busca o username do usuário pelo id sem restringir pelo tenant atual (síncrono).
+        /// </summary>
+        /// <param name="userId">Parâmetro userId.</param>
+        /// <returns>Resultado da operação.</returns>
+        public override string GetUserNameFromDatabase(long userId)
+        {
+            using (_unitOfWorkManager.Current.SetTenantId(null, switchMustHaveTenantEnableDisable: false))
+            using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                var user = UserRepository.Get(userId);
+                return user.UserName;
+            }
         }
     }
 }

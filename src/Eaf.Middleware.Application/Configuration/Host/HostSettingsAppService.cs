@@ -65,6 +65,7 @@ namespace Eaf.Middleware.Configuration.Host
             {
                 General = await GetGeneralSettingsAsync(),
                 UserManagement = await GetUserManagementAsync(),
+                TenantManagement = await GetTenantManagementSettingsAsync(),
                 Email = await GetEmailSettingsAsync(false),
                 Security = await GetSecuritySettingsAsync(),
                 Google = await GetGoogleSettingsAsync(),
@@ -86,6 +87,7 @@ namespace Eaf.Middleware.Configuration.Host
             {
                 General = await GetGeneralSettingsAsync(),
                 UserManagement = await GetUserManagementAsync(),
+                TenantManagement = await GetTenantManagementSettingsAsync(),
                 Email = await GetEmailSettingsAsync(true),
                 Security = await GetSecuritySettingsAsync(),
                 Google = await GetGoogleSettingsAsync(),
@@ -337,6 +339,16 @@ namespace Eaf.Middleware.Configuration.Host
             };
         }
 
+        private async Task<TenantManagementSettingsEditDto> GetTenantManagementSettingsAsync()
+        {
+            return new TenantManagementSettingsEditDto
+            {
+                AllowSelfRegistration = await SettingManager.GetSettingValueAsync<bool>(AppSettings.TenantManagement.AllowSelfRegistration),
+                AllowTenantCreation = await SettingManager.GetSettingValueAsync<bool>(AppSettings.TenantManagement.AllowTenantCreation),
+                AllowJoinRequests = await SettingManager.GetSettingValueAsync<bool>(AppSettings.TenantManagement.AllowJoinRequests)
+            };
+        }
+
         private async Task<ExpiredEntityLoginImpersonatorSettingsEditDto> GetLoginImpersonatorAsync()
         {
             try
@@ -387,6 +399,7 @@ namespace Eaf.Middleware.Configuration.Host
             if (input == null) return;
             await UpdateGeneralSettingsAsync(input.General);
             await UpdateUserManagementSettingsAsync(input.UserManagement);
+            await UpdateTenantManagementSettingsAsync(input.TenantManagement);
             await UpdateSecuritySettingsAsync(input.Security);
             await UpdateEmailSettingsAsync(input.Email);
             await UpdateGoogleSettingsAsync(input.Google);
@@ -642,6 +655,28 @@ namespace Eaf.Middleware.Configuration.Host
                 AppSettings.UserManagement.AllowOneConcurrentLoginPerUser,
                 settings.AllowOneConcurrentLoginPerUser.ToString().ToLowerInvariant()
             );
+        }
+
+        private async Task UpdateTenantManagementSettingsAsync(TenantManagementSettingsEditDto settings)
+        {
+            if (settings == null) return;
+
+            var allowSelfRegistration = settings.AllowSelfRegistration.ToString().ToLowerInvariant();
+            var allowTenantCreation = settings.AllowTenantCreation.ToString().ToLowerInvariant();
+            var allowJoinRequests = settings.AllowJoinRequests.ToString().ToLowerInvariant();
+
+            if (AbpSession.TenantId.HasValue)
+            {
+                await SettingManager.ChangeSettingForTenantAsync(AbpSession.TenantId.Value, AppSettings.TenantManagement.AllowSelfRegistration, allowSelfRegistration);
+                await SettingManager.ChangeSettingForTenantAsync(AbpSession.TenantId.Value, AppSettings.TenantManagement.AllowTenantCreation, allowTenantCreation);
+                await SettingManager.ChangeSettingForTenantAsync(AbpSession.TenantId.Value, AppSettings.TenantManagement.AllowJoinRequests, allowJoinRequests);
+            }
+            else
+            {
+                await SettingManager.ChangeSettingForApplicationAsync(AppSettings.TenantManagement.AllowSelfRegistration, allowSelfRegistration);
+                await SettingManager.ChangeSettingForApplicationAsync(AppSettings.TenantManagement.AllowTenantCreation, allowTenantCreation);
+                await SettingManager.ChangeSettingForApplicationAsync(AppSettings.TenantManagement.AllowJoinRequests, allowJoinRequests);
+            }
         }
 
         #endregion Update Settings

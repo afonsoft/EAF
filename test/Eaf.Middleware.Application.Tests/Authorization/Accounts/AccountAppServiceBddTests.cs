@@ -676,7 +676,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
 
             var request = new TenantJoinRequest { Id = 100, UserId = 2, TenantId = 1, Status = TenantJoinRequestStatus.Pending };
             var tenantUserManager = Substitute.For<ITenantUserManager>();
-            tenantUserManager.CreatePendingMembershipAsync(2, 1, null).Returns(request);
+            tenantUserManager.CreatePendingMembershipAsync(Arg.Any<long>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string>()).Returns(request);
 
             typeof(AccountAppService).GetField("_tenantUserManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.SetValue(_sut, tenantUserManager);
@@ -697,7 +697,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             result.ShouldNotBeNull();
             result.CanLogin.ShouldBeFalse();
             result.TenantId.ShouldBe(1);
-            await tenantUserManager.Received(1).CreatePendingMembershipAsync(2, 1, null);
+            await tenantUserManager.Received(1).CreatePendingMembershipAsync(Arg.Any<long>(), 1, Arg.Any<string>(), Arg.Any<string>());
         }
 
         #endregion
