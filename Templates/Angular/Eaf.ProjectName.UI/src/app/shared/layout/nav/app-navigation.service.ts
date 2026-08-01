@@ -28,6 +28,7 @@ export class AppNavigationService {
       new AppMenuItem('Tenants', 'Pages.Tenants', 'flaticon-squares-4', '/app/admin/tenants'),
       new AppMenuItem('Roles', 'Pages.Administration.Roles', 'flaticon-suitcase', '/app/admin/roles'),
       new AppMenuItem('Users', 'Pages.Administration.Users', 'flaticon-users', '/app/admin/users'),
+      new AppMenuItem('TenantJoinRequests', 'Pages.Administration.Users', 'flaticon-user-add', '/app/admin/tenant-join-requests'),
       new AppMenuItem('OrganizationUnits', 'Pages.Administration.OrganizationUnits', 'flaticon-network', '/app/admin/organization-units'),
       new AppMenuItem('MassNotifications', 'Pages.Administration.MassNotifications', 'flaticon-speech-bubble', '/app/admin/mass-notifications'),
       new AppMenuItem('UserDelegation', 'Pages.Administration.Users.Delegation', 'flaticon-user-ok', '/app/admin/user-delegations'),

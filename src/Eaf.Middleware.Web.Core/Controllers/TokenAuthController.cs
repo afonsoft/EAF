@@ -308,7 +308,10 @@ namespace Eaf.Middleware.Web.Controllers
 
             using (var tenantUserManager = _iocManager.ResolveAsDisposable<ITenantUserManager>())
             {
-                var membership = await tenantUserManager.Object.EnsureMembershipAsync(loginResult.User.Id, model.TenantId);
+                var memberships = await tenantUserManager.Object.GetMembershipsAsync(loginResult.User.Id);
+                var membership = memberships.FirstOrDefault(m => m.TenantId == model.TenantId);
+                if (membership == null)
+                    throw new UserFriendlyException(L("TenantMembershipNotFound"));
 
                 var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
                 var expiration = TimeSpan.FromSeconds(expirationSettings);
@@ -319,6 +322,9 @@ namespace Eaf.Middleware.Web.Controllers
                     var shadowUser = await _userManager.FindByIdAsync(membership.TenantUserId.ToString());
                     if (shadowUser == null)
                         throw new UserFriendlyException(L("ShadowUserNotFound"));
+
+                    if (!shadowUser.IsActive)
+                        throw new UserFriendlyException(L("TenantUserIsNotActive"));
 
                     ClaimsIdentity identity;
                     using (var principalFactory = _iocManager.ResolveAsDisposable<UserClaimsPrincipalFactory>())

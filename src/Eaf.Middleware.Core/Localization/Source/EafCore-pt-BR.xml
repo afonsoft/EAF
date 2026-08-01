@@ -22,9 +22,7 @@
 		<text name="InvalidUserNameOrPassword" value="Usuário ou senha Inválidos" />
 		<text name="InvalidRequest" value="Requisição inválida" />
 		<text name="ThereIsNoTenantDefinedWithName{0}" value="Não existe nenhum canal com o nome {0}" />
-		<text name="TenantIsNotActive" value="Canal {0} não está ativo." />
 		<text name="UserIsNotActiveAndCanNotLogin" value="Usuário {0} não está ativo e não pode logar." />
-		<text name="TenancyName" value="Nome da canal" />
 		<text name="UserNameOrEmail" value="Usuário ou email" />
 		<text name="Password" value="Senha" />
 		<text name="RememberMe" value="Lembrar" />
@@ -48,12 +46,6 @@
 		<text name="Surname" value="Sobrenome" />
 		<text name="EmailAddress" value="Endereço de email" />
 		<text name="Register" value="Cadastrar" />
-		<text name="CreateNewTenant" value="Criar novo canal" />
-		<text name="SelectTenant" value="Selecionar canal" />
-		<text name="TenancyName" value="Nome do canal (url)" />
-		<text name="TenantName" value="Nome do canal" />
-		<text name="SuccessfullyRegistered" value="Cadastrado com sucesso." />
-		<text name="RegistrationWaitingForApproval" value="Seu cadastro está aguardando aprovação." />
 		<text name="LastLoginTime" value="Data de último login" />
 		<text name="UserInformations" value="Usuário de Sistema" />
 		<text name="PasswordRepeat" value="Senha (repetir)" />
@@ -115,7 +107,6 @@
 		<text name="LoginFailed" value="Falha no login!" />
 		<text name="InvalidEmailConfirmationCode" value="Código de confirmação de email inválido" />
 		<text name="InvalidEmailConfirmationCode_Detail" value="Por favor tenha certeza que você entrou nessa página clicando no link enviado para seu email. Se isso não resolver o email você pode tentar novamente requerir um código de confirmação." />
-		<text name="TenantIsNotActive" value="O tenant selecionado não está ativo." />
 		<text name="InvalidRegisterRequest" value="Requisição de cadastro inválida." />
 		<text name="YourEmailIsConfirmedMessage" value="O seu endereço de email foi verificado com sucesso." />
 		<text name="ShouldChangePasswordOnNextLogin" value="Deve mudar a senha no próximo login." />
@@ -428,12 +419,7 @@
 		<text name="WebSiteLogsHeaderInfo">WebSite Logs</text>
 		<text name="TestSendMensage">Mensagem de Testes</text>
 		<text name="WelcomeToTheApplication">Bem vindo ao sistema</text>
-		<text name="OnlyHostUsersCanHaveTenantMemberships">Apenas usuários host podem ter associações a tenants.</text>
 		<text name="OnlyHostUsersCanSelectTenant">Apenas usuários host podem selecionar um tenant.</text>
-		<text name="TenantMembershipNotFound">Associação de tenant não encontrada.</text>
-		<text name="ShadowUserNotFound">Usuário sombra não encontrado.</text>
-		<text name="FailedToCreateShadowUser">Falha ao criar usuário sombra.</text>
-		<text name="FailedToAddRoleToShadowUser">Falha ao adicionar role ao usuário sombra.</text>
 		<text name="FailedToCreateTenantRole">Falha ao criar role no tenant.</text>
 		<text name="TotalTenants">Total de tenants</text>
 		<text name="TotalUsers">Total de usuários</text>
@@ -547,5 +533,26 @@
 		<text name="GatewaySettings">Configuração de gateway</text>
 		<text name="DefaultGateway">Gateway padrão</text>
 		<text name="SubscriptionEndDate">Data de término da assinatura</text>
+		<text name="TenantRequired">Tenant é obrigatório.</text>
+		<text name="TenantNotFound">Tenant não encontrado.</text>
+		<text name="OnlyHostUsersCanHaveTenantMemberships">Apenas usuários do host podem ter memberships em tenants.</text>
+		<text name="TenantMembershipNotFound">Membership do tenant não encontrada.</text>
+		<text name="UserAlreadyActiveInTenant">Usuário já está ativo neste tenant.</text>
+		<text name="RequestAlreadyProcessed">Esta solicitação já foi processada.</text>
+		<text name="FailedToCreateShadowUser">Falha ao criar o usuário do tenant.</text>
+		<text name="FailedToAddRoleToShadowUser">Falha ao adicionar a role ao usuário do tenant.</text>
+		<text name="ShadowUserNotFound">Usuário do tenant não encontrado.</text>
+		<text name="TenantUserIsNotActive">Usuário não está ativo neste tenant. Aguarde a aprovação.</text>
+		<text name="InvalidTenancyName">Nome técnico do tenant inválido.</text>
+		<text name="SelfRegistrationIsDisabled">Auto cadastro está desabilitado.</text>
+		<text name="TenantCreationIsDisabled">Criação de tenants está desabilitada.</text>
+		<text name="JoinRequestsAreDisabled">Solicitações de ingresso estão desabilitadas.</text>
+		<text name="CreateNewTenant">Criar novo tenant</text>
+		<text name="SelectTenant">Selecionar tenant</text>
+		<text name="TenantName">Nome do tenant</text>
+		<text name="TenancyName">Nome técnico do tenant</text>
+		<text name="JoinCompany">Ingressar em tenant existente</text>
+		<text name="RegistrationWaitingForApproval">Seu cadastro está aguardando aprovação.</text>
+		<text name="SuccessfullyRegistered">Cadastro realizado com sucesso.</text>
 	</texts>
 </localizationDictionary>

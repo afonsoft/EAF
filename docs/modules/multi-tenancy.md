@@ -223,6 +223,14 @@ O EAF/ABP permite que features e configurações da aplicação sejam específic
 
 ## 6. Considerações de Multi-Tenancy Específicas do EAF
 
+*   **Cadastro Público com Seleção/Criação de Tenant (EAF 9.4.3)**:
+    *   A tela de registro público passa a oferecer três modos: usar o tenant padrão (`DefaultTenant`), criar um novo tenant (`CreateNew`) ou solicitar ingresso em um tenant existente (`JoinExisting`).
+    *   Todos os novos tenants criados pelo registro são vinculados automaticamente à edição `Free`.
+    *   Ao criar um tenant, o primeiro usuário se torna administrador ativo e o tenant recebe as roles padrão `Admin` e `User`.
+    *   Ao solicitar ingresso, o sistema cria um *shadow user* inativo e uma `TenantJoinRequest` pendente. O administrador do tenant aprova ou rejeita a solicitação; só então o usuário pode acessar o tenant.
+    *   O fluxo é controlado pelas settings `App.TenantManagement.AllowSelfRegistration`, `App.TenantManagement.AllowTenantCreation` e `App.TenantManagement.AllowJoinRequests` (escopo aplicação e tenant), permitindo que o host ou cada tenant desabilite o cadastro público.
+    *   Principais componentes: `AccountAppService.Register`, `TenantJoinRequestAppService`, `TenantUserManager`, entidade `TenantJoinRequest`, `RegisterComponent` e `TenantJoinRequestsComponent`.
+
 *   **Login Multi-Tenant em Duas Etapas**:
     *   O EAF introduz um fluxo de autenticação em duas etapas para usuários host que pertencem a múltiplos tenants. O usuário autentica primeiro no host e, em seguida, seleciona o tenant desejado. Para cada associação, o EAF cria um *shadow user* dentro do tenant e replica as roles/permissões do host automaticamente.
     *   Principais componentes: `UserTenantMembership` (entidade host-level), `TenantUserManager` (serviço de domínio), `TenantRolePermissionReplicationService`, endpoints `TokenAuth` (`GetAvailableTenants` e `SelectTenant`) e o componente Angular `SelectTenantComponent`.

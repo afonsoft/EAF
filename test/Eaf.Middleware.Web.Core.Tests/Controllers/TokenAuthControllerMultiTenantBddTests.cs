@@ -14,6 +14,7 @@ using NSubstitute;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
@@ -112,12 +113,15 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var logInManager = CriarLogInManagerSubstituto(userManager, roleManager, loginResult);
 
             var tenantUserManager = Substitute.For<ITenantUserManager>();
-            tenantUserManager.EnsureMembershipAsync(hostUser.Id, 1).Returns(Task.FromResult(new UserTenantMembership
+            tenantUserManager.GetMembershipsAsync(hostUser.Id).Returns(Task.FromResult<IReadOnlyList<UserTenantMembership>>(new List<UserTenantMembership>
             {
-                UserId = hostUser.Id,
-                TenantId = 1,
-                TenantUserId = shadowUser.Id,
-                IsDefault = true
+                new UserTenantMembership
+                {
+                    UserId = hostUser.Id,
+                    TenantId = 1,
+                    TenantUserId = shadowUser.Id,
+                    IsDefault = true
+                }
             }));
 
             var principalFactory = Substitute.For<UserClaimsPrincipalFactory>(

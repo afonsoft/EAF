@@ -117,6 +117,16 @@ namespace Eaf.Middleware.Configuration
         }
 
         /// <summary>
+        /// Representa as configurações de gerenciamento de tenants.
+        /// </summary>
+        public static class TenantManagement
+        {
+            public const string AllowSelfRegistration = "App.TenantManagement.AllowSelfRegistration";
+            public const string AllowTenantCreation = "App.TenantManagement.AllowTenantCreation";
+            public const string AllowJoinRequests = "App.TenantManagement.AllowJoinRequests";
+        }
+
+        /// <summary>
         /// Representa a classe UserManagement.
         /// </summary>
         public static class UserManagement

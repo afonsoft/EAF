@@ -61,6 +61,7 @@ import { CreateOrEditUserModalComponent } from './users/create-or-edit-user-moda
 import { EditUserPermissionsModalComponent } from './users/edit-user-permissions-modal.component';
 import { ImpersonationService } from './users/impersonation.service';
 import { UsersComponent } from './users/users.component';
+import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-requests.component';
 
 @NgModule({
   imports: [
@@ -127,6 +128,7 @@ import { UsersComponent } from './users/users.component';
     Theme4ThemeUiSettingsComponent,
     Theme2ThemeUiSettingsComponent,
     Theme3ThemeUiSettingsComponent,
+    TenantJoinRequestsComponent,
   ],
   exports: [],
   providers: [

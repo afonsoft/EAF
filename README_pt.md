@@ -46,7 +46,7 @@ O **EAF (Enterprise Application Foundation)** é uma plataforma de middleware op
 
 - **Segurança Integrada**: Autenticação e autorização com suporte a Azure Active Directory e LDAP
 - **Auditoria Completa**: Rastreamento automático de todas as operações do sistema
-- **Multi-tenancy**: Suporte nativo para aplicações multi-inquilino
+- **Multi-tenancy**: Suporte nativo para aplicações multi-inquilino com cadastro público, edição Free, solicitação de ingresso e aprovação
 - **Observabilidade**: Integração com OpenTelemetry para monitoramento e telemetria
 - **Cache Distribuído**: Suporte para Redis, SQL Server e SQLite
 - **Gerenciamento de Segredos**: Integração com Azure Key Vault e Oracle Cloud Infrastructure
@@ -99,6 +99,10 @@ O **EAF (Enterprise Application Foundation)** é uma implementação open source
 - **Isolamento de Dados**: Separação completa de dados por tenant
 - **Login em Duas Etapas para Host**: Usuários host selecionam o tenant após autenticação (`GetAvailableTenants` / `SelectTenant`)
 - **Shadow Users**: Criação automática e replicação de roles/permissões por tenant via `TenantUserManager`
+- **Edição Free Padrão**: Todos os novos tenants são vinculados automaticamente à edição `Free`
+- **Cadastro Público com Tenant**: Novos usuários podem criar um tenant, ingressar em um existente com aprovação, ou usar o tenant padrão
+- **Aprovação de Ingresso**: Administradores analisam e aprovam/rejeitam solicitações; usuários pendentes recebem shadow accounts
+- **Roles Padrão por Tenant**: Todo novo tenant recebe as roles `Admin` e `User`; o primeiro usuário registrado se torna administrador
 - **Tenant Management**: Gerenciamento de inquilinos
 - **Tenant Resolution**: Resolução automática de tenant
 - **Feature Management**: Habilitação/desabilitação de features por tenant

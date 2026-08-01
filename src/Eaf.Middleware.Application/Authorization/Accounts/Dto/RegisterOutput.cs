@@ -6,8 +6,18 @@ namespace Eaf.Middleware.Authorization.Accounts.Dto
     public class RegisterOutput
     {
         /// <summary>
-        /// Obtém ou define CanLogin.
+        /// Indica se o usuário pode logar imediatamente.
         /// </summary>
         public bool CanLogin { get; set; }
+
+        /// <summary>
+        /// Id do tenant criado ou selecionado.
+        /// </summary>
+        public int? TenantId { get; set; }
+
+        /// <summary>
+        /// Nome técnico do tenant criado ou selecionado.
+        /// </summary>
+        public string TenancyName { get; set; }
     }
 }

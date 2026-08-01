@@ -125,6 +125,10 @@ namespace Eaf.Middleware
             configuration.CreateMap<Friendship, FriendshipDto>();
             configuration.CreateMap<ChatMessage, ChatMessageDto>();
 
+            //TenantJoinRequest
+            configuration.CreateMap<TenantJoinRequest, TenantJoinRequestDto>();
+            configuration.CreateMap<Tenant, AvailableTenantDto>();
+
             /* ADD YOUR OWN CUSTOM AUTOMAPPER MAPPINGS HERE */
         }
     }

@@ -368,6 +368,62 @@ export class AccountServiceProxy {
      * @param body (optional) 
      * @return OK
      */
+    register(body: RegisterInput | undefined): Observable<RegisterOutput> {
+        let url_ = this.baseUrl + "/api/services/app/Account/Register";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json-patch+json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRegister(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRegister(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RegisterOutput>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RegisterOutput>;
+        }));
+    }
+
+    protected processRegister(response: HttpResponseBase): Observable<RegisterOutput> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RegisterOutput.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
     resetPassword(body: ResetPasswordInput | undefined): Observable<ResetPasswordOutput> {
         let url_ = this.baseUrl + "/api/services/app/Account/ResetPassword";
         url_ = url_.replace(/[?&]$/, "");
@@ -18299,6 +18355,106 @@ export interface IProviderModel {
     usernameOrEmailAddress: string | undefined;
     authenticationSource: string | undefined;
     tenant: TenantModal;
+}
+
+export class RegisterInput implements IRegisterInput {
+    tenancyName!: string | undefined;
+    tenantName!: string | undefined;
+    tenantId!: number | undefined;
+    name!: string;
+    surname!: string;
+    userName!: string;
+    emailAddress!: string;
+    password!: string;
+
+    constructor(data?: IRegisterInput) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tenancyName = _data["tenancyName"];
+            this.tenantName = _data["tenantName"];
+            this.tenantId = _data["tenantId"];
+            this.name = _data["name"];
+            this.surname = _data["surname"];
+            this.userName = _data["userName"];
+            this.emailAddress = _data["emailAddress"];
+            this.password = _data["password"];
+        }
+    }
+
+    static fromJS(data: any): RegisterInput {
+        data = typeof data === 'object' ? data : {};
+        let result = new RegisterInput();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tenancyName"] = this.tenancyName;
+        data["tenantName"] = this.tenantName;
+        data["tenantId"] = this.tenantId;
+        data["name"] = this.name;
+        data["surname"] = this.surname;
+        data["userName"] = this.userName;
+        data["emailAddress"] = this.emailAddress;
+        data["password"] = this.password;
+        return data;
+    }
+}
+
+export interface IRegisterInput {
+    tenancyName: string | undefined;
+    tenantName: string | undefined;
+    tenantId: number | undefined;
+    name: string;
+    surname: string;
+    userName: string;
+    emailAddress: string;
+    password: string;
+}
+
+export class RegisterOutput implements IRegisterOutput {
+    canLogin!: boolean;
+
+    constructor(data?: IRegisterOutput) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.canLogin = _data["canLogin"];
+        }
+    }
+
+    static fromJS(data: any): RegisterOutput {
+        data = typeof data === 'object' ? data : {};
+        let result = new RegisterOutput();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["canLogin"] = this.canLogin;
+        return data;
+    }
+}
+
+export interface IRegisterOutput {
+    canLogin: boolean;
 }
 
 export class ResetPasswordInput implements IResetPasswordInput {
