@@ -1,20 +1,23 @@
 using Abp.Authorization;
 using Abp.Collections.Extensions;
+using Abp.Domain.Uow;
 using Abp.Runtime.Security;
 using Abp.UI;
 using Eaf.Middleware.Authorization.Accounts.Dto;
 using Eaf.Middleware.Authorization.Impersonation;
+using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.MultiTenancy.Dto;
 using Eaf.Middleware.Url;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.EntityFrameworkCore;
 
 namespace Eaf.Middleware.Authorization.Accounts
 {
@@ -24,6 +27,8 @@ namespace Eaf.Middleware.Authorization.Accounts
     public class AccountAppService : MiddlewareAppServiceBase, IAccountAppService
     {
         private readonly IImpersonationManager _impersonationManager;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly RoleManager _roleManager;
         private readonly IUserEmailer _userEmailer;
         private readonly IWebUrlService _webUrlService;
 
@@ -33,15 +38,21 @@ namespace Eaf.Middleware.Authorization.Accounts
         /// <param name="userEmailer">Parâmetro userEmailer.</param>
         /// <param name="webUrlService">Parâmetro webUrlService.</param>
         /// <param name="impersonationManager">Parâmetro impersonationManager.</param>
+        /// <param name="passwordHasher">Parâmetro passwordHasher.</param>
+        /// <param name="roleManager">Parâmetro roleManager.</param>
         /// <returns>Resultado da operação.</returns>
         public AccountAppService(
             IUserEmailer userEmailer,
             IWebUrlService webUrlService,
-            IImpersonationManager impersonationManager)
+            IImpersonationManager impersonationManager,
+            IPasswordHasher<User> passwordHasher,
+            RoleManager roleManager)
         {
             _userEmailer = userEmailer;
             _webUrlService = webUrlService;
             _impersonationManager = impersonationManager;
+            _passwordHasher = passwordHasher;
+            _roleManager = roleManager;
 
             AppUrlService = NullAppUrlService.Instance;
         }
@@ -120,6 +131,73 @@ namespace Eaf.Middleware.Authorization.Accounts
             }
 
             return new IsTenantAvailableOutput(TenantAvailabilityState.Available, tenant.Id, _webUrlService.GetServerRootAddress(input.TenancyName));
+        }
+
+        /// <summary>
+        /// Register.
+        /// </summary>
+        /// <param name="input">Parâmetro input.</param>
+        /// <returns>Resultado da operação.</returns>
+        [AbpAllowAnonymous]
+        [UnitOfWork(IsDisabled = true)]
+        public virtual async Task<RegisterOutput> Register(RegisterInput input)
+        {
+            if (!string.IsNullOrWhiteSpace(input.TenancyName))
+            {
+                var tenantId = await TenantManager.CreateWithAdminUserAsync(
+                    input.TenancyName,
+                    input.TenantName ?? input.TenancyName,
+                    input.Password,
+                    input.EmailAddress,
+                    isActive: true,
+                    shouldChangePasswordOnNextLogin: false,
+                    sendActivationEmail: false,
+                    emailActivationLink: null
+                );
+
+                return new RegisterOutput { CanLogin = true };
+            }
+
+            if (input.TenantId.HasValue)
+            {
+                var tenant = await TenantManager.FindByIdAsync(input.TenantId.Value);
+                if (tenant == null || !tenant.IsActive)
+                {
+                    throw new UserFriendlyException(L("TenantIsNotActive"));
+                }
+
+                using (CurrentUnitOfWork.SetTenantId(tenant.Id))
+                {
+                    var user = new User
+                    {
+                        TenantId = tenant.Id,
+                        UserName = input.UserName.ToLowerInvariant(),
+                        Name = input.Name,
+                        Surname = input.Surname,
+                        EmailAddress = input.EmailAddress,
+                        IsActive = false,
+                        IsEmailConfirmed = false,
+                        IsLockoutEnabled = true,
+                    };
+                    user.SetNormalizedNames();
+                    user.Password = _passwordHasher.HashPassword(user, input.Password);
+
+                    CheckErrors(await UserManager.CreateAsync(user));
+                    await CurrentUnitOfWork.SaveChangesAsync();
+
+                    var userRole = await _roleManager.Roles.FirstOrDefaultAsync(r => r.TenantId == tenant.Id && r.Name == StaticRoleNames.Tenants.User);
+                    if (userRole != null)
+                    {
+                        CheckErrors(await UserManager.AddToRoleAsync(user, userRole.Name));
+                    }
+
+                    await CurrentUnitOfWork.SaveChangesAsync();
+
+                    return new RegisterOutput { CanLogin = false };
+                }
+            }
+
+            throw new UserFriendlyException(L("InvalidRegisterRequest"));
         }
 
         /// <summary>
