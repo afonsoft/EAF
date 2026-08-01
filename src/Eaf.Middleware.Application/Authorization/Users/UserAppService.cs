@@ -416,6 +416,12 @@ namespace Eaf.Middleware.Authorization.Users
             user.TenantId = AbpSession.TenantId;
             user.UserName = user.UserName.ToLower();
 
+            //New users registered in a tenant require approval except administrators
+            if (AbpSession.TenantId.HasValue && !input.AssignedRoleNames.Contains(StaticRoleNames.Tenants.Admin))
+            {
+                user.IsActive = false;
+            }
+
             //Set password
             if (input.SetRandomPassword)
             {

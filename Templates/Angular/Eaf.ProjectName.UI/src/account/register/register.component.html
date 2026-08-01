@@ -1,0 +1,130 @@
+<div [@routerTransition] [busyIf]="dataTableHelper.isLoading" class="m-login__signup">
+  <div class="m-login__head">
+    <h3 class="m-login__title">{{ 'Register' | localize }}</h3>
+  </div>
+  <form
+    (ngSubmit)="register()"
+    #registerForm="ngForm"
+    autocomplete="off"
+    class="m-login__form m-form register-form"
+    method="post"
+    novalidate
+  >
+    <div class="form-group m-form__group">
+      <label class="m-checkbox m-checkbox--primary">
+        <input [(ngModel)]="model.isCreatingTenant" name="isCreatingTenant" type="checkbox" (change)="toggleCreateTenant()" />
+        {{ 'CreateNewTenant' | localize }}
+        <span></span>
+      </label>
+    </div>
+
+    <div *ngIf="!model.isCreatingTenant && multiTenancy.isEnabled" class="form-group m-form__group">
+      <label>{{ 'Tenant' | localize }}</label>
+      <select [(ngModel)]="model.tenantId" name="tenantId" class="form-control m-input">
+        <option [ngValue]="undefined">{{ 'SelectTenant' | localize }}</option>
+        <option *ngFor="let tenant of tenants" [ngValue]="tenant.id">{{ tenant.name }}</option>
+      </select>
+    </div>
+
+    <div *ngIf="model.isCreatingTenant" class="form-group m-form__group md-form">
+      <input
+        [(ngModel)]="model.tenancyName"
+        #tenancyNameInput="ngModel"
+        class="form-control m-input"
+        id="tenancyName"
+        name="tenancyName"
+        [required]="model.isCreatingTenant"
+        type="text"
+      />
+      <label for="tenancyName">{{ 'TenancyName' | localize }}</label>
+    </div>
+
+    <div *ngIf="model.isCreatingTenant" class="form-group m-form__group md-form">
+      <input
+        [(ngModel)]="model.tenantName"
+        #tenantNameInput="ngModel"
+        class="form-control m-input"
+        id="tenantName"
+        name="tenantName"
+        type="text"
+      />
+      <label for="tenantName">{{ 'TenantName' | localize }}</label>
+    </div>
+
+    <div class="form-group m-form__group md-form">
+      <input [(ngModel)]="model.name" #nameInput="ngModel" class="form-control m-input" id="name" name="name" required type="text" />
+      <label for="name">{{ 'Name' | localize }}</label>
+    </div>
+
+    <div class="form-group m-form__group md-form">
+      <input
+        [(ngModel)]="model.surname"
+        #surnameInput="ngModel"
+        class="form-control m-input"
+        id="surname"
+        name="surname"
+        required
+        type="text"
+      />
+      <label for="surname">{{ 'Surname' | localize }}</label>
+    </div>
+
+    <div class="form-group m-form__group md-form">
+      <input
+        [(ngModel)]="model.userName"
+        #userNameInput="ngModel"
+        class="form-control m-input"
+        id="userName"
+        name="userName"
+        required
+        type="text"
+      />
+      <label for="userName">{{ 'UserName' | localize }}</label>
+    </div>
+
+    <div class="form-group m-form__group md-form">
+      <input
+        [(ngModel)]="model.emailAddress"
+        #emailAddressInput="ngModel"
+        class="form-control m-input"
+        id="emailAddress"
+        name="emailAddress"
+        required
+        email
+        type="email"
+      />
+      <label for="emailAddress">{{ 'EmailAddress' | localize }}</label>
+    </div>
+
+    <div class="form-group m-form__group md-form">
+      <input
+        [(ngModel)]="model.password"
+        #passwordInput="ngModel"
+        class="form-control m-input"
+        id="password"
+        name="password"
+        required
+        type="password"
+      />
+      <label for="password">{{ 'Password' | localize }}</label>
+    </div>
+
+    <div class="row m-login__form-action text-right">
+      <div class="col m--align-left">
+        <a class="m-link" routerLink="/account/login">
+          {{ 'LogIn' | localize }}
+        </a>
+      </div>
+      <div class="col m--align-right">
+        <button
+          [buttonBusy]="submitting"
+          [disabled]="!registerForm.form.valid"
+          class="btn btn-primary m-btn m-btn--pill m-btn--custom m-btn--air"
+          type="submit"
+        >
+          {{ 'Register' | localize }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

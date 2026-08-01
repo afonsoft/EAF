@@ -12,7 +12,8 @@ namespace Eaf.Middleware.Core.Editions
     /// </summary>
     public class EditionManager : AbpEditionManager
     {
-        public const string DefaultEditionName = "Standard";
+        public const string DefaultEditionName = "Free";
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
         /// <summary>
         /// EditionManager.
@@ -28,6 +29,7 @@ namespace Eaf.Middleware.Core.Editions
                   featureValueStore,
                   unitOfWorkManager)
         {
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
         /// <summary>
@@ -35,9 +37,24 @@ namespace Eaf.Middleware.Core.Editions
         /// </summary>
         /// <returns>Resultado da operação.</returns>
         public async Task<List<Edition>> GetAllAsync()
-
         {
             return await EditionRepository.GetAllListAsync();
+        }
+
+        /// <summary>
+        /// Obtém ou cria a edição padrão "Free".
+        /// </summary>
+        /// <returns>Edição "Free".</returns>
+        public virtual async Task<Edition> GetOrCreateDefaultEditionAsync()
+        {
+            var edition = await EditionRepository.FirstOrDefaultAsync(e => e.DisplayName == DefaultEditionName);
+            if (edition == null)
+            {
+                edition = new Edition { DisplayName = DefaultEditionName };
+                await EditionRepository.InsertAsync(edition);
+                await _unitOfWorkManager.Current.SaveChangesAsync();
+            }
+            return edition;
         }
     }
 }

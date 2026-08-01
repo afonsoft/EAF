@@ -19,6 +19,8 @@ namespace Eaf.Middleware.Authorization.Accounts
 
         Task<IsTenantAvailableOutput> IsTenantAvailable(IsTenantAvailableInput input);
 
+        Task<RegisterOutput> Register(RegisterInput input);
+
         Task<ResetPasswordOutput> ResetPassword(ResetPasswordInput input);
 
         Task<int?> ResolveTenantId(ResolveTenantIdInput input);

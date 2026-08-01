@@ -32,6 +32,13 @@
 		<text name="Name">Name</text>
 		<text name="Surname">Surname</text>
 		<text name="EmailAddress">Email address</text>
+		<text name="Register">Register</text>
+		<text name="CreateNewTenant">Create new tenant</text>
+		<text name="SelectTenant">Select tenant</text>
+		<text name="TenancyName">Tenancy name</text>
+		<text name="TenantName">Tenant name</text>
+		<text name="SuccessfullyRegistered">Successfully registered.</text>
+		<text name="RegistrationWaitingForApproval">Your registration is waiting for approval.</text>
 		<text name="LastLoginTime">Last login time</text>
 		<text name="UserInformations">System User</text>
 		<text name="PasswordRepeat">Password (repeat)</text>
@@ -95,6 +102,8 @@
 		<text name="LoginFailed">Login failed!</text>
 		<text name="InvalidEmailConfirmationCode">Invalid email confirmation code</text>
 		<text name="InvalidEmailConfirmationCode_Detail">Please be sure you entered this page by clicking the link sent to your email. If this does not solve the problem, you can re-try to request a new confirmation code.</text>
+		<text name="TenantIsNotActive">The selected tenant is not active.</text>
+		<text name="InvalidRegisterRequest">Invalid registration request.</text>
 		<text name="YourEmailIsConfirmedMessage">Your email address is successfully confirmed.</text>
 		<text name="ShouldChangePasswordOnNextLogin">Should change password on next login.</text>
 		<text name="SetRandomPassword">Set random password.</text>

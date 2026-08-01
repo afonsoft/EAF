@@ -32,9 +32,9 @@ namespace Eaf.MiddlewareCore.Tests.Editions
         #region Constantes
 
         [Fact]
-        public void Dado_EditionManager_Quando_VerificarDefaultEditionName_Entao_DeveSerStandard()
+        public void Dado_EditionManager_Quando_VerificarDefaultEditionName_Entao_DeveSerFree()
         {
-            EditionManager.DefaultEditionName.ShouldBe("Standard");
+            EditionManager.DefaultEditionName.ShouldBe("Free");
         }
 
         #endregion

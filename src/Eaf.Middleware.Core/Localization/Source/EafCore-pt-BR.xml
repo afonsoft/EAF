@@ -47,6 +47,13 @@
 		<text name="Name" value="Nome" />
 		<text name="Surname" value="Sobrenome" />
 		<text name="EmailAddress" value="Endereço de email" />
+		<text name="Register" value="Cadastrar" />
+		<text name="CreateNewTenant" value="Criar novo canal" />
+		<text name="SelectTenant" value="Selecionar canal" />
+		<text name="TenancyName" value="Nome do canal (url)" />
+		<text name="TenantName" value="Nome do canal" />
+		<text name="SuccessfullyRegistered" value="Cadastrado com sucesso." />
+		<text name="RegistrationWaitingForApproval" value="Seu cadastro está aguardando aprovação." />
 		<text name="LastLoginTime" value="Data de último login" />
 		<text name="UserInformations" value="Usuário de Sistema" />
 		<text name="PasswordRepeat" value="Senha (repetir)" />
@@ -108,6 +115,8 @@
 		<text name="LoginFailed" value="Falha no login!" />
 		<text name="InvalidEmailConfirmationCode" value="Código de confirmação de email inválido" />
 		<text name="InvalidEmailConfirmationCode_Detail" value="Por favor tenha certeza que você entrou nessa página clicando no link enviado para seu email. Se isso não resolver o email você pode tentar novamente requerir um código de confirmação." />
+		<text name="TenantIsNotActive" value="O tenant selecionado não está ativo." />
+		<text name="InvalidRegisterRequest" value="Requisição de cadastro inválida." />
 		<text name="YourEmailIsConfirmedMessage" value="O seu endereço de email foi verificado com sucesso." />
 		<text name="ShouldChangePasswordOnNextLogin" value="Deve mudar a senha no próximo login." />
 		<text name="SetRandomPassword" value="Gerar senha aleatória." />

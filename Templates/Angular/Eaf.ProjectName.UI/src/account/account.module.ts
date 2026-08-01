@@ -14,6 +14,8 @@ import { ConfirmEmailComponent } from './email-activation/confirm-email.componen
 import { EmailActivationComponent } from './email-activation/email-activation.component';
 import { LoginComponent } from './login/login.component';
 import { LoginService } from './login/login.service';
+import { RegisterComponent } from './register/register.component';
+import { RegisterService } from './register/register.service';
 import { SelectTenantComponent } from './login/select-tenant/select-tenant.component';
 import { ForgotPasswordComponent } from './password/forgot-password.component';
 import { ResetPasswordComponent } from './password/reset-password.component';
@@ -36,11 +38,12 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     AccountRoutingModule,
     OAuthModule.forRoot(),
     BsDatepickerModule.forRoot(),
-        BsDropdownModule.forRoot(),
+    BsDropdownModule.forRoot(),
   ],
   declarations: [
     AccountComponent,
     LoginComponent,
+    RegisterComponent,
     SelectTenantComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
@@ -48,6 +51,6 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     SsoComponent,
     ConfirmEmailComponent,
   ],
-  providers: [LoginService, AccountRouteGuard],
+  providers: [LoginService, RegisterService, AccountRouteGuard],
 })
 export class AccountModule {}

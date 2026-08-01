@@ -4,9 +4,11 @@ using Abp.Runtime.Security;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
+using static Eaf.Middleware.Application.Tests.Helpers.ManagerTestHelper;
 using Eaf.Middleware.Authorization.Accounts;
 using Eaf.Middleware.Authorization.Accounts.Dto;
 using Eaf.Middleware.Authorization.Impersonation;
+using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.MultiTenancy.Dto;
@@ -28,6 +30,7 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
         private readonly IUserEmailer _userEmailer;
         private readonly IWebUrlService _webUrlService;
         private readonly IImpersonationManager _impersonationManager;
+        private readonly RoleManager _roleManager;
         private readonly AccountAppService _sut;
 
         public AccountAppServiceBddTests()
@@ -35,8 +38,9 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             _userEmailer = Substitute.For<IUserEmailer>();
             _webUrlService = Substitute.For<IWebUrlService>();
             _impersonationManager = Substitute.For<IImpersonationManager>();
+            _roleManager = ManagerTestHelper.CreateRoleManager();
 
-            _sut = new AccountAppService(_userEmailer, _webUrlService, _impersonationManager);
+            _sut = new AccountAppService(_userEmailer, _webUrlService, _impersonationManager, _roleManager);
         }
 
         #region Construtor

@@ -23,6 +23,7 @@ namespace Eaf.Middleware.MultiTenancy
     /// </summary>
     public class TenantManager : AbpTenantManager<Tenant, User>
     {
+        private readonly Core.Editions.EditionManager _editionManager;
         private readonly INotificationSubscriptionManager _notificationSubscriptionManager;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly RoleManager _roleManager;
@@ -44,7 +45,7 @@ namespace Eaf.Middleware.MultiTenancy
             INotificationSubscriptionManager notificationSubscriptionManager,
             IAbpZeroFeatureValueStore featureValueStore,
             IPasswordHasher<User> passwordHasher,
-            EditionManager editionManager
+            Core.Editions.EditionManager editionManager
         ) : base(
             tenantRepository,
             tenantFeatureRepository,
@@ -54,6 +55,7 @@ namespace Eaf.Middleware.MultiTenancy
         {
             EafSession = NullAbpSession.Instance;
 
+            _editionManager = editionManager;
             _unitOfWorkManager = unitOfWorkManager;
             _roleManager = roleManager;
             _userEmailer = userEmailer;
@@ -95,10 +97,14 @@ namespace Eaf.Middleware.MultiTenancy
 
             using (var uow = _unitOfWorkManager.Begin(TransactionScopeOption.RequiresNew))
             {
+                //Ensure default Free edition exists
+                var defaultEdition = await _editionManager.GetOrCreateDefaultEditionAsync();
+
                 //Create tenant
                 var tenant = new Tenant(tenancyName, name)
                 {
-                    IsActive = isActive
+                    IsActive = isActive,
+                    EditionId = defaultEdition.Id
                 };
 
                 await CreateAsync(tenant);
