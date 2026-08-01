@@ -383,8 +383,8 @@ namespace Eaf.Middleware.MultiTenancy
         /// </summary>
         private static string GenerateShadowPassword()
         {
-            // Guid hex contém letras minúsculas e dígitos; adiciona maiúscula, dígito e caractere não alfanumérico.
-            return $"{Guid.NewGuid().ToString("N")[..12]}A1!";
+            // Guid hex contém letras minúsculas e dígitos; adiciona letra minúscula, maiúscula, dígito e caractere não alfanumérico.
+            return $"{Guid.NewGuid().ToString("N")[..12]}aA1!";
         }
     }
 }
