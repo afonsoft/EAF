@@ -10,6 +10,7 @@ using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Localization;
+using Abp.Localization.Sources;
 using Abp.MultiTenancy;
 using Abp.Notifications;
 using Abp.Organizations;
@@ -47,6 +48,8 @@ namespace Eaf.Middleware.Tests.Helpers
             var unitOfWorkManager = Substitute.For<IUnitOfWorkManager>();
             var activeUnitOfWork = Substitute.For<IActiveUnitOfWork>();
             activeUnitOfWork.SetTenantId(default(int?)).ReturnsForAnyArgs(Substitute.For<IDisposable>());
+            activeUnitOfWork.EnableFilter(Arg.Any<string[]>()).Returns(Substitute.For<IDisposable>());
+            activeUnitOfWork.DisableFilter(Arg.Any<string[]>()).Returns(Substitute.For<IDisposable>());
             activeUnitOfWork.SaveChangesAsync().Returns(Task.CompletedTask);
             unitOfWorkManager.Current.Returns(activeUnitOfWork);
 
@@ -124,6 +127,7 @@ namespace Eaf.Middleware.Tests.Helpers
             userManager.ResetAccessFailedCountAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
             userManager.AddToRoleAsync(Arg.Any<User>(), Arg.Any<string>()).Returns(IdentityResult.Success);
             userManager.CreateAsync(Arg.Any<User>()).Returns(t => { ((User)t[0]).Id = 2; return IdentityResult.Success; });
+            userManager.CreateAsync(Arg.Any<User>(), Arg.Any<string>()).Returns(t => { ((User)t[0]).Id = 2; return IdentityResult.Success; });
 
             return userManager;
         }
@@ -280,6 +284,102 @@ namespace Eaf.Middleware.Tests.Helpers
             );
             tenantManager.UnitOfWorkManager = unitOfWorkManager;
             return tenantManager;
+        }
+
+        public static TenantUserManager CreateTenantUserManager(
+            Tenant tenant,
+            User hostUser,
+            Role userRole,
+            out IRepository<TenantJoinRequest, long> joinRequestRepository,
+            out IRepository<UserTenantMembership, long> membershipRepository,
+            User shadowUser = null,
+            TenantJoinRequest pendingRequest = null,
+            Action<UserTenantMembership> onMembershipInserted = null)
+        {
+            var unitOfWorkManager = CreateUnitOfWorkManager();
+            var userManager = CreateUserManager();
+            var rolePermissionReplicationService = Substitute.For<ITenantRolePermissionReplicationService>();
+
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            tenantRepository.GetAllListAsync(Arg.Any<Expression<Func<Tenant, bool>>>())
+                .Returns(Task.FromResult(tenant != null ? new List<Tenant> { tenant } : new List<Tenant>()));
+
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            userRepository.GetAsync(Arg.Any<long>()).Returns(callInfo =>
+            {
+                var id = (long)callInfo[0];
+                if (hostUser != null && id == hostUser.Id)
+                    return hostUser;
+                if (shadowUser != null && id == shadowUser.Id)
+                    return shadowUser;
+                throw new Exception($"User {id} not found");
+            });
+
+            joinRequestRepository = Substitute.For<IRepository<TenantJoinRequest, long>>();
+            joinRequestRepository.GetAsync(Arg.Any<long>()).Returns(callInfo =>
+            {
+                var id = (long)callInfo[0];
+                if (pendingRequest != null && id == pendingRequest.Id)
+                    return pendingRequest;
+                throw new Exception($"Request {id} not found");
+            });
+            joinRequestRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<TenantJoinRequest, bool>>>()).Returns((TenantJoinRequest)null);
+            joinRequestRepository.InsertAsync(Arg.Any<TenantJoinRequest>()).Returns(callInfo =>
+            {
+                var request = (TenantJoinRequest)callInfo[0];
+                request.Id = 100;
+                return request;
+            });
+
+            var roleRepository = Substitute.For<IRepository<Role, int>>();
+            roleRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<Role, bool>>>()).Returns(callInfo =>
+            {
+                if (userRole == null)
+                    return (Role)null;
+                var predicate = (Expression<Func<Role, bool>>)callInfo[0];
+                return predicate.Compile()(userRole) ? userRole : (Role)null;
+            });
+
+            membershipRepository = Substitute.For<IRepository<UserTenantMembership, long>>();
+            membershipRepository.InsertAsync(Arg.Any<UserTenantMembership>()).Returns(callInfo =>
+            {
+                var membership = (UserTenantMembership)callInfo[0];
+                membership.Id = 50;
+                onMembershipInserted?.Invoke(membership);
+                return membership;
+            });
+            membershipRepository.FirstOrDefaultAsync(Arg.Any<Expression<Func<UserTenantMembership, bool>>>())
+                .Returns(callInfo =>
+                {
+                    if (pendingRequest == null)
+                        return (UserTenantMembership)null;
+                    return new UserTenantMembership
+                    {
+                        UserId = pendingRequest.UserId,
+                        TenantId = pendingRequest.TenantId,
+                        TenantUserId = pendingRequest.TenantUserId,
+                        IsDefault = false
+                    };
+                });
+
+            var tenantUserManager = new TenantUserManager(
+                joinRequestRepository,
+                tenantRepository,
+                userRepository,
+                membershipRepository,
+                roleRepository,
+                userManager,
+                rolePermissionReplicationService
+            );
+
+            tenantUserManager.UnitOfWorkManager = unitOfWorkManager;
+            tenantUserManager.AbpSession = Substitute.For<IAbpSession>();
+
+            var localizationManager = Substitute.For<ILocalizationManager>();
+            localizationManager.GetSource(Arg.Any<string>()).Returns((ILocalizationSource)null);
+            tenantUserManager.LocalizationManager = localizationManager;
+
+            return tenantUserManager;
         }
     }
 }

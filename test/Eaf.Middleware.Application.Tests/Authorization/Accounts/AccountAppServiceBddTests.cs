@@ -1,9 +1,13 @@
 using Abp;
+using Abp.Application.Editions;
+using Abp.Configuration;
+using Abp.Domain.Repositories;
 using Abp.ObjectMapping;
 using Abp.Runtime.Security;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
+using Eaf.Middleware.Configuration;
 using static Eaf.Middleware.Application.Tests.Helpers.ManagerTestHelper;
 using Eaf.Middleware.Authorization.Accounts;
 using Eaf.Middleware.Authorization.Accounts.Dto;
@@ -17,6 +21,8 @@ using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using Shouldly;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -39,8 +45,11 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             _webUrlService = Substitute.For<IWebUrlService>();
             _impersonationManager = Substitute.For<IImpersonationManager>();
             _roleManager = ManagerTestHelper.CreateRoleManager();
+            var editionManager = ManagerTestHelper.CreateEditionManager();
+            var membershipRepository = Substitute.For<IRepository<UserTenantMembership, long>>();
+            var tenantUserManager = Substitute.For<ITenantUserManager>();
 
-            _sut = new AccountAppService(_userEmailer, _webUrlService, _impersonationManager, _roleManager);
+            _sut = new AccountAppService(_userEmailer, _webUrlService, _impersonationManager, _roleManager, editionManager, membershipRepository, tenantUserManager);
         }
 
         #region Construtor
@@ -566,6 +575,148 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
         }
 
         #endregion
+
+        #region Register
+
+        [Fact]
+        public async Task Dado_SelfRegistrationDesabilitado_Quando_Register_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            ConfigurarSetting(AppSettings.TenantManagement.AllowSelfRegistration, false);
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.Register(new RegisterInput
+                {
+                    TenantSelectionMode = TenantSelectionMode.DefaultTenant,
+                    Name = "Joao",
+                    Surname = "Silva",
+                    UserName = "joaosilva",
+                    EmailAddress = "joao@example.com",
+                    Password = "P@ssw0rd!"
+                }));
+        }
+
+        [Fact]
+        public async Task Dado_ModoDefaultTenant_Quando_Register_Entao_DeveRetornarCanLoginTrue()
+        {
+            // Dado
+            ConfigurarRegistroBasico();
+
+            // Quando
+            var result = await _sut.Register(new RegisterInput
+            {
+                TenantSelectionMode = TenantSelectionMode.DefaultTenant,
+                Name = "Joao",
+                Surname = "Silva",
+                UserName = "joaosilva",
+                EmailAddress = "joao@example.com",
+                Password = "P@ssw0rd!"
+            });
+
+            // Então
+            result.ShouldNotBeNull();
+            result.CanLogin.ShouldBeTrue();
+            result.TenantId.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task Dado_ModoCreateNew_Quando_TenantCreationDesabilitado_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            ConfigurarRegistroBasico();
+            ConfigurarSetting(AppSettings.TenantManagement.AllowTenantCreation, false);
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.Register(new RegisterInput
+                {
+                    TenantSelectionMode = TenantSelectionMode.CreateNew,
+                    TenancyName = "empresa",
+                    Name = "Joao",
+                    Surname = "Silva",
+                    UserName = "joaosilva",
+                    EmailAddress = "joao@example.com",
+                    Password = "P@ssw0rd!"
+                }));
+        }
+
+        [Fact]
+        public async Task Dado_ModoJoinExisting_Quando_JoinRequestsDesabilitado_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            ConfigurarRegistroBasico();
+            ConfigurarSetting(AppSettings.TenantManagement.AllowJoinRequests, false);
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () =>
+                await _sut.Register(new RegisterInput
+                {
+                    TenantSelectionMode = TenantSelectionMode.JoinExisting,
+                    ExistingTenantId = 1,
+                    Name = "Joao",
+                    Surname = "Silva",
+                    UserName = "joaosilva",
+                    EmailAddress = "joao@example.com",
+                    Password = "P@ssw0rd!"
+                }));
+        }
+
+        [Fact]
+        public async Task Dado_ModoJoinExisting_Quando_Register_Entao_DeveCriarSolicitacaoPendente()
+        {
+            // Dado
+            ConfigurarRegistroBasico();
+            ConfigurarSetting(AppSettings.TenantManagement.AllowJoinRequests, true);
+
+            var tenant = new Tenant("empresa", "Empresa") { Id = 1, IsActive = true };
+            var tenantManager = ManagerTestHelper.CreateTenantManager();
+            tenantManager.FindByIdAsync(1).Returns(tenant);
+            _sut.TenantManager = tenantManager;
+
+            var request = new TenantJoinRequest { Id = 100, UserId = 2, TenantId = 1, Status = TenantJoinRequestStatus.Pending };
+            var tenantUserManager = Substitute.For<ITenantUserManager>();
+            tenantUserManager.CreatePendingMembershipAsync(2, 1, null).Returns(request);
+
+            typeof(AccountAppService).GetField("_tenantUserManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(_sut, tenantUserManager);
+
+            // Quando
+            var result = await _sut.Register(new RegisterInput
+            {
+                TenantSelectionMode = TenantSelectionMode.JoinExisting,
+                ExistingTenantId = 1,
+                Name = "Joao",
+                Surname = "Silva",
+                UserName = "joaosilva",
+                EmailAddress = "joao@example.com",
+                Password = "P@ssw0rd!"
+            });
+
+            // Então
+            result.ShouldNotBeNull();
+            result.CanLogin.ShouldBeFalse();
+            result.TenantId.ShouldBe(1);
+            await tenantUserManager.Received(1).CreatePendingMembershipAsync(2, 1, null);
+        }
+
+        #endregion
+
+        private void ConfigurarSetting(string nome, bool valor)
+        {
+            var settingManager = Substitute.For<ISettingManager>();
+            settingManager.GetSettingValueAsync(Arg.Any<string>()).Returns(Task.FromResult("true"));
+            settingManager.GetSettingValueAsync(nome).Returns(Task.FromResult(valor.ToString().ToLowerInvariant()));
+            _sut.SettingManager = settingManager;
+        }
+
+        private void ConfigurarRegistroBasico()
+        {
+            ConfigurarSetting(AppSettings.TenantManagement.AllowSelfRegistration, true);
+            _sut.LocalizationManager = Substitute.For<Abp.Localization.ILocalizationManager>();
+            _sut.UnitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
+            _sut.UserManager = ManagerTestHelper.CreateUserManager();
+        }
 
         private IObjectMapper CreateObjectMapper()
         {

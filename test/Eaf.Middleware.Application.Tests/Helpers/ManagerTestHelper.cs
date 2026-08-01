@@ -16,6 +16,7 @@ using Abp.Runtime.Caching;
 using Abp.Zero.Configuration;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.MultiTenancy;
 using Microsoft.AspNetCore.Identity;
@@ -100,6 +101,9 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             userManager.ResetAccessFailedCountAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
             userManager.InitializeOptionsAsync(Arg.Any<int?>()).Returns(Task.CompletedTask);
             userManager.UpdateAsync(Arg.Any<User>()).Returns(IdentityResult.Success);
+            userManager.AddToRoleAsync(Arg.Any<User>(), Arg.Any<string>()).Returns(IdentityResult.Success);
+            userManager.CreateAsync(Arg.Any<User>()).Returns(t => { ((User)t[0]).Id = 2; return IdentityResult.Success; });
+            userManager.CreateAsync(Arg.Any<User>(), Arg.Any<string>()).Returns(t => { ((User)t[0]).Id = 2; return IdentityResult.Success; });
 
             return userManager;
         }
@@ -166,17 +170,41 @@ namespace Eaf.Middleware.Application.Tests.Helpers
             var notificationSubscriptionManager = Substitute.For<INotificationSubscriptionManager>();
             var featureValueStore = Substitute.For<IAbpZeroFeatureValueStore>();
             var passwordHasher = Substitute.For<IPasswordHasher<User>>();
-            var editionManager = Substitute.For<EditionManager>(new object[]
-            {
-                Substitute.For<IRepository<Edition>>(),
-                Substitute.For<IAbpZeroFeatureValueStore>(),
-                Substitute.For<IUnitOfWorkManager>()
-            });
+            var editionManager = CreateEditionManager();
 
             return Substitute.For<TenantManager>(new object[]
             {
                 tenantRepository, tenantFeatureRepository, unitOfWorkManager, roleManager, userEmailer,
                 userManager, notificationSubscriptionManager, featureValueStore, passwordHasher, editionManager
+            });
+        }
+
+        public static EditionManager CreateEditionManager()
+        {
+            var editionRepository = Substitute.For<IRepository<Edition>>();
+            var featureValueStore = Substitute.For<IAbpZeroFeatureValueStore>();
+            var unitOfWorkManager = CreateUnitOfWorkManager();
+
+            return Substitute.For<EditionManager>(new object[]
+            {
+                editionRepository, featureValueStore, unitOfWorkManager
+            });
+        }
+
+        public static TenantUserManager CreateTenantUserManager()
+        {
+            var joinRequestRepository = Substitute.For<IRepository<TenantJoinRequest, long>>();
+            var tenantRepository = Substitute.For<IRepository<Tenant>>();
+            var userRepository = Substitute.For<IRepository<User, long>>();
+            var membershipRepository = Substitute.For<IRepository<UserTenantMembership, long>>();
+            var roleRepository = Substitute.For<IRepository<Role, int>>();
+            var userManager = CreateUserManager();
+            var rolePermissionReplicationService = Substitute.For<ITenantRolePermissionReplicationService>();
+
+            return Substitute.For<TenantUserManager>(new object[]
+            {
+                joinRequestRepository, tenantRepository, userRepository, membershipRepository, roleRepository,
+                userManager, rolePermissionReplicationService
             });
         }
     }

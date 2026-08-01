@@ -185,6 +185,9 @@ namespace Eaf.Middleware.Configuration
         private IEnumerable<SettingDefinition> GetHostSettings()
         {
             return new[] {
+                new SettingDefinition(AppSettings.TenantManagement.AllowSelfRegistration, GetFromAppSettings(AppSettings.TenantManagement.AllowSelfRegistration, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.TenantManagement.AllowTenantCreation, GetFromAppSettings(AppSettings.TenantManagement.AllowTenantCreation, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+                new SettingDefinition(AppSettings.TenantManagement.AllowJoinRequests, GetFromAppSettings(AppSettings.TenantManagement.AllowJoinRequests, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UiManagement.Theme, GetFromAppSettings(AppSettings.UiManagement.Theme, DefaultThemeName), isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.OpenIdConnectMappedClaims, "", isVisibleToClients: true, scopes: SettingScopes.All),
                 new SettingDefinition(AppSettings.ExternalLoginProvider.Host.Google, "", isVisibleToClients: true, scopes: SettingScopes.All),

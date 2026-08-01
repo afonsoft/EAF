@@ -71,6 +71,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<EafCache> EafCaches { get; set; }
         public virtual DbSet<TenantAddress> TenantAddress { get; set; }
         public virtual DbSet<UserTenantMembership> UserTenantMemberships { get; set; }
+        public virtual DbSet<TenantJoinRequest> TenantJoinRequests { get; set; }
         public virtual DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
         public virtual DbSet<MassNotification> MassNotifications { get; set; }
         public virtual DbSet<UserDelegation> UserDelegations { get; set; }
@@ -130,6 +131,13 @@ namespace Eaf.ProjectName.EntityFrameworkCore
             {
                 b.HasIndex(e => new { e.UserId, e.TenantId }).IsUnique();
                 b.HasIndex(e => e.TenantUserId);
+            });
+
+            modelBuilder.Entity<TenantJoinRequest>(b =>
+            {
+                b.HasIndex(e => new { e.UserId, e.TenantId });
+                b.HasIndex(e => e.Status);
+                b.Property(e => e.Status).HasConversion<int>();
             });
 
             if (Database.IsSqlServer())

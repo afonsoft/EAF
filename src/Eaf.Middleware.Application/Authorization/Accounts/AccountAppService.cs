@@ -1,5 +1,8 @@
 using Abp.Authorization;
 using Abp.Collections.Extensions;
+using Abp.Configuration;
+using Abp.Data;
+using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Runtime.Security;
 using Abp.UI;
@@ -7,6 +10,7 @@ using Eaf.Middleware.Authorization.Accounts.Dto;
 using Eaf.Middleware.Authorization.Impersonation;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.Configuration;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.MultiTenancy.Dto;
 using Eaf.Middleware.Url;
@@ -27,27 +31,31 @@ namespace Eaf.Middleware.Authorization.Accounts
     {
         private readonly IImpersonationManager _impersonationManager;
         private readonly RoleManager _roleManager;
+        private readonly Core.Editions.EditionManager _editionManager;
         private readonly IUserEmailer _userEmailer;
         private readonly IWebUrlService _webUrlService;
+        private readonly IRepository<UserTenantMembership, long> _membershipRepository;
+        private readonly ITenantUserManager _tenantUserManager;
 
         /// <summary>
         /// AccountAppService.
         /// </summary>
-        /// <param name="userEmailer">Parâmetro userEmailer.</param>
-        /// <param name="webUrlService">Parâmetro webUrlService.</param>
-        /// <param name="impersonationManager">Parâmetro impersonationManager.</param>
-        /// <param name="roleManager">Parâmetro roleManager.</param>
-        /// <returns>Resultado da operação.</returns>
         public AccountAppService(
             IUserEmailer userEmailer,
             IWebUrlService webUrlService,
             IImpersonationManager impersonationManager,
-            RoleManager roleManager)
+            RoleManager roleManager,
+            Core.Editions.EditionManager editionManager,
+            IRepository<UserTenantMembership, long> membershipRepository,
+            ITenantUserManager tenantUserManager)
         {
             _userEmailer = userEmailer;
             _webUrlService = webUrlService;
             _impersonationManager = impersonationManager;
             _roleManager = roleManager;
+            _editionManager = editionManager;
+            _membershipRepository = membershipRepository;
+            _tenantUserManager = tenantUserManager;
 
             AppUrlService = NullAppUrlService.Instance;
         }
@@ -136,61 +144,154 @@ namespace Eaf.Middleware.Authorization.Accounts
         [AbpAllowAnonymous]
         public virtual async Task<RegisterOutput> Register(RegisterInput input)
         {
-            if (!string.IsNullOrWhiteSpace(input.TenancyName))
-            {
-                var tenantId = await TenantManager.CreateWithAdminUserAsync(
-                    input.TenancyName,
-                    input.TenantName ?? input.TenancyName,
-                    input.Password,
-                    input.EmailAddress,
-                    isActive: true,
-                    shouldChangePasswordOnNextLogin: false,
-                    sendActivationEmail: false,
-                    emailActivationLink: null
-                );
+            if (!await SettingManager.GetSettingValueAsync<bool>(AppSettings.TenantManagement.AllowSelfRegistration))
+                throw new UserFriendlyException(L("SelfRegistrationIsDisabled"));
 
-                return new RegisterOutput { CanLogin = true };
+            var hostUser = await CreateHostUserAsync(input);
+
+            switch (input.TenantSelectionMode)
+            {
+                case TenantSelectionMode.DefaultTenant:
+                    return await RegisterDefaultTenantAsync(hostUser);
+
+                case TenantSelectionMode.CreateNew:
+                    return await RegisterCreateNewAsync(input, hostUser);
+
+                case TenantSelectionMode.JoinExisting:
+                    return await RegisterJoinExistingAsync(input, hostUser);
+
+                default:
+                    throw new UserFriendlyException(L("InvalidRegisterRequest"));
+            }
+        }
+
+        private async Task<User> CreateHostUserAsync(RegisterInput input)
+        {
+            var user = new User
+            {
+                UserName = input.UserName.ToLowerInvariant(),
+                Name = input.Name,
+                Surname = input.Surname,
+                EmailAddress = input.EmailAddress,
+                IsActive = true,
+                IsEmailConfirmed = false,
+                IsLockoutEnabled = true,
+            };
+            user.SetNormalizedNames();
+
+            CheckErrors(await UserManager.CreateAsync(user, input.Password));
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            return user;
+        }
+
+        private async Task<RegisterOutput> RegisterDefaultTenantAsync(User hostUser)
+        {
+            return new RegisterOutput
+            {
+                CanLogin = true,
+                TenantId = null,
+                TenancyName = null
+            };
+        }
+
+        private async Task<RegisterOutput> RegisterCreateNewAsync(RegisterInput input, User hostUser)
+        {
+            if (!await SettingManager.GetSettingValueAsync<bool>(AppSettings.TenantManagement.AllowTenantCreation))
+                throw new UserFriendlyException(L("TenantCreationIsDisabled"));
+
+            if (string.IsNullOrWhiteSpace(input.TenancyName))
+                throw new UserFriendlyException(L("InvalidTenancyName"));
+
+            var edition = await _editionManager.GetOrCreateDefaultEditionAsync();
+
+            var tenant = new Tenant(input.TenancyName, input.TenantName ?? input.TenancyName)
+            {
+                IsActive = true,
+                EditionId = edition.Id
+            };
+
+            await TenantManager.CreateAsync(tenant);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            long shadowUserId;
+
+            using (CurrentUnitOfWork.SetTenantId(tenant.Id))
+            {
+                CheckErrors(await _roleManager.CreateStaticRoles(tenant.Id));
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                var adminRole = _roleManager.Roles.Single(r => r.Name == StaticRoleNames.Tenants.Admin);
+                await _roleManager.GrantAllPermissionsAsync(adminRole);
+
+                var shadowUser = new User
+                {
+                    TenantId = tenant.Id,
+                    UserName = hostUser.UserName,
+                    Name = hostUser.Name,
+                    Surname = hostUser.Surname,
+                    EmailAddress = hostUser.EmailAddress,
+                    IsActive = true,
+                    IsEmailConfirmed = false,
+                    IsLockoutEnabled = true,
+                };
+                shadowUser.SetNormalizedNames();
+
+                CheckErrors(await UserManager.CreateAsync(shadowUser, input.Password));
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                CheckErrors(await UserManager.AddToRoleAsync(shadowUser, StaticRoleNames.Tenants.Admin));
+
+                var userRole = _roleManager.Roles.SingleOrDefault(r => r.Name == StaticRoleNames.Tenants.User);
+                if (userRole != null)
+                    CheckErrors(await UserManager.AddToRoleAsync(shadowUser, userRole.Name));
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                shadowUserId = shadowUser.Id;
             }
 
-            if (input.TenantId.HasValue)
+            using (CurrentUnitOfWork.SetTenantId(null))
+            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.MayHaveTenant))
             {
-                var tenant = await TenantManager.FindByIdAsync(input.TenantId.Value);
-                if (tenant == null || !tenant.IsActive)
+                var membership = new UserTenantMembership
                 {
-                    throw new UserFriendlyException(L("TenantIsNotActive"));
-                }
+                    UserId = hostUser.Id,
+                    TenantId = tenant.Id,
+                    TenantUserId = shadowUserId,
+                    IsDefault = true
+                };
 
-                using (CurrentUnitOfWork.SetTenantId(tenant.Id))
-                {
-                    var user = new User
-                    {
-                        TenantId = tenant.Id,
-                        UserName = input.UserName.ToLowerInvariant(),
-                        Name = input.Name,
-                        Surname = input.Surname,
-                        EmailAddress = input.EmailAddress,
-                        IsActive = false,
-                        IsEmailConfirmed = false,
-                        IsLockoutEnabled = true,
-                    };
-                    user.SetNormalizedNames();
-
-                    CheckErrors(await UserManager.CreateAsync(user, input.Password));
-                    await CurrentUnitOfWork.SaveChangesAsync();
-
-                    var userRole = await _roleManager.Roles.FirstOrDefaultAsync(r => r.TenantId == tenant.Id && r.Name == StaticRoleNames.Tenants.User);
-                    if (userRole != null)
-                    {
-                        CheckErrors(await UserManager.AddToRoleAsync(user, userRole.Name));
-                    }
-
-                    await CurrentUnitOfWork.SaveChangesAsync();
-
-                    return new RegisterOutput { CanLogin = false };
-                }
+                await _membershipRepository.InsertAsync(membership);
             }
 
-            throw new UserFriendlyException(L("InvalidRegisterRequest"));
+            return new RegisterOutput
+            {
+                CanLogin = true,
+                TenantId = tenant.Id,
+                TenancyName = tenant.TenancyName
+            };
+        }
+
+        private async Task<RegisterOutput> RegisterJoinExistingAsync(RegisterInput input, User hostUser)
+        {
+            if (!await SettingManager.GetSettingValueAsync<bool>(AppSettings.TenantManagement.AllowJoinRequests))
+                throw new UserFriendlyException(L("JoinRequestsAreDisabled"));
+
+            if (!input.ExistingTenantId.HasValue)
+                throw new UserFriendlyException(L("TenantIsNotActive"));
+
+            var request = await _tenantUserManager.CreatePendingMembershipAsync(
+                hostUser.Id,
+                input.ExistingTenantId.Value,
+                input.JoinRequestMessage);
+
+            return new RegisterOutput
+            {
+                CanLogin = false,
+                TenantId = request.TenantId,
+                TenancyName = (await TenantManager.FindByIdAsync(request.TenantId))?.TenancyName
+            };
         }
 
         /// <summary>

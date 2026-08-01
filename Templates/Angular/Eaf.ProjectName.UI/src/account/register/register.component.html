@@ -1,4 +1,4 @@
-<div [@routerTransition] [busyIf]="dataTableHelper.isLoading" class="m-login__signup">
+<div [@routerTransition] [busyIf]="submitting" class="m-login__signup">
   <div class="m-login__head">
     <h3 class="m-login__title">{{ 'Register' | localize }}</h3>
   </div>
@@ -10,20 +10,40 @@
     method="post"
     novalidate
   >
-    <div class="form-group m-form__group">
-      <label class="m-checkbox m-checkbox--primary">
-        <input [(ngModel)]="model.isCreatingTenant" name="isCreatingTenant" type="checkbox" (change)="toggleCreateTenant()" />
-        {{ 'CreateNewTenant' | localize }}
-        <span></span>
-      </label>
-    </div>
-
-    <div *ngIf="!model.isCreatingTenant && multiTenancy.isEnabled" class="form-group m-form__group">
-      <label>{{ 'Tenant' | localize }}</label>
-      <select [(ngModel)]="model.tenantId" name="tenantId" class="form-control m-input">
-        <option [ngValue]="undefined">{{ 'SelectTenant' | localize }}</option>
-        <option *ngFor="let tenant of tenants" [ngValue]="tenant.id">{{ tenant.name }}</option>
-      </select>
+    <div *ngIf="multiTenancy.isEnabled" class="form-group m-form__group">
+      <label>{{ 'TenantSelection' | localize }}</label>
+      <div class="m-radio-list">
+        <label class="m-radio m-radio--primary">
+          <input
+            type="radio"
+            name="tenantSelectionMode"
+            [value]="tenantSelectionMode.DefaultTenant"
+            [(ngModel)]="model.tenantSelectionMode"
+          />
+          {{ 'DefaultTenant' | localize }}
+          <span></span>
+        </label>
+        <label class="m-radio m-radio--primary">
+          <input
+            type="radio"
+            name="tenantSelectionMode"
+            [value]="tenantSelectionMode.CreateNew"
+            [(ngModel)]="model.tenantSelectionMode"
+          />
+          {{ 'CreateNewTenant' | localize }}
+          <span></span>
+        </label>
+        <label class="m-radio m-radio--primary">
+          <input
+            type="radio"
+            name="tenantSelectionMode"
+            [value]="tenantSelectionMode.JoinExisting"
+            [(ngModel)]="model.tenantSelectionMode"
+          />
+          {{ 'JoinCompany' | localize }}
+          <span></span>
+        </label>
+      </div>
     </div>
 
     <div *ngIf="model.isCreatingTenant" class="form-group m-form__group md-form">
@@ -49,6 +69,25 @@
         type="text"
       />
       <label for="tenantName">{{ 'TenantName' | localize }}</label>
+    </div>
+
+    <div *ngIf="model.isJoiningTenant" class="form-group m-form__group">
+      <label>{{ 'Tenant' | localize }}</label>
+      <select [(ngModel)]="model.existingTenantId" name="existingTenantId" class="form-control m-input" [required]="model.isJoiningTenant">
+        <option [ngValue]="undefined">{{ 'SelectTenant' | localize }}</option>
+        <option *ngFor="let tenant of tenants" [ngValue]="tenant.id">{{ tenant.name }}</option>
+      </select>
+    </div>
+
+    <div *ngIf="model.isJoiningTenant" class="form-group m-form__group md-form">
+      <textarea
+        [(ngModel)]="model.joinRequestMessage"
+        name="joinRequestMessage"
+        class="form-control m-input"
+        id="joinRequestMessage"
+        rows="3"
+      ></textarea>
+      <label for="joinRequestMessage">{{ 'Message' | localize }}</label>
     </div>
 
     <div class="form-group m-form__group md-form">

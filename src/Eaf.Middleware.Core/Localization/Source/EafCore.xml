@@ -7,9 +7,7 @@
 		<text name="InvalidUserNameOrPassword">Invalid user name or password</text>
 		<text name="InvalidRequest">Invalid request</text>
 		<text name="ThereIsNoTenantDefinedWithName{0}">There is no tenant defined with name {0}</text>
-		<text name="TenantIsNotActive">Tenant {0} is not active.</text>
 		<text name="UserIsNotActiveAndCanNotLogin">User {0} is not active and can not log in.</text>
-		<text name="TenancyName">Tenancy name</text>
 		<text name="UserNameOrEmail">User name or email</text>
 		<text name="Password">Password</text>
 		<text name="RememberMe">Remember me</text>
@@ -33,12 +31,6 @@
 		<text name="Surname">Surname</text>
 		<text name="EmailAddress">Email address</text>
 		<text name="Register">Register</text>
-		<text name="CreateNewTenant">Create new tenant</text>
-		<text name="SelectTenant">Select tenant</text>
-		<text name="TenancyName">Tenancy name</text>
-		<text name="TenantName">Tenant name</text>
-		<text name="SuccessfullyRegistered">Successfully registered.</text>
-		<text name="RegistrationWaitingForApproval">Your registration is waiting for approval.</text>
 		<text name="LastLoginTime">Last login time</text>
 		<text name="UserInformations">System User</text>
 		<text name="PasswordRepeat">Password (repeat)</text>
@@ -420,12 +412,7 @@
 		<text name="WebSiteLogsHeaderInfo">WebSite Logs</text>
 		<text name="TestSendMensage">Test send mensage</text>
 		<text name="WelcomeToTheApplication">Welcome to the application</text>
-		<text name="OnlyHostUsersCanHaveTenantMemberships">Only host users can have tenant memberships.</text>
 		<text name="OnlyHostUsersCanSelectTenant">Only host users can select a tenant.</text>
-		<text name="TenantMembershipNotFound">Tenant membership not found.</text>
-		<text name="ShadowUserNotFound">Shadow user not found.</text>
-		<text name="FailedToCreateShadowUser">Failed to create shadow user.</text>
-		<text name="FailedToAddRoleToShadowUser">Failed to add role to shadow user.</text>
 		<text name="FailedToCreateTenantRole">Failed to create tenant role.</text>
 		<text name="TotalTenants">Total tenants</text>
 		<text name="TotalUsers">Total users</text>
@@ -540,5 +527,26 @@
 		<text name="GatewaySettings">Gateway settings</text>
 		<text name="DefaultGateway">Default gateway</text>
 		<text name="SubscriptionEndDate">Subscription end date</text>
+		<text name="TenantRequired">Tenant is required.</text>
+		<text name="TenantNotFound">Tenant not found.</text>
+		<text name="OnlyHostUsersCanHaveTenantMemberships">Only host users can have tenant memberships.</text>
+		<text name="TenantMembershipNotFound">Tenant membership not found.</text>
+		<text name="UserAlreadyActiveInTenant">User is already active in this tenant.</text>
+		<text name="RequestAlreadyProcessed">This request has already been processed.</text>
+		<text name="FailedToCreateShadowUser">Failed to create the tenant user.</text>
+		<text name="FailedToAddRoleToShadowUser">Failed to add role to the tenant user.</text>
+		<text name="ShadowUserNotFound">Tenant user not found.</text>
+		<text name="TenantUserIsNotActive">User is not active in this tenant. Please wait for approval.</text>
+		<text name="InvalidTenancyName">Invalid tenancy name.</text>
+		<text name="SelfRegistrationIsDisabled">Self registration is disabled.</text>
+		<text name="TenantCreationIsDisabled">Tenant creation is disabled.</text>
+		<text name="JoinRequestsAreDisabled">Join requests are disabled.</text>
+		<text name="CreateNewTenant">Create new tenant</text>
+		<text name="SelectTenant">Select tenant</text>
+		<text name="TenantName">Tenant name</text>
+		<text name="TenancyName">Tenancy name</text>
+		<text name="JoinCompany">Join existing tenant</text>
+		<text name="RegistrationWaitingForApproval">Your registration is waiting for approval.</text>
+		<text name="SuccessfullyRegistered">Registration completed successfully.</text>
 	</texts>
 </localizationDictionary>
