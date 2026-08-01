@@ -10,7 +10,6 @@ using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.MultiTenancy.Dto;
 using Eaf.Middleware.Url;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -27,7 +26,6 @@ namespace Eaf.Middleware.Authorization.Accounts
     public class AccountAppService : MiddlewareAppServiceBase, IAccountAppService
     {
         private readonly IImpersonationManager _impersonationManager;
-        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly RoleManager _roleManager;
         private readonly IUserEmailer _userEmailer;
         private readonly IWebUrlService _webUrlService;
@@ -38,20 +36,17 @@ namespace Eaf.Middleware.Authorization.Accounts
         /// <param name="userEmailer">Parâmetro userEmailer.</param>
         /// <param name="webUrlService">Parâmetro webUrlService.</param>
         /// <param name="impersonationManager">Parâmetro impersonationManager.</param>
-        /// <param name="passwordHasher">Parâmetro passwordHasher.</param>
         /// <param name="roleManager">Parâmetro roleManager.</param>
         /// <returns>Resultado da operação.</returns>
         public AccountAppService(
             IUserEmailer userEmailer,
             IWebUrlService webUrlService,
             IImpersonationManager impersonationManager,
-            IPasswordHasher<User> passwordHasher,
             RoleManager roleManager)
         {
             _userEmailer = userEmailer;
             _webUrlService = webUrlService;
             _impersonationManager = impersonationManager;
-            _passwordHasher = passwordHasher;
             _roleManager = roleManager;
 
             AppUrlService = NullAppUrlService.Instance;
@@ -139,7 +134,6 @@ namespace Eaf.Middleware.Authorization.Accounts
         /// <param name="input">Parâmetro input.</param>
         /// <returns>Resultado da operação.</returns>
         [AbpAllowAnonymous]
-        [UnitOfWork(IsDisabled = true)]
         public virtual async Task<RegisterOutput> Register(RegisterInput input)
         {
             if (!string.IsNullOrWhiteSpace(input.TenancyName))
@@ -180,9 +174,8 @@ namespace Eaf.Middleware.Authorization.Accounts
                         IsLockoutEnabled = true,
                     };
                     user.SetNormalizedNames();
-                    user.Password = _passwordHasher.HashPassword(user, input.Password);
 
-                    CheckErrors(await UserManager.CreateAsync(user));
+                    CheckErrors(await UserManager.CreateAsync(user, input.Password));
                     await CurrentUnitOfWork.SaveChangesAsync();
 
                     var userRole = await _roleManager.Roles.FirstOrDefaultAsync(r => r.TenantId == tenant.Id && r.Name == StaticRoleNames.Tenants.User);

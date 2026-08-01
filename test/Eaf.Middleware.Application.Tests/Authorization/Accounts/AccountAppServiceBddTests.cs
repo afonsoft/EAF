@@ -30,7 +30,6 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
         private readonly IUserEmailer _userEmailer;
         private readonly IWebUrlService _webUrlService;
         private readonly IImpersonationManager _impersonationManager;
-        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly RoleManager _roleManager;
         private readonly AccountAppService _sut;
 
@@ -39,10 +38,9 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
             _userEmailer = Substitute.For<IUserEmailer>();
             _webUrlService = Substitute.For<IWebUrlService>();
             _impersonationManager = Substitute.For<IImpersonationManager>();
-            _passwordHasher = Substitute.For<IPasswordHasher<User>>();
             _roleManager = ManagerTestHelper.CreateRoleManager();
 
-            _sut = new AccountAppService(_userEmailer, _webUrlService, _impersonationManager, _passwordHasher, _roleManager);
+            _sut = new AccountAppService(_userEmailer, _webUrlService, _impersonationManager, _roleManager);
         }
 
         #region Construtor
