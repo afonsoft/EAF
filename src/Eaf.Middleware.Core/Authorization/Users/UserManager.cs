@@ -218,6 +218,23 @@ namespace Eaf.Middleware.Authorization.Users
         }
 
         /// <summary>
+        /// Atualiza o usuário garantindo que o contexto de multi-tenancy esteja
+        /// posicionado no tenant do próprio usuário, evitando que operações de
+        /// atualização (validação de nome, security stamp, tokens) percam o tenant
+        /// e corrompam os dados.
+        /// </summary>
+        /// <param name="user">Parâmetro user.</param>
+        /// <returns>Resultado da operação.</returns>
+        public override async Task<IdentityResult> UpdateAsync(User user)
+        {
+            using (_unitOfWorkManager.Current.SetTenantId(user.TenantId, switchMustHaveTenantEnableDisable: false))
+            using (_unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                return await base.UpdateAsync(user);
+            }
+        }
+
+        /// <summary>
         /// CheckDuplicateUsernameOrEmailAddressAsync.
         /// </summary>
         /// <param name="expectedUserId">Parâmetro expectedUserId.</param>
@@ -270,6 +287,97 @@ namespace Eaf.Middleware.Authorization.Users
             });
 
             return tokens;
+        }
+
+        /// <summary>
+        /// Busca usuário pelo nome respeitando o tenant atual da unidade de trabalho
+        /// (ou do <see cref="Abp.Runtime.Session.IAbpSession.TenantId"/> quando nenhum override de tenant foi aplicado).
+        /// </summary>
+        public override async Task<User> FindByNameAsync(string userName)
+        {
+            ThrowIfDisposed();
+            var normalizedUserName = NormalizeName(userName);
+            var tenantId = _unitOfWorkManager.Current.GetTenantId();
+
+            using (_unitOfWorkManager.Current.SetTenantId(tenantId, switchMustHaveTenantEnableDisable: false))
+            using (_unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                return await _userRepository.FirstOrDefaultAsync(
+                    u => u.NormalizedUserName == normalizedUserName);
+            }
+        }
+
+        /// <summary>
+        /// Busca usuário pelo email respeitando o tenant atual da unidade de trabalho
+        /// (ou do <see cref="Abp.Runtime.Session.IAbpSession.TenantId"/> quando nenhum override de tenant foi aplicado).
+        /// </summary>
+        public override async Task<User> FindByEmailAsync(string email)
+        {
+            ThrowIfDisposed();
+            var normalizedEmail = NormalizeEmail(email);
+            var tenantId = _unitOfWorkManager.Current.GetTenantId();
+
+            using (_unitOfWorkManager.Current.SetTenantId(tenantId, switchMustHaveTenantEnableDisable: false))
+            using (_unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                return await _userRepository.FirstOrDefaultAsync(
+                    u => u.NormalizedEmailAddress == normalizedEmail);
+            }
+        }
+
+        /// <summary>
+        /// Busca usuário por nome de usuário ou email.
+        /// Quando nenhum tenant é informado explicitamente, prioriza usuários do host (TenantId nulo)
+        /// para evitar que login sem tenant resolva um shadow user em vez do usuário do host.
+        /// </summary>
+        public override async Task<User> FindByNameOrEmailAsync(string userNameOrEmailAddress)
+        {
+            return await FindByNameOrEmailAsync(_unitOfWorkManager.Current.GetTenantId(), userNameOrEmailAddress);
+        }
+
+        /// <summary>
+        /// Busca usuário por nome de usuário ou email.
+        /// Quando <paramref name="tenantId"/> possui valor, a busca é restrita ao tenant.
+        /// Quando <paramref name="tenantId"/> é nulo, a busca percorre todos os tenants e prioriza o host.
+        /// </summary>
+        public override async Task<User> FindByNameOrEmailAsync(int? tenantId, string userNameOrEmailAddress)
+        {
+            ThrowIfDisposed();
+
+            var isEmail = userNameOrEmailAddress.Contains('@');
+            var normalizedValue = isEmail
+                ? NormalizeEmail(userNameOrEmailAddress)
+                : NormalizeName(userNameOrEmailAddress);
+
+            System.Linq.Expressions.Expression<Func<User, bool>> predicate;
+            if (isEmail)
+                predicate = u => u.NormalizedEmailAddress == normalizedValue;
+            else
+                predicate = u => u.NormalizedUserName == normalizedValue;
+
+            if (tenantId.HasValue)
+            {
+                using (_unitOfWorkManager.Current.SetTenantId(tenantId.Value, switchMustHaveTenantEnableDisable: false))
+                using (_unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant))
+                {
+                    return await _userRepository.FirstOrDefaultAsync(predicate);
+                }
+            }
+
+            using (_unitOfWorkManager.Current.SetTenantId(null, switchMustHaveTenantEnableDisable: false))
+            using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
+            {
+                var users = await _userRepository.GetAllListAsync(predicate);
+
+                if (users != null && users.Count > 0)
+                {
+                    return users
+                        .OrderByDescending(u => u.TenantId == null ? 1 : 0)
+                        .FirstOrDefault();
+                }
+
+                return await base.FindByNameOrEmailAsync(userNameOrEmailAddress);
+            }
         }
     }
 }

@@ -284,7 +284,8 @@ namespace Eaf.Middleware.Authorization.Accounts
             var request = await _tenantUserManager.CreatePendingMembershipAsync(
                 hostUser.Id,
                 input.ExistingTenantId.Value,
-                input.JoinRequestMessage);
+                input.JoinRequestMessage,
+                input.Password);
 
             return new RegisterOutput
             {

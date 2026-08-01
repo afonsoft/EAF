@@ -554,5 +554,17 @@
 		<text name="JoinCompany">Ingressar em tenant existente</text>
 		<text name="RegistrationWaitingForApproval">Seu cadastro está aguardando aprovação.</text>
 		<text name="SuccessfullyRegistered">Cadastro realizado com sucesso.</text>
+		<text name="TenantManagement">Gerenciamento de tenants</text>
+		<text name="TenantRegistrationSettings">Configurações de registro de tenants</text>
+		<text name="AllowSelfRegistration">Permitir cadastro público</text>
+		<text name="AllowTenantCreation">Permitir criação de tenant no cadastro</text>
+		<text name="AllowJoinRequests">Permitir solicitações de ingresso</text>
+		<text name="TenantJoinRequests">Solicitações de ingresso em tenants</text>
+		<text name="TenantJoinRequestApproveWarningMessage">O usuário será ativado neste tenant.</text>
+		<text name="TenantJoinRequestRejectWarningMessage">A solicitação será rejeitada e o usuário não será ativado.</text>
+		<text name="Approve">Aprovar</text>
+		<text name="Reject">Rejeitar</text>
+		<text name="SuccessfullyApproved">Solicitação aprovada com sucesso.</text>
+		<text name="SuccessfullyRejected">Solicitação rejeitada com sucesso.</text>
 	</texts>
 </localizationDictionary>

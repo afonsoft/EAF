@@ -17,7 +17,7 @@ namespace Eaf.Middleware.MultiTenancy
         /// <summary>
         /// Cria um shadow user inativo e uma solicitação de ingresso pendente no tenant.
         /// </summary>
-        Task<TenantJoinRequest> CreatePendingMembershipAsync(long hostUserId, int tenantId, string message = null);
+        Task<TenantJoinRequest> CreatePendingMembershipAsync(long hostUserId, int tenantId, string message = null, string plainPassword = null);
 
         /// <summary>
         /// Ativa o shadow user de uma solicitação aprovada e cria a membership.

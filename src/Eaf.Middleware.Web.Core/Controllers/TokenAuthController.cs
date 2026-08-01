@@ -172,7 +172,7 @@ namespace Eaf.Middleware.Web.Controllers
             var loginResult = await GetLoginResultAsync(
                     currentUserName,
                     model.Password,
-                    GetTenancyNameOrNull()
+                    model.TenancyName ?? GetTenancyNameOrNull()
                 );
 
             var returnUrl = model.ReturnUrl;

@@ -38,6 +38,9 @@ namespace Eaf.Middleware.Configuration.Host.Dto
         public SecuritySettingsEditDto Security { get; set; }
 
         [Required]
+        public TenantManagementSettingsEditDto TenantManagement { get; set; }
+
+        [Required]
         public HostUserManagementSettingsEditDto UserManagement { get; set; }
 
         /// <summary>

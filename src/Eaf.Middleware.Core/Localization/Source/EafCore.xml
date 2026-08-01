@@ -548,5 +548,17 @@
 		<text name="JoinCompany">Join existing tenant</text>
 		<text name="RegistrationWaitingForApproval">Your registration is waiting for approval.</text>
 		<text name="SuccessfullyRegistered">Registration completed successfully.</text>
+		<text name="TenantManagement">Tenant management</text>
+		<text name="TenantRegistrationSettings">Tenant registration settings</text>
+		<text name="AllowSelfRegistration">Allow public registration</text>
+		<text name="AllowTenantCreation">Allow tenant creation during registration</text>
+		<text name="AllowJoinRequests">Allow join requests</text>
+		<text name="TenantJoinRequests">Tenant join requests</text>
+		<text name="TenantJoinRequestApproveWarningMessage">The user will be activated in this tenant.</text>
+		<text name="TenantJoinRequestRejectWarningMessage">The request will be rejected and the user will not be activated.</text>
+		<text name="Approve">Approve</text>
+		<text name="Reject">Reject</text>
+		<text name="SuccessfullyApproved">Request approved successfully.</text>
+		<text name="SuccessfullyRejected">Request rejected successfully.</text>
 	</texts>
 </localizationDictionary>
