@@ -1,8 +1,16 @@
 import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { EditionServiceProxy, IEditionDto } from '@shared/service-proxies/edition.service-proxy';
-import { TenantSubscriptionServiceProxy, ITenantSubscriptionDto, IAssignEditionToTenantInput, IExtendTenantSubscriptionInput } from '@shared/service-proxies/tenant-subscription.service-proxy';
+import {
+    EditionServiceProxy,
+    IEditionDto,
+    TenantServiceProxy,
+    ITenantSubscriptionDto,
+    IAssignEditionToTenantInput,
+    IExtendTenantSubscriptionInput,
+    AssignEditionToTenantInput,
+    ExtendTenantSubscriptionInput,
+} from '@shared/service-proxies/service-proxies';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
@@ -28,7 +36,7 @@ export class TenantSubscriptionModalComponent extends AppComponentBase {
 
     constructor(
         injector: Injector,
-        private readonly _tenantSubscriptionService: TenantSubscriptionServiceProxy,
+        private readonly _tenantSubscriptionService: TenantServiceProxy,
         private readonly _editionService: EditionServiceProxy,
     ) {
         super(injector);
@@ -46,7 +54,7 @@ export class TenantSubscriptionModalComponent extends AppComponentBase {
     }
 
     loadEditions(): void {
-        this._editionService.getEditions('', 'displayName', 1000, 0).subscribe(result => {
+        this._editionService.getEditions('', 'displayName', 0, 1000).subscribe(result => {
             this.editions = result.items ?? [];
         });
     }
@@ -68,7 +76,7 @@ export class TenantSubscriptionModalComponent extends AppComponentBase {
 
         this.saving = true;
         this._tenantSubscriptionService
-            .assignEditionToTenant(this.assignInput)
+            .assignEditionToTenant(new AssignEditionToTenantInput(this.assignInput as any))
             .pipe(finalize(() => (this.saving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));
@@ -80,7 +88,7 @@ export class TenantSubscriptionModalComponent extends AppComponentBase {
     extendSubscription(): void {
         this.saving = true;
         this._tenantSubscriptionService
-            .extendTenantSubscription(this.extendInput)
+            .extendTenantSubscription(new ExtendTenantSubscriptionInput(this.extendInput as any))
             .pipe(finalize(() => (this.saving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));
