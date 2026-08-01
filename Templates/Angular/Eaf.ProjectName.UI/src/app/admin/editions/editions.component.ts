@@ -1,7 +1,7 @@
 import { Component, Injector, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { EditionServiceProxy } from '@shared/service-proxies/edition.service-proxy';
+import { EditionServiceProxy } from '@shared/service-proxies/service-proxies';
 import { LazyLoadEvent } from 'primeng/api';
 import { Paginator } from 'primeng/paginator';
 import { Table } from 'primeng/table';
@@ -46,8 +46,8 @@ export class EditionsComponent extends AppComponentBase implements OnInit {
       .getEditions(
         this.filters.filterText,
         this.dataTableHelper.getSorting(this.dataTable),
-        this.dataTableHelper.getMaxResultCount(this.paginator, event),
         this.dataTableHelper.getSkipCount(this.paginator, event),
+        this.dataTableHelper.getMaxResultCount(this.paginator, event),
       )
       .pipe(finalize(() => this.dataTableHelper.hideLoadingIndicator()))
       .subscribe(result => {

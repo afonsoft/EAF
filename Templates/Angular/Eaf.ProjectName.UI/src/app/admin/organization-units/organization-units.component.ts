@@ -1,8 +1,18 @@
 import { Component, Injector, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { IOrganizationUnitDto, OrganizationUnitServiceProxy } from '@shared/service-proxies/organization-unit.service-proxy';
-import { RoleServiceProxy, RoleListDto, UserServiceProxy, UserListDto } from '@shared/service-proxies/service-proxies';
+import {
+    IOrganizationUnitDto,
+    OrganizationUnitServiceProxy,
+    CreateOrganizationUnitInput,
+    UpdateOrganizationUnitInput,
+    UserToOrganizationUnitInput,
+    RoleToOrganizationUnitInput,
+    RoleServiceProxy,
+    RoleListDto,
+    UserServiceProxy,
+    UserListDto,
+} from '@shared/service-proxies/service-proxies';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
@@ -26,7 +36,7 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
     loading = false;
     saving = false;
 
-    activeOu: IOrganizationUnitDto = { id: 0, displayName: '', code: '', children: [] };
+    activeOu: IOrganizationUnitDto = { id: 0, displayName: '', code: '', parentId: undefined, children: [] };
     isEdit = false;
 
     // Members management
@@ -64,7 +74,7 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
             .getOrganizationUnits()
             .pipe(finalize(() => (this.loading = false)))
             .subscribe(result => {
-                this.organizationUnits = result ?? [];
+                this.organizationUnits = result.items ?? [];
                 this.flattenOrganizationUnits();
             });
     }
@@ -101,8 +111,8 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
 
         this.saving = true;
         const request = this.isEdit
-            ? this._organizationUnitService.update({ id: this.activeOu.id, displayName: this.activeOu.displayName })
-            : this._organizationUnitService.create({ displayName: this.activeOu.displayName, parentId: this.activeOu.parentId });
+            ? this._organizationUnitService.update(new UpdateOrganizationUnitInput({ id: this.activeOu.id, displayName: this.activeOu.displayName } as any))
+            : this._organizationUnitService.create(new CreateOrganizationUnitInput({ displayName: this.activeOu.displayName, parentId: this.activeOu.parentId } as any));
 
         request.pipe(finalize(() => (this.saving = false))).subscribe(() => {
             this.notify.success(this.l('SavedSuccessfully'));
@@ -150,13 +160,13 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
     loadMembers(): void {
         this.membersLoading = true;
         this._organizationUnitService
-            .getOrganizationUnitUsers({
-                organizationUnitId: this.activeOu.id,
-                filter: this.memberFilter,
-                sorting: 'Name asc',
-                skipCount: 0,
-                maxResultCount: 100,
-            })
+            .getOrganizationUnitUsers(
+                this.activeOu.id,
+                this.memberFilter,
+                'Name asc',
+                0,
+                100,
+            )
             .pipe(finalize(() => (this.membersLoading = false)))
             .subscribe(result => {
                 this.organizationUnitUsers = result.items ?? [];
@@ -171,10 +181,10 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
 
         this.membersSaving = true;
         this._organizationUnitService
-            .addUserToOrganizationUnit({
+            .addUserToOrganizationUnit(new UserToOrganizationUnitInput({
                 organizationUnitId: this.activeOu.id,
                 userId: this.selectedMemberUserId,
-            })
+            } as any))
             .pipe(finalize(() => (this.membersSaving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));
@@ -187,10 +197,7 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
         this.message.confirm('', this.l('OrganizationUnitUserRemoveWarningMessage', user.userName), isConfirmed => {
             if (isConfirmed) {
                 this._organizationUnitService
-                    .removeUserFromOrganizationUnit({
-                        organizationUnitId: this.activeOu.id,
-                        userId: user.userId,
-                    })
+                    .removeUserFromOrganizationUnit(this.activeOu.id, user.userId)
                     .subscribe(() => {
                         this.notify.success(this.l('SuccessfullyDeleted'));
                         this.loadMembers();
@@ -223,13 +230,13 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
     loadRoles(): void {
         this.rolesLoading = true;
         this._organizationUnitService
-            .getOrganizationUnitRoles({
-                organizationUnitId: this.activeOu.id,
-                filter: this.roleFilter,
-                sorting: 'Name asc',
-                skipCount: 0,
-                maxResultCount: 100,
-            })
+            .getOrganizationUnitRoles(
+                this.activeOu.id,
+                this.roleFilter,
+                'Name asc',
+                0,
+                100,
+            )
             .pipe(finalize(() => (this.rolesLoading = false)))
             .subscribe(result => {
                 this.organizationUnitRoles = result.items ?? [];
@@ -244,10 +251,10 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
 
         this.rolesSaving = true;
         this._organizationUnitService
-            .addRoleToOrganizationUnit({
+            .addRoleToOrganizationUnit(new RoleToOrganizationUnitInput({
                 organizationUnitId: this.activeOu.id,
                 roleId: this.selectedRoleId,
-            })
+            } as any))
             .pipe(finalize(() => (this.rolesSaving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));
@@ -260,10 +267,7 @@ export class OrganizationUnitsComponent extends AppComponentBase implements OnIn
         this.message.confirm('', this.l('OrganizationUnitRoleRemoveWarningMessage', role.roleName), isConfirmed => {
             if (isConfirmed) {
                 this._organizationUnitService
-                    .removeRoleFromOrganizationUnit({
-                        organizationUnitId: this.activeOu.id,
-                        roleId: role.roleId,
-                    })
+                    .removeRoleFromOrganizationUnit(this.activeOu.id, role.roleId)
                     .subscribe(() => {
                         this.notify.success(this.l('SuccessfullyDeleted'));
                         this.loadRoles();

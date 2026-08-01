@@ -1,8 +1,17 @@
 import { Component, Injector, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { IEditionDto, EditionServiceProxy } from '@shared/service-proxies/edition.service-proxy';
-import { ICreateSubscriptionPaymentInput, IProcessPaymentInput, IPaymentGatewayDto, ISubscriptionPaymentDto, PaymentServiceProxy } from '@shared/service-proxies/payment.service-proxy';
+import {
+    IEditionDto,
+    EditionServiceProxy,
+    ICreateSubscriptionPaymentInput,
+    IProcessPaymentInput,
+    IPaymentGatewayDto,
+    ISubscriptionPaymentDto,
+    PaymentServiceProxy,
+    CreateSubscriptionPaymentInput,
+    ProcessPaymentInput,
+} from '@shared/service-proxies/service-proxies';
 import { PaymentGatewaySettingsModalComponent } from './payment-gateway-settings-modal.component';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { LazyLoadEvent } from 'primeng/api';
@@ -34,6 +43,7 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
         editionPaymentType: 1,
         paymentPeriodType: 30,
         gateway: '',
+        description: undefined,
     };
 
     processInput: IProcessPaymentInput & { paymentId: number } = {
@@ -63,7 +73,7 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
     }
 
     loadEditions(): void {
-        this._editionService.getEditions('', 'displayName', 1000, 0).subscribe(result => {
+        this._editionService.getEditions('', 'displayName', 0, 1000).subscribe(result => {
             this.editions = result.items ?? [];
             if (this.editions.length > 0 && this.newPayment.editionId === 0) {
                 this.newPayment.editionId = this.editions[0].id;
@@ -89,13 +99,12 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
 
         this.dataTableHelper.showLoadingIndicator();
         this._paymentService
-            .getAll({
-                filter: this.filters.filterText,
-                status: this.filters.status,
-                sorting: this.dataTableHelper.getSorting(this.dataTable),
-                skipCount: this.dataTableHelper.getSkipCount(this.paginator, event),
-                maxResultCount: this.dataTableHelper.getMaxResultCount(this.paginator, event),
-            })
+            .getAll(
+                this.filters.filterText,
+                this.dataTableHelper.getSorting(this.dataTable),
+                this.dataTableHelper.getSkipCount(this.paginator, event),
+                this.dataTableHelper.getMaxResultCount(this.paginator, event),
+            )
             .pipe(finalize(() => this.dataTableHelper.hideLoadingIndicator()))
             .subscribe(result => {
                 this.dataTableHelper.totalRecordsCount = result.totalCount;
@@ -113,6 +122,7 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
             editionPaymentType: 1,
             paymentPeriodType: 30,
             gateway: this.gateways.find(g => g.isDefault)?.name ?? (this.gateways.length > 0 ? this.gateways[0].name : ''),
+            description: undefined,
         };
         this.createModal.show();
     }
@@ -129,7 +139,7 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
 
         this.saving = true;
         this._paymentService
-            .createPayment(this.newPayment)
+            .createPayment(new CreateSubscriptionPaymentInput(this.newPayment as any))
             .pipe(finalize(() => (this.saving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));
@@ -180,8 +190,9 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
 
     processPayment(): void {
         this.saving = true;
+        const { paymentId, ...processData } = this.processInput;
         this._paymentService
-            .processPayment(this.processInput.paymentId, this.processInput)
+            .processPayment(this.processInput.paymentId, new ProcessPaymentInput(processData as any))
             .pipe(finalize(() => (this.saving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Injector, Output, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { PaymentServiceProxy, IPaymentGatewaySettingsDto } from '@shared/service-proxies/payment.service-proxy';
+import { PaymentServiceProxy, PaymentGatewaySettingsDto } from '@shared/service-proxies/service-proxies';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
 
@@ -17,7 +17,7 @@ export class PaymentGatewaySettingsModalComponent extends AppComponentBase {
 
     active = false;
     saving = false;
-    settings: IPaymentGatewaySettingsDto;
+    settings: PaymentGatewaySettingsDto;
     gateways: string[] = ['Stripe', 'PayPal', 'MercadoPago', 'PagSeguro'];
 
     constructor(

@@ -52,9 +52,7 @@ export class FeatureTreeComponent extends AppComponentBase {
       },
       {
         target: 'selectable',
-        targetFunction(item) {
-          return item.inputType.name === 'CHECKBOX';
-        },
+        value: true,
       },
     ]);
   }
@@ -72,14 +70,21 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   setSelectedNode(featureName, value) {
-    let node;
+    const node = this._treeDataHelperService.findNode(this.treeData, { data: { name: featureName } });
+    if (!node) {
+      return;
+    }
 
     if (value === 'true') {
-      node = this._treeDataHelperService.findNode(this.treeData, { data: { name: featureName } });
-      this.selectedFeatures.push(node);
+      this.addToSelection(node);
     } else if (value && value !== 'false') {
-      node = this._treeDataHelperService.findNode(this.treeData, { data: { name: featureName } });
       node.value = value;
+      this.addToSelection(node);
+    }
+  }
+
+  private addToSelection(node) {
+    if (!this.selectedFeatures.find(n => n.data.name === node.data.name)) {
       this.selectedFeatures.push(node);
     }
   }
@@ -102,9 +107,26 @@ export class FeatureTreeComponent extends AppComponentBase {
     return features;
   }
 
+  private setDefaultValueIfNeeded(node): void {
+    if (node.data.inputType.name !== 'CHECKBOX' && this.isFeatureSelected(node.data.name) && !node.value) {
+      node.value = node.data.defaultValue;
+    }
+  }
+
   onDropdownChange(node) {
+    this.toggleSelectionByValue(node);
+  }
+
+  private toggleSelectionByValue(node) {
+    const index = this.selectedFeatures.findIndex(n => n.data.name === node.data.name);
     if (node.value) {
-      node.selected = true;
+      if (index === -1) {
+        this.selectedFeatures = [...this.selectedFeatures, node];
+      }
+    } else {
+      if (index > -1) {
+        this.selectedFeatures = this.selectedFeatures.filter(n => n.data.name !== node.data.name);
+      }
     }
   }
 
@@ -199,6 +221,10 @@ export class FeatureTreeComponent extends AppComponentBase {
     let result = true;
 
     for (const feature of this._editData.features || []) {
+      if (!this.isFeatureSelected(feature.name)) {
+        continue;
+      }
+
       const value = this.getFeatureValueByName(feature.name);
       if (!this.isFeatureValueValid(feature.name, value)) {
         result = false;
@@ -229,12 +255,16 @@ export class FeatureTreeComponent extends AppComponentBase {
       return null;
     }
 
+    if (!this.isFeatureSelected(featureName)) {
+      return 'false';
+    }
+
     if (feature.value) {
       return feature.value;
     }
 
-    if (!this.isFeatureSelected(featureName)) {
-      return 'false';
+    if (feature.data.inputType.name !== 'CHECKBOX') {
+      return feature.data.defaultValue || 'true';
     }
 
     return 'true';
@@ -247,11 +277,45 @@ export class FeatureTreeComponent extends AppComponentBase {
   }
 
   nodeSelect(event) {
-    let parentNode = this._treeDataHelperService.findParent(this.treeData, { data: { name: event.node.data.name } });
+    const node = event.node;
+    this.setDefaultValueIfNeeded(node);
+
+    let parentNode = this._treeDataHelperService.findParent(this.treeData, { data: { name: node.data.name } });
 
     while (parentNode != null) {
-      this.selectedFeatures.push(parentNode);
+      this.addToSelection(parentNode);
+      this.setDefaultValueIfNeeded(parentNode);
       parentNode = this._treeDataHelperService.findParent(this.treeData, { data: { name: parentNode.data.name } });
+    }
+
+    this.setDefaultValuesForChildren(node);
+  }
+
+  private setDefaultValuesForChildren(node): void {
+    if (!node.children) {
+      return;
+    }
+
+    for (const child of node.children) {
+      this.setDefaultValueIfNeeded(child);
+      this.setDefaultValuesForChildren(child);
+    }
+  }
+
+  onNodeUnselect(event) {
+    const node = event.node;
+    this.clearValueIfUnselected(node);
+    this.selectedFeatures = this.selectedFeatures.filter(n => n.data.name !== node.data.name);
+  }
+
+  private clearValueIfUnselected(node): void {
+    if (!this.isFeatureSelected(node.data.name) && node.data.inputType.name !== 'CHECKBOX') {
+      node.value = undefined;
+    }
+    if (node.children) {
+      for (const child of node.children) {
+        this.clearValueIfUnselected(child);
+      }
     }
   }
 }

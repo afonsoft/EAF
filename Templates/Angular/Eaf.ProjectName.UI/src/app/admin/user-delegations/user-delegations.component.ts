@@ -1,7 +1,7 @@
 import { Component, Injector, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
-import { ICreateUserDelegationInput, IUserDelegationDto, UserDelegationServiceProxy } from '@shared/service-proxies/user-delegation.service-proxy';
+import { IUserDelegationDto, UserDelegationServiceProxy, CreateUserDelegationInput, EntityDtoOfInt64 } from '@shared/service-proxies/service-proxies';
 import { UserListDto, UserServiceProxy } from '@shared/service-proxies/service-proxies';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs/operators';
@@ -24,7 +24,7 @@ export class UserDelegationsComponent extends AppComponentBase implements OnInit
 
     allUsers: UserListDto[] = [];
 
-    newDelegation: ICreateUserDelegationInput & { targetUserId?: number } = {
+    newDelegation: { targetUserId?: number; startTime: string; endTime: string; description: string } = {
         targetUserId: undefined,
         startTime: '',
         endTime: '',
@@ -53,14 +53,14 @@ export class UserDelegationsComponent extends AppComponentBase implements OnInit
     loadDelegations(): void {
         this.loading = true;
         this._userDelegationService
-            .getMyDelegations({ maxResultCount: 1000 })
+            .getMyDelegations(undefined, undefined, '', 0, 1000)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe(result => {
                 this.myDelegations = result.items ?? [];
             });
 
         this._userDelegationService
-            .getDelegatedUsers({ maxResultCount: 1000 })
+            .getDelegatedUsers(undefined, undefined, '', 0, 1000)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe(result => {
                 this.delegatedUsers = result.items ?? [];
@@ -102,12 +102,7 @@ export class UserDelegationsComponent extends AppComponentBase implements OnInit
         }
 
         this.saving = true;
-        const input: ICreateUserDelegationInput = {
-            targetUserId: this.newDelegation.targetUserId,
-            startTime: this.newDelegation.startTime,
-            endTime: this.newDelegation.endTime,
-            description: this.newDelegation.description,
-        };
+        const input = CreateUserDelegationInput.fromJS(this.newDelegation);
 
         this._userDelegationService
             .create(input)
@@ -122,7 +117,7 @@ export class UserDelegationsComponent extends AppComponentBase implements OnInit
     cancel(delegation: IUserDelegationDto): void {
         this.message.confirm(this.l('AreYouSure'), this.l('UserDelegationCancelWarningMessage', delegation.targetUserName), isConfirmed => {
             if (isConfirmed) {
-                this._userDelegationService.cancel(delegation.id).subscribe(() => {
+                this._userDelegationService.cancel(new EntityDtoOfInt64({ id: delegation.id } as any)).subscribe(() => {
                     this.notify.success(this.l('SuccessfullyDeleted'));
                     this.loadDelegations();
                 });

@@ -3,20 +3,32 @@
   [(selection)]="selectedFeatures"
   selectionMode="checkbox"
   (onNodeSelect)="nodeSelect($event)"
+  (onNodeUnselect)="onNodeUnselect($event)"
   [propagateSelectionUp]="false"
 >
   <ng-template let-node pTemplate="default">
-    <span style="margin-right: 5px">{{ node.label }}</span>
-    <input
-      type="text"
-      [attr.name]="node.data.name"
-      [attr.aria-label]="node.label"
-      *ngIf="node.data.inputType.name === 'SINGLE_LINE_STRING'"
-      [(ngModel)]="node.value"
-      (change)="onDropdownChange(node)"
-    />
-    <select *ngIf="node.data.inputType.name === 'COMBOBOX'" [(ngModel)]="node.value" [attr.aria-label]="node.label" (change)="onDropdownChange(node)">
-      <option *ngFor="let item of node.data.inputType.itemSource.items" [value]="item.value">{{ item.displayName }}</option>
-    </select>
+    <span style="display: inline-flex; align-items: center; gap: 0.5rem; width: 100%;">
+      <span style="flex-shrink: 0;">{{ node.label }}</span>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        style="width: auto; min-width: 80px; max-width: 200px; margin-left: auto;"
+        [attr.name]="node.data.name"
+        [attr.aria-label]="node.label"
+        *ngIf="node.data.inputType.name === 'SINGLE_LINE_STRING'"
+        [(ngModel)]="node.value"
+        (change)="onDropdownChange(node)"
+      />
+      <select
+        *ngIf="node.data.inputType.name === 'COMBOBOX'"
+        class="form-control form-control-sm"
+        style="width: auto; min-width: 120px; max-width: 220px; margin-left: auto;"
+        [(ngModel)]="node.value"
+        [attr.aria-label]="node.label"
+        (change)="onDropdownChange(node)"
+      >
+        <option *ngFor="let item of node.data.inputType.itemSource.items" [value]="item.value">{{ item.displayName }}</option>
+      </select>
+    </span>
   </ng-template>
 </p-tree>
