@@ -54,6 +54,12 @@ namespace Eaf.Middleware.Editions
         Task<GetEditionFeaturesEditOutput> GetEditionFeaturesForEdit(EntityDto input);
 
         /// <summary>
+        /// Obtém todas as features cadastradas.
+        /// </summary>
+        /// <returns>Lista de features.</returns>
+        Task<ListResultDto<FlatFeatureDto>> GetAllFeatures();
+
+        /// <summary>
         /// Atualiza as features de uma edição.
         /// </summary>
         /// <param name="input">Identificador da edição e valores de features.</param>

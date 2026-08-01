@@ -34,6 +34,7 @@ export class AppNavigationService {
       new AppMenuItem('Payments', 'Pages.Administration.Payments', 'flaticon-coins', '/app/admin/payments'),
       new AppMenuItem('Languages', 'Pages.Administration.Languages', 'flaticon-tabs', '/app/admin/languages'),
       new AppMenuItem('Editions', 'Pages.Administration.Editions', 'flaticon-layers', '/app/admin/editions'),
+      new AppMenuItem('Features', 'Pages.Administration.Editions', 'flaticon-interface-8', '/app/admin/features'),
       new AppMenuItem('AuditLogs', 'Pages.Administration.AuditLogs', 'flaticon-folder-1', '/app/admin/auditLogs'),
       new AppMenuItem('VisualSettings', 'Pages.Administration.UiCustomization', 'flaticon-imac', '/app/admin/ui-customization'),
       new AppMenuItem('Maintenance', 'Pages.Administration.Maintenance', 'flaticon-lock', '/app/admin/maintenance'),

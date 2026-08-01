@@ -168,6 +168,9 @@
 		<text name="Apply" value="Aplicar" />
 		<text name="CustomRange" value="Intervalo personalizado" />
 		<text name="Features" value="Funcionalidades" />
+		<text name="DisplayName" value="Nome de Exibição" />
+		<text name="DefaultValue" value="Valor Padrão" />
+		<text name="InputType" value="Tipo de Entrada" />
 		<text name="ChangingFeatures" value="Mudar funcionalidades" />
 		<text name="ResetSpecialFeatures" value="Resetar funcionalidades especiais" />
 		<text name="ResetFeaturesTooltip" value="Esse botão reseta imediatamente as funcionalidades específicas do canal e salva as mudanças. O canal vai ter as funcionalidades atribuídas do plano." />

@@ -2693,6 +2693,57 @@ export class EditionServiceProxy {
     }
 
     /**
+     * @return OK
+     */
+    getAllFeatures(): Observable<ListResultDtoOfFlatFeatureDto> {
+        let url_ = this.baseUrl + "/api/services/app/Edition/GetAllFeatures";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllFeatures(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllFeatures(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ListResultDtoOfFlatFeatureDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ListResultDtoOfFlatFeatureDto>;
+        }));
+    }
+
+    protected processGetAllFeatures(response: HttpResponseBase): Observable<ListResultDtoOfFlatFeatureDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ListResultDtoOfFlatFeatureDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param id (optional) 
      * @return OK
      */
@@ -15970,6 +16021,50 @@ export class ListResultDtoOfChatMessageDto implements IListResultDtoOfChatMessag
 
 export interface IListResultDtoOfChatMessageDto {
     items: ChatMessageDto[] | undefined;
+}
+
+export class ListResultDtoOfFlatFeatureDto implements IListResultDtoOfFlatFeatureDto {
+    items!: FlatFeatureDto[] | undefined;
+
+    constructor(data?: IListResultDtoOfFlatFeatureDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(FlatFeatureDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ListResultDtoOfFlatFeatureDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ListResultDtoOfFlatFeatureDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IListResultDtoOfFlatFeatureDto {
+    items: FlatFeatureDto[] | undefined;
 }
 
 export class ListResultDtoOfFlatPermissionWithLevelDto implements IListResultDtoOfFlatPermissionWithLevelDto {

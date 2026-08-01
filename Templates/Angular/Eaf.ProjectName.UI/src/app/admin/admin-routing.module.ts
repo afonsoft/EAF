@@ -2,6 +2,7 @@
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 
 import { AuditLogsComponent } from './audit-logs/audit-logs.component';
+import { FeaturesComponent } from './features/features.component';
 import { LanguageTextsComponent } from './languages/language-texts.component';
 import { LanguagesComponent } from './languages/languages.component';
 import { EditionsComponent } from './editions/editions.component';
@@ -33,6 +34,7 @@ import { UsersComponent } from './users/users.component';
           },
           { path: 'tenants', component: TenantsComponent, data: { permission: 'Pages.Tenants' } },
           { path: 'editions', component: EditionsComponent, data: { permission: 'Pages.Administration.Editions' } },
+          { path: 'features', component: FeaturesComponent, data: { permission: 'Pages.Administration.Editions' } },
           { path: 'organization-units', component: OrganizationUnitsComponent, data: { permission: 'Pages.Administration.OrganizationUnits' } },
           { path: 'mass-notifications', component: MassNotificationsComponent, data: { permission: 'Pages.Administration.MassNotifications' } },
           { path: 'user-delegations', component: UserDelegationsComponent, data: { permission: 'Pages.Administration.Users.Delegation' } },

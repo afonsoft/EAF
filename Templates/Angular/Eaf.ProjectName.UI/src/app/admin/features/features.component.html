@@ -1,0 +1,73 @@
+<div class="m-content" [@appModuleAnimation]>
+  <div class="m-portlet">
+    <div class="m-portlet__head">
+      <div class="m-portlet__head-caption">
+        <div class="m-portlet__head-title">
+          <h3 class="m-portlet__head-text">
+            <span>{{ 'Features' | localize }}</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+    <div class="m-portlet__body">
+      <div class="row align-items-center">
+        <div class="col-xl-12">
+          <div class="form-group m-form__group align-items-center">
+            <div class="input-group">
+              <input
+                [(ngModel)]="filterText"
+                (input)="filterFeatures()"
+                type="text"
+                class="form-control m-input"
+                placeholder="{{ 'SearchWithThreeDot' | localize }}"
+                [attr.aria-label]="'SearchWithThreeDot' | localize"
+              />
+              <button class="btn btn-primary" type="button" (click)="loadFeatures()">
+                <i class="flaticon-refresh"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p-table
+        [value]="filteredFeatures"
+        [loading]="loading"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        sortMode="single"
+        responsiveLayout="scroll"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="name">
+              {{ 'Name' | localize }}
+              <p-sortIcon field="name"></p-sortIcon>
+            </th>
+            <th pSortableColumn="displayName">
+              {{ 'DisplayName' | localize }}
+              <p-sortIcon field="displayName"></p-sortIcon>
+            </th>
+            <th>{{ 'DefaultValue' | localize }}</th>
+            <th>{{ 'InputType' | localize }}</th>
+            <th>{{ 'Parent' | localize }}</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-feature>
+          <tr>
+            <td>{{ feature.name }}</td>
+            <td>{{ feature.displayName }}</td>
+            <td>{{ feature.defaultValue }}</td>
+            <td>{{ feature.inputType?.name }}</td>
+            <td>{{ feature.parentName }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center">{{ 'NoData' | localize }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

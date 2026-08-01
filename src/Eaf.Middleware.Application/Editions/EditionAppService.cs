@@ -100,6 +100,16 @@ namespace Eaf.Middleware.Editions
         }
 
         /// <summary>
+        /// Obtém todas as features cadastradas.
+        /// </summary>
+        /// <returns>Lista de features.</returns>
+        public async Task<ListResultDto<FlatFeatureDto>> GetAllFeatures()
+        {
+            var features = FeatureManager.GetAll();
+            return new ListResultDto<FlatFeatureDto>(ObjectMapper.Map<List<FlatFeatureDto>>(features).OrderBy(f => f.DisplayName).ToList());
+        }
+
+        /// <summary>
         /// Obtém as features da edição para edição.
         /// </summary>
         /// <param name="input">Identificador da edição.</param>

@@ -156,6 +156,9 @@
 		<text name="CustomRange">Custom range</text>
 		<text name="Edition">Edition</text>
 		<text name="Features">Features</text>
+		<text name="DisplayName">Display Name</text>
+		<text name="DefaultValue">Default Value</text>
+		<text name="InputType">Input Type</text>
 		<text name="ChangingFeatures">Changing features</text>
 		<text name="ResetSpecialFeatures">Reset special features</text>
 		<text name="ResetFeaturesTooltip">This button immediately resets tenant-specific feature settings and saves changes. The tenant will only have features from assigned edition.</text>
