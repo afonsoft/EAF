@@ -270,6 +270,9 @@ export class MockEditionServiceProxy {
   getEditions(filter?: string, sorting?: string, maxResultCount?: number, skipCount?: number): Observable<any> {
     return of({ totalCount: 0, items: [] });
   }
+  getAllFeatures(): Observable<any> {
+    return of({ items: [] });
+  }
   deleteEdition(id: number): Observable<void> {
     return of(undefined);
   }

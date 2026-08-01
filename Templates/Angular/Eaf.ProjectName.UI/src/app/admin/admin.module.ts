@@ -26,6 +26,7 @@ import { TreeModule } from 'primeng/tree';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AuditLogDetailModalComponent } from './audit-logs/audit-log-detail-modal.component';
 import { AuditLogsComponent } from './audit-logs/audit-logs.component';
+import { FeaturesComponent } from './features/features.component';
 import { CreateOrEditEditionModalComponent } from './editions/create-or-edit-edition-modal.component';
 import { EditionFeaturesModalComponent } from './editions/edition-features-modal.component';
 import { EditionsComponent } from './editions/editions.component';
@@ -100,6 +101,7 @@ import { UsersComponent } from './users/users.component';
     CreateOrEditRoleModalComponent,
     AuditLogsComponent,
     AuditLogDetailModalComponent,
+    FeaturesComponent,
     EditionsComponent,
     CreateOrEditEditionModalComponent,
     EditionFeaturesModalComponent,

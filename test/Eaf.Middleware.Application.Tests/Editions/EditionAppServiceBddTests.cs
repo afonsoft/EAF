@@ -78,8 +78,39 @@ namespace Eaf.Middleware.Application.Tests.Editions
                 edition.DisplayName = input.DisplayName;
                 return edition;
             });
+            mapper.Map<List<FlatFeatureDto>>(Arg.Any<IEnumerable<Feature>>()).Returns(ci =>
+            {
+                var features = ci.Arg<IEnumerable<Feature>>();
+                return features.Select(f => new FlatFeatureDto
+                {
+                    Name = f.Name,
+                }).ToList();
+            });
             return mapper;
         }
+
+        #region GetAllFeatures
+
+        [Fact]
+        public async Task Dado_FeaturesCadastradas_Quando_GetAllFeatures_Entao_DeveRetornarListaOrdenada()
+        {
+            // Dado
+            var feature = new TestFeature("FeatureB");
+
+            var featureManager = Substitute.For<IFeatureManager>();
+            featureManager.GetAll().Returns(new List<Feature> { feature });
+            _sut.FeatureManager = featureManager;
+
+            // Quando
+            var result = await _sut.GetAllFeatures();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Items.Count.ShouldBe(1);
+            result.Items[0].Name.ShouldBe("FeatureB");
+        }
+
+        #endregion
 
         #region Construtor
 
@@ -219,5 +250,13 @@ namespace Eaf.Middleware.Application.Tests.Editions
         }
 
         #endregion
+    }
+
+    public class TestFeature : Feature
+    {
+        public TestFeature(string name)
+            : base(name, defaultValue: "true")
+        {
+        }
     }
 }
