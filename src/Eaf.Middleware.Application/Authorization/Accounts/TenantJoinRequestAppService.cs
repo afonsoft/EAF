@@ -89,7 +89,7 @@ namespace Eaf.Middleware.Authorization.Accounts
         public virtual async Task<List<TenantJoinRequestDto>> GetPendingRequestsForCurrentTenantAsync()
         {
             if (!AbpSession.TenantId.HasValue)
-                throw new UserFriendlyException(L("TenantRequired"));
+                return new List<TenantJoinRequestDto>();
 
             using (CurrentUnitOfWork.SetTenantId(null, switchMustHaveTenantEnableDisable: false))
             using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.MayHaveTenant))
