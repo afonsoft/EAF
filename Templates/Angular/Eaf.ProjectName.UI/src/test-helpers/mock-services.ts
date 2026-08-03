@@ -267,7 +267,7 @@ export class MockTenantServiceProxy {
 }
 
 export class MockEditionServiceProxy {
-  getEditions(filter?: string, sorting?: string, maxResultCount?: number, skipCount?: number): Observable<any> {
+  getEditions(filter?: string, sorting?: string, skipCount?: number, maxResultCount?: number): Observable<any> {
     return of({ totalCount: 0, items: [] });
   }
   getAllFeatures(): Observable<any> {
