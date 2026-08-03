@@ -129,6 +129,20 @@ namespace Eaf.Middleware.Application.Tests.Authorization.Accounts
         }
 
         [Fact]
+        public async Task Dado_UsuarioHostSemTenant_Quando_ListarPendentes_Entao_DeveRetornarListaVazia()
+        {
+            // Dado
+            ConfigurarSessao(5, null);
+
+            // Quando
+            var result = await _sut.GetPendingRequestsForCurrentTenantAsync();
+
+            // Então
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(0);
+        }
+
+        [Fact]
         public async Task Dado_SolicitacaoPendente_Quando_Aprovar_Entao_DeveChamarTenantUserManager()
         {
             // Dado
