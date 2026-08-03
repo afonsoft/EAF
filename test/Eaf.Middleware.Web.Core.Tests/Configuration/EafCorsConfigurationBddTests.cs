@@ -70,6 +70,32 @@ namespace Eaf.Middleware.Web.Tests.Configuration
         }
 
         [Fact]
+        public void Dado_AmbienteDeDesenvolvimentoComWildcard_Quando_RegistrarPolitica_Entao_DevePermitirQualquerOrigem()
+        {
+            // Dado
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    { "App:CorsOrigins", "*" }
+                })
+                .Build();
+
+            var services = new ServiceCollection();
+
+            // Quando
+            services.AddEafCors(configuration, true, "TestPolicy");
+
+            // Então
+            var sp = services.BuildServiceProvider();
+            var options = sp.GetRequiredService<IOptions<CorsOptions>>().Value;
+            var policy = options.GetPolicy("TestPolicy");
+
+            policy.ShouldNotBeNull();
+            policy.IsOriginAllowed("https://any-origin.example.com").ShouldBeTrue();
+            policy.SupportsCredentials.ShouldBeTrue();
+        }
+
+        [Fact]
         public void Dado_AmbienteDeProducaoSemOrigens_Quando_RegistrarPolitica_Entao_DeveLancarExcecao()
         {
             // Dado
