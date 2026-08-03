@@ -90,7 +90,8 @@ namespace Eaf.ProjectName.Web.Startup
             // Add OpenTelemetry and configure it to use Azure Monitor.
 
             //Configure CORS for angular2 UI
-            services.AddEafCors(_appConfiguration, _hostingEnvironment.IsDevelopment(), ProjectNameConsts.DefaultCorsPolicyName);
+            var isDevelopment = _hostingEnvironment.IsDevelopment() || _hostingEnvironment.IsEnvironment("Local");
+            services.AddEafCors(_appConfiguration, isDevelopment, ProjectNameConsts.DefaultCorsPolicyName);
 
             // GDPR / Data Protection
             services.AddDataProtection()
@@ -185,7 +186,8 @@ namespace Eaf.ProjectName.Web.Startup
             app.UseEafHealthChecks();
             app.UseMiddleware<SecurityHeadersMiddleware>();
             app.UseMiddleware<ContentSecurityPolicyMiddleware>();
-            if (env.IsDevelopment())
+            var isDevelopment = env.IsDevelopment() || env.IsEnvironment("Local");
+            if (isDevelopment)
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/Error");
