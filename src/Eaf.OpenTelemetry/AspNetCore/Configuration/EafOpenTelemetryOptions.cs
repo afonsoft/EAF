@@ -12,6 +12,9 @@ namespace Eaf.AspNetCore.Configuration
     public class EafOpenTelemetryOptions : IOptions<EafOpenTelemetryOptions>
     {
         private const string OtelExporterOtlpEndpointKey = "OTEL_EXPORTER_OTLP_ENDPOINT";
+        private const string OtelExporterOtlpTracesEndpointKey = "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT";
+        private const string OtelExporterOtlpMetricsEndpointKey = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT";
+        private const string OtelExporterOtlpLogsEndpointKey = "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT";
         private const string OtelExporterOtlpProtocolKey = "OTEL_EXPORTER_OTLP_PROTOCOL";
         private const string OtelExporterOtlpHeadersKey = "OTEL_EXPORTER_OTLP_HEADERS";
         private const string OtelServiceNameKey = "OTEL_SERVICE_NAME";
@@ -28,6 +31,9 @@ namespace Eaf.AspNetCore.Configuration
             otlpVariables = new Dictionary<string, string>
             {
                 { OtelExporterOtlpEndpointKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpEndpointKey) },
+                { OtelExporterOtlpTracesEndpointKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpTracesEndpointKey) },
+                { OtelExporterOtlpMetricsEndpointKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpMetricsEndpointKey) },
+                { OtelExporterOtlpLogsEndpointKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpLogsEndpointKey) },
                 { OtelExporterOtlpProtocolKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpProtocolKey) ?? "http/protobuf" },
                 { OtelExporterOtlpHeadersKey, System.Environment.GetEnvironmentVariable(OtelExporterOtlpHeadersKey) },
                 { "OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT", System.Environment.GetEnvironmentVariable("OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT") ?? "4095" },
@@ -106,6 +112,66 @@ namespace Eaf.AspNetCore.Configuration
             {
                 _otlpEndpoint = value;
                 otlpVariables[OtelExporterOtlpEndpointKey] = value;
+            }
+        }
+
+        private string _otlpTraceEndpoint = null;
+
+        /// <summary>
+        /// Gets or sets the target OTLP endpoint for traces. Falls back to <see cref="OtlpEndpoint"/>.
+        /// </summary>
+        public string OtlpTraceEndpoint
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_otlpTraceEndpoint))
+                    _otlpTraceEndpoint = otlpVariables[OtelExporterOtlpTracesEndpointKey] ?? OtlpEndpoint;
+                return _otlpTraceEndpoint;
+            }
+            set
+            {
+                _otlpTraceEndpoint = value;
+                otlpVariables[OtelExporterOtlpTracesEndpointKey] = value;
+            }
+        }
+
+        private string _otlpMetricsEndpoint = null;
+
+        /// <summary>
+        /// Gets or sets the target OTLP endpoint for metrics. Falls back to <see cref="OtlpEndpoint"/>.
+        /// </summary>
+        public string OtlpMetricsEndpoint
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_otlpMetricsEndpoint))
+                    _otlpMetricsEndpoint = otlpVariables[OtelExporterOtlpMetricsEndpointKey] ?? OtlpEndpoint;
+                return _otlpMetricsEndpoint;
+            }
+            set
+            {
+                _otlpMetricsEndpoint = value;
+                otlpVariables[OtelExporterOtlpMetricsEndpointKey] = value;
+            }
+        }
+
+        private string _otlpLogsEndpoint = null;
+
+        /// <summary>
+        /// Gets or sets the target OTLP endpoint for logs. Falls back to <see cref="OtlpEndpoint"/>.
+        /// </summary>
+        public string OtlpLogsEndpoint
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_otlpLogsEndpoint))
+                    _otlpLogsEndpoint = otlpVariables[OtelExporterOtlpLogsEndpointKey] ?? OtlpEndpoint;
+                return _otlpLogsEndpoint;
+            }
+            set
+            {
+                _otlpLogsEndpoint = value;
+                otlpVariables[OtelExporterOtlpLogsEndpointKey] = value;
             }
         }
 

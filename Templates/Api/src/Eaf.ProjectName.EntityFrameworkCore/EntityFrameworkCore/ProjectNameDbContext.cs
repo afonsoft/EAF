@@ -140,6 +140,22 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                 b.Property(e => e.Status).HasConversion<int>();
             });
 
+            modelBuilder.Entity<SubscribableEdition>(b =>
+            {
+                b.Property(e => e.DailyPrice).HasPrecision(18, 2);
+                b.Property(e => e.WeeklyPrice).HasPrecision(18, 2);
+                b.Property(e => e.MonthlyPrice).HasPrecision(18, 2);
+                b.Property(e => e.AnnualPrice).HasPrecision(18, 2);
+                b.Property(e => e.QuarterlyPrice).HasPrecision(18, 2);
+                b.Property(e => e.BiannualPrice).HasPrecision(18, 2);
+                b.Property(e => e.PermanentPrice).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<SubscriptionPayment>(b =>
+            {
+                b.Property(e => e.Amount).HasPrecision(18, 2);
+            });
+
             if (Database.IsSqlServer())
             {
                 modelBuilder.Entity<Abp.Auditing.AuditLog>(b =>
