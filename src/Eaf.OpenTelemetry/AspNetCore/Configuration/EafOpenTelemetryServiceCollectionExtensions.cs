@@ -161,32 +161,32 @@ namespace Eaf.AspNetCore.Configuration
 
         private static void AddOtlpExporter(TracerProviderBuilder builder, EafOpenTelemetryOptions options)
         {
-            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            if (!string.IsNullOrEmpty(options.OtlpTraceEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options, options.OtlpTraceEndpoint, "traces"));
             else
                 builder.AddOtlpExporter();
         }
 
         private static void AddOtlpExporter(OpenTelemetryLoggerOptions builder, EafOpenTelemetryOptions options)
         {
-            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            if (!string.IsNullOrEmpty(options.OtlpLogsEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options, options.OtlpLogsEndpoint, "logs"));
             else
                 builder.AddOtlpExporter();
         }
 
         private static void AddOtlpExporter(MeterProviderBuilder builder, EafOpenTelemetryOptions options)
         {
-            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            if (!string.IsNullOrEmpty(options.OtlpMetricsEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options, options.OtlpMetricsEndpoint, "metrics"));
             else
                 builder.AddOtlpExporter();
         }
 
         private static void AddOtlpExporter(LoggerProviderBuilder builder, EafOpenTelemetryOptions options)
         {
-            if (!string.IsNullOrEmpty(options.OtlpEndpoint))
-                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options));
+            if (!string.IsNullOrEmpty(options.OtlpLogsEndpoint))
+                builder.AddOtlpExporter(otlpOptions => ConfigureOtlpExporterOptions(otlpOptions, options, options.OtlpLogsEndpoint, "logs"));
             else
                 builder.AddOtlpExporter();
         }
@@ -215,12 +215,35 @@ namespace Eaf.AspNetCore.Configuration
                 builder.AddConsoleExporter();
         }
 
-        private static void ConfigureOtlpExporterOptions(OtlpExporterOptions otlpOptions, EafOpenTelemetryOptions options)
+        private static void ConfigureOtlpExporterOptions(OtlpExporterOptions otlpOptions, EafOpenTelemetryOptions options, string endpoint, string signal)
         {
-            otlpOptions.Endpoint = new Uri(options.OtlpEndpoint);
+            if (options.OtlpProtocol == OtlpExportProtocol.HttpProtobuf && IsBaseEndpoint(endpoint))
+                endpoint = AppendSignalPath(endpoint, signal);
+
+            otlpOptions.Endpoint = new Uri(endpoint);
             otlpOptions.Headers = options.OtlpHeaders;
             otlpOptions.Protocol = options.OtlpProtocol;
             otlpOptions.ExportProcessorType = options.OtlpExportProcessorType;
+        }
+
+        private static bool IsBaseEndpoint(string endpoint)
+        {
+            if (string.IsNullOrEmpty(endpoint))
+                return false;
+
+            if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+                return false;
+
+            var path = uri.AbsolutePath;
+            return string.IsNullOrEmpty(path) || path == "/";
+        }
+
+        private static string AppendSignalPath(string endpoint, string signal)
+        {
+            if (endpoint.EndsWith("/"))
+                return $"{endpoint}v1/{signal}";
+
+            return $"{endpoint}/v1/{signal}";
         }
     }
 }

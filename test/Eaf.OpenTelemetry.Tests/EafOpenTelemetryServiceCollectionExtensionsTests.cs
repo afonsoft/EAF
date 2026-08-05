@@ -1,8 +1,10 @@
 using Eaf.AspNetCore.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry.Exporter;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Xunit;
 
 namespace Eaf.OpenTelemetry.Tests
@@ -179,6 +181,50 @@ namespace Eaf.OpenTelemetry.Tests
 
             // Act & Assert
             Should.NotThrow(() => services.AddEafOpenTelemetry(configureOptions));
+        }
+
+        [Theory]
+        [InlineData("https://otlp.nr-data.net", "traces", "https://otlp.nr-data.net/v1/traces")]
+        [InlineData("https://otlp.nr-data.net/", "metrics", "https://otlp.nr-data.net/v1/metrics")]
+        [InlineData("https://otlp.nr-data.net/v1/traces", "traces", "https://otlp.nr-data.net/v1/traces")]
+        public void ConfigureOtlpExporterOptions_WithBaseEndpointAndHttpProtobuf_ShouldAppendSignalPath(string endpoint, string signal, string expectedEndpoint)
+        {
+            // Arrange
+            var options = new EafOpenTelemetryOptions
+            {
+                OtlpEndpoint = endpoint,
+                OtlpProtocol = OtlpExportProtocol.HttpProtobuf
+            };
+            var otlpOptions = new OtlpExporterOptions();
+            var method = typeof(EafOpenTelemetryServiceCollectionExtensions).GetMethod("ConfigureOtlpExporterOptions", BindingFlags.NonPublic | BindingFlags.Static);
+            method.ShouldNotBeNull();
+
+            // Act
+            method.Invoke(null, new object[] { otlpOptions, options, endpoint, signal });
+
+            // Assert
+            otlpOptions.Endpoint.ShouldBe(new Uri(expectedEndpoint));
+        }
+
+        [Fact]
+        public void ConfigureOtlpExporterOptions_WithBaseEndpointAndGrpc_ShouldNotAppendSignalPath()
+        {
+            // Arrange
+            var endpoint = "https://otlp.nr-data.net";
+            var options = new EafOpenTelemetryOptions
+            {
+                OtlpEndpoint = endpoint,
+                OtlpProtocol = OtlpExportProtocol.Grpc
+            };
+            var otlpOptions = new OtlpExporterOptions();
+            var method = typeof(EafOpenTelemetryServiceCollectionExtensions).GetMethod("ConfigureOtlpExporterOptions", BindingFlags.NonPublic | BindingFlags.Static);
+            method.ShouldNotBeNull();
+
+            // Act
+            method.Invoke(null, new object[] { otlpOptions, options, endpoint, "traces" });
+
+            // Assert
+            otlpOptions.Endpoint.ShouldBe(new Uri(endpoint));
         }
     }
 }

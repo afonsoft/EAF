@@ -280,6 +280,45 @@ namespace Eaf.OpenTelemetry.Tests
         }
 
         [Fact]
+        public void OtlpTraceEndpoint_WhenNotSet_ShouldFallbackToOtlpEndpoint()
+        {
+            // Arrange
+            var options = new EafOpenTelemetryOptions();
+            var endpoint = "https://otlp.example.com";
+
+            // Act
+            options.OtlpEndpoint = endpoint;
+
+            // Assert
+            options.OtlpTraceEndpoint.ShouldBe(endpoint);
+            options.OtlpMetricsEndpoint.ShouldBe(endpoint);
+            options.OtlpLogsEndpoint.ShouldBe(endpoint);
+        }
+
+        [Fact]
+        public void OtlpSignalEndpoints_WhenSet_ShouldUpdateOtlpVariables()
+        {
+            // Arrange
+            var options = new EafOpenTelemetryOptions();
+            var traceEndpoint = "https://otlp.example.com/v1/traces";
+            var metricsEndpoint = "https://otlp.example.com/v1/metrics";
+            var logsEndpoint = "https://otlp.example.com/v1/logs";
+
+            // Act
+            options.OtlpTraceEndpoint = traceEndpoint;
+            options.OtlpMetricsEndpoint = metricsEndpoint;
+            options.OtlpLogsEndpoint = logsEndpoint;
+
+            // Assert
+            options.OtlpTraceEndpoint.ShouldBe(traceEndpoint);
+            options.OtlpMetricsEndpoint.ShouldBe(metricsEndpoint);
+            options.OtlpLogsEndpoint.ShouldBe(logsEndpoint);
+            options.OtlpVariables["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"].ShouldBe(traceEndpoint);
+            options.OtlpVariables["OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"].ShouldBe(metricsEndpoint);
+            options.OtlpVariables["OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"].ShouldBe(logsEndpoint);
+        }
+
+        [Fact]
         public void OtlpHeaders_WhenEmpty_ShouldUseEnvironmentVariable()
         {
             // Arrange
