@@ -31,8 +31,6 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
   chatConnected = false;
   isSystemUser = true;
   showChatMenu = false;
-  languageDropdownExpanded = false;
-  userDropdownExpanded = false;
 
   constructor(
     injector: Injector,
@@ -85,20 +83,7 @@ export class TopBarComponent extends AppComponentBase implements OnInit {
 
   showChat(id: string): void {
     const side = document.getElementById(id);
-    side?.classList.add('mr-0');
-  }
-
-  toggleLanguageDropdown(): void {
-    this.languageDropdownExpanded = !this.languageDropdownExpanded;
-  }
-
-  toggleUserDropdown(): void {
-    this.userDropdownExpanded = !this.userDropdownExpanded;
-  }
-
-  toggleMobileMenu(): void {
-    const aside = document.getElementById('m_aside_left');
-    aside?.classList.toggle('m-aside-left--on');
+    side.classList.add('mr-0');
   }
 
   changeLanguage(languageName: string): void {
