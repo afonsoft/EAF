@@ -264,7 +264,7 @@ jobs:
           "${FTP_BASE_URL}/app_offline.htm"
         echo "app_offline.htm uploaded."
 
-    - name: 🗑️ Delete *.dll *.json *.config files from server via FTP
+    - name: 🗑️ Delete *.dll *.json *.config *.log files from server via FTP
       env:
         FTP_PUBLISH_USER: ${{ secrets.FTP_PUBLISH_USER }}
         FTP_PUBLISH_PASSWORD: ${{ secrets.FTP_PUBLISH_PASSWORD }}
@@ -276,10 +276,10 @@ jobs:
         echo "Listing remote files..."
         FILE_LIST=$(curl -s --insecure --ssl-reqd -l -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}")
 
-        echo "Deleting *.dll, *.json, *.config files from server root..."
+        echo "Deleting *.dll, *.json, *.config, *.log files from server root..."
         for FILE in $FILE_LIST; do
           case "$FILE" in
-            *.dll|*.json|*.config)
+            *.dll|*.json|*.config|*.log)
               echo "  Deleting $FILE ..."
               curl -s --insecure --ssl-reqd -u "${FTP_USER}:${FTP_PASS}" "${FTP_URL}" \
                 -Q "DELE /demo-eaf-api.afonsoft.com.br/$FILE" \
