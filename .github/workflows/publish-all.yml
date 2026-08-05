@@ -224,6 +224,34 @@ jobs:
           --self-contained \
           --ignore-failed-sources
 
+    - name: 🔧 Inject production connection string
+      env:
+        PROJECTNAME_CONNECTIONSTRINGS_DEFAULT: ${{ secrets.PROJECTNAME_CONNECTIONSTRINGS_DEFAULT }}
+      run: |
+        if [ -z "$PROJECTNAME_CONNECTIONSTRINGS_DEFAULT" ]; then
+          echo "Secret PROJECTNAME_CONNECTIONSTRINGS_DEFAULT not set, skipping connection string injection."
+          exit 0
+        fi
+
+        python3 - <<'PY'
+        import glob, json, os
+
+        conn_str = os.environ['PROJECTNAME_CONNECTIONSTRINGS_DEFAULT']
+        files = glob.glob('publish/appsettings*.json')
+        if not files:
+          print('No appsettings*.json files found in publish output.')
+
+        for path in files:
+          with open(path, 'r', encoding='utf-8-sig') as f:
+            data = json.load(f)
+          if 'ConnectionStrings' not in data:
+            data['ConnectionStrings'] = {}
+          data['ConnectionStrings']['Default'] = conn_str
+          with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+          print(f'Updated {path}')
+        PY
+
     - name: 🛑 Take site offline (upload app_offline.htm)
       continue-on-error: true
       env:
