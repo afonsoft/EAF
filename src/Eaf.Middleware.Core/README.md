@@ -55,7 +55,7 @@ Este módulo implementa os padrões de Domain-Driven Design (DDD) e segue a arqu
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Core --version 9.4.2
+dotnet add package Eaf.Middleware.Core --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto

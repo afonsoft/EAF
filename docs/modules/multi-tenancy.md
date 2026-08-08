@@ -223,7 +223,7 @@ O EAF/ABP permite que features e configurações da aplicação sejam específic
 
 ## 6. Considerações de Multi-Tenancy Específicas do EAF
 
-*   **Cadastro Público com Seleção/Criação de Tenant (EAF 9.4.3)**:
+*   **Cadastro Público com Seleção/Criação de Tenant (EAF 9.4.4)**:
     *   A tela de registro público passa a oferecer três modos: usar o tenant padrão (`DefaultTenant`), criar um novo tenant (`CreateNew`) ou solicitar ingresso em um tenant existente (`JoinExisting`).
     *   Todos os novos tenants criados pelo registro são vinculados automaticamente à edição `Free`.
     *   Ao criar um tenant, o primeiro usuário se torna administrador ativo e o tenant recebe as roles padrão `Admin` e `User`.

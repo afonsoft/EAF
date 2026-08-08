@@ -37,12 +37,12 @@ Integração com ASP.NET Core Hosting:
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.KeyVault 9.4.2
+- Eaf.KeyVault 9.4.4
 - Azure Key Vault ou OCI Vault configurado
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.KeyVault.AspNetCore --version 9.4.2
+dotnet add package Eaf.KeyVault.AspNetCore --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
