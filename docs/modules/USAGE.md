@@ -28,7 +28,7 @@ Este documento centraliza exemplos práticos de como usar cada módulo de middle
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Castle.Serilog --version 9.4.2
+dotnet add package Eaf.Castle.Serilog --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -212,7 +212,7 @@ Log.Logger = new LoggerConfiguration()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.KeyVault --version 9.4.2
+dotnet add package Eaf.KeyVault --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -353,12 +353,12 @@ public override void PreInitialize()
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.KeyVault 9.4.2
+- Eaf.KeyVault 9.4.4
 - Azure Key Vault ou OCI Vault configurado
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.KeyVault.AspNetCore --version 9.4.2
+dotnet add package Eaf.KeyVault.AspNetCore --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -540,7 +540,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Log4NetServiceBus --version 9.4.2
+dotnet add package Eaf.Log4NetServiceBus --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -724,11 +724,11 @@ public class MyService : ApplicationService
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.Middleware.Core 9.4.2
+- Eaf.Middleware.Core 9.4.4
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Application --version 9.4.2
+dotnet add package Eaf.Middleware.Application --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -907,7 +907,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.AzureActiveDirectory --version 9.4.2
+dotnet add package Eaf.Middleware.AzureActiveDirectory --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -1088,7 +1088,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Core --version 9.4.2
+dotnet add package Eaf.Middleware.Core --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -1216,7 +1216,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Ldap --version 9.4.2
+dotnet add package Eaf.Middleware.Ldap --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -1380,11 +1380,11 @@ public override void PreInitialize()
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.Middleware.Application 9.4.2
+- Eaf.Middleware.Application 9.4.4
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Web.Core --version 9.4.2
+dotnet add package Eaf.Middleware.Web.Core --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -1610,7 +1610,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Worker --version 9.4.2
+dotnet add package Eaf.Middleware.Worker --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -1822,7 +1822,7 @@ protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.OpenTelemetry --version 9.4.2
+dotnet add package Eaf.OpenTelemetry --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -2010,7 +2010,7 @@ services.AddEafOpenTelemetry(options =>
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SqlServerCache --version 9.4.2
+dotnet add package Eaf.SqlServerCache --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
@@ -2188,7 +2188,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SqliteCache --version 9.4.2
+dotnet add package Eaf.SqliteCache --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto

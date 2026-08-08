@@ -42,7 +42,7 @@ Configurações de conexão LDAP:
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Ldap --version 9.4.2
+dotnet add package Eaf.Middleware.Ldap --version 9.4.4
 ```
 
 ### Instalação via Referência de Projeto
