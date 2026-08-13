@@ -23,6 +23,11 @@ namespace Eaf.Middleware.Core.Editions
         /// <summary>
         /// A tenant is extending it's current edition (without changing the edition).
         /// </summary>
-        Extend = 3
+        Extend = 3,
+
+        /// <summary>
+        /// A tenant is downgrading it's edition.
+        /// </summary>
+        Downgrade = 4
     }
 }

@@ -24,5 +24,15 @@ namespace Eaf.Middleware.Payments
         /// Pagamento falhou.
         /// </summary>
         Failed = 3,
+
+        /// <summary>
+        /// Pagamento reembolsado.
+        /// </summary>
+        Refunded = 4,
+
+        /// <summary>
+        /// Pagamento atrasado / em inadimplência (recorrente).
+        /// </summary>
+        PastDue = 5,
     }
 }

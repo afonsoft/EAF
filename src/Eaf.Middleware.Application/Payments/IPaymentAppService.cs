@@ -27,6 +27,16 @@ namespace Eaf.Middleware.Payments
         Task<SubscriptionPaymentDto> ProcessPaymentAsync(long paymentId, ProcessPaymentInput input);
 
         /// <summary>
+        /// Realiza upgrade/downgrade de edição com cálculo de prorração.
+        /// </summary>
+        Task<PaymentRequestDto> UpgradeSubscriptionAsync(UpgradeSubscriptionInput input);
+
+        /// <summary>
+        /// Cancela uma assinatura recorrente.
+        /// </summary>
+        Task<SubscriptionPaymentDto> CancelRecurringAsync(long paymentId);
+
+        /// <summary>
         /// Lista os gateways de pagamento disponíveis e suas configurações.
         /// </summary>
         Task<List<PaymentGatewayDto>> GetGatewayListAsync();

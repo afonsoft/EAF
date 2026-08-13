@@ -1,3 +1,5 @@
+using System;
+
 namespace Eaf.Middleware.Payments.Dto
 {
     /// <summary>
@@ -9,6 +11,21 @@ namespace Eaf.Middleware.Payments.Dto
         /// Identificador externo do pagamento.
         /// </summary>
         public string ExternalPaymentId { get; set; }
+
+        /// <summary>
+        /// Identificador externo da assinatura (recorrente).
+        /// </summary>
+        public string GatewaySubscriptionId { get; set; }
+
+        /// <summary>
+        /// Número da fatura/invoice gerada.
+        /// </summary>
+        public string InvoiceNo { get; set; }
+
+        /// <summary>
+        /// Data de término da assinatura (quando informada pelo gateway).
+        /// </summary>
+        public DateTime? SubscriptionEndDate { get; set; }
 
         /// <summary>
         /// Gateway utilizado.

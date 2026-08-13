@@ -1,4 +1,5 @@
 using Eaf.Middleware.Core.Editions;
+using System.Collections.Generic;
 
 namespace Eaf.Middleware.Payments.Dto
 {
@@ -28,6 +29,11 @@ namespace Eaf.Middleware.Payments.Dto
         public decimal Amount { get; set; }
 
         /// <summary>
+        /// Indica se o pagamento deve ser recorrente.
+        /// </summary>
+        public bool IsRecurring { get; set; }
+
+        /// <summary>
         /// Descrição do pagamento.
         /// </summary>
         public string Description { get; set; }
@@ -36,5 +42,20 @@ namespace Eaf.Middleware.Payments.Dto
         /// Gateway de pagamento desejado.
         /// </summary>
         public string Gateway { get; set; }
+
+        /// <summary>
+        /// URL de redirecionamento em caso de sucesso.
+        /// </summary>
+        public string SuccessUrl { get; set; }
+
+        /// <summary>
+        /// URL de redirecionamento em caso de erro/cancelamento.
+        /// </summary>
+        public string ErrorUrl { get; set; }
+
+        /// <summary>
+        /// Produtos/linhas do pagamento.
+        /// </summary>
+        public List<SubscriptionPaymentProductInput> Products { get; set; } = new List<SubscriptionPaymentProductInput>();
     }
 }

@@ -6,9 +6,19 @@ namespace Eaf.Middleware.Payments.Dto
     public class PaymentRequestDto
     {
         /// <summary>
-        /// Identificador do pagamento gerado.
+        /// Identificador do pagamento no EAF.
+        /// </summary>
+        public long SubscriptionPaymentId { get; set; }
+
+        /// <summary>
+        /// Identificador externo do pagamento (token/payment intent/session).
         /// </summary>
         public string PaymentId { get; set; }
+
+        /// <summary>
+        /// Identificador externo do pagamento no gateway.
+        /// </summary>
+        public string GatewayPaymentId { get; set; }
 
         /// <summary>
         /// Gateway utilizado.

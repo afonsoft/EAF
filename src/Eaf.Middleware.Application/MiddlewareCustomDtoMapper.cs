@@ -107,6 +107,8 @@ namespace Eaf.Middleware
 
             //Payments
             configuration.CreateMap<SubscriptionPayment, SubscriptionPaymentDto>();
+            configuration.CreateMap<SubscriptionPaymentProduct, SubscriptionPaymentProductDto>();
+            configuration.CreateMap<SubscriptionPaymentProductInput, SubscriptionPaymentProduct>();
 
             configuration.CreateMap<User, UserEditDto>()
                 .ForMember(dto => dto.Password, options => options.Ignore())

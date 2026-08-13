@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-subscription-lifecycle` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | In Review |
 | Date | 2026-08-13 |
 | Target agent | Claude Code / Devin |
 
@@ -140,8 +140,8 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 **Acceptance criteria:**
 
-- [ ] `PaymentManager.CreatePayment` creates a pending payment.
-- [ ] Products total amount equals payment amount.
+- [x] `PaymentManager.CreatePayment` creates a pending payment.
+- [x] Products total amount equals payment amount.
 - [ ] Angular redirects to `account/gateway-selection?paymentId={id}`.
 
 ### FR-002: Gateway callback processing
@@ -157,8 +157,8 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 **Acceptance criteria:**
 
-- [ ] Successful payment updates `Tenant.SubscriptionEndDateUtc`.
-- [ ] `InvoiceNo` generated and stored.
+- [x] Successful payment updates `Tenant.SubscriptionEndDateUtc`.
+- [x] `InvoiceNo` generated and stored.
 - [ ] User redirected to `SuccessUrl`.
 
 ### FR-003: Recurring payments (Stripe)
@@ -174,8 +174,8 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 **Acceptance criteria:**
 
-- [ ] Recurring Stripe payment creates a subscription.
-- [ ] Webhook updates payment and tenant dates.
+- [x] Recurring Stripe payment creates a subscription.
+- [x] Webhook updates payment and tenant dates.
 - [ ] Failed payment sets tenant into grace period (optional).
 
 ### FR-004: Proration and upgrade/downgrade
@@ -190,8 +190,8 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 **Acceptance criteria:**
 
-- [ ] Upgrade triggers proration payment.
-- [ ] Tenant gets new edition immediately after successful proration payment.
+- [x] Upgrade triggers proration payment.
+- [x] Tenant gets new edition immediately after successful proration payment.
 - [ ] Downgrade effective at next billing cycle.
 
 ### FR-005: Background renewal/expiry job
@@ -206,7 +206,7 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 **Acceptance criteria:**
 
-- [ ] Job runs daily and logs actions.
+- [x] Job runs daily and logs actions.
 - [ ] Reminder notifications created.
 - [ ] Expired tenants see downgrade/renewal prompt.
 
