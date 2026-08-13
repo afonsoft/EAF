@@ -1,178 +1,239 @@
 # EAF — ASP.NET Zero Functional Gap Analysis
 
-## Summary
+## 0. SPEC Metadata
 
-Analysis of [ASP.NET Zero Angular documentation](https://docs.aspnetzero.com/aspnet-core-angular/latest/) against the current EAF middleware and `Templates/Angular/Eaf.ProjectName.UI`. Scope: **functional features only**. Layout, themes and visual redesign are out of scope because Metronic 8 assets cannot be reused without a license.
+| Field | Value |
+|---|---|
+| Feature name | ASP.NET Zero Functional Gap Analysis |
+| Product / System | EAF Middleware + Angular Template |
+| Module / Bounded Context | Cross-cutting / Analysis |
+| Change type | Roadmap / Analysis |
+| Repository | `github.com/afonsoft/EAF` |
+| Suggested branch | `docs/zero-gap-analysis` |
+| Technical owner | Core Team |
+| Status | Approved |
+| Date | 2026-08-13 |
+| Target agent | Any |
 
-## 1. Already present in EAF (2026-08)
+## 1. Executive Summary
 
-| Feature | EAF evidence | Notes |
-|---|---|---|
-| User / Role / Tenant management | `src/app/admin/users`, `roles`, `tenants` | Complete UI + backend. |
-| Language / localization management | `src/app/admin/languages` | Backend `LanguageAppService` exists. |
-| Host / Tenant settings | `src/app/admin/settings` | Host and tenant settings pages exist. |
-| Audit logs & Entity history | `src/app/admin/audit-logs`, `Auditing/EntityChange*` | Fully implemented. |
-| Maintenance | `src/app/admin/maintenance/maintenance.component.*` | Cache, logs, Web site logs. |
-| Notifications | `NotificationAppService`, notifications components | In-app and SignalR. |
-| Webhooks | `WebHooks` services and tests | Subscription, send attempts, events. |
-| Chat | `chat-bar.component`, `ChatSignalrService`, `ChatAppService` | Real-time chat. |
-| Token-based authentication | `TokenAuthController`, `TokenAuthServiceProxy` | JWT + refresh tokens. |
-| Two-factor authentication | `TwoFactorCodeCacheExtensions`, `HostSettingsAppService` TwoFactor settings | Backend ready. |
-| Social / external logins | `ExternalAuthConfigurer`, `TokenAuthController` external auth | Google, Azure AD, OIDC, etc. |
-| LDAP / Active Directory | `Eaf.Middleware.Ldap` | Exists. |
-| Azure Key Vault | `Eaf.KeyVault` | Exists. |
-| Background jobs / Hangfire | `MiddlewareWebCoreModule` Hangfire config | Exists. |
-| Real-time SignalR | Chat / Notifications | Present. |
-| Web API Swagger UI | `Swashbuckle` integration | Present. |
-| Visual settings / UI customization | `src/app/admin/ui-customization` | Theme selection exists. |
-| Organization Units | `src/Eaf.Middleware.Application/Organizations/OrganizationUnitAppService.cs` + `src/app/admin/organization-units` | **Implemented** after this analysis. |
-| Mass Notifications | `MassNotificationAppService` + `src/app/admin/mass-notifications` | **Implemented** after this analysis. |
-| User Delegation | `UserDelegationAppService` + `src/app/admin/user-delegations` | **Implemented** after this analysis. |
-| Tenant Join Requests | `TenantJoinRequest` + `src/app/admin/tenant-join-requests` | **Implemented** after this analysis. |
-| Dashboard | `DashboardAppService` + `src/app/main/dashboard` | **Implemented** after this analysis. |
-| Payment gateway abstraction | `IPaymentGateway`, `PaymentGatewayResolver`, `PaymentAppService`, Stripe/PayPal/PagSeguro/MercadoPago + `src/app/admin/payments` | **Implemented** after this analysis. |
-| Edition management | `EditionsComponent`, `EditionAppService` | CRUD list exists; no feature/price integration yet. |
-| Rate limiting | `Eaf.Middleware.Core/RateLimiting`, `IRateLimitManager` | Core engine exists; admin UI not present. |
+### Problem
 
-## 2. Functional gaps compared to ASP.NET Zero (2026-08)
+There is no public, evidence-based mapping of ASP.NET Zero functional features against the current EAF implementation, making it hard to decide what to build next.
 
-### 2.1 Subscription & Payment System (high value)
+### Objective
 
-ASP.NET Zero exposes a full subscription lifecycle (`IPaymentManager`, `SubscriptionAppService`, `SubscriptionPayment`/`SubscriptionPaymentProduct`, invoice generation, recurring/proration, expiration workers, edition → tenant assignment with trial days and fallback edition).
+Maintain a living functional gap analysis based on ASP.NET Zero public documentation and the actual EAF codebase.
 
-EAF currently has:
+### Expected outcome
 
-- `SubscribableEdition`, `PaymentPeriodType`/`EditionPaymentType` enums as legacy remnants.
-- **Payment gateway abstraction** implemented (`IPaymentGateway` + Stripe/PayPal/PagSeguro/MercadoPago).
-- **No** `SubscriptionAppService`, tenant subscription UI, invoice worker, recurring payments or fallback edition logic.
+- A documented list of already implemented and missing features.
+- A prioritized backlog of missing features.
+- Clear evidence from `src/` and `Templates/` for each implemented item.
 
-**Recommended approach:**
+### Out of scope
 
-1. Add `SubscriptionPayment` and `SubscriptionPaymentProduct` entities.
-2. Build `SubscriptionAppService` on top of `PaymentAppService`.
-3. Create tenant subscription Angular page (`/app/main/subscription` or `/app/admin/subscription`).
-4. Add background workers for expiration notifications and tenant deactivation/fallback.
+- Layout, themes, and visual redesign (Metronic 8 licensing).
+- Copying Zero code or assets.
 
-### 2.2 SMS Provider (medium value)
+## 2. Agent Role
 
-ASP.NET Zero supports passwordless login and mass notifications by SMS.
+Analyst / architect. Use public Zero docs and EAF source; do not invent features.
 
-EAF has no SMS module.
+## 3. Agent Autonomy Level
 
-**Recommended approach:** add `Eaf.Sms` module with Twilio / AWS SNS providers and an `ISmsSender` interface.
+**0 — Research**
 
-### 2.3 MailKit Module (medium value)
+## 4. Product Context
 
-ASP.NET Zero has rich email templates and providers.
+EAF is an open-source ABP middleware. The gap analysis compares it to the commercial ASP.NET Zero Angular template.
 
-EAF has basic email but no `MailKit` module.
+### Relevant stack
 
-**Recommended approach:** add `Eaf.MailKit` module with templates, SendGrid / Mailgun providers and attachment support.
+- .NET 10, ABP 10.5, Angular 20
 
-### 2.4 Blob Storage (medium value)
+### Context files the agent must read before implementation
 
-ASP.NET Zero has file management and tenant assets.
+- `CLAUDE.md`
+- `.specs/eaf-aspnetzero-feature-adoption.spec.md`
+- `.specs/eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md`
+- `.specs/eaf-next-steps-q3-2026.spec.md`
 
-EAF has no `BlobStoring` module.
+## 5. Task Definition
 
-**Recommended approach:** add `Eaf.BlobStoring` with Azure Blob, AWS S3, FileSystem and Database providers.
+### Main task
 
-### 2.5 Redis Cache (medium value)
+Analyze ASP.NET Zero public features and compare them to the current EAF implementation.
 
-ASP.NET Zero supports distributed Redis cache out of the box.
+### Subtasks
 
-EAF has `Eaf.SqlServerCache` and `Eaf.SqliteCache` but no Redis module.
+- Inventory implemented features with source evidence.
+- List missing features with business value.
+- Maintain priority order.
 
-**Recommended approach:** add `Eaf.RedisCache` implementing `ICacheManager`.
+### Do not do
 
-### 2.6 SignalR Module (medium value)
+- Do not copy Zero code.
+- Do not claim implementation without source evidence.
 
-ASP.NET Zero has dedicated real-time notifications and chat backends.
+## 6. Functional Requirements
 
-EAF has a `ChatHub` but no formal `Eaf.SignalR` middleware module.
+### FR-001: Implemented features
 
-**Recommended approach:** create `Eaf.SignalR` / `Eaf.SignalR.AspNetCore` module with notification and chat backplane.
+**Description:** List features already in EAF with evidence.
 
-### 2.7 Push Notifications (medium value)
+**Acceptance criteria:**
 
-ASP.NET Zero supports push for mobile apps.
+- [ ] Each implemented feature links to a source file or directory.
+- [ ] Status is current.
 
-EAF PWA has Service Worker configured but no push logic.
+### FR-002: Missing features
 
-**Recommended approach:** add `Eaf.PushNotifications` (Web Push VAPID) and PWA integration.
+**Description:** List missing features, grouped by area, with priority.
 
-### 2.8 Passwordless Login (low-medium value)
+**Acceptance criteria:**
 
-ASP.NET Zero supports passwordless login via email/SMS code.
+- [ ] Each gap has a recommended approach.
+- [ ] Priority is justified by business value and effort.
 
-EAF has no passwordless flow.
+## 7. Business Rules
 
-**Recommended approach:** add `PasswordlessLoginManager` and UI pages.
+### BR-001: Evidence-based
 
-### 2.9 QR Login (low-medium value)
+All EAF status claims must cite source files or pages.
 
-ASP.NET Zero allows QR login from the mobile app.
+## 8. Domain Modeling
 
-EAF has no QR login.
+N/A.
 
-**Recommended approach:** deferred until mobile app planning.
+## 9. Expected Architecture
 
-### 2.10 Tenant Impersonation (low-medium value)
+N/A.
 
-ASP.NET Zero allows host admins to impersonate a tenant user.
+## 10. API Contracts
 
-EAF has user delegation but no tenant impersonation.
+N/A.
 
-**Recommended approach:** extend `UserDelegation`/`PermissionChecker` for cross-tenant support.
+## 11. Application Contracts
 
-### 2.11 Social Account Linking (low value)
+N/A.
 
-ASP.NET Zero lets users connect/disconnect external providers from their profile.
+## 12. Persistence and Data
 
-EAF supports external login at authentication time but no linked accounts page.
+N/A.
 
-**Recommended approach:** add `UserLogin` management AppService and profile section.
+## 13. Integrations
 
-### 2.12 Setup Page (low value)
+N/A.
 
-ASP.NET Zero has a `/setup` page for initial DB creation.
+## 14. Edge Cases and Error Scenarios
 
-EAF has no setup page; migrations are run via CLI/deploy scripts.
+N/A.
 
-**Recommended approach:** keep as documentation/tooling unless product requires it.
+## 15. Few-Shot Examples
 
-## 3. Priority Order for the EAF Roadmap
+N/A.
 
-Order balances implementation effort and business value:
+## 16. Non-Functional Requirements
 
-1. **Redis Cache** — foundational for scale; aligns with ABP `ICacheManager`.
-2. **MailKit Module** — improves email deliverability and templates.
-3. **Blob Storage** — enables file uploads and tenant assets.
-4. **SignalR Module** — formalizes real-time backend.
-5. **Subscription & Payment System** — high business value for SaaS; builds on existing payment gateways.
-6. **SMS Provider** — enables passwordless and mass notifications.
-7. **Push Notifications** — depends on SignalR/PWA.
-8. **Passwordless Login** — security/UX improvement.
-9. **Tenant Impersonation** — support scenarios.
-10. **Social Account Linking** — nice-to-have.
-11. **QR Login** — deferred until mobile app.
-12. **Setup Page** — only if required for zero-config deployment.
+- Update monthly or after each release.
+- Language: en-us.
 
-## 4. Out of Scope
+## 17. Mandatory Guardrails
 
-The following ASP.NET Zero capabilities are intentionally excluded because they depend on Metronic 8 or proprietary Zero assets:
+Do not use Zero proprietary information beyond public docs.
 
-- New Metronic themes / visual design system.
-- Quick theme switcher UI beyond existing `ui-customization`.
+## 18. Expected Tests
+
+N/A.
+
+## 19. Acceptance Criteria
+
+- [ ] Implemented list is evidence-based.
+- [ ] Gap list is prioritized.
+- [ ] Out-of-scope items are explicit.
+
+## 20. Implementation Plan
+
+1. Review Zero public docs.
+2. Map to EAF source.
+3. Document implemented and missing features.
+4. Update priority order.
+
+## 21. Rollback Strategy
+
+N/A.
+
+## 22. Risks and Mitigations
+
+| Risk | Impact | Probability | Mitigation |
+|---|---|---:|---|
+| Zero docs change | Low | Medium | Reference version and update |
+| Claims become stale | Medium | High | Update per release |
+
+## 23. Definition of Done
+
+- [ ] SPEC reviewed.
+- [ ] Evidence cross-checked.
+- [ ] Roadmap references this analysis.
+
+## 24. Key Reminder
+
+> The SPEC is the contract. Use public docs and source evidence only.
+
+## Already Implemented in EAF (2026-08)
+
+| Feature | EAF evidence |
+|---|---|
+| Users/Roles/Tenants | `src/app/admin/users`, `roles`, `tenants` |
+| Localization management | `src/app/admin/languages` |
+| Host/tenant settings | `src/app/admin/settings` |
+| Audit logs & entity history | `src/app/admin/audit-logs`, `Auditing/EntityChange*` |
+| Maintenance | `src/app/admin/maintenance` |
+| Notifications | `NotificationAppService`, notifications components |
+| Webhooks | `WebHooks` services and tests |
+| Chat | `chat-bar.component`, `ChatSignalrService`, `ChatAppService` |
+| Token-based authentication | `TokenAuthController`, `TokenAuthServiceProxy` |
+| Two-factor authentication | `TwoFactorCodeCacheExtensions`, `HostSettingsAppService` |
+| Social/external logins | `ExternalAuthConfigurer`, `TokenAuthController` |
+| LDAP / Azure AD | `Eaf.Middleware.Ldap`, `Eaf.Middleware.AzureActiveDirectory` |
+| Key Vault | `Eaf.KeyVault` |
+| Background jobs | Hangfire in `MiddlewareWebCoreModule` |
+| SignalR (chat/notifications) | Hubs and services exist |
+| Swagger | `Swashbuckle` integration |
+| UI customization | `src/app/admin/ui-customization` |
+| Organization Units | `OrganizationUnitAppService`, `admin/organization-units` |
+| Mass Notifications | `MassNotificationAppService`, `admin/mass-notifications` |
+| User Delegation | `UserDelegationAppService`, `admin/user-delegations` |
+| Tenant Join Requests | `TenantJoinRequest`, `admin/tenant-join-requests` |
+| Dashboard | `DashboardAppService`, `main/dashboard` |
+| Payment gateway | `IPaymentGateway`, resolver, gateways, `admin/payments` |
+
+## Functional Gaps (2026-08)
+
+| # | Feature | Priority | Recommended approach |
+|---|---|---:|---|
+| 1 | Subscription & payment lifecycle | High | `SubscriptionPayment` entities + `SubscriptionAppService` |
+| 2 | SMS provider | Medium | `Eaf.Sms` (Twilio / SNS) |
+| 3 | MailKit module | Medium | `Eaf.MailKit` |
+| 4 | Blob storage | Medium | `Eaf.BlobStoring` |
+| 5 | Redis cache | Medium | `Eaf.RedisCache` |
+| 6 | SignalR module | Medium | `Eaf.SignalR` |
+| 7 | Push notifications | Medium | `Eaf.PushNotifications` |
+| 8 | Passwordless login | Low-medium | `PasswordlessLoginManager` |
+| 9 | QR login | Low-medium | Deferred until mobile app |
+| 10 | Tenant impersonation | Low-medium | Extend `UserDelegation` |
+| 11 | Social account linking | Low | Profile settings |
+| 12 | Setup page | Low | Documentation/tooling |
+
+## Out of Scope
+
+- Metronic 8 themes / visual design system.
+- Quick theme switcher beyond existing `ui-customization`.
 - MAUI-specific UI layouts.
 
-## 5. Implementation Status (2026-08)
-
-Several ASP.NET Zero features (Organization Units, Mass Notifications, User Delegation, Tenant Join Requests, Dashboard, Payment Gateway) have been implemented since the original gap analysis. Remaining gaps are concentrated in infrastructure modules (Redis, Blob, MailKit, SignalR, SMS, Push) and subscription lifecycle.
-
-## 6. References
+## References
 
 - ASP.NET Zero Angular docs: <https://docs.aspnetzero.com/aspnet-core-angular/latest/>
-- EAF repository: `afonsoft/EAF`
 - `.specs/eaf-aspnetzero-feature-adoption.spec.md`
-- `.specs/eaf-backend-modularization.spec.md`
+- `.specs/eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md`

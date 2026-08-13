@@ -121,6 +121,38 @@ Each module's .csproj MUST include:
 </ItemGroup>
 ```
 
+## New Module Checklist
+
+When implementing a new EAF middleware module (e.g., `Eaf.RedisCache`, `Eaf.MailKit`, `Eaf.BlobStoring`, `Eaf.SignalR`):
+
+1. Open the corresponding `.specs/eaf-module-*.spec.md` and read the source files it references.
+2. Create a new project folder under `src/` using the standard module structure:
+   ```
+   src/Eaf.ModuleName/
+   ├── Eaf.ModuleName.csproj
+   ├── README.md
+   ├── EafModuleNameModule.cs
+   ├── Configuration/
+   ├── Runtime/
+   └── ...
+   ```
+3. Declare `[DependsOn(typeof(AbpKernelModule))]` and any other required EAF modules.
+4. Implement configuration, stores/managers, and extension methods following the existing `Eaf.SqlServerCache` / `Eaf.SqliteCache` patterns.
+5. Add a `README.md` with description, dependencies, installation, usage, and testing.
+6. Add a mirror test project under `test/` and follow the BDD `Dado_Quando_Entao` naming convention in Portuguese.
+7. Update `.specs/eaf-specs-index-and-roadmap-2026.md` and `docs/` if necessary.
+
+### .specs References
+
+- `eaf-module-redis-cache.spec.md`
+- `eaf-module-mailkit.spec.md`
+- `eaf-module-blob-storage.spec.md`
+- `eaf-module-signalr.spec.md`
+- `eaf-module-subscription-payments.spec.md`
+- `eaf-module-dynamic-entity-properties.spec.md`
+- `eaf-module-openiddict.spec.md`
+- `eaf-module-sms-push-notifications.spec.md`
+
 ## Module-Specific Guidelines
 
 ### Eaf.Middleware.Core
