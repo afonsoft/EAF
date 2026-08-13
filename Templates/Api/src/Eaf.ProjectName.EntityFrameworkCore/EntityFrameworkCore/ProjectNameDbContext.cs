@@ -73,6 +73,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<UserTenantMembership> UserTenantMemberships { get; set; }
         public virtual DbSet<TenantJoinRequest> TenantJoinRequests { get; set; }
         public virtual DbSet<SubscriptionPayment> SubscriptionPayments { get; set; }
+        public virtual DbSet<SubscriptionPaymentProduct> SubscriptionPaymentProducts { get; set; }
         public virtual DbSet<MassNotification> MassNotifications { get; set; }
         public virtual DbSet<UserDelegation> UserDelegations { get; set; }
         public virtual DbSet<SubscribableEdition> SubscribableEditions { get; set; }
@@ -154,6 +155,16 @@ namespace Eaf.ProjectName.EntityFrameworkCore
             modelBuilder.Entity<SubscriptionPayment>(b =>
             {
                 b.Property(e => e.Amount).HasPrecision(18, 2);
+                b.HasMany(e => e.Products)
+                    .WithOne(e => e.SubscriptionPayment)
+                    .HasForeignKey(e => e.SubscriptionPaymentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SubscriptionPaymentProduct>(b =>
+            {
+                b.Property(e => e.Amount).HasPrecision(18, 2);
+                b.Property(e => e.TotalAmount).HasPrecision(18, 2);
             });
 
             if (Database.IsSqlServer())
