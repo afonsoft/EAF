@@ -1,8 +1,7 @@
-﻿import { Component, Injector, ViewChild } from '@angular/core';
+﻿import { Component, Injector } from '@angular/core';
 import { AppComponentBase } from '@shared/common/app-component-base';
 import { AuditLogServiceProxy, EntityChangeListDto, EntityPropertyChangeDto } from '@shared/service-proxies/service-proxies';
 import * as moment from 'moment';
-import { ModalDirective } from 'ngx-bootstrap/modal';
 
 @Component({
   standalone: false,
@@ -10,10 +9,8 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
   templateUrl: './entity-change-detail-modal.component.html',
 })
 export class EntityChangeDetailModalComponent extends AppComponentBase {
-  @ViewChild('entityChangeDetailModal', { static: true })
-  modal: ModalDirective;
-
   active = false;
+  visible = false;
   entityPropertyChanges: EntityPropertyChangeDto[];
   entityChange: EntityChangeListDto;
 
@@ -45,24 +42,24 @@ export class EntityChangeDetailModalComponent extends AppComponentBase {
   }
 
   isUpdated(): boolean {
-    return this.entityChange.changeTypeName == 'Updated';
+    return this.entityChange.changeTypeName === 'Updated';
   }
 
   show(record: EntityChangeListDto): void {
-
     this.active = true;
     this.entityChange = record;
+    this.entityPropertyChanges = [];
 
     this._auditLogService.getEntityPropertyChanges(record.id).subscribe(result => {
       this.entityPropertyChanges = result;
     });
 
-    this.modal.show();
+    this.visible = true;
   }
 
   close(): void {
     this.active = false;
-    this.modal.hide();
+    this.visible = false;
   }
 
   private trimQuotes(value: string): string {

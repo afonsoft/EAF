@@ -1,5 +1,4 @@
 import { FormsModule } from '@angular/forms';
-import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { AuditLogsComponent } from './audit-logs.component';
@@ -40,7 +39,7 @@ describe('AuditLogsComponent', () => {
     setupEafGlobals();
     TestBed.configureTestingModule({
       declarations: [AuditLogsComponent, MockLocalizePipe],
-      imports: [FormsModule, BsDatepickerModule.forRoot()],
+      imports: [FormsModule],
       providers: [
         { provide: AuditLogServiceProxy, useClass: MockAuditLogServiceProxy },
         { provide: FileDownloadService, useClass: MockFileDownloadService },

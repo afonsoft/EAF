@@ -13,14 +13,22 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BsDatepickerConfig, BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { TreeDragDropService } from 'primeng/api';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { ButtonModule } from 'primeng/button';
+import { CalendarModule } from 'primeng/calendar';
 import { ContextMenuModule } from 'primeng/contextmenu';
+import { DialogModule } from 'primeng/dialog';
 import { DragDropModule } from 'primeng/dragdrop';
+import { DropdownModule } from 'primeng/dropdown';
 import { EditorModule } from 'primeng/editor';
+import { InputMaskModule } from 'primeng/inputmask';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
 import { NgxFileDropModule } from 'ngx-file-drop';
 import { FileUploadModule as PrimeNgFileUploadModule } from 'primeng/fileupload';
-import { InputMaskModule } from 'primeng/inputmask';
 import { PaginatorModule } from 'primeng/paginator';
+import { TabViewModule } from 'primeng/tabview';
 import { TableModule } from 'primeng/table';
+import { TooltipModule as PrimeNgTooltipModule } from 'primeng/tooltip';
 import { TreeModule } from 'primeng/tree';
 
 import { AdminRoutingModule } from './admin-routing.module';
@@ -89,6 +97,14 @@ import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-
     EditorModule,
     InputMaskModule,
     NgxChartsModule,
+    DialogModule,
+    ButtonModule,
+    InputTextModule,
+    CalendarModule,
+    DropdownModule,
+    TabViewModule,
+    InputNumberModule,
+    PrimeNgTooltipModule,
   ],
   declarations: [
     UsersComponent,
