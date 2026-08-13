@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup>
-		<Version>9.4.4</Version>
+		<Version>9.4.5</Version>
 		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277;CS8632</NoWarn>
 		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3253;MSB3277</MSBuildWarningsAsMessages>
 		<PackageProjectUrl>https://github.com/afonsoft/EAF</PackageProjectUrl>
