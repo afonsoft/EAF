@@ -74,7 +74,7 @@ jobs:
     - name: 🛡️ Run Snyk (.NET)
       if: steps.snyk-token-check.outputs.has_token == 'true'
       id: snyk-dotnet
-      uses: snyk/actions/dotnet@8e119fbb6c251787721d34ba683ed48eba792766   # master
+      uses: snyk/actions/dotnet@12140f4059e244892ae643824a95459a102120dd   # master
       continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -84,7 +84,7 @@ jobs:
     - name: 🛡️ Snyk UI Scan
       if: steps.snyk-token-check.outputs.has_token == 'true'
       id: snyk-node
-      uses: snyk/actions/node@8e119fbb6c251787721d34ba683ed48eba792766   # master
+      uses: snyk/actions/node@12140f4059e244892ae643824a95459a102120dd   # master
       continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
