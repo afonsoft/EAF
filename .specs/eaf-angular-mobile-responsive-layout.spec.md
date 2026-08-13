@@ -1,83 +1,90 @@
-# EAF Angular — Layout Responsivo Mobile
+# EAF Angular — Mobile Responsive Layout
 
-## Resumo
-Melhorar a experiência do template Angular do EAF em telas pequenas, substituindo o comportamento desktop-first atual por um layout mobile-first, com navegação adaptativa, menus off-canvas otimizados e componentes administrativos que funcionem bem em smartphones e tablets.
+## Summary
 
-## Motivação
-- O template atual (`Templates/Angular/Eaf.ProjectName.UI`) é baseado em Metronic antigo, com estrutura `m-grid--desktop` e poucas regras `@media` próprias.
-- Apenas `chat-bar.component.css` possui media query específica (`max-width: 576px`); os demais componentes dependem do bundle Metronic.
-- ASP.NET Zero adota **Metronic 8 + Bootstrap 5**, oferecendo grid responsivo nativo, 13+ temas, dark mode e componentes mobile-first.
-- Usuários finais acessam cada vez mais dashboards e aprovações pelo celular.
+Improve the EAF Angular template experience on small screens by replacing the current desktop-first behavior with a mobile-first layout, adaptive navigation, optimized off-canvas menus and admin components that work well on smartphones and tablets.
 
-## Estado Atual
-- Versão do Angular: `^20.3.26` (já moderna).
-- Biblioteca de UI: `primeng ^17.17.0`, `ngx-bootstrap ^12.0.0`, `ngx-scrollbar`.
-- CSS/Layout: `style.bundle.css` minificado por tema, classes Metronic (`m-header`, `m-aside-left`, `m-wrapper`), mix de Bootstrap 4/Metronic antigo.
-- Sidebar: `m-aside-left` é fixa em desktop; em mobile, o controle de abrir/fechar é limitado.
-- Chat: `chatSideRight` já tem largura 100vw em mobile, mas o header, rodapé e lista de amigos não foram pensados para touch.
-- Tabelas/admin: `primeng-datatable-container` requer scroll horizontal em telas pequenas.
+## Motivation
 
-## Proposta de Mudanças
+- The current template (`Templates/Angular/Eaf.ProjectName.UI`) is based on legacy Metronic, with `m-grid--desktop` structure and few custom `@media` rules.
+- Only `chat-bar.component.css` has a specific mobile media query (`max-width: 576px`); other components rely on the Metronic bundle.
+- ASP.NET Zero uses **Metronic 8 + Bootstrap 5**, offering native responsive grid, 13+ themes, dark mode and mobile-first components.
+- End users increasingly access dashboards and approvals from mobile devices.
 
-### 1. Migrar para Bootstrap 5 + Metronic 8 (ou design system próprio)
-- Substituir o bundle Metronic antigo por CSS/SASS do **Metronic 8** ou por **Bootstrap 5 + tema customizado EAF**.
-- Reaproveitar as variáveis CSS do Bootstrap 5 (`--bs-breakpoint-sm|md|lg|xl`) para responsividade consistente.
-- Manter as cores e identidade EAF (`#FF7020`) via CSS variables.
+## Current State
 
-### 2. Refatorar componentes de layout
+- Angular: `^20.3.26`.
+- UI libraries: `primeng ^17.17.0`, `ngx-bootstrap ^12.0.0`, `ngx-scrollbar`.
+- CSS/Layout: per-theme minified `style.bundle.css`, Metronic classes (`m-header`, `m-aside-left`, `m-wrapper`), mix of Bootstrap 4 / legacy Metronic.
+- Sidebar: `m-aside-left` is fixed on desktop; mobile open/close control is limited.
+- Chat: `chatSideRight` already has `100vw` on mobile, but header, footer and friend list are not touch-optimized.
+- Tables/admin: `primeng-datatable-container` requires horizontal scroll on small screens.
+
+## Proposed Changes
+
+### 1. Adopt Bootstrap 5 + Metronic 8 (or custom EAF design system)
+- Replace legacy Metronic bundle with **Metronic 8 CSS/SASS** or **Bootstrap 5 + custom EAF theme**.
+- Reuse Bootstrap 5 variables (`--bs-breakpoint-sm|md|lg|xl`) for consistent responsiveness.
+- Keep EAF identity (`#FF7020`) through CSS variables.
+
+### 2. Refactor Layout Components
 - `default-layout.component.html`, `theme2/3/4-layout.component.html`:
-  - Trocar `m-stack--desktop` e `m-grid--ver-desktop` por grid flex/CSS Grid.
-  - Adicionar classes condicionais para off-canvas: `offcanvas offcanvas-start` no sidebar e `offcanvas offcanvas-end` para painéis (chat, notificações).
+  - Replace `m-stack--desktop` and `m-grid--ver-desktop` with Flex / CSS Grid.
+  - Add conditional off-canvas classes: `offcanvas offcanvas-start` for sidebar and `offcanvas offcanvas-end` for panels (chat, notifications).
 - `topbar.component.html`:
-  - Mover itens de menu para um menu hamburguer em telas < 992px.
-  - Agrupar notificações, chat e perfil em uma bottom navigation ou em um top dropdown compacto.
+  - Move menu items into a hamburger menu on screens < 992px.
+  - Group notifications, chat and profile into a bottom navigation or compact top dropdown.
 - `side-bar-menu.component.ts/html`:
-  - Transformar sidebar em drawer mobile, com gestos de swipe e overlay.
-  - Adicionar toggle fixo flutuante para abrir/fechar.
+  - Turn sidebar into a mobile drawer with swipe gestures and overlay.
+  - Add floating toggle to open/close.
 
-### 3. Responsividade por breakpoints
+### 3. Breakpoints
 ```css
 @media (max-width: 575.98px) { /* portrait phones */ }
 @media (min-width: 576px) and (max-width: 991.98px) { /* tablets */ }
 @media (min-width: 992px) { /* desktop */ }
 ```
-- Em mobile (< 576px): header fixo no topo, sidebar escondida, conteúdo principal com padding seguro para bottom navigation.
-- Em tablet (576-991px): sidebar colapsada em ícones, header expandido.
-- Em desktop (>= 992px): sidebar expandida, layout atual.
+- Mobile (< 576px): fixed top header, hidden sidebar, main content with safe padding for bottom navigation.
+- Tablet (576–991px): collapsed icon sidebar, expanded header.
+- Desktop (>= 992px): expanded sidebar, current layout.
 
-### 4. Componentes administrativos
-- Tabelas: usar `p-table` do PrimeNG com `responsiveLayout="scroll"` ou `stack`.
-- Formulários: empilhar campos em mobile (`col-12` por padrão, `col-md-6`/`col-lg-4` em desktop).
-- Modais: garantir que `p-dialog` ocupe 100% da viewport em mobile.
-- Chat: manter `chatSideRight` 100vw, ajustar header recém-criado (skins) e inputs de mensagem para teclado virtual.
+### 4. Admin Components
+- Tables: use `p-table` with `responsiveLayout="scroll"` or `stack`.
+- Forms: stack fields on mobile (`col-12` by default, `col-md-6` / `col-lg-4` on desktop).
+- Modals: ensure `p-dialog` uses 100% viewport on mobile.
+- Chat: keep `chatSideRight` 100vw, adjust newly created header skins and message inputs for virtual keyboard.
 
-### 5. Navegação touch
-- Aumentar áreas de toque para botões (>= 44x44px).
-- Adicionar suporte a gestos para sidebar e chat (`hammerjs` já está em `eaf-web-resources`).
-- Evitar hover-only (tooltips, dropdowns) em touch.
+### 5. Touch Navigation
+- Increase touch targets (>= 44x44px).
+- Add gesture support for sidebar and chat (`hammerjs` is already in `eaf-web-resources`).
+- Avoid hover-only tooltips/dropdowns on touch.
 
-### 6. Acessibilidade móvel
-- Garantir `viewport` meta, `touch-action`, foco visível em campos.
-- Testar com leitor de tela e navegação por teclado externo.
+### 6. Mobile Accessibility
+- Ensure `viewport` meta, `touch-action`, visible focus on fields.
+- Test with screen readers and external keyboard navigation.
 
-## Plano de Migração
-1. **Fase 1 — Inventory**: listar todos os componentes de layout e admin que precisam de ajuste.
-2. **Fase 2 — Spike**: criar um tema mobile-first alternativo (p.ex. `theme13`) sem afetar os atuais.
-3. **Fase 3 — Componentes**: ajustar `layout`, `topbar`, `side-bar-menu`, `chat-bar`, tabelas e modais.
-4. **Fase 4 — Testes**: testes em dispositivos reais/emuladores, Cypress/Playwright com viewports mobile.
-5. **Fase 5 — Rollout**: tornar o novo layout padrão, deprecar temas antigos gradualmente.
+## Implementation Status (2026-08)
 
-## Impacto
-- **Alto**: altera markup e CSS dos componentes de layout.
-- **Médio**: possível necessidade de ajustar testes e2e existentes.
-- **Baixo**: regras de negócio e APIs não são afetadas.
+Partial. Some responsive CSS exists in `styles.css`, but no mobile-first off-canvas layout, bottom navigation or comprehensive breakpoint system. `m-stack`, `m-grid` and `m-aside-left` classes still dominate the layout.
 
-## Riscos
-- Bundle Metronic antigo é grande e minificado; mudanças indevidas podem quebrar CSS global.
-- Themes múltiplos (12) aumentam custo de teste.
-- `ngx-bootstrap` pode conflitar com Bootstrap 5 JS; avaliar migração ou `ng-bootstrap`.
+## Migration Plan
+1. **Phase 1 — Inventory**: list all layout and admin components that need adjustment.
+2. **Phase 2 — Spike**: create an alternative mobile-first theme (e.g. `theme13`) without affecting current ones.
+3. **Phase 3 — Components**: adjust `layout`, `topbar`, `side-bar-menu`, `chat-bar`, tables and modals.
+4. **Phase 4 — Tests**: test on real devices/emulators, Cypress/Playwright with mobile viewports.
+5. **Phase 5 — Rollout**: make the new layout default and gradually deprecate old themes.
 
-## Referências
-- <https://aspnetzero.com/angular> — Metronic 8, Bootstrap 5, 13+ temas, dark mode.
-- `/home/ubuntu/repos/EAF/Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout` — componentes de layout atuais.
-- `/home/ubuntu/repos/EAF/Templates/Angular/Eaf.ProjectName.UI/src/assets/common/styles/themes` — bundles CSS por tema.
+## Impact
+- **High**: changes layout markup and CSS.
+- **Medium**: may require e2e test adjustments.
+- **Low**: business rules and APIs are not affected.
+
+## Risks
+- Legacy Metronic bundle is large and minified; incorrect changes can break global CSS.
+- Multiple themes (12) increase test cost.
+- `ngx-bootstrap` may conflict with Bootstrap 5 JS; evaluate migration or `ng-bootstrap`.
+
+## References
+- <https://aspnetzero.com/angular> — Metronic 8, Bootstrap 5, 13+ themes, dark mode.
+- `Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout` — current layout components.
+- `Templates/Angular/Eaf.ProjectName.UI/src/assets/common/styles/themes` — per-theme CSS bundles.

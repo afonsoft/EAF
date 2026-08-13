@@ -1,77 +1,113 @@
-# EAF — Adoção de Features do ASP.NET Zero
+# EAF — Adopt ASP.NET Zero Enterprise Features
 
-## Resumo
-Analisar funcionalidades e experiências do ASP.NET Zero (frontend Angular, backend .NET, mobile MAUI, RAD tooling) e definir quais podem ser replicadas no EAF para aproximá-lo de uma solução enterprise pronta para produção.
+## Summary
 
-## Motivação
-- ASP.NET Zero é um produto comercial derivado do ABP, com centenas de features prontas.
-- EAF é a base open-source da Afonsoft; adotar features consolidadas do Zero reduz gap de mercado.
-- Usuário final espera dashboard, notificações, chat, mobile, multi-tenant billing, aprovações, etc.
+Identify the high-value enterprise features available in **ASP.NET Zero** and implement the ones missing in EAF, focusing on features that add value to the open-source middleware and templates without violating licensing.
 
-## Features do ASP.NET Zero Mapeadas
+## Motivation
 
-### UI/UX Angular
-- **13+ Theme Options + Dark Mode**: Metronic 8, Bootstrap 5, theming dinâmico.
-- **Responsive Layout**: mobile-first, bottom navigation, drawer menus.
-- **Dashboard Host/Tenant**: widgets de estatísticas, gráficos e atividades recentes.
-- **Tour/Onboarding**: guia interativo para novos usuários.
-- **RTL e Localization**: suporte nativo a idiomas da direita para esquerda.
+- ASP.NET Zero is the paid commercial version of ASP.NET Boilerplate and adds enterprise modules and templates.
+- EAF already implements some Zero features (see below); others can be implemented as open-source modules and Angular pages to increase parity.
 
-### Funcionalidades de Administração
-- **Editions & Feature Management**: planos com features e limites.
-- **Subscription & Payment Management**: integração com Stripe/PayPal para SaaS.
-- **Tenant Registration**: página pública para novos tenants se cadastrarem.
-- **Impersonation**: logar como usuário para suporte.
-- **Organization Units**: hierarquia de OUs para permissões.
-- **Audit Logs**: filtro avançado, exportação e detalhamento.
-- **Dynamic Parameters**: configurações por tenant customizáveis.
+## Comparison — ASP.NET Zero vs EAF
 
-### Mobile
-- **.NET MAUI App**: app nativo iOS/Android consumindo a API.
-- **Push Notifications**: notificações via Firebase/APNs.
+### Identity / User Management
+| Feature | ASP.NET Zero | EAF Status (2026-08) |
+|---|---|---|
+| Users, Roles, Permissions | Yes | Implemented |
+| Organization Units | Yes | **Implemented** (`OrganizationUnitAppService`) |
+| User Delegation (impersonation) | Yes | **Implemented** (`UserDelegationAppService`) |
+| Mass Notifications | Yes | **Implemented** (`MassNotificationAppService`) |
+| Tenant Join Requests / Registration | Yes | **Implemented** (`TenantJoinRequest`) |
+| Dashboard | Yes | **Implemented** (`DashboardAppService` + widgets) |
+| Two-factor authentication | Yes | Implemented via ASP.NET Identity / ABP |
+| LDAP / Azure AD | Yes | **Implemented** (`Eaf.Middleware.Ldap`, `Eaf.Middleware.AzureActiveDirectory`) |
+| Payment gateway abstraction | Yes | **Implemented** (`IPaymentGateway`, Stripe, PayPal, PagSeguro, MercadoPago) |
+| Subscription / edition management | Yes | **Implemented** (`Editions` + payment gateway) |
+| SMS provider | Yes | Not implemented |
+| Chat | Yes | Partial (SignalR Hub exists; UI in Angular) |
 
-### RAD / Developer Experience
-- **Power Tools / Suite**: geração de CRUD a partir de entidades.
-- **Master-Detail Scaffolding**: geração de páginas complexas.
-- **Code Generator**: reduce boilerplate.
+### Multi-Tenancy
+| Feature | ASP.NET Zero | EAF Status (2026-08) |
+|---|---|---|
+| Tenant isolation (database/host) | Yes | Implemented |
+| Tenant registration / join request | Yes | **Implemented** |
+| Tenant dashboard | Yes | **Implemented** |
+| Tenant-specific settings | Yes | Implemented via ABP `ISettingManager` |
+| Tenant impersonation | Yes | Not implemented |
 
-## Proposta de Adoção no EAF
+### CMS / Content
+| Feature | ASP.NET Zero | EAF Status (2026-08) |
+|---|---|---|
+| Dynamic forms / survey | Yes | Not implemented |
+| File management | Yes | Not implemented (no `BlobStoring` module) |
+| Email templates | Yes | Basic (no `MailKit` module) |
+| Push notifications | Yes | Not implemented |
 
-### Fase 1 — UI/UX (curto prazo)
-1. Adotar Metronic 8 + Bootstrap 5 (ver `eaf-angular-metronic8-bootstrap5-migration.spec.md`).
-2. Implementar dark mode e theming tokens (ver `eaf-angular-dark-mode-theming.spec.md`).
-3. Criar dashboard inicial com widgets reutilizáveis.
-4. Melhorar responsividade mobile (ver `eaf-angular-mobile-responsive-layout.spec.md`).
+### DevOps / Infra
+| Feature | ASP.NET Zero | EAF Status (2026-08) |
+|---|---|---|
+| Hangfire background jobs | Yes | **Implemented** |
+| SignalR | Yes | Partial (backend Hub + Angular service exist) |
+| OpenTelemetry / logs | Yes | **Implemented** (`Eaf.OpenTelemetry`, `Eaf.Castle.Serilog`) |
+| Key Vault integration | Yes | **Implemented** (`Eaf.KeyVault`) |
+| Redis cache | Yes | Not implemented as a module |
+| Blob storage | Yes | Not implemented as a module |
 
-### Fase 2 — Features Enterprise (médio prazo)
-1. **Editions**: expandir entidades de Edition com FeatureValues.
-2. **Subscription/Payment**: abstrair `Eaf.Payment` com providers Stripe/PayPal.
-3. **Organization Units**: já existe no ABP/EAF? Verificar e documentar.
-4. **Audit Log UI**: tela de busca avançada com exportação CSV/PDF.
-5. **Tenant Self-Registration**: página `/register-tenant`.
+## Already Implemented in EAF
 
-### Fase 3 — Mobile e RAD (longo prazo)
-1. Criar template .NET MAUI consumindo a API EAF.
-2. Implementar push notifications backend + frontend.
-3. Criar ferramenta de scaffolding/code generator para EAF.
+- `OrganizationUnitAppService` + Angular `admin/organization-units`.
+- `MassNotificationAppService` + Angular `admin/mass-notifications`.
+- `UserDelegationAppService` + Angular `admin/user-delegations`.
+- `TenantJoinRequest` + Angular `admin/tenant-join-requests`.
+- `DashboardAppService` + Angular `main/dashboard`.
+- Payment gateway abstraction (`IPaymentGateway`, resolver, gateways, `PaymentAppService`).
+- LDAP / Azure AD modules.
+- `Eaf.KeyVault`, `Eaf.OpenTelemetry`, `Eaf.Castle.Serilog`, `Eaf.SqlServerCache`, `Eaf.SqliteCache`.
 
-## Plano de Migração
-1. Validar quais features já existem parcialmente no EAF.
-2. Criar specs detalhados por feature priorizada.
-3. Implementar incrementalmente, mantendo compatibilidade com templates.
-4. Atualizar documentação e AGENTS.md.
+## Gaps / Next Steps
 
-## Impacto
-- **Alto**: muda significativamente o produto EAF.
-- **Alto**: atratividade para novos usuários e projetos.
-- **Médio**: crescimento de complexidade e testes.
+1. **SMS module** (`Eaf.Sms` + Twilio / AWS SNS provider).
+2. **MailKit module** (`Eaf.MailKit`) for richer email templates and providers (SendGrid, Mailgun).
+3. **BlobStoring module** (`Eaf.BlobStoring` + Azure/AWS/FileSystem providers) for file uploads and tenant assets.
+4. **Redis cache module** (`Eaf.RedisCache`) for distributed caching.
+5. **SignalR module** (`Eaf.SignalR` / `Eaf.SignalR.AspNetCore`) with notification and chat backends.
+6. **Push notifications** (Web Push + `libnpush`) for PWA.
+7. **Dynamic forms / surveys** (low priority).
+8. **Tenant impersonation** for support scenarios.
+9. **Audit logs UI** (ABP already writes logs; Angular UI missing).
+10. **Language management** UI for localization resources.
 
-## Riscos
-- Reimplementar features do Zero pode violar licença se copiar código; usar como referência de requisitos/UX.
-- Módulos de pagamento exigem compliance e segurança (PCI DSS).
-- MAUI requer expertise e manutenção cross-platform.
+## Proposed Modules
 
-## Referências
-- <https://aspnetzero.com/features> — lista de features.
-- <https://aspnetzero.com/angular> — Angular UI.
-- `/home/ubuntu/repos/EAF/Templates/Angular/Eaf.ProjectName.UI/src/app` — funcionalidades atuais.
+- `Eaf.Sms` — SMS service interface + Twilio provider.
+- `Eaf.MailKit` — email service interface + MailKit provider + templates.
+- `Eaf.BlobStoring` — file storage abstraction + container/provider pattern.
+- `Eaf.RedisCache` — distributed cache with ABP `ICacheManager`.
+- `Eaf.SignalR` — real-time notifications and chat backend.
+- `Eaf.PushNotifications` — Web Push + PWA integration.
+
+## Implementation Status (2026-08)
+
+Partial. Several Zero features are already in EAF, but distributed cache, blob storage, MailKit, SignalR, SMS and push notifications are missing.
+
+## Migration Plan
+1. Prioritize the missing modules by impact (Redis > Blob > MailKit > SignalR > SMS > Push).
+2. Create each module following the existing EAF middleware module pattern.
+3. Add Angular admin pages and service proxies.
+4. Update templates to include the new modules and configurations.
+
+## Impact
+- **High**: increases EAF parity with commercial ASP.NET Zero.
+- **Medium**: grows the middleware package surface.
+- **High**: improves value for template users.
+
+## Risks
+- Some ASP.NET Zero features may be patented/licensed; implement independently using ABP patterns only.
+- Avoid copying names, code or assets from ASP.NET Zero.
+
+## References
+- <https://aspnetzero.com/Features> — ASP.NET Zero feature list.
+- `src/Eaf.Middleware.Application/Authorization/Users/UserDelegationAppService.cs`
+- `src/Eaf.Middleware.Application/Organizations/OrganizationUnitAppService.cs`
+- `src/Eaf.Middleware.Application/Payments/PaymentAppService.cs`

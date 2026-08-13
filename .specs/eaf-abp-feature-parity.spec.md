@@ -1,69 +1,76 @@
-# EAF Middleware — Paridade de Features com ASP.NET Boilerplate (ABP)
+# EAF Middleware — ABP Feature Parity
 
-## Resumo
-Comparar os módulos do EAF com os do ASP.NET Boilerplate (branch `dev`) e identificar módulos/stratégias que podem ser incorporados ao EAF para ampliar suporte a storage, cache, ORM, validação, jobs e notificações.
+## Summary
 
-## Motivação
-- EAF é baseado no ASP.NET Boilerplate, mas possui menos módulos opcionais.
-- ABP oferece integrações prontas que reduzem trabalho manual em novos projetos enterprise.
-- Manter paridade relevante facilita migrações e reduz customizações.
+Compare EAF modules with ASP.NET Boilerplate (ABP) and identify modules/strategies that can be incorporated into EAF to broaden storage, cache, ORM, validation, jobs and notification support.
 
-## Comparativo de Módulos
+## Motivation
 
-| Módulo ABP | Módulo EAF equivalente | Status | Ação proposta |
-|---|---|---|---|
-| `Abp.BlobStoring` / `Azure` / `FileSystem` | Não encontrado | **Ausente** | Adicionar `Eaf.BlobStoring.*` para upload de arquivos, imagens de perfil, anexos de chat |
-| `Abp.HtmlSanitizer` | Não encontrado | **Ausente** | Criar `Eaf.HtmlSanitizer` integrado ao chat, emails e conteúdo rico |
-| `Abp.MailKit` | Não encontrado (usa `System.Net.Mail`?) | **Ausente/Parcial** | `Eaf.MailKit` para emails com templates e anexos |
-| `Abp.FluentValidation` | Não encontrado | **Ausente** | Integrar FluentValidation em DTOs e Application Services |
-| `Abp.Dapper` | Não encontrado | **Ausente** | `Eaf.Dapper` para queries complexas e relatórios |
-| `Abp.RedisCache` / `ProtoBuf` | `Eaf.SqlServerCache`, `Eaf.SqliteCache` | **Parcial** | Adicionar provedor Redis para cache distribuído |
-| `Abp.MongoDB` | Não encontrado | **Ausente** | `Eaf.MongoDB` como alternativa ao EF Core para alguns cenários |
-| `Abp.NHibernate` | Não encontrado | **Ausente** | Avaliar se faz sentido no EAF (.NET 10 foca EF Core) |
-| `Abp.HangFire` / `Quartz` | `Eaf.Middleware.Worker` | **Parcial** | Adicionar `Eaf.Hangfire` e `Eaf.Quartz` como opções ao worker |
-| `Abp.MemoryDb` | Não encontrado | **Ausente** | `Eaf.MemoryDb` para testes e prototipagem |
-| `Abp.FluentMigrator` | Não encontrado | **Ausente** | Alternativa ao `dotnet ef migrations` em ambientes legados |
-| `Abp.AspNetCore.SignalR` | `Eaf.Middleware.Web.Core` usa SignalR? | **Parcial** | Módulo dedicado `Eaf.SignalR` com hubs e integração |
-| `Abp.AspNetCore.OData` | Não encontrado | **Ausente** | `Eaf.OData` para endpoints OData |
-| `Abp.AspNetCore.OpenIddict` | `Eaf.Middleware.AzureActiveDirectory`, `Ldap` | **Parcial** | Modernizar autenticação com OpenIddict nativo |
+- EAF is built on ASP.NET Boilerplate but has fewer optional modules.
+- ABP provides ready-made integrations that reduce manual work on new enterprise projects.
+- Keeping relevant parity eases migrations and reduces custom code.
 
-## Proposta por Prioridade
+## Module Comparison
 
-### Alta Prioridade
-1. **Eaf.BlobStoring.FileSystem + Azure + OCI** — upload de arquivos é necessário no chat e perfil.
-2. **Eaf.RedisCache** — cache distribuído em multi-tenant e containers.
-3. **Eaf.MailKit** — envio de emails transacionais e campanhas.
-4. **Eaf.HtmlSanitizer** — segurança no chat e conteúdo dinâmico.
+| ABP Module | EAF Equivalent | Status | Proposed Action |
+|------------|----------------|--------|-----------------|
+| `Abp.BlobStoring` / `Azure` / `FileSystem` | Not found | **Missing** | Add `Eaf.BlobStoring.*` for profile pictures, chat attachments and documents |
+| `Abp.HtmlSanitizer` | Not found | **Missing** | Create `Eaf.HtmlSanitizer` for chat, email and rich content |
+| `Abp.MailKit` | Not found (uses `System.Net.Mail`?) | **Missing/Partial** | `Eaf.MailKit` for templated emails with attachments |
+| `Abp.FluentValidation` | Not found | **Missing** | Integrate FluentValidation into DTOs and Application Services |
+| `Abp.Dapper` | Not found | **Missing** | `Eaf.Dapper` for complex queries and reports |
+| `Abp.RedisCache` / `ProtoBuf` | `Eaf.SqlServerCache`, `Eaf.SqliteCache` | **Partial** | Add Redis distributed-cache provider |
+| `Abp.MongoDB` | Not found | **Missing** | `Eaf.MongoDB` as an EF Core alternative |
+| `Abp.NHibernate` | Not found | **Missing** | Evaluate relevance (.NET 10 targets EF Core) |
+| `Abp.HangFire` / `Quartz` | `Eaf.Middleware.Worker` | **Partial** | Add `Eaf.Hangfire` and `Eaf.Quartz` as worker options |
+| `Abp.MemoryDb` | Not found | **Missing** | `Eaf.MemoryDb` for tests and prototyping |
+| `Abp.FluentMigrator` | Not found | **Missing** | Alternative to `dotnet ef migrations` in legacy environments |
+| `Abp.AspNetCore.SignalR` | `Eaf.Middleware.Web.Core` uses SignalR | **Partial** | Dedicated `Eaf.SignalR` module with hubs and `IOnlineClientManager` |
+| `Abp.AspNetCore.OData` | Not found | **Missing** | `Eaf.OData` for admin endpoints |
+| `Abp.AspNetCore.OpenIddict` | `Eaf.Middleware.AzureActiveDirectory`, `Ldap` | **Partial** | Modernize auth with native OpenIddict server |
 
-### Média Prioridade
-5. **Eaf.Dapper** — relatórios e queries de performance.
-6. **Eaf.FluentValidation** — validações mais expressivas.
-7. **Eaf.SignalR** — módulo isolado para realtime.
-8. **Eaf.Quartz** — agendamento alternativo ao Hangfire.
+## Implementation Status Update (2026-08)
 
-### Baixa Prioridade / Avaliar
-9. **Eaf.MongoDB** — se houver necessidade de NoSQL.
-10. **Eaf.OData** — se APIs precisarem suporte OData.
-11. **Eaf.FluentMigrator** — se houver legado sem EF Core.
+- **Implemented**: `OrganizationUnitAppService`, `PaymentAppService` with Stripe/PayPal/PagSeguro/MercadoPago, `MassNotificationAppService`, `UserDelegationAppService`, `TenantJoinRequest` flow, `DashboardAppService`.
+- **Still missing**: Blob storage, Redis cache, MailKit, SignalR module, OpenIddict, HtmlSanitizer, Dapper, FluentValidation, MongoDB, Quartz, OData.
 
-## Plano de Migração
-1. Criar issues/features para cada módulo prioritário.
-2. Copiar/adaptar a estrutura dos módulos ABP (`Abp.*`) para `Eaf.*`.
-3. Adicionar testes xUnit para cada módulo novo.
-4. Atualizar `Eaf.sln`, `common.props` e templates.
-5. Documentar uso no README e AGENTS.md.
+## Proposed Priority
 
-## Impacto
-- **Alto**: expande capacidade do EAF.
-- **Médio**: aumenta superfície de testes e manutenção.
-- **Médio**: requer decisões arquiteturais sobre multi-tenancy e cache.
+### High Priority
+1. `Eaf.BlobStoring.FileSystem` + `Azure` + `OCI` — file upload is required for chat and profiles.
+2. `Eaf.RedisCache` — distributed cache for multi-tenant and container scenarios.
+3. `Eaf.MailKit` — transactional emails and campaigns.
+4. `Eaf.HtmlSanitizer` — security for chat and dynamic content.
 
-## Riscos
-- Sincronizar com upstream ABP pode ser trabalhoso se APIs mudarem.
-- Cada módulo precisa de providers específicos (Azure, OCI, Redis, Mongo).
-- Aumento de complexidade e tempo de build.
+### Medium Priority
+5. `Eaf.Dapper` — reports and performance queries.
+6. `Eaf.FluentValidation` — more expressive validation.
+7. `Eaf.SignalR` — isolated realtime module.
+8. `Eaf.Quartz` — alternative scheduling to Hangfire.
 
-## Referências
-- `/home/ubuntu/repos/abp-aspnetboilerplate/src` — lista de módulos ABP.
-- `/home/ubuntu/repos/EAF/src` — lista de módulos EAF.
-- <https://aspnetboilerplate.com/Pages/Documents/Module-System>.
+### Low Priority / Evaluate
+9. `Eaf.MongoDB` — if NoSQL is needed.
+10. `Eaf.OData` — if APIs require OData support.
+11. `Eaf.FluentMigrator` — if legacy without EF Core exists.
+
+## Migration Plan
+1. Create issues/features for each high-priority module.
+2. Copy/adapt ABP module structure (`Abp.*`) to `Eaf.*`.
+3. Add xUnit tests for each new module.
+4. Update `Eaf.sln`, `common.props` and templates.
+5. Document usage in README and `AGENTS.md`.
+
+## Impact
+- **High**: expands EAF capability.
+- **Medium**: increases test and maintenance surface.
+- **Medium**: requires architectural decisions on multi-tenancy and cache.
+
+## Risks
+- Syncing with upstream ABP can be hard if APIs change.
+- Each module needs specific providers (Azure, OCI, Redis, Mongo).
+- Complexity and build time grow.
+
+## References
+- `/home/ubuntu/repos/abp-aspnetboilerplate/src` — ABP module list
+- `/home/ubuntu/repos/EAF/src` — current EAF modules
+- <https://aspnetboilerplate.com/Pages/Documents/Module-System>

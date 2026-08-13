@@ -1,30 +1,32 @@
-# Prompt de Migração — EAF 9.4.0 → 9.4.3
+# EAF Migration Prompt — 9.4.0 → 9.4.3
 
-## Objetivo
+## Objective
 
-Aplicar, em um projeto gerado a partir do template EAF 9.4.0 (API .NET 10 + Angular 20), as mudanças da **versão 9.4.3** relacionadas ao fluxo de **cadastro público com seleção/criação de tenant**, **edição `Free` padrão**, **solicitação de ingresso** e **aprovação de membros**.
+Apply the changes from EAF **9.4.3** to a project generated from the EAF 9.4.0 template (.NET 10 API + Angular 20). The changes cover the **public registration flow with tenant selection/creation**, the **default `Free` edition**, the **join request** flow and **member approval**.
 
-## Escopo
+## Scope
 
 - **Backend (`Templates/Api`):** `ProjectName.Core`, `ProjectName.Application`, `ProjectName.EntityFrameworkCore`, `ProjectName.Web.Host`, seed/migrations.
-- **Frontend (`Templates/Angular/Eaf.ProjectName.UI`):** tela de registro, serviço de solicitações, tela admin de aprovação, navegação.
-- **Banco de dados:** migration EF Core para `TenantJoinRequest`.
+- **Frontend (`Templates/Angular/Eaf.ProjectName.UI`):** registration screen, request service, admin approval page, navigation.
+- **Database:** EF Core migration for `TenantJoinRequest`.
 
-## Pré-requisitos
+## Prerequisites
 
-- [ ] Branch de migração: `git checkout -b migration/eaf-9.4.3`.
-- [ ] .NET 10 SDK e Node.js 18+.
-- [ ] Banco SQL Server/PostgreSQL acessível.
-- [ ] API compilando e rodando localmente (`dotnet build` / `dotnet run`).
-- [ ] Atualizar pacotes/módulos EAF para `9.4.3` (ou `common.props` para projetos que referenciam o fonte).
+- [ ] Migration branch: `git checkout -b migration/eaf-9.4.3`.
+- [ ] .NET 10 SDK and Node.js 18+.
+- [ ] SQL Server/PostgreSQL accessible.
+- [ ] API compiling and running locally (`dotnet build` / `dotnet run`).
+- [ ] Update EAF packages/modules to `9.4.3` (or `common.props` for projects referencing the source).
+
+> **Note:** As of the current EAF repository, the features below are already included in the middleware/template. This guide is intended for projects created from EAF 9.4.0 that need to be migrated manually.
 
 ---
 
-## 1. Backend — Domínio e EF Core
+## 1. Backend — Domain and EF Core
 
-### 1.1 Adicionar entidade `TenantJoinRequest`
+### 1.1 Add the `TenantJoinRequest` entity
 
-No projeto `ProjectName.Core` (ou `Eaf.ProjectName.Core`), crie ou atualize:
+In the `ProjectName.Core` project (or `Eaf.ProjectName.Core`), create or update:
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -61,15 +63,15 @@ namespace Eaf.ProjectName.MultiTenancy
 }
 ```
 
-### 1.2 Atualizar `DbContext`
+### 1.2 Update `DbContext`
 
-Em `ProjectNameDbContext.cs`, adicione:
+In `ProjectNameDbContext.cs`, add:
 
 ```csharp
 public virtual DbSet<TenantJoinRequest> TenantJoinRequests { get; set; }
 ```
 
-E no `OnModelCreating`:
+And in `OnModelCreating`:
 
 ```csharp
 modelBuilder.Entity<TenantJoinRequest>(b =>
@@ -80,7 +82,7 @@ modelBuilder.Entity<TenantJoinRequest>(b =>
 });
 ```
 
-### 1.3 Gerar migration
+### 1.3 Generate migration
 
 ```bash
 dotnet ef migrations add AddTenantJoinRequest \
@@ -88,7 +90,7 @@ dotnet ef migrations add AddTenantJoinRequest \
   --startup-project src/Eaf.ProjectName.Web.Host
 ```
 
-Atualize o banco:
+Update the database:
 
 ```bash
 dotnet ef database update \
@@ -96,9 +98,9 @@ dotnet ef database update \
   --startup-project src/Eaf.ProjectName.Web.Host
 ```
 
-### 1.4 Seed da edição `Free` e tenant padrão
+### 1.4 Seed the `Free` edition and default tenant
 
-Em `Migrations/Seed/Tenants/DefaultTenantBuilder.cs`, garanta que o tenant padrão seja criado:
+In `Migrations/Seed/Tenants/DefaultTenantBuilder.cs`, ensure the default tenant is created:
 
 ```csharp
 var defaultTenant = _context.Tenants.IgnoreQueryFilters()
@@ -111,7 +113,7 @@ if (defaultTenant == null)
 }
 ```
 
-Em `Migrations/Seed/Tenants/TenantRoleAndUserBuilder.cs`, garanta as roles `Admin` e `User` (além do admin user já existente):
+In `Migrations/Seed/Tenants/TenantRoleAndUserBuilder.cs`, ensure the `Admin` and `User` roles exist (in addition to the admin user already present):
 
 ```csharp
 var adminRole = _context.Roles.IgnoreQueryFilters()
@@ -141,11 +143,11 @@ if (userRole == null)
 
 ---
 
-## 2. Backend — Aplicação
+## 2. Backend — Application
 
-### 2.1 DTOs de registro
+### 2.1 Registration DTOs
 
-Atualize `RegisterInput` para incluir modo de seleção de tenant:
+Update `RegisterInput` to include tenant selection mode:
 
 ```csharp
 using Eaf.Middleware.Authorization.Accounts.Dto;
@@ -188,7 +190,7 @@ namespace Eaf.ProjectName.Authorization.Accounts.Dto
 }
 ```
 
-Atualize `RegisterOutput`:
+Update `RegisterOutput`:
 
 ```csharp
 public class RegisterOutput
@@ -210,9 +212,9 @@ public enum TenantSelectionMode
 }
 ```
 
-### 2.2 DTOs de `TenantJoinRequest`
+### 2.2 `TenantJoinRequest` DTOs
 
-Crie em `Authorization/Accounts/Dto/`:
+Create in `Authorization/Accounts/Dto/`:
 
 ```csharp
 public class AvailableTenantDto
@@ -251,21 +253,21 @@ public class ApproveTenantJoinRequestInput
 }
 ```
 
-### 2.3 AppService `TenantJoinRequestAppService`
+### 2.3 `TenantJoinRequestAppService`
 
-Crie `Authorization/Accounts/TenantJoinRequestAppService.cs` implementando `IApplicationService` (ou uma interface `ITenantJoinRequestAppService`):
+Create `Authorization/Accounts/TenantJoinRequestAppService.cs` implementing `IApplicationService` (or an `ITenantJoinRequestAppService` interface):
 
-- `GetAvailableTenantsAsync()` — `[AbpAllowAnonymous]`; retorna tenants ativos (`t.IsActive`).
-- `CreateRequestAsync(CreateTenantJoinRequestInput input)` — `[AbpAuthorize]`; chama `ITenantUserManager.CreatePendingMembershipAsync`.
-- `GetMyRequestsAsync()` — `[AbpAuthorize]`; solicitações do usuário logado.
-- `GetPendingRequestsForCurrentTenantAsync()` — `[AbpAuthorize(Pages_Administration_Users)]`; pendentes do tenant atual.
-- `ApproveAsync(ApproveTenantJoinRequestInput input)` — `[AbpAuthorize(Pages_Administration_Users)]`; aprova (`ITenantUserManager.ApproveMembershipAsync`) ou rejeita.
+- `GetAvailableTenantsAsync()` — `[AbpAllowAnonymous]`; returns active tenants (`t.IsActive`).
+- `CreateRequestAsync(CreateTenantJoinRequestInput input)` — `[AbpAuthorize]`; calls `ITenantUserManager.CreatePendingMembershipAsync`.
+- `GetMyRequestsAsync()` — `[AbpAuthorize]`; requests for the current user.
+- `GetPendingRequestsForCurrentTenantAsync()` — `[AbpAuthorize(Pages_Administration_Users)]`; pending requests for the current tenant.
+- `ApproveAsync(ApproveTenantJoinRequestInput input)` — `[AbpAuthorize(Pages_Administration_Users)]`; approves (`ITenantUserManager.ApproveMembershipAsync`) or rejects.
 
-> Os serviços do EAF 9.4.3 já expõem `ITenantUserManager` com os métodos `CreatePendingMembershipAsync` e `ApproveMembershipAsync`. Se estiver usando os pacotes NuGet `9.4.3`, injete `ITenantUserManager` e utilize-os. Caso contrário, copie a implementação do `TenantUserManager` do EAF.
+> EAF 9.4.3 already exposes `ITenantUserManager` with `CreatePendingMembershipAsync` and `ApproveMembershipAsync`. If using NuGet packages `9.4.3`, inject `ITenantUserManager` and use them. Otherwise, copy `TenantUserManager` from EAF.
 
-### 2.4 Ajustar `AccountAppService.Register`
+### 2.4 Adjust `AccountAppService.Register`
 
-A implementação do `AccountAppService.Register` em 9.4.3 segue o fluxo:
+The 9.4.3 implementation follows this flow:
 
 ```csharp
 public async Task<RegisterOutput> Register(RegisterInput input)
@@ -289,21 +291,21 @@ public async Task<RegisterOutput> Register(RegisterInput input)
 }
 ```
 
-- **DefaultTenant**: retorna `CanLogin = true`.
-- **CreateNew**: valida `AllowTenantCreation`; cria tenant vinculado à edição `Free`; cria shadow user admin com roles `Admin` e `User`; retorna `CanLogin = true`.
-- **JoinExisting**: valida `AllowJoinRequests`; cria shadow user inativo e `TenantJoinRequest` pendente; retorna `CanLogin = false`.
+- **DefaultTenant**: returns `CanLogin = true`.
+- **CreateNew**: validates `AllowTenantCreation`; creates tenant linked to the `Free` edition; creates shadow admin user with `Admin` and `User` roles; returns `CanLogin = true`.
+- **JoinExisting**: validates `AllowJoinRequests`; creates an inactive shadow user and a pending `TenantJoinRequest`; returns `CanLogin = false`.
 
-### 2.5 Configurações (`AppSettings`)
+### 2.5 Settings (`AppSettings`)
 
-As novas settings existem no EAF 9.4.3 e podem ser controladas por host e tenant:
+The new settings exist in EAF 9.4.3 and can be controlled by host and tenant:
 
 ```csharp
 AppSettings.TenantManagement.AllowSelfRegistration  // default: true
-AppSettings.TenantManagement.AllowTenantCreation  // default: true
-AppSettings.TenantManagement.AllowJoinRequests    // default: true
+AppSettings.TenantManagement.AllowTenantCreation    // default: true
+AppSettings.TenantManagement.AllowJoinRequests      // default: true
 ```
 
-No `appsettings*.json` do projeto gerado, adicione (opcional) para sobrescrever defaults:
+In the generated project's `appsettings*.json`, add (optional) to override defaults:
 
 ```json
 {
@@ -317,16 +319,16 @@ No `appsettings*.json` do projeto gerado, adicione (opcional) para sobrescrever 
 }
 ```
 
-### 2.6 Login e seleção de tenant
+### 2.6 Login and tenant selection
 
-No `TokenAuthController`:
+In `TokenAuthController`:
 
-- `GetAvailableTenants` e `SelectTenant` devem permitir apenas usuários host (`loginResult.User.TenantId` nulo).
-- Em `SelectTenant`, após carregar o shadow user via `membership.TenantUserId`, valide `shadowUser.IsActive`. Se falso, lance `UserFriendlyException(L("TenantUserIsNotActive"))`.
+- `GetAvailableTenants` and `SelectTenant` should allow only host users (`loginResult.User.TenantId` null).
+- In `SelectTenant`, after loading the shadow user via `membership.TenantUserId`, validate `shadowUser.IsActive`. If false, throw `UserFriendlyException(L("TenantUserIsNotActive"))`.
 
-### 2.7 Localização
+### 2.7 Localization
 
-Adicione as chaves nos XMLs de localização (`Localization/Source/EafCore.xml` e `EafCore-pt-BR.xml`):
+Add the keys to the localization XMLs (`Localization/Source/EafCore.xml` and `EafCore-pt-BR.xml`):
 
 ```xml
 <text name="TenantRequired">Tenant is required.</text>
@@ -353,9 +355,9 @@ Adicione as chaves nos XMLs de localização (`Localization/Source/EafCore.xml` 
 
 ## 3. Frontend — Angular
 
-### 3.1 Model e serviço de registro
+### 3.1 Registration model and service
 
-Atualize `src/account/register/register.model.ts`:
+Update `src/account/register/register.model.ts`:
 
 ```typescript
 export enum TenantSelectionMode {
@@ -394,9 +396,9 @@ export class RegisterResult {
 }
 ```
 
-### 3.2 Tela de registro (`register.component.html`)
+### 3.2 Registration screen (`register.component.html`)
 
-Adicione a seção de seleção de tenant (exemplo, multi-tenancy habilitado):
+Add the tenant selection section (when multi-tenancy is enabled):
 
 ```html
 <div *ngIf="multiTenancy.isEnabled" class="form-group m-form__group">
@@ -426,7 +428,7 @@ Adicione a seção de seleção de tenant (exemplo, multi-tenancy habilitado):
   </div>
 </div>
 
-<!-- Campos condicionais CreateNew -->
+<!-- Conditional fields for CreateNew -->
 <div *ngIf="model.isCreatingTenant" class="form-group m-form__group md-form">
   <input [(ngModel)]="model.tenancyName" name="tenancyName" required class="form-control m-input" type="text" />
   <label>{{ 'TenancyName' | localize }}</label>
@@ -436,7 +438,7 @@ Adicione a seção de seleção de tenant (exemplo, multi-tenancy habilitado):
   <label>{{ 'TenantName' | localize }}</label>
 </div>
 
-<!-- Campos condicionais JoinExisting -->
+<!-- Conditional fields for JoinExisting -->
 <div *ngIf="model.isJoiningTenant" class="form-group m-form__group">
   <label>{{ 'Tenant' | localize }}</label>
   <select [(ngModel)]="model.existingTenantId" name="existingTenantId" class="form-control m-input" [required]="model.isJoiningTenant">
@@ -494,9 +496,9 @@ export class RegisterComponent extends AppComponentBase implements OnInit {
 }
 ```
 
-### 3.4 Serviço `TenantJoinRequestService`
+### 3.4 `TenantJoinRequestService`
 
-Crie `src/shared/service-proxies/tenant-join-request.service.ts`:
+Create `src/shared/service-proxies/tenant-join-request.service.ts`:
 
 ```typescript
 import { Injectable, Injector } from '@angular/core';
@@ -547,26 +549,26 @@ export class TenantJoinRequestService extends AppComponentBase {
 }
 ```
 
-Registre o serviço em `src/shared/service-proxies/service-proxy.module.ts`.
+Register the service in `src/shared/service-proxies/service-proxy.module.ts`.
 
-### 3.5 Tela admin de aprovação
+### 3.5 Admin approval page
 
-Crie `src/app/admin/tenant-join-requests/`:
+Create `src/app/admin/tenant-join-requests/`:
 
-- `tenant-join-requests.component.ts`: lista pendentes via `getPendingRequestsForCurrentTenant()` e chama `approve({requestId, isApproved: true/false})`.
-- `tenant-join-requests.component.html`: tabela com nome do usuário/tenant, mensagem e botões Aprovar/Rejeitar.
-- Adicione rota em `admin-routing.module.ts`:
+- `tenant-join-requests.component.ts`: list pending requests via `getPendingRequestsForCurrentTenant()` and call `approve({requestId, isApproved: true/false})`.
+- `tenant-join-requests.component.html`: table with user/tenant name, message and Approve/Reject buttons.
+- Add the route in `admin-routing.module.ts`:
   ```typescript
   { path: 'tenant-join-requests', component: TenantJoinRequestsComponent }
   ```
-- Adicione o item de menu em `app-navigation.service.ts`:
+- Add the menu item in `app-navigation.service.ts`:
   ```typescript
   new AppMenuItem('TenantJoinRequests', 'Pages.Administration.Users', 'flaticon-user-add', '/app/admin/tenant-join-requests'),
   ```
 
-### 3.6 Atualizar `service-proxies`
+### 3.6 Update `service-proxies`
 
-Se o projeto usa `nswag` para gerar proxies automaticamente, suba a API e execute:
+If the project uses `nswag` to generate proxies automatically, start the API and run:
 
 ```bash
 cd Templates/Angular/Eaf.ProjectName.UI
@@ -574,13 +576,13 @@ npm install
 npm run service-update
 ```
 
-> O script `service-update` lê `http://localhost:8001/swagger/v1/swagger.json` (conforme `service.config.nswag`). Certifique-se de que a API está rodando na porta `8001` com o Swagger exposto.
+> The `service-update` script reads `http://localhost:8001/swagger/v1/swagger.json` (as configured in `service.config.nswag`). Make sure the API is running on port `8001` with Swagger exposed.
 
-Caso não use NSwag, mantenha os serviços manuais criados acima.
+If NSwag is not used, keep the manual services created above.
 
 ---
 
-## 4. Validação
+## 4. Validation
 
 ### 4.1 Backend
 
@@ -598,7 +600,7 @@ npx ng build --configuration=production
 npx ng test --no-watch --browsers=ChromeHeadlessNoSandbox
 ```
 
-### 4.3 Docker (opcional, mas recomendado)
+### 4.3 Docker (optional, recommended)
 
 ```bash
 export MSSQL_SA_PASSWORD="Your_password123"
@@ -607,19 +609,19 @@ bash scripts/validate-docker-compose.sh
 
 ---
 
-## 5. Checklist de migração
+## 5. Migration Checklist
 
-- [ ] Entidade `TenantJoinRequest` criada no `Core`.
-- [ ] `DbSet<TenantJoinRequest>` e configuração de índices no `DbContext`.
-- [ ] Migration `AddTenantJoinRequest` gerada e banco atualizado.
-- [ ] Seed de edição `Free` e roles `Admin`/`User` no tenant.
-- [ ] `RegisterInput`/`RegisterOutput` com `TenantSelectionMode`.
-- [ ] `AccountAppService.Register` implementando três modos.
-- [ ] `TenantJoinRequestAppService` e DTOs criados.
-- [ ] `TokenAuthController.SelectTenant` validando `shadowUser.IsActive`.
-- [ ] Localizações adicionadas/verificadas.
-- [ ] Tela de registro Angular com seleção de tenant.
-- [ ] Serviço `TenantJoinRequestService` criado e registrado.
-- [ ] Tela admin de aprovação criada e rota/menu adicionados.
-- [ ] `service-proxies` atualizados via NSwag.
-- [ ] Build, testes e Docker Compose validados.
+- [ ] `TenantJoinRequest` entity created in `Core`.
+- [ ] `DbSet<TenantJoinRequest>` and index configuration in `DbContext`.
+- [ ] Migration `AddTenantJoinRequest` generated and database updated.
+- [ ] `Free` edition seed and `Admin`/`User` tenant roles.
+- [ ] `RegisterInput`/`RegisterOutput` with `TenantSelectionMode`.
+- [ ] `AccountAppService.Register` implementing the three modes.
+- [ ] `TenantJoinRequestAppService` and DTOs created.
+- [ ] `TokenAuthController.SelectTenant` validates `shadowUser.IsActive`.
+- [ ] Localizations added/verified.
+- [ ] Angular registration screen with tenant selection.
+- [ ] `TenantJoinRequestService` created and registered.
+- [ ] Admin approval page created and route/menu added.
+- [ ] `service-proxies` updated via NSwag.
+- [ ] Build, tests and Docker Compose validated.
