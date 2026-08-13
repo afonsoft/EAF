@@ -1,102 +1,131 @@
-# EAF Angular - Remaining Modernization Features
+# EAF Angular — Remaining Modernization Features
 
 ## Goal
 
-Consolidar as features de modernização do template Angular EAF que ainda não foram implementadas, organizadas do mais simples ao mais complexo, com análise de viabilidade e escopo.
+Consolidate the remaining Angular EAF template modernization features, ordered from simplest to most complex, with feasibility and scope analysis.
 
-## Features restantes
+## Features Status
 
-### 1. Dark Mode e Sistema de Temas (Feature 4)
+### 1. Dark Mode and Design System
 
-**Objetivo:** Adicionar um tema escuro e um sistema de design tokens no Angular, substituindo as cores fixas do Metronic por CSS variables.
+**Goal:** Add a dark theme and CSS design-token system to Angular, replacing Metronic hardcoded colors with CSS variables.
 
-**Escopo atual proposto:**
-- Criar `theme-variables.scss`/`styles.css` com tokens para cores de superfície, texto, borda, primária, status e destaque.
-- Estender `Header/Theme/UiCustomization` DTOs para expor `isDarkMode` e `themeName`.
-- Adicionar toggle no header para alternar entre `light` e `dark`.
-- Persistir preferência via `localStorage` e `UserPreferences` (backend opcional).
-- Ajustar `chat-bar.component.css` e todos os layouts para usar `var(--eaf-surface)` etc.
+**Current proposed scope:**
+- Create `theme-variables.scss` / `styles.css` with tokens for surface, text, border, primary, status and accent colors.
+- Extend `Header/Theme/UiCustomization` DTOs to expose `isDarkMode` and `themeName`.
+- Add a header toggle to switch between `light` and `dark`.
+- Persist preference via `localStorage` and optionally `UserPreferences` backend.
+- Adjust `chat-bar.component.css` and all layouts to use `var(--eaf-surface)` etc.
 
-**Faz sentido?** Sim. É uma demanda comum e melhora acessibilidade. Complexidade média.
+**Implementation status (2026-08):** Not started. No `themeMode`, `isDarkMode`, `data-theme` or `prefers-color-scheme` references found in `Templates/Angular/Eaf.ProjectName.UI/src`.
 
----
-
-### 2. Modernização de Componentes PrimeNG (Feature 5)
-
-**Objetivo:** Substituir componentes legados do `ngx-bootstrap` e do Metronic por componentes nativos do PrimeNG 17 (p-table, p-menu, p-dropdown, p-dialog, p-toast, p-inputswitch).
-
-**Escopo atual proposto:**
-- Substituir `BsDropdownModule` dos menus por `p-menu`/`p-tieredmenu`.
-- Substituir modais `ngx-bootstrap` por `p-dialog`.
-- Substituir tabelas manuais por `p-table` com `responsiveLayout="scroll"`.
-- Consolidar `p-paginator` e `p-confirmDialog`.
-- Adicionar `p-toast` para notificações e remover `notify` customizado.
-
-**Faz sentido?** Sim. O `package.json` já lista `primeng ^17.17.0`. Complexidade média-alta por causa dos estilos do Metronic.
+**Makes sense?** Yes. Common demand; improves accessibility. Medium complexity.
 
 ---
 
-### 3. Migração Metronic 8 + Bootstrap 5 (Feature 6)
+### 2. PrimeNG Component Modernization
 
-**Objetivo:** Atualizar o layout do template Angular para Metronic 8 com Bootstrap 5, abandonando classes legadas (`m-grid`, `m-stack`, `m-portlet`) em favor de `row`, `col`, `card`, `navbar`, `offcanvas`.
+**Goal:** Replace legacy `ngx-bootstrap` and Metronic widgets with native PrimeNG 17 components (`p-table`, `p-menu`, `p-dropdown`, `p-dialog`, `p-toast`, `p-inputswitch`).
 
-**Escopo atual proposto:**
-- Substituir `style.bundle.css` do Metronic 5/7 por assets do Metronic 8 ou por um design system próprio.
-- Refatorar `default-layout`, `theme2-layout`, `theme3-layout`, `theme4-layout` para estrutura Bootstrap 5.
-- Criar componentes reutilizáveis: `app-card`, `app-page-header`, `app-offcanvas-menu`.
-- Garantir responsividade mobile com `offcanvas` nativo e breakpoints Bootstrap.
+**Current proposed scope:**
+- Replace `BsDropdownModule` menus with `p-menu` / `p-tieredmenu`.
+- Replace `ngx-bootstrap` modals with `p-dialog`.
+- Replace manual tables with `p-table` using `responsiveLayout="scroll"`.
+- Consolidate `p-paginator` and `p-confirmDialog`.
+- Add `p-toast` for notifications and remove custom `notify`.
 
-**Faz sentido?** Apenas se houver licença do Metronic 8. Sem licença, a recomendação é construir um design system próprio incrementalmente. Complexidade alta.
+**Implementation status (2026-08):** Partial. `p-table`, `p-dialog`, `p-paginator` and `p-fileUpload` are already used in admin pages; `ngx-bootstrap` (`ModalModule`, `TabsModule`, `BsDropdownModule`, `TooltipModule`, `PopoverModule`) is still imported in `app.module.ts` and used across many components.
 
----
-
-### 4. Backend Modularization (Feature 7)
-
-**Objetivo:** Criar os módulos backend ausentes no EAF e padronizar os já existentes.
-
-**Escopo atual proposto:**
-- `Eaf.BlobStoring` — abstração para armazenamento de arquivos (Azure Blob, S3, local).
-- `Eaf.HtmlSanitizer` — sanitização de HTML para chat/notificações.
-- `Eaf.OpenIddict` — provedor OpenID Connect (já existe `ExternalLoginProviderInfo`, mas sem implementação).
-- `Eaf.Dapper` — repositórios Dapper para consultas complexas.
-- `Eaf.FluentValidation` — validação fluente nos Application Services.
-- Padronizar `MailKit` e `Redis` já existentes, extraindo para módulos bem definidos.
-
-**Faz sentido?** `BlobStoring`, `HtmlSanitizer` e `OpenIddict` têm alto valor. `Dapper` e `FluentValidation` dependem de demandas reais. Complexidade alta.
+**Makes sense?** Yes. `package.json` already lists `primeng ^17.17.0`. Medium-high complexity because of Metronic styles.
 
 ---
 
-### 5. ABP Feature Parity (Feature 9)
+### 3. Metronic 8 + Bootstrap 5 Migration
 
-**Objetivo:** Aproximar o EAF das funcionalidades modernas do ABP Framework.
+**Goal:** Update the Angular template layout to Metronic 8 with Bootstrap 5, abandoning legacy classes (`m-grid`, `m-stack`, `m-portlet`) in favor of `row`, `col`, `card`, `navbar`, `offcanvas`.
 
-**Escopo atual proposto:**
-- `Eaf.BlobStoring` (também listado na modularização).
-- Suporte a MongoDB (`Eaf.Middleware.MongoDB`)
-- Background jobs com Quartz (`Eaf.Quartz`)
-- OData controllers para entidades administrativas
-- Feature system aprimorado (Editions/Feature values)
-- OpenIddict/OAuth2 servidor
+**Current proposed scope:**
+- Replace Metronic 5/7 `style.bundle.css` with Metronic 8 assets or a custom design system.
+- Refactor `default-layout`, `theme2-layout`, `theme3-layout`, `theme4-layout` to Bootstrap 5 structure.
+- Create reusable components: `app-card`, `app-page-header`, `app-offcanvas-menu`.
+- Ensure mobile responsiveness with native `offcanvas` and Bootstrap breakpoints.
 
-**Faz sentido?** MongoDB e Quartz fazem sentido para projetos grandes. OData e OpenIddict dependem de roadmap. Complexidade muito alta.
+**Implementation status (2026-08):** Not started. Layouts still use `m-stack`, `m-grid`, `m-aside-left` and `style.bundle.css` per theme.
 
-## Prioridade recomendada
+**Makes sense?** Only if a Metronic 8 license exists. Without a license, build an incremental custom design system. High complexity.
 
-1. Dark Mode e Design Tokens
+---
+
+### 4. Backend Modularization
+
+**Goal:** Create the missing backend EAF modules and standardize existing ones.
+
+**Current proposed scope:**
+- `Eaf.BlobStoring` — file-storage abstraction (Azure Blob, S3, local).
+- `Eaf.HtmlSanitizer` — HTML sanitization for chat/notifications.
+- `Eaf.OpenIddict` — OpenID Connect provider ( `ExternalLoginProviderInfo` exists but has no implementation).
+- `Eaf.Dapper` — Dapper repositories for complex queries.
+- `Eaf.FluentValidation` — fluent validation in Application Services.
+- Standardize existing `MailKit` and `Redis` into well-defined modules.
+
+**Implementation status (2026-08):** Not started in `src/`. Payment gateway abstraction was implemented; backend modularization items are still pending.
+
+**Makes sense?** `BlobStoring`, `HtmlSanitizer` and `OpenIddict` have high value. `Dapper` and `FluentValidation` depend on real demand. High complexity.
+
+---
+
+### 5. ABP Feature Parity
+
+**Goal:** Bring EAF closer to modern ABP Framework features.
+
+**Current proposed scope:**
+- `Eaf.BlobStoring` (also listed under modularization).
+- MongoDB support (`Eaf.Middleware.MongoDB`).
+- Background jobs with Quartz (`Eaf.Quartz`).
+- OData controllers for admin entities.
+- Enhanced feature system (Editions/Feature values).
+- OpenIddict/OAuth2 server.
+
+**Implementation status (2026-08):** Not started. Edition CRUD exists but feature-value/pricing integration is missing.
+
+**Makes sense?** MongoDB and Quartz make sense for large projects. OData and OpenIddict depend on roadmap. Very high complexity.
+
+---
+
+### 6. PWA and Offline
+
+**Goal:** Complete the Progressive Web App setup.
+
+**Current proposed scope:**
+- Verify `ngsw-config.json` and `manifest.json` are production-ready.
+- Add offline banner and action queue.
+- Implement push notifications backend and frontend.
+- Add install prompt handling.
+
+**Implementation status (2026-08):** Partial. `ngsw-config.json`, `ServiceWorkerModule.register('ngsw-worker.js')`, `manifest.json` and `angular.json` PWA assets are present, but no offline queue, push notifications or install prompt logic was found in `src/app`.
+
+**Makes sense?** Yes. Improves mobile UX. Medium complexity.
+
+---
+
+## Recommended Priority
+
+1. Dark Mode and Design Tokens
 2. PrimeNG Modernization
-3. Metronic 8 + Bootstrap 5 (ou design system próprio)
+3. Metronic 8 + Bootstrap 5 (or custom design system)
 4. Backend Modularization (`BlobStoring`, `HtmlSanitizer`, `OpenIddict`)
 5. ABP Feature Parity
+6. PWA Completion
 
-## Critérios de aceite gerais
+## General Acceptance Criteria
 
-- Cada feature deve ter sua própria spec detalhada antes de implementação.
-- Build do Angular (`ng build --configuration=production`) sem erros.
-- Build do .NET (`dotnet build Eaf.sln`) sem erros.
-- Testes unitários/xUnit passando.
-- Cobertura mínima 90% para código backend novo.
+- Each feature must have its own detailed spec before implementation.
+- Angular build (`ng build --configuration=production`) without errors.
+- .NET build (`dotnet build Eaf.sln`) without errors.
+- Unit/xUnit tests passing.
+- Minimum 90% coverage for new backend code.
 
-## Notas
+## Notes
 
-- Features 1, 2, 3 e 8 já implementadas. Esta spec documenta o trabalho restante.
-- Recomenda-se aprovar e implementar uma feature por vez, validando CI antes de avançar.
+- Features 1, 2, 3 and 8 are still open. This spec documents the remaining work.
+- Implement one feature at a time, validating CI before moving on.

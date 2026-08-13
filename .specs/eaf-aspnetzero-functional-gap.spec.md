@@ -1,9 +1,10 @@
 # EAF — ASP.NET Zero Functional Gap Analysis
 
-> Analysis of [ASP.NET Zero Angular documentation](https://docs.aspnetzero.com/aspnet-core-angular/latest/) against the current EAF middleware and `Templates/Angular/Eaf.ProjectName.UI`.
-> Scope: **functional features only**. New layouts, themes and visual redesign are explicitly out of scope because Metronic licensing does not allow copying Zero's Metronic 8 assets.
+## Summary
 
-## 1. Already present in EAF (no work required)
+Analysis of [ASP.NET Zero Angular documentation](https://docs.aspnetzero.com/aspnet-core-angular/latest/) against the current EAF middleware and `Templates/Angular/Eaf.ProjectName.UI`. Scope: **functional features only**. Layout, themes and visual redesign are out of scope because Metronic 8 assets cannot be reused without a license.
+
+## 1. Already present in EAF (2026-08)
 
 | Feature | EAF evidence | Notes |
 |---|---|---|
@@ -24,158 +25,154 @@
 | Real-time SignalR | Chat / Notifications | Present. |
 | Web API Swagger UI | `Swashbuckle` integration | Present. |
 | Visual settings / UI customization | `src/app/admin/ui-customization` | Theme selection exists. |
-| Edition management (basic) | `EditionsComponent`, `EditionAppService` | Recently added: CRUD list only, no features/prices integration yet. |
+| Organization Units | `src/Eaf.Middleware.Application/Organizations/OrganizationUnitAppService.cs` + `src/app/admin/organization-units` | **Implemented** after this analysis. |
+| Mass Notifications | `MassNotificationAppService` + `src/app/admin/mass-notifications` | **Implemented** after this analysis. |
+| User Delegation | `UserDelegationAppService` + `src/app/admin/user-delegations` | **Implemented** after this analysis. |
+| Tenant Join Requests | `TenantJoinRequest` + `src/app/admin/tenant-join-requests` | **Implemented** after this analysis. |
+| Dashboard | `DashboardAppService` + `src/app/main/dashboard` | **Implemented** after this analysis. |
+| Payment gateway abstraction | `IPaymentGateway`, `PaymentGatewayResolver`, `PaymentAppService`, Stripe/PayPal/PagSeguro/MercadoPago + `src/app/admin/payments` | **Implemented** after this analysis. |
+| Edition management | `EditionsComponent`, `EditionAppService` | CRUD list exists; no feature/price integration yet. |
 | Rate limiting | `Eaf.Middleware.Core/RateLimiting`, `IRateLimitManager` | Core engine exists; admin UI not present. |
 
-## 2. Functional gaps compared to ASP.NET Zero
+## 2. Functional gaps compared to ASP.NET Zero (2026-08)
 
 ### 2.1 Subscription & Payment System (high value)
 
-ASP.NET Zero exposes `IPaymentManager`, `PaymentAppService`, `SubscriptionAppService` and full `SubscriptionPayment`/`SubscriptionPaymentProduct` entities. It provides:
-
-- Tenant subscription page with **payment history** and **invoice generation**.
-- **PayPal** and **Stripe** gateway integrations.
-- Recurring / proration payments.
-- **Subscription expiration workers**: `SubscriptionExpireEmailNotifierWorker`, `SubscriptionExpirationCheckWorker`.
-- Edition → tenant assignment with **trial days**, **waiting period after expire** and **fallback edition**.
+ASP.NET Zero exposes a full subscription lifecycle (`IPaymentManager`, `SubscriptionAppService`, `SubscriptionPayment`/`SubscriptionPaymentProduct`, invoice generation, recurring/proration, expiration workers, edition → tenant assignment with trial days and fallback edition).
 
 EAF currently has:
 
-- `SubscribableEdition` and `PaymentPeriodType`/`EditionPaymentType` enums in `Eaf.Middleware.Core` (legacy remnants).
-- No `PaymentAppService`, no `SubscriptionAppService`, no tenant subscription UI, no payment gateway integration, no invoice worker.
+- `SubscribableEdition`, `PaymentPeriodType`/`EditionPaymentType` enums as legacy remnants.
+- **Payment gateway abstraction** implemented (`IPaymentGateway` + Stripe/PayPal/PagSeguro/MercadoPago).
+- **No** `SubscriptionAppService`, tenant subscription UI, invoice worker, recurring payments or fallback edition logic.
 
 **Recommended approach:**
 
 1. Add `SubscriptionPayment` and `SubscriptionPaymentProduct` entities.
-2. Implement `IPaymentManager` with `CreatePayment`.
-3. Add PayPal and Stripe gateway abstractions (`IPaymentGateway` + concrete providers).
-4. Create tenant subscription Angular page (`/app/admin/subscription` or `/app/main/subscription`).
-5. Add background workers for expiration notifications and tenant deactivation/fallback.
+2. Build `SubscriptionAppService` on top of `PaymentAppService`.
+3. Create tenant subscription Angular page (`/app/main/subscription` or `/app/admin/subscription`).
+4. Add background workers for expiration notifications and tenant deactivation/fallback.
 
-### 2.2 Organization Units (high value, low risk)
+### 2.2 SMS Provider (medium value)
 
-ASP.NET Zero has an **Organization Units** page that lets host admins:
+ASP.NET Zero supports passwordless login and mass notifications by SMS.
 
-- Manage a hierarchical tree of OUs (create, edit, delete, move).
-- Add/remove **members** (users) of an OU.
-- Add/remove **roles** of an OU (inherited permissions).
-- Generic `common-lookup-modal` for selecting users/roles.
+EAF has no SMS module.
 
-EAF already uses ABP Zero's `OrganizationUnit` / `UserOrganizationUnit` / `OrganizationUnitRole` entities in `UserManager`/`RoleManager`, but there is **no AppService and no UI** for OUs.
+**Recommended approach:** add `Eaf.Sms` module with Twilio / AWS SNS providers and an `ISmsSender` interface.
 
-**Recommended approach:**
+### 2.3 MailKit Module (medium value)
 
-1. Add `OrganizationUnitAppService` with tree CRUD, members and roles management.
-2. Add Angular page `src/app/admin/organization-units/` with a tree view and members/roles tabs.
-3. Reuse existing ABP `IRepository<OrganizationUnit>` and `UserManager`.
+ASP.NET Zero has rich email templates and providers.
 
-### 2.3 Passwordless Login (medium value)
+EAF has basic email but no `MailKit` module.
 
-ASP.NET Zero supports passwordless login via email or SMS verification code. It is disabled by default and can be toggled in host settings. A 6-digit single-use code is sent and verified.
+**Recommended approach:** add `Eaf.MailKit` module with templates, SendGrid / Mailgun providers and attachment support.
+
+### 2.4 Blob Storage (medium value)
+
+ASP.NET Zero has file management and tenant assets.
+
+EAF has no `BlobStoring` module.
+
+**Recommended approach:** add `Eaf.BlobStoring` with Azure Blob, AWS S3, FileSystem and Database providers.
+
+### 2.5 Redis Cache (medium value)
+
+ASP.NET Zero supports distributed Redis cache out of the box.
+
+EAF has `Eaf.SqlServerCache` and `Eaf.SqliteCache` but no Redis module.
+
+**Recommended approach:** add `Eaf.RedisCache` implementing `ICacheManager`.
+
+### 2.6 SignalR Module (medium value)
+
+ASP.NET Zero has dedicated real-time notifications and chat backends.
+
+EAF has a `ChatHub` but no formal `Eaf.SignalR` middleware module.
+
+**Recommended approach:** create `Eaf.SignalR` / `Eaf.SignalR.AspNetCore` module with notification and chat backplane.
+
+### 2.7 Push Notifications (medium value)
+
+ASP.NET Zero supports push for mobile apps.
+
+EAF PWA has Service Worker configured but no push logic.
+
+**Recommended approach:** add `Eaf.PushNotifications` (Web Push VAPID) and PWA integration.
+
+### 2.8 Passwordless Login (low-medium value)
+
+ASP.NET Zero supports passwordless login via email/SMS code.
 
 EAF has no passwordless flow.
 
-**Recommended approach:**
+**Recommended approach:** add `PasswordlessLoginManager` and UI pages.
 
-1. Add `PasswordlessLoginManager` / `PasswordlessCodeCacheItem`.
-2. Add settings under `SecuritySettingsEditDto`/`HostSettingsAppService`.
-3. Add Angular pages under `/account/passwordless` and `/account/passwordless-verify`.
-4. Integrate with existing `UserEmailer` and SMS provider.
+### 2.9 QR Login (low-medium value)
 
-### 2.4 QR Login (medium value)
+ASP.NET Zero allows QR login from the mobile app.
 
-ASP.NET Zero allows a user already authenticated in the MAUI mobile app to scan a QR code on the web login page and log in without credentials.
+EAF has no QR login.
 
-EAF has no QR login flow.
+**Recommended approach:** deferred until mobile app planning.
 
-**Recommended approach:**
+### 2.10 Tenant Impersonation (low-medium value)
 
-1. Add backend QR session generation endpoint (`TokenAuthController`/`QrLoginManager`).
-2. Add WebSocket/SignalR channel to poll QR session status.
-3. Add Angular login page QR widget.
-4. Optional: add QR endpoint for mobile app (separate from this Angular template work).
+ASP.NET Zero allows host admins to impersonate a tenant user.
 
-### 2.5 User Delegation (medium value)
+EAF has user delegation but no tenant impersonation.
 
-ASP.NET Zero lets a user delegate their account to another user for a limited period. Audit logs keep impersonator info. It is similar to impersonation with expiry.
+**Recommended approach:** extend `UserDelegation`/`PermissionChecker` for cross-tenant support.
 
-EAF has impersonation but no time-bounded delegation and no self-service delegation UI.
+### 2.11 Social Account Linking (low value)
 
-**Recommended approach:**
+ASP.NET Zero lets users connect/disconnect external providers from their profile.
 
-1. Add `UserDelegation` entity and `UserDelegationManager`.
-2. Extend login/impersonation flow to validate delegation end time.
-3. Add Angular modal in the user profile menu for managing delegations.
+EAF supports external login at authentication time but no linked accounts page.
 
-### 2.6 Mass Notifications (medium value)
+**Recommended approach:** add `UserLogin` management AppService and profile section.
 
-ASP.NET Zero has an admin page to send mass notifications to selected users and/or OUs via SMS, email and in-app notification.
+### 2.12 Setup Page (low value)
 
-EAF has per-user notifications and in-app notifications but no mass-sending UI.
+ASP.NET Zero has a `/setup` page for initial DB creation.
 
-**Recommended approach:**
+EAF has no setup page; migrations are run via CLI/deploy scripts.
 
-1. Add `MassNotificationAppService` with target filters (users, OUs, roles, tenants).
-2. Add `MassNotification` entity and background job dispatcher.
-3. Add Angular page `/app/admin/mass-notifications`.
+**Recommended approach:** keep as documentation/tooling unless product requires it.
 
-### 2.7 Host Dashboard & Tenant Dashboard (low-medium value)
-
-ASP.NET Zero ships with a **host dashboard** showing tenant/edition/income statistics and a **tenant dashboard** as starting point. The dashboards are fully implemented with sample widgets and are **customizable**.
-
-EAF `DashboardComponent` is empty (only `AppComponentBase` constructor). There is no customizable dashboard engine.
-
-**Recommended approach:**
-
-1. Add `DashboardAppService` returning stats.
-2. Implement host dashboard (`/app/main/dashboard` when host) and tenant dashboard.
-3. Optional later phase: widget-based customizable dashboard (separate from this gap list because it is UI-heavy).
-
-### 2.8 Social Account Linking (low-medium value)
-
-ASP.NET Zero allows a logged-in user to connect/disconnect external providers (Google, Facebook, Microsoft, OIDC, WsFederation, Twitter) from their profile.
-
-EAF supports external login at authentication time but does not have a "linked accounts" management page.
-
-**Recommended approach:**
-
-1. Add `UserLogin` management AppService methods to link/unlink external providers.
-2. Add Angular page or section in user profile settings.
-
-### 2.9 Setup Page (low value)
-
-ASP.NET Zero has a `/setup` page to create the initial database, apply migrations and configure the app from a web UI.
-
-EAF has no setup page. Usually migrations are run via `dotnet ef` or deploy scripts.
-
-**Recommended approach:**
-
-Consider keeping this as documentation/tooling rather than a runtime page unless product requirements demand it.
-
-## 3. Priority order for the EAF roadmap
+## 3. Priority Order for the EAF Roadmap
 
 Order balances implementation effort and business value:
 
-1. **Organization Units** — ABP entities already exist; mostly AppService + UI.
-2. **Host Dashboard / Tenant Dashboard** — Empty dashboard; low risk, high visibility.
-3. **Subscription & Payment System** — Large but high business value for SaaS.
-4. **Mass Notifications** — Extends existing notification infrastructure.
-5. **User Delegation** — Extends existing impersonation.
-6. **Passwordless Login** — Security/UX improvement.
-7. **Social Account Linking** — Nice-to-have; depends on external auth usage.
-8. **QR Login** — Requires mobile app; do after MAUI planning.
-9. **Setup Page** — Only if required for zero-config deployment.
+1. **Redis Cache** — foundational for scale; aligns with ABP `ICacheManager`.
+2. **MailKit Module** — improves email deliverability and templates.
+3. **Blob Storage** — enables file uploads and tenant assets.
+4. **SignalR Module** — formalizes real-time backend.
+5. **Subscription & Payment System** — high business value for SaaS; builds on existing payment gateways.
+6. **SMS Provider** — enables passwordless and mass notifications.
+7. **Push Notifications** — depends on SignalR/PWA.
+8. **Passwordless Login** — security/UX improvement.
+9. **Tenant Impersonation** — support scenarios.
+10. **Social Account Linking** — nice-to-have.
+11. **QR Login** — deferred until mobile app.
+12. **Setup Page** — only if required for zero-config deployment.
 
-## 4. Out of scope
+## 4. Out of Scope
 
-The following ASP.NET Zero capabilities are intentionally excluded because they depend on Metronic 8 or proprietary Zero assets that cannot be reused without a license:
+The following ASP.NET Zero capabilities are intentionally excluded because they depend on Metronic 8 or proprietary Zero assets:
 
 - New Metronic themes / visual design system.
 - Quick theme switcher UI beyond existing `ui-customization`.
 - MAUI-specific UI layouts.
 
-## 5. References
+## 5. Implementation Status (2026-08)
 
-- ASP.NET Zero Angular docs: https://docs.aspnetzero.com/aspnet-core-angular/latest/
+Several ASP.NET Zero features (Organization Units, Mass Notifications, User Delegation, Tenant Join Requests, Dashboard, Payment Gateway) have been implemented since the original gap analysis. Remaining gaps are concentrated in infrastructure modules (Redis, Blob, MailKit, SignalR, SMS, Push) and subscription lifecycle.
+
+## 6. References
+
+- ASP.NET Zero Angular docs: <https://docs.aspnetzero.com/aspnet-core-angular/latest/>
 - EAF repository: `afonsoft/EAF`
-- Existing EAF docs: `.specs/eaf-aspnetzero-feature-adoption.spec.md` (edition-centric), `.specs/eaf-angular-remaining-modernization-features.spec.md` (layout/theme/PWA gap)
+- `.specs/eaf-aspnetzero-feature-adoption.spec.md`
+- `.specs/eaf-backend-modularization.spec.md`

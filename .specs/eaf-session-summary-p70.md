@@ -1,38 +1,38 @@
 # EAF Session Summary P70 — Docker Compose CI Validation
 
-## Contexto
+## Context
 
-Sessão P70 concluída. As métricas atuais são:
+Session P70 completed. Current metrics:
 
-| Métrica | Valor |
+| Metric | Value |
 |---------|-------|
 | Line coverage | 97.9% (13311 / 13590) |
 | Branch coverage | 90.5% (2598 / 2868) |
 | Method coverage | 99.8% (2159 / 2162) |
-| Tests | 4605 total, 4604 passando, 0 ignorados |
+| Tests | 4605 total, 4604 passing, 0 skipped |
 | Build warnings (Eaf.sln) | 0 |
 | Template warnings (Api/Worker/Angular) | 0 |
 
 Branch: `feature/devin-20260719-priority70-compose-cicd`.
 
-## O que foi feito
+## What was done
 
-1. Criado `.github/workflows/docker-compose-validation.yml` para validar a stack Docker Compose em PRs que toquem em `docker-compose*.yml`, `Dockerfile*` ou `scripts/validate-docker-compose.sh`.
-2. Workflow dispara em `pull_request` (para `main`/`develop`) e `workflow_dispatch`.
-3. Realiza build de `Eaf.sln` em Release, restaura cache NuGet, configura Docker Buildx e cache de camadas.
-4. Executa `bash scripts/validate-docker-compose.sh` com `COMPOSE_FILE=docker-compose.all.yml`.
-5. Em caso de falha, faz upload dos logs dos containers como artifact (`docker-compose-logs`).
-6. `scripts/validate-docker-compose.sh` foi ajustado para salvar logs em `LOGS_DIR` (quando definido) antes de derrubar a stack, tornando possível o upload de artifacts.
-7. Pasta `docs/development/session-summaries` removida; resumos e prompts futuros devem ficar em `.specs/`.
-8. `.agents/MEMORY.md` atualizado com as notas do P70.
+1. Created `.github/workflows/docker-compose-validation.yml` to validate the Docker Compose stack on PRs that touch `docker-compose*.yml`, `Dockerfile*` or `scripts/validate-docker-compose.sh`.
+2. Workflow triggers on `pull_request` (to `main`/`develop`) and `workflow_dispatch`.
+3. Builds `Eaf.sln` in Release, restores NuGet cache, sets up Docker Buildx and layer cache.
+4. Runs `bash scripts/validate-docker-compose.sh` with `COMPOSE_FILE=docker-compose.all.yml`.
+5. On failure, uploads container logs as an artifact (`docker-compose-logs`).
+6. `scripts/validate-docker-compose.sh` was adjusted to save logs to `LOGS_DIR` (when set) before tearing down the stack, enabling artifact upload.
+7. Removed `docs/development/session-summaries`; future summaries and prompts should live in `.specs/`.
+8. Updated `.agents/MEMORY.md` with P70 notes.
 
-## Restrições respeitadas
+## Constraints respected
 
-- Nenhum workflow existente em `.github/workflows/` foi modificado.
-- Cobertura de testes não reduzida.
-- Não foram commitados secrets (`.env`, connection strings, tokens).
+- No existing workflow in `.github/workflows/` was modified.
+- Test coverage was not reduced.
+- No secrets (`.env`, connection strings, tokens) were committed.
 
-## Referências
+## References
 
 - `.github/workflows/docker-compose-validation.yml`
 - `scripts/validate-docker-compose.sh`

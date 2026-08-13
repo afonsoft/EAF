@@ -1,68 +1,76 @@
-# EAF Angular — PWA, Cache e Experiência Offline
+# EAF Angular — PWA, Cache and Offline Experience
 
-## Resumo
-Transformar o template Angular EAF em uma **Progressive Web App (PWA)** com Service Worker (`@angular/service-worker`), cache de assets e APIs, suporte a instalação e notificações push, aproveitando os pacotes `@angular/pwa` e `@angular/service-worker` já presentes no `package.json`.
+## Summary
 
-## Motivação
-- `@angular/pwa` e `@angular/service-worker` já estão em `dependencies` do `package.json`, mas não há evidências de configuração ativa de PWA no template.
-- Usuários mobile esperam instalar o app e acessar dados offline.
-- ASP.NET Zero oferece mobile app .NET MAUI; uma PWA pode cobrir casos mais leves sem publicar nas stores.
+Turn the EAF Angular template into a **Progressive Web App (PWA)** with Service Worker (`@angular/service-worker`), asset and API caching, install support and push notifications, using the `@angular/pwa` and `@angular/service-worker` packages already present in `package.json`.
 
-## Estado Atual
-- `package.json` possui `@angular/pwa` e `@angular/service-worker`.
-- `ngsw-config.json` pode existir? Não verificado.
-- Não há manifesto `manifest.webmanifest` visível nos assets principais.
-- Service worker não é registrado em `main.ts` ou `app.module.ts` sem verificação.
+## Motivation
 
-## Proposta de Mudanças
+- `@angular/pwa` and `@angular/service-worker` are already in `package.json` dependencies, but PWA features are not fully activated.
+- Mobile users expect to install the app and access data offline.
+- ASP.NET Zero offers a .NET MAUI mobile app; a PWA can cover lighter scenarios without app-store publishing.
 
-### 1. Configurar Angular PWA
-- Rodar `ng add @angular/pwa` (ou manualmente criar `ngsw-config.json`, `manifest.webmanifest`).
-- Registrar `ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })`.
-- Adicionar `manifest.webmanifest` em `src/assets` com ícones EAF, cores, atalhos.
+## Current State
 
-### 2. Cache de dados
-- Definir `assetGroups` para cachear CSS, JS, fontes e imagens.
-- Definir `dataGroups` para cachear chamadas API com estratégias `performance` (dashboard) e `freshness` (dados de edição).
-- Integrar com `localforage` (já presente) para cache de dados de usuário, configurações e preferências.
+- `package.json` has `@angular/pwa` and `@angular/service-worker`.
+- `ngsw-config.json` exists with `assetGroups` and `dataGroups`.
+- `manifest.json` is referenced in `angular.json` and `index.html`.
+- Service worker is registered in `app.module.ts` for production.
+- No offline banner, action queue, push notifications or install prompt logic found in `src/app`.
+
+## Proposed Changes
+
+### 1. Configure Angular PWA
+- Run `ng add @angular/pwa` (or keep manual `ngsw-config.json` / `manifest.webmanifest`).
+- Register `ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })`.
+- Add `manifest.webmanifest` in `src/assets` with EAF icons, colors and shortcuts.
+
+### 2. Data Cache
+- Define `assetGroups` for CSS, JS, fonts and images.
+- Define `dataGroups` for API calls with `performance` (dashboard) and `freshness` (edit data) strategies.
+- Integrate with `localforage` (already present) for user data, settings and preferences.
 
 ### 3. Offline UX
-- Detectar estado de conectividade (`navigator.onLine` + eventos `online`/`offline`).
-- Mostrar banner/snackbar de offline e sincronização pendente.
-- Armazenar ações do usuário (ex: mensagens de chat) em fila offline e sincronizar quando online.
+- Detect connectivity (`navigator.onLine` + `online`/`offline` events).
+- Show offline banner / snackbar and pending sync indicator.
+- Queue user actions (e.g. chat messages) offline and sync when online.
 
-### 4. Notificações Push
-- Configurar `PushSubscription` no service worker.
-- Backend EAF: endpoint para registrar subscrições e enviar push via VAPID.
-- Usar notificações push para chat, alertas de sistema e aprovações.
+### 4. Push Notifications
+- Configure `PushSubscription` in the service worker.
+- Backend: endpoint to register subscriptions and send pushes via VAPID.
+- Use push for chat, system alerts and approvals.
 
-### 5. Instalação e ícones
-- Adicionar `beforeinstallprompt` para sugerir instalação.
-- Criar ícones 192x192 e 512x512 e splash screens.
-- Configurar `display: standalone`, `theme_color`, `background_color`.
+### 5. Installation and Icons
+- Add `beforeinstallprompt` to suggest installation.
+- Create 192x192 and 512x512 icons and splash screens.
+- Configure `display: standalone`, `theme_color`, `background_color`.
 
-### 6. Background Sync (opcional)
-- Usar `BackgroundSync` para enviar mensagens de chat e formulários offline.
+### 6. Background Sync (optional)
+- Use `BackgroundSync` to send chat messages and forms offline.
 
-## Plano de Migração
-1. Verificar configuração atual de PWA no template.
-2. Criar `ngsw-config.json` e `manifest.webmanifest`.
-3. Ajustar `app.module.ts` para registrar service worker.
-4. Implementar cache de API e UI de offline.
-5. Adicionar notificações push backend + frontend.
-6. Testar em Lighthouse e dispositivos reais.
+## Implementation Status (2026-08)
 
-## Impacto
-- **Médio**: altera build e assets, adiciona configuração.
-- **Alto**: melhora significativa de UX mobile.
-- **Médio**: backend precisa expor endpoints push.
+Partial. Service Worker configuration (`ngsw-config.json`, `ServiceWorkerModule.register`, `manifest.json`, `angular.json` assets) is in place, but there is no offline UX, API queue, push notification or install prompt implementation.
 
-## Riscos
-- Cache agressivo pode causar dados desatualizados; requer estratégias por endpoint.
-- Multi-tenancy com Service Worker exige cuidado com cache por tenant.
-- Notificações push exigem HTTPS e VAPID keys.
+## Migration Plan
+1. Verify current PWA configuration in the template.
+2. Create/validate `ngsw-config.json` and `manifest.webmanifest`.
+3. Adjust `app.module.ts` to register the service worker.
+4. Implement API/UI cache and offline handling.
+5. Add backend + frontend push notifications.
+6. Test with Lighthouse and real devices.
 
-## Referências
+## Impact
+- **Medium**: changes build and assets, adds configuration.
+- **High**: significantly improves mobile UX.
+- **Medium**: backend must expose push endpoints.
+
+## Risks
+- Aggressive caching can cause stale data; requires per-endpoint strategies.
+- Multi-tenancy with Service Worker requires tenant-scoped cache care.
+- Push notifications require HTTPS and VAPID keys.
+
+## References
 - <https://angular.io/guide/service-worker-intro>
 - <https://angular.io/guide/service-worker-config>
-- `/home/ubuntu/repos/EAF/Templates/Angular/Eaf.ProjectName.UI/package.json` — `@angular/pwa`, `@angular/service-worker`.
+- `Templates/Angular/Eaf.ProjectName.UI/package.json` — `@angular/pwa`, `@angular/service-worker`

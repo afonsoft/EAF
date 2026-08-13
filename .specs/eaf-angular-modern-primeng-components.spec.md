@@ -1,26 +1,29 @@
-# EAF Angular — Modernização de Componentes com PrimeNG
+# EAF Angular — Modernize Components with PrimeNG
 
-## Resumo
-Padronizar o template Angular EAF em componentes **PrimeNG 17+**, reduzindo o uso de `ngx-bootstrap`, jQuery e widgets legados, aproveitando novos recursos como Tailwind-aware theming, unstyled mode, inline messages e acessibilidade aprimorada.
+## Summary
 
-## Motivação
-- O `package.json` já inclui `primeng ^17.17.0`, mas muitos componentes ainda usam `ngx-bootstrap` (`^12.0.0`) e estilos customizados.
-- PrimeNG 17 introduziu nova API de theming, melhor suporte a acessibilidade e componentes unstyled.
-- ASP.NET Zero usa PrimeNG como base para a UI Angular.
-- Menor dependência de jQuery/Bootstrap JS facilita manutenção e SSR/PWA.
+Standardize the EAF Angular template on **PrimeNG 17+** components, reducing the use of `ngx-bootstrap`, jQuery and legacy widgets, and leveraging new features such as Tailwind-aware theming, unstyled mode, inline messages and improved accessibility.
 
-## Estado Atual
-- `primeng` presente: `p-fileUpload`, `p-table` (usado em datatables?), `p-dialog` parcial.
-- `ngx-bootstrap` usado para: dropdown, datepicker, modal, tooltip, tabs, accordion.
-- Formulários: mistura de HTML puro + classes Bootstrap + `m-form` Metronic.
-- Datepicker: `ngx-bootstrap` e `bs-datepicker` presentes em assets.
-- Modais: Bootstrap modal + `m-modal` + `p-dialog`.
+## Motivation
 
-## Proposta de Mudanças
+- `package.json` already includes `primeng ^17.17.0`, but many components still use `ngx-bootstrap` (`^12.0.0`) and custom styles.
+- PrimeNG 17 introduces a new theming API, better accessibility and unstyled components.
+- ASP.NET Zero Angular uses PrimeNG as the base UI library.
+- Less dependency on jQuery/Bootstrap JS simplifies maintenance and SSR/PWA.
 
-### 1. Substituir ngx-bootstrap por PrimeNG
+## Current State
+
+- `primeng` is present: `p-fileUpload`, `p-table` (used in datatables), `p-dialog` partially.
+- `ngx-bootstrap` is used for: dropdown, datepicker, modal, tooltip, tabs, accordion.
+- Forms: mix of plain HTML + Bootstrap classes + `m-form` Metronic.
+- Datepicker: `ngx-bootstrap` and `bs-datepicker` assets are present.
+- Modals: Bootstrap modal + `m-modal` + `p-dialog`.
+
+## Proposed Changes
+
+### 1. Replace ngx-bootstrap with PrimeNG
 | ngx-bootstrap | PrimeNG 17+ |
-|---|---|
+|---------------|-------------|
 | Dropdown | `p-dropdown` / `p-splitButton` |
 | Datepicker | `p-calendar` |
 | Modal | `p-dialog` |
@@ -29,42 +32,46 @@ Padronizar o template Angular EAF em componentes **PrimeNG 17+**, reduzindo o us
 | Accordion | `p-accordion` |
 | Typeahead | `p-autoComplete` |
 
-### 2. Padronizar formulários
-- Usar `p-inputText`, `p-inputNumber`, `p-inputTextarea`, `p-checkbox`, `p-radioButton`, `p-toggleButton`.
-- Integrar com `ReactiveFormsModule` e validações do Angular.
-- Substituir `m-form` / `form-group form-md-line-input` por `p-fluid` + grid responsiva.
+### 2. Standardize Forms
+- Use `p-inputText`, `p-inputNumber`, `p-inputTextarea`, `p-checkbox`, `p-radioButton`, `p-toggleButton`.
+- Integrate with `ReactiveFormsModule` and Angular validations.
+- Replace `m-form` / `form-group form-md-line-input` with `p-fluid` + responsive grid.
 
-### 3. Tabelas
-- Substituir `primeng-datatable-container` customizado por `p-table` com `responsiveLayout="stack"` ou `scroll`.
-- Adicionar `p-paginator` nativo e lazy loading.
-- Usar `p-columnFilter` para filtros inline.
+### 3. Tables
+- Replace custom `primeng-datatable-container` with `p-table` using `responsiveLayout="stack"` or `scroll`.
+- Add native `p-paginator` and lazy loading.
+- Use `p-columnFilter` for inline filters.
 
-### 4. Temas PrimeNG
-- Migrar de `theme.css` legado para novo sistema de theming do PrimeNG 17 (`Aura`, `Lara`, `Material`, `Bootstrap` ou tema customizado EAF).
-- Criar `theme-eaf` com tokens de design (cores, radius, spacing, tipografia).
+### 4. PrimeNG Themes
+- Migrate from legacy `theme.css` to the new PrimeNG 17 theming system (`Aura`, `Lara`, `Material`, `Bootstrap` or a custom EAF theme).
+- Create `theme-eaf` with design tokens (colors, radius, spacing, typography).
 
-### 5. Acessibilidade
-- Usar atributos `aria-*` e roles fornecidos pelos componentes PrimeNG.
-- Garantir foco visível e navegação por teclado.
+### 5. Accessibility
+- Use `aria-*` attributes and roles provided by PrimeNG components.
+- Ensure visible focus and keyboard navigation.
 
-## Plano de Migração
-1. Inventariar todos os usos de `ngx-bootstrap` no `src/app`.
-2. Criar exemplos de substituição em componentes admin críticos (Users, Roles, Tenants).
-3. Migrar componentes genéricos (dropdowns, datepickers, modais).
-4. Atualizar CSS para novo theming PrimeNG.
-5. Testes de regressão visual e funcional.
+## Implementation Status (2026-08)
 
-## Impacto
-- **Médio/Alto**: muitos componentes de UI precisam ser reescritos.
-- **Alto**: melhora de acessibilidade e consistência.
-- **Baixo/Médio**: pode reduzir tamanho de bundle ao remover `ngx-bootstrap`.
+Partial. `p-table`, `p-dialog`, `p-paginator`, `p-fileUpload` and `p-progressbar` are already used in admin pages. `ngx-bootstrap` (`ModalModule`, `TabsModule`, `BsDropdownModule`, `TooltipModule`, `PopoverModule`) is still imported in `app.module.ts` and widely used across the application.
 
-## Riscos
-- Mudanças de API entre `ngx-bootstrap` e PrimeNG exigem testes.
-- Projetos gerados pelo template EAF podem depender de estilos `m-form`.
-- Necessidade de manter compatibilidade com localize pipe e serviços existentes.
+## Migration Plan
+1. Inventory all `ngx-bootstrap` usages in `src/app`.
+2. Create replacement examples in critical admin components (Users, Roles, Tenants).
+3. Migrate generic components (dropdowns, datepickers, modals).
+4. Update CSS for the new PrimeNG theming system.
+5. Run visual and functional regression tests.
 
-## Referências
-- <https://primeng.org/installation> — PrimeNG 17 theming e unstyled mode.
-- ASP.NET Zero Angular UI usa PrimeNG como base.
-- `/home/ubuntu/repos/EAF/Templates/Angular/Eaf.ProjectName.UI/package.json`.
+## Impact
+- **Medium/High**: many UI components must be rewritten.
+- **High**: improves accessibility and consistency.
+- **Low/Medium**: may reduce bundle size by removing `ngx-bootstrap`.
+
+## Risks
+- API differences between `ngx-bootstrap` and PrimeNG require testing.
+- Projects generated from the EAF template may depend on `m-form` styles.
+- Need to maintain compatibility with `localize` pipe and existing services.
+
+## References
+- <https://primeng.org/installation> — PrimeNG 17 theming and unstyled mode.
+- ASP.NET Zero Angular UI uses PrimeNG as base.
+- `Templates/Angular/Eaf.ProjectName.UI/package.json`
