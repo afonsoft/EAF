@@ -61,7 +61,8 @@ namespace Eaf.ProjectName.Tests.Authorization.Users
                     IsEmailConfirmed = true,
                     IsActive = true,
                     SecurityStamp = Guid.NewGuid().ToString(),
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    Password = "123qwe"
                 };
                 hostUser.SetNormalizedNames();
                 context.Users.Add(hostUser);
@@ -81,7 +82,8 @@ namespace Eaf.ProjectName.Tests.Authorization.Users
                     IsEmailConfirmed = true,
                     IsActive = true,
                     SecurityStamp = Guid.NewGuid().ToString(),
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    Password = "123qwe"
                 };
                 tenantUser.SetNormalizedNames();
                 context.Users.Add(tenantUser);
