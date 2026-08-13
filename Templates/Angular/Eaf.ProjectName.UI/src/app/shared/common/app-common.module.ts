@@ -7,8 +7,11 @@ import { AppNavigationService } from '@app/shared/layout/nav/app-navigation.serv
 import { CommonModule } from '@shared/common/common.module';
 import { UtilsModule } from '@shared/utils/utils.module';
 import { ModalModule } from 'ngx-bootstrap/modal';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule } from 'primeng/paginator';
 import { TableModule } from 'primeng/table';
+import { TooltipModule as PrimeNgTooltipModule } from 'primeng/tooltip';
 import { AppAuthService } from './auth/app-auth.service';
 import { AppRouteGuard } from './auth/auth-route-guard';
 import { CommonLookupModalComponent } from './lookup/common-lookup-modal.component';
@@ -33,6 +36,9 @@ import { StatusBadgeComponent } from '../components/status-badge/status-badge.co
     CommonModule,
     TableModule,
     PaginatorModule,
+    DialogModule,
+    ButtonModule,
+    PrimeNgTooltipModule,
   ],
   declarations: [
     TimeZoneComboComponent,

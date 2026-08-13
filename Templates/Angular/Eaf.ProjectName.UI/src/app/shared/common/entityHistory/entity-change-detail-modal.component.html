@@ -1,44 +1,49 @@
-<div
-  bsModal
-  #entityChangeDetailModal="bs-modal"
-  class="modal fade"
-  tabindex="-1"
- 
-  aria-labelledby="entityChangeDetailModal"
-  [config]="{ backdrop: 'static' }"
->
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content" *ngIf="active">
-      <div *ngIf="entityChange" class="modal-header">
-        <h4 class="modal-title">
-          <span>{{ entityChange.entityTypeFullName | localize }}</span> <br />
-          <small [innerHTML]="l('CreatedAtByUser', entityChange.changeTime, entityChange.userName)"></small>
-        </h4>
-        <button type="button" class="close" (click)="close()" [attr.aria-label]="l('Close')">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body scroll-horizontal">
-        <table id="EntityPropertyChangesTable" class="display table table-striped table-bordered table-hover dt-responsive">
-          <thead>
-            <tr>
-              <th>{{ 'Property' | localize }}</th>
-              <th *ngIf="isUpdated()" style="min-width: 200px">{{ 'OriginalValue' | localize }}</th>
-              <th style="min-width: 200px">{{ 'NewValue' | localize }}</th>
-            </tr>
-            <tr *ngFor="let propertyChange of entityPropertyChanges">
-              <td>
-                <strong>{{ propertyChange.propertyName }}</strong>
-              </td>
-              <td *ngIf="isUpdated()">{{ getPropertyChangeValue(propertyChange.originalValue, propertyChange.propertyTypeFullName) }}</td>
-              <td>{{ getPropertyChangeValue(propertyChange.newValue, propertyChange.propertyTypeFullName) }}</td>
-            </tr>
-          </thead>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" (click)="close()">{{ 'Close' | localize }}</button>
-      </div>
+﻿<p-dialog
+  *ngIf="active"
+  [(visible)]="visible"
+  (onHide)="close()"
+  [modal]="true"
+  [style]="{ width: '900px', maxWidth: '95vw' }"
+  [maximizable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closeOnEscape]="true"
+  [dismissableMask]="false">
+  <ng-template pTemplate="header">
+    <div *ngIf="entityChange">
+      <span>{{ entityChange.entityTypeFullName | localize }}</span>
+      <br />
+      <small [innerHTML]="l('CreatedAtByUser', entityChange.changeTime, entityChange.userName)"></small>
     </div>
+  </ng-template>
+
+  <div class="modal-body scroll-horizontal">
+    <p-table [value]="entityPropertyChanges" scrollable="true" [scrollable]="true" styleClass="p-datatable-sm" [responsive]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>{{ 'Property' | localize }}</th>
+          <th *ngIf="isUpdated()" style="min-width: 200px">{{ 'OriginalValue' | localize }}</th>
+          <th style="min-width: 200px">{{ 'NewValue' | localize }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-propertyChange>
+        <tr>
+          <td>
+            <strong>{{ propertyChange.propertyName }}</strong>
+          </td>
+          <td *ngIf="isUpdated()">{{ getPropertyChangeValue(propertyChange.originalValue, propertyChange.propertyTypeFullName) }}</td>
+          <td>{{ getPropertyChangeValue(propertyChange.newValue, propertyChange.propertyTypeFullName) }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="isUpdated() ? 3 : 2" class="text-center">{{ 'NoData' | localize }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
   </div>
-</div>
+
+  <ng-template pTemplate="footer">
+    <button type="button" pButton label="{{ 'Close' | localize }}" (click)="close()"></button>
+  </ng-template>
+</p-dialog>

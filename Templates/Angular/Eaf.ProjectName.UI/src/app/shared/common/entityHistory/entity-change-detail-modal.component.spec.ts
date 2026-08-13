@@ -1,6 +1,8 @@
-import { ModalModule } from 'ngx-bootstrap/modal';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { TableModule } from 'primeng/table';
 import { EntityChangeDetailModalComponent } from './entity-change-detail-modal.component';
 import { AuditLogServiceProxy } from '@shared/service-proxies/service-proxies';
 import { LocalizationService } from '@eaf/localization/localization.service';
@@ -29,7 +31,7 @@ describe('EntityChangeDetailModalComponent', () => {
     setupEafGlobals();
     TestBed.configureTestingModule({
       declarations: [EntityChangeDetailModalComponent, MockLocalizePipe],
-      imports: [ModalModule.forRoot()],
+      imports: [DialogModule, ButtonModule, TableModule],
       providers: [
         { provide: AuditLogServiceProxy, useClass: MockAuditLogServiceProxy },
         { provide: LocalizationService, useClass: MockLocalizationService },

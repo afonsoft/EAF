@@ -1,4 +1,5 @@
-import { ModalModule } from 'ngx-bootstrap/modal';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import {
   MockLocalizePipe,
   setupEafGlobals,
@@ -35,7 +36,7 @@ describe('AuditLogDetailModalComponent', () => {
     setupEafGlobals();
     TestBed.configureTestingModule({
       declarations: [AuditLogDetailModalComponent, MockLocalizePipe],
-      imports: [ModalModule.forRoot()],
+      imports: [DialogModule, ButtonModule],
       providers: [
         { provide: LocalizationService, useClass: MockLocalizationService },
         { provide: PermissionCheckerService, useClass: MockPermissionCheckerService },
