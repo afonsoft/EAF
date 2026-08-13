@@ -24,38 +24,16 @@ namespace Eaf.Middleware.Application.Tests.Payments
     {
         private readonly PaymentAppService _sut;
         private readonly IRepository<SubscriptionPayment, long> _subscriptionPaymentRepository;
-        private readonly IRepository<SubscribableEdition, int> _editionRepository;
-        private readonly IRepository<Tenant, int> _tenantRepository;
-        private readonly IPaymentGatewayResolver _paymentGatewayResolver;
-        private readonly IPaymentGateway _paymentGateway;
+        private readonly IPaymentManager _paymentManager;
 
         public PaymentAppServiceBddTests()
         {
             _subscriptionPaymentRepository = Substitute.For<IRepository<SubscriptionPayment, long>>();
-            _editionRepository = Substitute.For<IRepository<SubscribableEdition, int>>();
-            _tenantRepository = Substitute.For<IRepository<Tenant, int>>();
-            _paymentGatewayResolver = Substitute.For<IPaymentGatewayResolver>();
-            _paymentGateway = Substitute.For<IPaymentGateway>();
-
-            _paymentGatewayResolver.Resolve(Arg.Any<string>()).Returns(_paymentGateway);
-            _paymentGateway.CreatePaymentAsync(Arg.Any<CreatePaymentRequestInput>()).Returns(new PaymentRequestDto
-            {
-                PaymentId = "PAY-123",
-                Gateway = "Null",
-                IsSuccess = true,
-            });
-            _paymentGateway.ProcessPaymentAsync(Arg.Any<ProcessPaymentInput>()).Returns(new PaymentResultDto
-            {
-                ExternalPaymentId = "PAY-123",
-                Gateway = "Null",
-                IsSuccess = true,
-            });
+            _paymentManager = Substitute.For<IPaymentManager>();
 
             _sut = new PaymentAppService(
                 _subscriptionPaymentRepository,
-                _editionRepository,
-                _tenantRepository,
-                _paymentGatewayResolver);
+                _paymentManager);
 
             _sut.ObjectMapper = CreateObjectMapper();
             _sut.UnitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
@@ -90,12 +68,9 @@ namespace Eaf.Middleware.Application.Tests.Payments
         }
 
         [Fact]
-        public async Task Dado_InputValido_Quando_CreatePaymentAsync_Entao_DeveCriarPagamentoPendenteEGerarRequest()
+        public async Task Dado_InputValido_Quando_CreatePaymentAsync_Entao_DeveDelegarParaPaymentManager()
         {
             // Dado
-            var edition = new SubscribableEdition { Id = 1, DisplayName = "Pro", MonthlyPrice = 100 };
-            _editionRepository.GetAsync(1).Returns(edition);
-
             var input = new CreateSubscriptionPaymentInput
             {
                 EditionId = 1,
@@ -104,43 +79,25 @@ namespace Eaf.Middleware.Application.Tests.Payments
                 Gateway = "Null",
             };
 
-            SubscriptionPayment inserted = null;
-            await _subscriptionPaymentRepository.InsertAsync(Arg.Do<SubscriptionPayment>(p => inserted = p));
+            _paymentManager.CreatePaymentAsync(input).Returns(new PaymentRequestDto
+            {
+                PaymentId = "PAY-123",
+                Gateway = "Null",
+                IsSuccess = true,
+            });
 
             // Quando
             var result = await _sut.CreatePaymentAsync(input);
 
             // Então
-            inserted.ShouldNotBeNull();
-            inserted.Amount.ShouldBe(100);
-            inserted.Status.ShouldBe(SubscriptionPaymentStatus.Pending);
-            inserted.ExternalPaymentId.ShouldBe("PAY-123");
             result.PaymentId.ShouldBe("PAY-123");
+            await _paymentManager.Received(1).CreatePaymentAsync(input);
         }
 
         [Fact]
-        public async Task Dado_PagamentoProcessadoComSucesso_Quando_ProcessPaymentAsync_Entao_DeveAtivarAssinaturaDoTenant()
+        public async Task Dado_PagamentoProcessadoComSucesso_Quando_ProcessPaymentAsync_Entao_DeveDelegarParaPaymentManagerEAtivarAssinatura()
         {
             // Dado
-            var tenant = new Tenant("acme", "ACME");
-            _tenantRepository.GetAsync(1).Returns(tenant);
-
-            var edition = new SubscribableEdition { Id = 1, DisplayName = "Pro" };
-            _editionRepository.GetAsync(1).Returns(edition);
-
-            var payment = new SubscriptionPayment
-            {
-                Id = 1,
-                TenantId = 1,
-                EditionId = 1,
-                Amount = 100,
-                Status = SubscriptionPaymentStatus.Pending,
-                Gateway = "Null",
-                ExternalPaymentId = "PAY-123",
-                PaymentPeriodType = PaymentPeriodType.Monthly,
-            };
-            _subscriptionPaymentRepository.GetAsync(1).Returns(payment);
-
             var input = new ProcessPaymentInput
             {
                 ExternalPaymentId = "PAY-123",
@@ -148,14 +105,65 @@ namespace Eaf.Middleware.Application.Tests.Payments
                 IsSuccess = true,
             };
 
+            _paymentManager.ProcessPaymentAsync(1, input).Returns(new SubscriptionPaymentDto
+            {
+                Id = 1,
+                Status = SubscriptionPaymentStatus.Completed.ToString(),
+            });
+
             // Quando
             var result = await _sut.ProcessPaymentAsync(1, input);
 
             // Então
-            payment.Status.ShouldBe(SubscriptionPaymentStatus.Completed);
-            tenant.EditionId.ShouldBe(1);
-            tenant.SubscriptionEndDateUtc.HasValue.ShouldBeTrue();
             result.Status.ShouldBe(SubscriptionPaymentStatus.Completed.ToString());
+            await _paymentManager.Received(1).ProcessPaymentAsync(1, input);
+        }
+
+        [Fact]
+        public async Task Dado_PagamentoExistente_Quando_UpgradeSubscriptionAsync_Entao_DeveDelegarParaPaymentManager()
+        {
+            // Dado
+            var input = new UpgradeSubscriptionInput
+            {
+                TenantId = 1,
+                NewEditionId = 2,
+                PaymentPeriodType = PaymentPeriodType.Monthly,
+                Gateway = "Stripe",
+            };
+
+            _paymentManager.UpgradeSubscriptionAsync(input).Returns(new PaymentRequestDto
+            {
+                PaymentId = "UPG-123",
+                Gateway = "Stripe",
+                IsSuccess = true,
+            });
+
+            // Quando
+            var result = await _sut.UpgradeSubscriptionAsync(input);
+
+            // Então
+            result.PaymentId.ShouldBe("UPG-123");
+            await _paymentManager.Received(1).UpgradeSubscriptionAsync(input);
+        }
+
+        [Fact]
+        public async Task Dado_AssinaturaRecorrenteAtiva_Quando_CancelRecurringAsync_Entao_DeveDelegarParaPaymentManager()
+        {
+            // Dado
+            _paymentManager.CancelRecurringAsync(1).Returns(new SubscriptionPaymentDto
+            {
+                Id = 1,
+                IsRecurring = false,
+                Status = SubscriptionPaymentStatus.Canceled.ToString(),
+            });
+
+            // Quando
+            var result = await _sut.CancelRecurringAsync(1);
+
+            // Então
+            result.IsRecurring.ShouldBeFalse();
+            result.Status.ShouldBe(SubscriptionPaymentStatus.Canceled.ToString());
+            await _paymentManager.Received(1).CancelRecurringAsync(1);
         }
     }
 }

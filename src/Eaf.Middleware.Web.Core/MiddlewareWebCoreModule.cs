@@ -121,6 +121,23 @@ namespace Eaf.Middleware.Web
 
             Configuration.Auditing.SetExpiredAuditWoker();
             Configuration.EntityHistory.SetExpiredHistoryEntityWoker();
+            AddSubscriptionRenewalWorker();
+        }
+
+        private void AddSubscriptionRenewalWorker()
+        {
+            try
+            {
+                RecurringJob.AddOrUpdate<Eaf.Middleware.Payments.hangfire.ISubscriptionRenewalWorker>(
+                    "SubscriptionRenewalWorker",
+                    x => x.DoWork(null),
+                    Cron.Daily,
+                    TimeZoneInfo.Local);
+            }
+            catch (Exception ex)
+            {
+                Logger.WarnFormat("Could not register SubscriptionRenewalWorker recurring job: {0}", ex.Message);
+            }
         }
 
         private void AddExpiredAuditLogDeleterWorker()
