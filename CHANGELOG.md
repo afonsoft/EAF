@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ## [Unreleased]
 
+## [9.4.5] - 2026-08-13
+
 ### Added
 
+* feat(payments): lifecycle de pagamentos de assinatura com `PaymentManager`, checkout recorrente Stripe, webhooks e worker de renovação
+* feat(angular): modernização da tela de Audit Logs com PrimeNG, filtros avançados e Entity History
 *   feat(cors): `AddEafCors` centralizado em `Eaf.Middleware.Web.Core` com reflexão de origem real, suporte a wildcards de subdomínio e todos os headers enviados pelo `EafHttpInterceptor`
 *   feat(error): Middleware e filtro de public errors (`EafPublicErrorMiddleware`, `EafExceptionFilter`) mapeando `UserFriendlyException` e outras exceções para `PublicErrorContract` com status apropriado
 *   feat(auth): Parsing JWT no frontend via `TokenService.getPayload`, `getUserId`, `getTenantId`, `getUserName`, `getRoles` e `isInRole`; claim `tenantid` adicionada ao token no backend
@@ -30,6 +34,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 *   docs: Spec de migração dos templates EAF da versão 9.3.1 para 9.4.1 (`.specs/eaf-template-migration-9.4.1.md`) e atualização dos índices de documentação/wiki
 *   docs: Documentação XML `/// <summary>` adicionada a 48 tipos públicos sem documentação
 *   feat: add repo summary to .openhands/microagents/repo.md
+
+### Changed
+
+* chore: bump da versão dos pacotes EAF e templates para 9.4.5
+* docs: atualização das referências de versão nos guias de instalação
+*   docs: README e documentação atualizados com as novas implementações de login multi-tenant, contratos realtime e sociais, rate limit e moderação
+*   docs: Atualizar README badges com métricas atuais (Line 36.6%, Tests 2384, 0 Warnings)
+*   refactor: Atualizar xunit.runner.visualstudio para 3.1.4 em todos os projetos de teste
+*   refactor: Padronizar PackageReference em Directory.Build.props
+*   Update ABP to Version="10.2.0"
+*   Update and rename ci.yml to coverage-reports.yml
 
 ### Fixed
 
@@ -60,17 +75,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 *   Fix issue #475: Corrigir testes unitários com falhas e atualizar README
 *   Fix: Resolve Coverlet path errors in CI workflow
 *   Fix: Address some SqliteCache test failures
-
-### Changed
-
-*   chore: Bump dos módulos EAF para a versão 9.4.2 e atualização das documentações de instalação dos pacotes NuGet
-*   chore: Bump dos templates e módulos para a versão 9.3.1 (PRs #248 e #249)
-*   docs: README e documentação atualizados com as novas implementações de login multi-tenant, contratos realtime e sociais, rate limit e moderação
-*   docs: Atualizar README badges com métricas atuais (Line 36.6%, Tests 2384, 0 Warnings)
-*   refactor: Atualizar xunit.runner.visualstudio para 3.1.4 em todos os projetos de teste
-*   refactor: Padronizar PackageReference em Directory.Build.props
-*   Update ABP to Version="10.2.0"
-*   Update and rename ci.yml to coverage-reports.yml
 
 ### Removed
 
