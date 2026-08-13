@@ -1,40 +1,125 @@
-# EAF Session Summary P70 — Docker Compose CI Validation
+# EAF Session Summary — P70
 
-## Context
+## 0. SPEC Metadata
 
-Session P70 completed. Current metrics:
+| Field | Value |
+|---|---|
+| Feature name | Session Summary P70 |
+| Product / System | EAF |
+| Module / Bounded Context | Documentation / Session Record |
+| Change type | Documentation |
+| Repository | `github.com/afonsoft/EAF` |
+| Suggested branch | `docs/session-summary-p70` |
+| Technical owner | Core Team |
+| Status | Archived |
+| Date | 2026-08-13 |
+| Target agent | Any |
 
-| Metric | Value |
-|---------|-------|
-| Line coverage | 97.9% (13311 / 13590) |
-| Branch coverage | 90.5% (2598 / 2868) |
-| Method coverage | 99.8% (2159 / 2162) |
-| Tests | 4605 total, 4604 passing, 0 skipped |
-| Build warnings (Eaf.sln) | 0 |
-| Template warnings (Api/Worker/Angular) | 0 |
+## 1. Executive Summary
 
-Branch: `feature/devin-20260719-priority70-compose-cicd`.
+This file captures the results of a prior session (P70) that analyzed the EAF repository, updated `.specs/` to English, and produced comparison/roadmap documentation. It is preserved as a session record and should not be used as an implementation contract.
 
-## What was done
+## 2. Agent Role
 
-1. Created `.github/workflows/docker-compose-validation.yml` to validate the Docker Compose stack on PRs that touch `docker-compose*.yml`, `Dockerfile*` or `scripts/validate-docker-compose.sh`.
-2. Workflow triggers on `pull_request` (to `main`/`develop`) and `workflow_dispatch`.
-3. Builds `Eaf.sln` in Release, restores NuGet cache, sets up Docker Buildx and layer cache.
-4. Runs `bash scripts/validate-docker-compose.sh` with `COMPOSE_FILE=docker-compose.all.yml`.
-5. On failure, uploads container logs as an artifact (`docker-compose-logs`).
-6. `scripts/validate-docker-compose.sh` was adjusted to save logs to `LOGS_DIR` (when set) before tearing down the stack, enabling artifact upload.
-7. Removed `docs/development/session-summaries`; future summaries and prompts should live in `.specs/`.
-8. Updated `.agents/MEMORY.md` with P70 notes.
+Reference only.
 
-## Constraints respected
+## 3. Agent Autonomy Level
 
-- No existing workflow in `.github/workflows/` was modified.
-- Test coverage was not reduced.
-- No secrets (`.env`, connection strings, tokens) were committed.
+**0 — Reference/Read-only**
+
+## 4. Product Context
+
+Captured during the P70 EAF analysis session. For the current codebase, refer to `CLAUDE.md` and the other `.specs/*.md` files.
+
+## 5. Task Definition
+
+No active task. This file is a historical record.
+
+## 6. Functional Requirements
+
+N/A.
+
+## 7. Business Rules
+
+N/A.
+
+## 8. Domain Modeling
+
+N/A.
+
+## 9. Expected Architecture
+
+N/A.
+
+## 10. API Contracts
+
+N/A.
+
+## 11. Application Contracts
+
+N/A.
+
+## 12. Persistence and Data
+
+N/A.
+
+## 13. Integrations
+
+N/A.
+
+## 14. Edge Cases and Error Scenarios
+
+N/A.
+
+## 15. Few-Shot Examples
+
+N/A.
+
+## 16. Non-Functional Requirements
+
+N/A.
+
+## 17. Mandatory Guardrails
+
+Do not treat this as an implementation SPEC. Use `eaf-next-steps-q3-2026.spec.md` and child SPECs instead.
+
+## 18. Expected Tests
+
+N/A.
+
+## 19. Acceptance Criteria
+
+N/A.
+
+## 20. Implementation Plan
+
+N/A.
+
+## 21. Rollback Strategy
+
+N/A.
+
+## 22. Risks and Mitigations
+
+N/A.
+
+## 23. Definition of Done
+
+N/A.
+
+## 24. Key Reminder
+
+> The SPEC is the contract. This file is not a contract; it is a session record.
+
+## Session Notes
+
+- EAF uses ABP 10.5, .NET 10, Castle Windsor, EF Core 10.
+- Angular template uses Angular 20, PrimeNG 17, `ngx-bootstrap` 12, legacy Metronic.
+- `.specs/` updated to en-us.
+- New comparison and roadmap SPECs created.
+- Largest gaps: subscription lifecycle, Redis, Blob, MailKit, SignalR module, SMS, Push, Angular dark mode/modern UI.
 
 ## References
 
-- `.github/workflows/docker-compose-validation.yml`
-- `scripts/validate-docker-compose.sh`
-- `docker-compose.all.yml`
-- `.agents/MEMORY.md`
+- `.specs/eaf-next-steps-q3-2026.spec.md`
+- `.specs/eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md`

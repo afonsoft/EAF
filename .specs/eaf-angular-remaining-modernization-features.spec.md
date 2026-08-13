@@ -1,131 +1,205 @@
 # EAF Angular — Remaining Modernization Features
 
-## Goal
+## 0. SPEC Metadata
 
-Consolidate the remaining Angular EAF template modernization features, ordered from simplest to most complex, with feasibility and scope analysis.
+| Field | Value |
+|---|---|
+| Feature name | Angular Remaining Modernization Features |
+| Product / System | EAF Angular Template |
+| Module / Bounded Context | UI Modernization |
+| Change type | Refactor / Frontend |
+| Repository | `github.com/afonsoft/EAF` |
+| Suggested branch | `feature/eaf-angular-modernization` |
+| Technical owner | Frontend Team |
+| Status | In review |
+| Date | 2026-08-13 |
+| Target agent | Claude Code / Devin |
 
-## Features Status
+## 1. Executive Summary
 
-### 1. Dark Mode and Design System
+### Problem
 
-**Goal:** Add a dark theme and CSS design-token system to Angular, replacing Metronic hardcoded colors with CSS variables.
+The EAF Angular template is a mix of legacy Metronic, `ngx-bootstrap`, and partial PrimeNG adoption. Several modernization tracks (dark mode, PrimeNG, Bootstrap 5/Metronic 8, mobile-first, PWA) are tracked in separate SPECs but need a single coordination point.
 
-**Current proposed scope:**
-- Create `theme-variables.scss` / `styles.css` with tokens for surface, text, border, primary, status and accent colors.
-- Extend `Header/Theme/UiCustomization` DTOs to expose `isDarkMode` and `themeName`.
-- Add a header toggle to switch between `light` and `dark`.
-- Persist preference via `localStorage` and optionally `UserPreferences` backend.
-- Adjust `chat-bar.component.css` and all layouts to use `var(--eaf-surface)` etc.
+### Objective
 
-**Implementation status (2026-08):** Not started. No `themeMode`, `isDarkMode`, `data-theme` or `prefers-color-scheme` references found in `Templates/Angular/Eaf.ProjectName.UI/src`.
+Coordinate the remaining Angular modernization tracks and report their implementation status in one place.
 
-**Makes sense?** Yes. Common demand; improves accessibility. Medium complexity.
+### Expected outcome
 
----
+- Each modernization track has a dedicated SPEC.
+- Status is updated monthly.
+- Dependencies between tracks are explicit.
 
-### 2. PrimeNG Component Modernization
+### Out of scope
 
-**Goal:** Replace legacy `ngx-bootstrap` and Metronic widgets with native PrimeNG 17 components (`p-table`, `p-menu`, `p-dropdown`, `p-dialog`, `p-toast`, `p-inputswitch`).
+- Implementation details (covered by child SPECs).
 
-**Current proposed scope:**
-- Replace `BsDropdownModule` menus with `p-menu` / `p-tieredmenu`.
-- Replace `ngx-bootstrap` modals with `p-dialog`.
-- Replace manual tables with `p-table` using `responsiveLayout="scroll"`.
-- Consolidate `p-paginator` and `p-confirmDialog`.
-- Add `p-toast` for notifications and remove custom `notify`.
+## 2. Agent Role
 
-**Implementation status (2026-08):** Partial. `p-table`, `p-dialog`, `p-paginator` and `p-fileUpload` are already used in admin pages; `ngx-bootstrap` (`ModalModule`, `TabsModule`, `BsDropdownModule`, `TooltipModule`, `PopoverModule`) is still imported in `app.module.ts` and used across many components.
+Technical coordinator. Synthesize child SPECs, track status, and update this SPEC.
 
-**Makes sense?** Yes. `package.json` already lists `primeng ^17.17.0`. Medium-high complexity because of Metronic styles.
+## 3. Agent Autonomy Level
 
----
+**0 — Research/Coordination**
 
-### 3. Metronic 8 + Bootstrap 5 Migration
+## 4. Product Context
 
-**Goal:** Update the Angular template layout to Metronic 8 with Bootstrap 5, abandoning legacy classes (`m-grid`, `m-stack`, `m-portlet`) in favor of `row`, `col`, `card`, `navbar`, `offcanvas`.
+Angular template modernization is split across multiple SPECs due to its size.
 
-**Current proposed scope:**
-- Replace Metronic 5/7 `style.bundle.css` with Metronic 8 assets or a custom design system.
-- Refactor `default-layout`, `theme2-layout`, `theme3-layout`, `theme4-layout` to Bootstrap 5 structure.
-- Create reusable components: `app-card`, `app-page-header`, `app-offcanvas-menu`.
-- Ensure mobile responsiveness with native `offcanvas` and Bootstrap breakpoints.
+### Relevant stack
 
-**Implementation status (2026-08):** Not started. Layouts still use `m-stack`, `m-grid`, `m-aside-left` and `style.bundle.css` per theme.
+- Angular 20, PrimeNG 17, Bootstrap 4/5, Metronic, `ngx-bootstrap`
 
-**Makes sense?** Only if a Metronic 8 license exists. Without a license, build an incremental custom design system. High complexity.
+### Context files the agent must read before implementation
 
----
+- `CLAUDE.md`
+- `.specs/eaf-angular-dark-mode-theming.spec.md`
+- `.specs/eaf-angular-modern-primeng-components.spec.md`
+- `.specs/eaf-angular-metronic8-bootstrap5-migration.spec.md`
+- `.specs/eaf-angular-mobile-responsive-layout.spec.md`
+- `.specs/eaf-angular-pwa-offline.spec.md`
+- `.specs/eaf-angular-accessibility-a11y.spec.md`
 
-### 4. Backend Modularization
+## 5. Task Definition
 
-**Goal:** Create the missing backend EAF modules and standardize existing ones.
+### Main task
 
-**Current proposed scope:**
-- `Eaf.BlobStoring` — file-storage abstraction (Azure Blob, S3, local).
-- `Eaf.HtmlSanitizer` — HTML sanitization for chat/notifications.
-- `Eaf.OpenIddict` — OpenID Connect provider ( `ExternalLoginProviderInfo` exists but has no implementation).
-- `Eaf.Dapper` — Dapper repositories for complex queries.
-- `Eaf.FluentValidation` — fluent validation in Application Services.
-- Standardize existing `MailKit` and `Redis` into well-defined modules.
+Maintain a coordinated view of Angular template modernization.
 
-**Implementation status (2026-08):** Not started in `src/`. Payment gateway abstraction was implemented; backend modularization items are still pending.
+### Subtasks
 
-**Makes sense?** `BlobStoring`, `HtmlSanitizer` and `OpenIddict` have high value. `Dapper` and `FluentValidation` depend on real demand. High complexity.
+- Track status of each modernization track.
+- Identify dependencies and ordering.
+- Update this SPEC monthly.
 
----
+### Do not do
 
-### 5. ABP Feature Parity
+- Do not implement code here; defer to child SPECs.
 
-**Goal:** Bring EAF closer to modern ABP Framework features.
+## 6. Functional Requirements
 
-**Current proposed scope:**
-- `Eaf.BlobStoring` (also listed under modularization).
-- MongoDB support (`Eaf.Middleware.MongoDB`).
-- Background jobs with Quartz (`Eaf.Quartz`).
-- OData controllers for admin entities.
-- Enhanced feature system (Editions/Feature values).
-- OpenIddict/OAuth2 server.
+### FR-001: Status dashboard
 
-**Implementation status (2026-08):** Not started. Edition CRUD exists but feature-value/pricing integration is missing.
+**Description:** This SPEC must list each track with status, owner, and blocking dependencies.
 
-**Makes sense?** MongoDB and Quartz make sense for large projects. OData and OpenIddict depend on roadmap. Very high complexity.
+**Acceptance criteria:**
 
----
+- [ ] Table includes all modernization tracks.
+- [ ] Status is one of `Not started`, `Partial`, `In progress`, `Completed`.
 
-### 6. PWA and Offline
+### FR-002: Dependency mapping
 
-**Goal:** Complete the Progressive Web App setup.
+**Description:** Identify which tracks block others.
 
-**Current proposed scope:**
-- Verify `ngsw-config.json` and `manifest.json` are production-ready.
-- Add offline banner and action queue.
-- Implement push notifications backend and frontend.
-- Add install prompt handling.
+**Acceptance criteria:**
 
-**Implementation status (2026-08):** Partial. `ngsw-config.json`, `ServiceWorkerModule.register('ngsw-worker.js')`, `manifest.json` and `angular.json` PWA assets are present, but no offline queue, push notifications or install prompt logic was found in `src/app`.
+- [ ] Dark mode depends on PrimeNG theme tokens.
+- [ ] Bootstrap 5 migration depends on `ngx-bootstrap` replacement.
 
-**Makes sense?** Yes. Improves mobile UX. Medium complexity.
+## 7. Business Rules
 
----
+### BR-001: No duplicate implementation
 
-## Recommended Priority
+Implementation plans must live in child SPECs, not here.
 
-1. Dark Mode and Design Tokens
-2. PrimeNG Modernization
-3. Metronic 8 + Bootstrap 5 (or custom design system)
-4. Backend Modularization (`BlobStoring`, `HtmlSanitizer`, `OpenIddict`)
-5. ABP Feature Parity
-6. PWA Completion
+## 8. Domain Modeling
 
-## General Acceptance Criteria
+N/A.
 
-- Each feature must have its own detailed spec before implementation.
-- Angular build (`ng build --configuration=production`) without errors.
-- .NET build (`dotnet build Eaf.sln`) without errors.
-- Unit/xUnit tests passing.
-- Minimum 90% coverage for new backend code.
+## 9. Expected Architecture
 
-## Notes
+N/A.
 
-- Features 1, 2, 3 and 8 are still open. This spec documents the remaining work.
-- Implement one feature at a time, validating CI before moving on.
+## 10. API Contracts
+
+N/A.
+
+## 11. Application Contracts
+
+N/A.
+
+## 12. Persistence and Data
+
+N/A.
+
+## 13. Integrations
+
+N/A.
+
+## 14. Edge Cases and Error Scenarios
+
+N/A.
+
+## 15. Few-Shot Examples
+
+N/A.
+
+## 16. Non-Functional Requirements
+
+- Keep the SPEC concise.
+- Update monthly.
+
+## 17. Mandatory Guardrails
+
+Do not expand scope beyond the listed tracks.
+
+## 18. Expected Tests
+
+N/A.
+
+## 19. Acceptance Criteria
+
+- [ ] All Angular modernization tracks listed.
+- [ ] Each links to a child SPEC.
+- [ ] Status is current.
+
+## 20. Implementation Plan
+
+1. Create child SPECs for each track.
+2. Link them here.
+3. Update status monthly or after each release.
+
+## 21. Rollback Strategy
+
+N/A.
+
+## 22. Risks and Mitigations
+
+| Risk | Impact | Probability | Mitigation |
+|---|---|---:|---|
+| Tracks drift out of sync | Medium | High | Monthly update and review |
+
+## 23. Definition of Done
+
+- [ ] SPEC reviewed.
+- [ ] All child SPECs linked.
+- [ ] Status current.
+
+## 24. Key Reminder
+
+> The SPEC is the contract. This is a coordination SPEC, not an implementation SPEC.
+
+## Modernization Tracks
+
+| Track | Status (2026-08) | Child SPEC |
+|---|---|---|
+| Dark mode / theme system | Not started | `eaf-angular-dark-mode-theming.spec.md` |
+| PrimeNG full adoption | Partial | `eaf-angular-modern-primeng-components.spec.md` |
+| Bootstrap 5 / Metronic 8 | Not started | `eaf-angular-metronic8-bootstrap5-migration.spec.md` |
+| Mobile responsive layout | Partial | `eaf-angular-mobile-responsive-layout.spec.md` |
+| PWA / offline / push | Partial | `eaf-angular-pwa-offline.spec.md` |
+| Accessibility (WCAG AA) | Not started | `eaf-angular-accessibility-a11y.spec.md` |
+| Performance / bundle size | Partial | `eaf-performance-memory-optimization-plan.md` |
+
+## Current State Summary
+
+- `package.json`: Angular ^20.3.26, PrimeNG ^17.17.0, `ngx-bootstrap` ^12.0.0, `@angular/pwa`/`@angular/service-worker`.
+- PWA service worker is registered in `app.module.ts` for production.
+- `ngx-bootstrap` is still imported in `app.module.ts`.
+- No dark mode implementation found.
+- No mobile-first off-canvas layout.
+
+## References
+
+- See child SPECs listed above.

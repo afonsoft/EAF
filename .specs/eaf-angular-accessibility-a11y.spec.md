@@ -1,80 +1,263 @@
 # EAF Angular — Accessibility (a11y) and WCAG Compliance
 
-## Summary
+## 0. SPEC Metadata
 
-Make the EAF Angular admin template conform to **WCAG 2.1 Level AA** by improving keyboard navigation, color contrast, ARIA roles, focus management and screen-reader support across the main components.
+| Field | Value |
+|---|---|
+| Feature name | Angular Accessibility and WCAG Compliance |
+| Product / System | EAF Angular Template |
+| Module / Bounded Context | UI / Accessibility |
+| Change type | Refactor / Frontend |
+| Repository | `github.com/afonsoft/EAF` |
+| Suggested branch | `feature/eaf-angular-a11y` |
+| Technical owner | Frontend Team |
+| Status | In review |
+| Date | 2026-08-13 |
+| Target agent | Claude Code / Devin |
 
-## Motivation
+## 1. Executive Summary
 
-- Accessibility is a requirement in enterprise and government projects.
-- Modern frameworks (PrimeNG, Angular Material) already ship with accessibility baked in.
-- Improves UX for all users, not only those using assistive technologies.
+### Problem
 
-## Current State
+The Angular admin template lacks a systematic accessibility audit and does not explicitly target WCAG 2.1 Level AA. This can block enterprise and government use cases.
 
-- Uses PrimeNG 17, ngx-bootstrap 12 and legacy Metronic markup.
-- Tables use `p-table` in some pages but often rely on custom CSS classes.
-- No explicit ARIA live regions or skip links.
-- Color contrast may fail for light gray text (`m--font-grey`, `text-muted`) and the orange `#FF7020` on white.
-- `role="presentation"` and `tabindex` are hardcoded in some places.
+### Objective
 
-## Proposed Changes
+Make the EAF Angular admin template conform to WCAG 2.1 Level AA by improving keyboard navigation, color contrast, ARIA roles, focus management, and screen-reader support.
 
-### 1. Semantic HTML and ARIA
-- Use `<header>`, `<nav>`, `<main>`, `<aside>`, `<footer>` in layout components.
-- Replace `div`-based buttons with `<button>` or `p-button`.
-- Add `aria-label`, `aria-describedby`, `aria-expanded` and `aria-current` to menus, buttons, tabs and page navigation.
-- Add skip link "Skip to main content" visible on focus.
+### Expected outcome
 
-### 2. Color Contrast
-- Ensure all text meets 4.5:1 (AA) or 3:1 for large text.
-- Update `--primary: #FF7020` usage to provide dark text on orange.
-- Avoid color-only indicators; add icons and text labels.
+- Lighthouse accessibility score ≥ 90 on core pages.
+- Keyboard-only navigation works for all admin flows.
+- Color contrast meets 4.5:1 for normal text and 3:1 for large text.
 
-### 3. Keyboard Navigation
-- Sidebar menu items must be focusable and operable with Enter/Space/Arrow keys.
-- Modals (`p-dialog`) must trap focus and return focus to the trigger on close.
-- Escape key should close dropdowns, modals and panels.
+### Out of scope
 
-### 4. Screen Reader Support
-- Add ARIA live regions for chat messages, notifications and toasts.
-- Use `aria-live="polite"` for dynamic content updates.
-- Label all icon-only buttons (`aria-label` / `title`).
+- Full UX redesign.
+- Accessibility of non-admin pages in the first pass.
 
-### 5. Forms
-- Associate labels and inputs with `for`/`id`.
-- Use `aria-invalid` and `aria-errormessage` for validation.
-- Error messages should be programmatically associated.
+## 2. Agent Role
 
-### 6. Tables
-- Use `p-table` with `aria-label` or `caption`.
-- Ensure headers are real `<th>` with `scope`.
-- Add `aria-sort` to sortable columns.
+Senior frontend engineer with accessibility expertise. Make incremental, evidence-based fixes and add automated checks.
 
-### 7. Focus Visibility
-- Provide a visible focus ring (`:focus-visible`) that is not removed by `outline: 0`.
+## 3. Agent Autonomy Level
+
+**2 — Reliable**
+
+## 4. Product Context
+
+The template uses PrimeNG 17, `ngx-bootstrap` 12, and legacy Metronic markup. Some components already have ARIA attributes from PrimeNG, but the app lacks global a11y audit and tests.
+
+### Relevant stack
+
+- Angular 20, PrimeNG 17, `ngx-bootstrap`, TypeScript 5.8
+
+### Relevant files or directories
+
+```text
+Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout
+Templates/Angular/Eaf.ProjectName.UI/src/app/admin
+Templates/Angular/Eaf.ProjectName.UI/src/styles.css
+```
+
+### Context files the agent must read before implementation
+
+- `CLAUDE.md`
+- `.specs/eaf-angular-dark-mode-theming.spec.md`
+- `.specs/eaf-angular-modern-primeng-components.spec.md`
+
+## 5. Task Definition
+
+### Main task
+
+Audit and improve accessibility across the main admin components and layout.
+
+### Subtasks
+
+- Run Lighthouse and axe-core on top pages.
+- Add semantic HTML and ARIA roles.
+- Fix color contrast.
+- Improve keyboard navigation.
+- Add automated a11y tests.
+
+### Do not do
+
+- Do not remove visual design.
+- Do not modify `service-proxies.ts`.
+
+## 6. Functional Requirements
+
+### FR-001: Semantic HTML and ARIA
+
+**Description:** Use `<header>`, `<nav>`, `<main>`, `<aside>`, `<footer>`, and proper ARIA attributes.
+
+**Acceptance criteria:**
+
+- [ ] Layout components use semantic tags.
+- [ ] Buttons are `<button>` or `p-button`, not `div`.
+- [ ] Menus, tabs, and page nav have `aria-label`, `aria-expanded`, `aria-current`.
+- [ ] Skip link "Skip to main content" added and visible on focus.
+
+### FR-002: Color contrast
+
+**Description:** Ensure text meets WCAG AA contrast ratios.
+
+**Acceptance criteria:**
+
+- [ ] All text ≥ 4.5:1 (AA) or 3:1 for large text.
+- [ ] Orange `#FF7020` on white has dark text or sufficient contrast.
+
+### FR-003: Keyboard navigation
+
+**Description:** All interactive elements operable with keyboard.
+
+**Acceptance criteria:**
+
+- [ ] Sidebar menu items focusable and operable with Enter/Space/Arrows.
+- [ ] `p-dialog` traps focus and returns focus on close.
+- [ ] Escape closes dropdowns, modals, and panels.
+
+### FR-004: Screen reader support
+
+**Description:** Dynamic content announced to screen readers.
+
+**Acceptance criteria:**
+
+- [ ] ARIA live regions for chat, notifications, toasts.
+- [ ] Icon-only buttons have `aria-label` / `title`.
+
+### FR-005: Forms and tables
+
+**Description:** Labels, validation, and tables are programmatically associated.
+
+**Acceptance criteria:**
+
+- [ ] Labels `for` match input `id`.
+- [ ] `aria-invalid` and error messages associated.
+- [ ] Tables have `aria-label` or `<caption>` and `<th scope>`.
+
+### FR-006: Focus visibility
+
+**Description:** Provide visible `:focus-visible` ring.
+
+**Acceptance criteria:**
+
+- [ ] No `outline: 0` without replacement.
+- [ ] Focus ring visible on keyboard navigation.
+
+## 7. Business Rules
+
+### BR-001: No color-only indicators
+
+Status and actions must include text or icon labels, not color alone.
+
+### BR-002: Keyboard equivalence
+
+Every mouse-operable feature must be keyboard-operable.
+
+## 8. Domain Modeling
+
+N/A.
+
+## 9. Expected Architecture
+
+Angular components with semantic markup and ARIA attributes; CSS focus management.
+
+## 10. API Contracts
+
+N/A.
+
+## 11. Application Contracts
+
+N/A.
+
+## 12. Persistence and Data
+
+N/A.
+
+## 13. Integrations
+
+N/A.
+
+## 14. Edge Cases and Error Scenarios
+
+| Scenario | Input | Expected behavior |
+|---|---|---|
+| Focus lost inside modal | Tab past last focusable | Return to first element (loop) |
+| Color-only status indicator | Red text alone | Add icon or text label |
+
+## 15. Few-Shot Examples
+
+N/A.
+
+## 16. Non-Functional Requirements
+
+### Performance
+
+A11y checks should not block build if they are warnings; errors should fail CI.
+
+### Security
+
+No PII exposed in ARIA labels or live regions.
+
+### Maintainability
+
+Document a11y patterns in the frontend contribution guide.
+
+## 17. Mandatory Guardrails
+
+Do not remove focus outlines without replacement; do not rely on color alone; do not modify generated files.
+
+## 18. Expected Tests
+
+| Test type | Scenarios |
+|---|---|
+| axe-core unit | Top 20 components |
+| Cypress/Playwright a11y | Login, users, roles, tenants |
+| Manual keyboard | Full admin flow |
+
+## 19. Acceptance Criteria
+
+- [ ] Lighthouse a11y score ≥ 90 on core pages.
+- [ ] No critical axe violations.
+- [ ] Keyboard flow verified.
+
+## 20. Implementation Plan
+
+1. Audit top 20 components with Lighthouse and axe-core.
+2. Fix layout, topbar, sidebar, and form components.
+3. Add `axe-core` + `jest-axe` unit tests and Cypress a11y checks.
+4. Set target WCAG 2.1 AA.
+5. Document patterns.
+
+## 21. Rollback Strategy
+
+- Revert CSS or markup changes if they break existing themes.
+
+## 22. Risks and Mitigations
+
+| Risk | Impact | Probability | Mitigation |
+|---|---|---:|---|
+| Legacy Metronic CSS overrides focus | High | High | Test and override carefully |
+| Custom widgets lack ARIA | Medium | High | Add manual roles incrementally |
+
+## 23. Definition of Done
+
+- [ ] SPEC reviewed.
+- [ ] Audit completed.
+- [ ] Critical issues fixed.
+- [ ] Automated a11y tests added.
+
+## 24. Key Reminder
+
+> The SPEC is the contract. Aim for WCAG 2.1 AA; do not redesign the UI.
 
 ## Implementation Status (2026-08)
 
 Partial. PrimeNG 17 components include built-in ARIA attributes, but the application does not yet have a global a11y audit, skip links, contrast validation, or automated a11y tests.
 
-## Migration Plan
-1. Audit top 20 components with Lighthouse, axe-core and manual keyboard test.
-2. Fix layout, topbar, sidebar and form components first.
-3. Add `axe-core` + `jest-axe` unit tests and Cypress a11y checks.
-4. Set target: WCAG 2.1 AA.
-5. Document accessibility patterns in the UI contribution guide.
-
-## Impact
-- **Medium**: changes templates and CSS.
-- **High**: improves compliance and usability.
-- **Low/Medium**: may require icon font alternatives for screen readers.
-
-## Risks
-- Legacy Metronic CSS may override focus styles; need careful CSS management.
-- Some widgets (chat, notifications) are custom and need manual ARIA roles.
-
 ## References
-- <https://www.w3.org/WAI/WCAG21/quickref/> — WCAG 2.1 quick reference.
-- <https://primeng.org/accessibility> — PrimeNG accessibility docs.
+
+- <https://www.w3.org/WAI/WCAG21/quickref/>
+- <https://primeng.org/accessibility>
 - `Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout`

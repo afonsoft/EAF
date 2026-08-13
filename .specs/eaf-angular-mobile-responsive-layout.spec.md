@@ -1,90 +1,244 @@
 # EAF Angular — Mobile Responsive Layout
 
-## Summary
+## 0. SPEC Metadata
 
-Improve the EAF Angular template experience on small screens by replacing the current desktop-first behavior with a mobile-first layout, adaptive navigation, optimized off-canvas menus and admin components that work well on smartphones and tablets.
+| Field | Value |
+|---|---|
+| Feature name | Mobile Responsive Layout |
+| Product / System | EAF Angular Template |
+| Module / Bounded Context | UI / Layout |
+| Change type | Feature / Refactor |
+| Repository | `github.com/afonsoft/EAF` |
+| Suggested branch | `feature/eaf-angular-mobile` |
+| Technical owner | Frontend Team |
+| Status | In review |
+| Date | 2026-08-13 |
+| Target agent | Claude Code / Devin |
 
-## Motivation
+## 1. Executive Summary
 
-- The current template (`Templates/Angular/Eaf.ProjectName.UI`) is based on legacy Metronic, with `m-grid--desktop` structure and few custom `@media` rules.
-- Only `chat-bar.component.css` has a specific mobile media query (`max-width: 576px`); other components rely on the Metronic bundle.
-- ASP.NET Zero uses **Metronic 8 + Bootstrap 5**, offering native responsive grid, 13+ themes, dark mode and mobile-first components.
-- End users increasingly access dashboards and approvals from mobile devices.
+### Problem
 
-## Current State
+The Angular template is desktop-first. Layout relies on legacy Metronic `m-grid--desktop` and few custom media queries, so admin workflows are hard to use on phones and tablets.
 
-- Angular: `^20.3.26`.
-- UI libraries: `primeng ^17.17.0`, `ngx-bootstrap ^12.0.0`, `ngx-scrollbar`.
-- CSS/Layout: per-theme minified `style.bundle.css`, Metronic classes (`m-header`, `m-aside-left`, `m-wrapper`), mix of Bootstrap 4 / legacy Metronic.
-- Sidebar: `m-aside-left` is fixed on desktop; mobile open/close control is limited.
-- Chat: `chatSideRight` already has `100vw` on mobile, but header, footer and friend list are not touch-optimized.
-- Tables/admin: `primeng-datatable-container` requires horizontal scroll on small screens.
+### Objective
 
-## Proposed Changes
+Deliver a mobile-first responsive layout with adaptive navigation, off-canvas sidebar, optimized admin components, and touch-friendly targets.
 
-### 1. Adopt Bootstrap 5 + Metronic 8 (or custom EAF design system)
-- Replace legacy Metronic bundle with **Metronic 8 CSS/SASS** or **Bootstrap 5 + custom EAF theme**.
-- Reuse Bootstrap 5 variables (`--bs-breakpoint-sm|md|lg|xl`) for consistent responsiveness.
-- Keep EAF identity (`#FF7020`) through CSS variables.
+### Expected outcome
 
-### 2. Refactor Layout Components
-- `default-layout.component.html`, `theme2/3/4-layout.component.html`:
-  - Replace `m-stack--desktop` and `m-grid--ver-desktop` with Flex / CSS Grid.
-  - Add conditional off-canvas classes: `offcanvas offcanvas-start` for sidebar and `offcanvas offcanvas-end` for panels (chat, notifications).
-- `topbar.component.html`:
-  - Move menu items into a hamburger menu on screens < 992px.
-  - Group notifications, chat and profile into a bottom navigation or compact top dropdown.
-- `side-bar-menu.component.ts/html`:
-  - Turn sidebar into a mobile drawer with swipe gestures and overlay.
-  - Add floating toggle to open/close.
+- Admin pages are usable on screens down to 320px.
+- Sidebar and panels behave as off-canvas drawers on mobile.
+- Tables and forms adapt to small screens without horizontal overflow.
 
-### 3. Breakpoints
-```css
-@media (max-width: 575.98px) { /* portrait phones */ }
-@media (min-width: 576px) and (max-width: 991.98px) { /* tablets */ }
-@media (min-width: 992px) { /* desktop */ }
+### Out of scope
+
+- Full Metronic 8 migration.
+- Native mobile app.
+
+## 2. Agent Role
+
+Senior frontend engineer with mobile UX focus. Use Bootstrap 5 / native CSS, test on real viewports.
+
+## 3. Agent Autonomy Level
+
+**2 — Reliable**
+
+## 4. Product Context
+
+Template uses Angular 20, PrimeNG 17, legacy Metronic CSS. Only `chat-bar.component.css` has a mobile media query.
+
+### Relevant stack
+
+- Angular 20, PrimeNG 17, Bootstrap 4/5, `ngx-bootstrap`
+
+### Relevant files or directories
+
+```text
+Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout
+Templates/Angular/Eaf.ProjectName.UI/src/app/admin
+Templates/Angular/Eaf.ProjectName.UI/src/assets/common/styles
 ```
-- Mobile (< 576px): fixed top header, hidden sidebar, main content with safe padding for bottom navigation.
-- Tablet (576–991px): collapsed icon sidebar, expanded header.
-- Desktop (>= 992px): expanded sidebar, current layout.
 
-### 4. Admin Components
-- Tables: use `p-table` with `responsiveLayout="scroll"` or `stack`.
-- Forms: stack fields on mobile (`col-12` by default, `col-md-6` / `col-lg-4` on desktop).
-- Modals: ensure `p-dialog` uses 100% viewport on mobile.
-- Chat: keep `chatSideRight` 100vw, adjust newly created header skins and message inputs for virtual keyboard.
+### Context files the agent must read before implementation
 
-### 5. Touch Navigation
-- Increase touch targets (>= 44x44px).
-- Add gesture support for sidebar and chat (`hammerjs` is already in `eaf-web-resources`).
-- Avoid hover-only tooltips/dropdowns on touch.
+- `CLAUDE.md`
+- `.specs/eaf-angular-metronic8-bootstrap5-migration.spec.md`
+- `.specs/eaf-angular-remaining-modernization-features.spec.md`
 
-### 6. Mobile Accessibility
-- Ensure `viewport` meta, `touch-action`, visible focus on fields.
-- Test with screen readers and external keyboard navigation.
+## 5. Task Definition
+
+### Main task
+
+Implement mobile-first responsive layout for the EAF Angular admin template.
+
+### Subtasks
+
+- Define breakpoints and layout behavior.
+- Refactor layout components for off-canvas sidebar and panels.
+- Optimize admin tables, forms, and modals for mobile.
+- Add touch targets and gestures.
+
+### Do not do
+
+- Do not break desktop layout.
+- Do not add native app features.
+
+## 6. Functional Requirements
+
+### FR-001: Breakpoints
+
+**Description:** Adopt standard breakpoints and layout behavior.
+
+| Range | Behavior |
+|---|---|
+| < 576px | Mobile: fixed header, hidden sidebar, off-canvas, bottom nav padding |
+| 576–991px | Tablet: collapsed icon sidebar |
+| ≥ 992px | Desktop: expanded sidebar |
+
+**Acceptance criteria:**
+
+- [ ] CSS uses standard `@media` breakpoints.
+- [ ] Layout tested at 320px, 768px, 1920px.
+
+### FR-002: Layout components
+
+**Description:** Refactor `default-layout`, `topbar`, `side-bar-menu`, `chat-bar`.
+
+**Acceptance criteria:**
+
+- [ ] Sidebar is off-canvas on mobile with overlay and close on outside click.
+- [ ] Topbar has hamburger menu and compact profile/notifications dropdown.
+- [ ] Chat panel is full-width on mobile.
+
+### FR-003: Admin components
+
+**Description:** Tables and forms adapt to mobile.
+
+**Acceptance criteria:**
+
+- [ ] `p-table` uses `responsiveLayout="scroll"` or `stack`.
+- [ ] Forms stack fields on mobile.
+- [ ] `p-dialog` uses full viewport on mobile.
+
+### FR-004: Touch navigation
+
+**Description:** Touch targets and gestures.
+
+**Acceptance criteria:**
+
+- [ ] Touch targets ≥ 44x44px.
+- [ ] Hover-only menus avoided or duplicated with click handlers.
+
+## 7. Business Rules
+
+### BR-001: Desktop parity
+
+Desktop layout and features must remain unchanged.
+
+### BR-002: No horizontal overflow
+
+Admin pages must not require horizontal scrolling on phones except for intentionally scrollable tables.
+
+## 8. Domain Modeling
+
+N/A.
+
+## 9. Expected Architecture
+
+Mobile-first CSS, off-canvas components, responsive PrimeNG tables.
+
+## 10. API Contracts
+
+N/A.
+
+## 11. Application Contracts
+
+N/A.
+
+## 12. Persistence and Data
+
+N/A.
+
+## 13. Integrations
+
+N/A.
+
+## 14. Edge Cases and Error Scenarios
+
+| Scenario | Input | Expected behavior |
+|---|---|---|
+| Virtual keyboard opens on input | Mobile focus | Keep input and buttons visible |
+| Orientation change | Portrait ↔ landscape | Re-layout without breaking state |
+
+## 15. Few-Shot Examples
+
+N/A.
+
+## 16. Non-Functional Requirements
+
+### Performance
+
+Lazy-load mobile-specific components if beneficial.
+
+### Accessibility
+
+Mobile menus must be operable with screen readers and external keyboards.
+
+## 17. Mandatory Guardrails
+
+Do not break desktop; do not use fixed widths that break small screens; do not add native-only gestures.
+
+## 18. Expected Tests
+
+| Component / Flow | Scenarios |
+|---|---|
+| Layout | Mobile off-canvas open/close |
+| Users page | Table scroll and form stacking |
+| e2e | Login and tenant creation on mobile viewport |
+
+## 19. Acceptance Criteria
+
+- [ ] Core admin flows usable on 320px screen.
+- [ ] No horizontal overflow on pages.
+- [ ] Desktop unchanged.
+- [ ] Tests pass.
+
+## 20. Implementation Plan
+
+1. Inventory layout and admin components.
+2. Add off-canvas CSS and behavior.
+3. Refactor tables and forms.
+4. Add mobile e2e tests.
+5. Document mobile-first patterns.
+
+## 21. Rollback Strategy
+
+- Revert CSS if desktop layout breaks.
+- Keep old layout behind feature flag until verified.
+
+## 22. Risks and Mitigations
+
+| Risk | Impact | Probability | Mitigation |
+|---|---|---:|---|
+| Metronic bundle conflicts | High | High | Scope CSS carefully, use `!important` only when needed |
+| Testing on all devices | Medium | High | Use BrowserStack or emulators |
+
+## 23. Definition of Done
+
+- [ ] SPEC reviewed.
+- [ ] Mobile layout implemented.
+- [ ] Tests updated.
+- [ ] Documentation updated.
+
+## 24. Key Reminder
+
+> The SPEC is the contract. Mobile-first does not mean desktop-last.
 
 ## Implementation Status (2026-08)
 
-Partial. Some responsive CSS exists in `styles.css`, but no mobile-first off-canvas layout, bottom navigation or comprehensive breakpoint system. `m-stack`, `m-grid` and `m-aside-left` classes still dominate the layout.
-
-## Migration Plan
-1. **Phase 1 — Inventory**: list all layout and admin components that need adjustment.
-2. **Phase 2 — Spike**: create an alternative mobile-first theme (e.g. `theme13`) without affecting current ones.
-3. **Phase 3 — Components**: adjust `layout`, `topbar`, `side-bar-menu`, `chat-bar`, tables and modals.
-4. **Phase 4 — Tests**: test on real devices/emulators, Cypress/Playwright with mobile viewports.
-5. **Phase 5 — Rollout**: make the new layout default and gradually deprecate old themes.
-
-## Impact
-- **High**: changes layout markup and CSS.
-- **Medium**: may require e2e test adjustments.
-- **Low**: business rules and APIs are not affected.
-
-## Risks
-- Legacy Metronic bundle is large and minified; incorrect changes can break global CSS.
-- Multiple themes (12) increase test cost.
-- `ngx-bootstrap` may conflict with Bootstrap 5 JS; evaluate migration or `ng-bootstrap`.
+Partial. Some responsive CSS exists in `styles.css`, but no mobile-first off-canvas layout, bottom navigation, or comprehensive breakpoint system. `m-stack`, `m-grid`, and `m-aside-left` still dominate the layout.
 
 ## References
-- <https://aspnetzero.com/angular> — Metronic 8, Bootstrap 5, 13+ themes, dark mode.
-- `Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout` — current layout components.
-- `Templates/Angular/Eaf.ProjectName.UI/src/assets/common/styles/themes` — per-theme CSS bundles.
+- `Templates/Angular/Eaf.ProjectName.UI/src/app/shared/layout`
+- `Templates/Angular/Eaf.ProjectName.UI/src/assets/common/styles/themes`

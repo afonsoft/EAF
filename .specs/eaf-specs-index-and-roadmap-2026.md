@@ -1,14 +1,44 @@
 # EAF Specs Index & Roadmap 2026
 
+## 0. SPEC Metadata
+
+| Field | Value |
+|---|---|
+| Feature name | EAF Specs Index & Roadmap 2026 |
+| Product / System | EAF |
+| Module / Bounded Context | Cross-cutting / Program Management |
+| Change type | Roadmap / Index |
+| Repository | `github.com/afonsoft/EAF` |
+| Suggested branch | `docs/specs-index` |
+| Technical owner | Core Team |
+| Status | Approved |
+| Date | 2026-08-13 |
+| Target agent | Any |
+
 ## 1. Scope
 
 This document tracks all living specs under `.specs/`, their current implementation status in `afonsoft/EAF`, and the roadmap derived from comparing EAF against **ASP.NET Boilerplate (ABP)** and **ASP.NET Zero**.
+
+All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 
 ## 2. Spec Index
 
 | Spec | Domain | Status (2026-08) |
 |---|---|---|
+| `eaf-spec-template.md` | Spec engineering template | Approved (template) |
 | `eaf-abp-feature-parity.spec.md` | Backend modules vs ABP | Updated (en-us); partial parity, modules missing |
+| `eaf-aspnetzero-docs-gap-analysis.spec.md` | ASP.NET Zero docs gap analysis | Created (en-us) |
+| `eaf-abp-docs-gap-analysis.spec.md` | ABP Boilerplate docs gap analysis | Created (en-us) |
+| `eaf-module-redis-cache.spec.md` | `Eaf.RedisCache` module | Created (en-us) |
+| `eaf-module-mailkit.spec.md` | `Eaf.MailKit` module | Created (en-us) |
+| `eaf-module-blob-storage.spec.md` | `Eaf.BlobStoring` module | Created (en-us) |
+| `eaf-module-signalr.spec.md` | `Eaf.SignalR` module | Created (en-us) |
+| `eaf-module-subscription-payments.spec.md` | Subscription payment lifecycle | Created (en-us) |
+| `eaf-module-dynamic-entity-properties.spec.md` | Dynamic entity properties | Created (en-us) |
+| `eaf-module-openiddict.spec.md` | `Eaf.OpenIddict` integration | Created (en-us) |
+| `eaf-module-sms-push-notifications.spec.md` | SMS and push notifications | Created (en-us) |
+| `eaf-angular-customizable-dashboard.spec.md` | Customizable dashboard UI | Created (en-us) |
+| `eaf-angular-audit-logs-ui.spec.md` | Audit logs / entity history UI | Created (en-us) |
 | `eaf-angular-accessibility-a11y.spec.md` | Angular a11y/WCAG | Updated (en-us); not started |
 | `eaf-angular-dark-mode-theming.spec.md` | Angular dark mode | Updated (en-us); not started |
 | `eaf-angular-metronic8-bootstrap5-migration.spec.md` | Angular layout | Updated (en-us); not started |
@@ -23,9 +53,9 @@ This document tracks all living specs under `.specs/`, their current implementat
 | `eaf-session-summary-p70.md` | Session summary | Updated (en-us); done |
 | `eaf-template-migration-9.4.1.md` | Migration guide | Updated (en-us); done |
 | `eaf-template-migration-and-update.spec.md` | Migration spec | Updated (en-us); in progress |
-| `prompt-migracao-eaf-9.4.0-para-9.4.3.md` | Migration prompt | Updated (en-us); done |
-| `eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md` | Cross-project comparison | Created (en-us) |
 | `eaf-next-steps-q3-2026.spec.md` | Q3 2026 roadmap | Created (en-us) |
+| `eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md` | Cross-project comparison | Created (en-us) |
+| `prompt-migracao-eaf-9.4.0-para-9.4.3.md` | Migration prompt | Updated (en-us); done |
 
 ## 3. Implementation Status by Area
 
@@ -53,19 +83,24 @@ Implemented since last review:
 - `TenantJoinRequest` flow + Angular `admin/tenant-join-requests`
 - `DashboardAppService` + Angular `main/dashboard`
 
-Missing ABP-equivalent modules:
-- `Eaf.BlobStoring.*` — file/image upload abstraction
-- `Eaf.RedisCache` — distributed cache provider
-- `Eaf.MailKit` — transactional email with templates
-- `Eaf.SignalR` — dedicated realtime module
-- `Eaf.OpenIddict` — OAuth2/OIDC server
+Missing ABP-equivalent modules (with dedicated specs):
+- `Eaf.RedisCache` — `eaf-module-redis-cache.spec.md`
+- `Eaf.MailKit` — `eaf-module-mailkit.spec.md`
+- `Eaf.BlobStoring` — `eaf-module-blob-storage.spec.md`
+- `Eaf.SignalR` — `eaf-module-signalr.spec.md`
+- `Eaf.OpenIddict` — `eaf-module-openiddict.spec.md`
+- `Eaf.Notifications.Sms` / `Eaf.Notifications.Push` — `eaf-module-sms-push-notifications.spec.md`
+- `Eaf.DynamicEntityProperties` — `eaf-module-dynamic-entity-properties.spec.md`
+- Subscription payment lifecycle — `eaf-module-subscription-payments.spec.md`
+
+Other missing modules (future specs):
 - `Eaf.HtmlSanitizer` — XSS-safe rich content
 - `Eaf.Dapper` — complex query support
 - `Eaf.FluentValidation` — fluent DTO validation
 - `Eaf.MongoDB` / `Eaf.Middleware.MongoDB` — NoSQL option
 - `Eaf.Quartz` — alternative scheduler
-- `Eaf.Sms` — SMS provider
-- `Eaf.PushNotifications` — Web Push for PWA
+- `Eaf.Webhooks` — outgoing webhooks
+- `Eaf.RateLimiting` — IP/user throttling
 
 ### 3.2 Angular UI (`Templates/Angular/Eaf.ProjectName.UI`)
 
@@ -73,16 +108,18 @@ Already present:
 - Angular 20 / TypeScript 5.8
 - PrimeNG 17 partially adopted (`p-table`, `p-dialog`, `p-fileUpload`, `p-paginator`, `p-progressbar`)
 - Service Worker (`ngsw-config.json`, `ServiceWorkerModule.register`) and `manifest.json` references
-- `admin/organization-units`, `admin/mass-notifications`, `admin/payments`, `admin/user-delegations`, `admin/tenant-join-requests`, `admin/editions`
+- `admin/organization-units`, `admin/mass-notifications`, `admin/payments`, `admin/user-delegations`, `admin/tenant-join-requests`, `admin/editions`, `admin/audit-logs`
 - Mobile responsive CSS in `styles.css` (partial)
 
-Still open:
-- Full dark mode / CSS design tokens
-- Complete `ngx-bootstrap` → PrimeNG migration
-- Mobile-first layout (off-canvas, bottom nav, touch targets)
-- Metronic 8 / Bootstrap 5 migration
-- WCAG 2.1 AA audit
-- PWA offline queue, push notifications and install prompt
+Still open (with dedicated specs):
+- Full dark mode / CSS design tokens — `eaf-angular-dark-mode-theming.spec.md`
+- Complete `ngx-bootstrap` → PrimeNG migration — `eaf-angular-modern-primeng-components.spec.md`
+- Mobile-first layout — `eaf-angular-mobile-responsive-layout.spec.md`
+- Metronic 8 / Bootstrap 5 migration — `eaf-angular-metronic8-bootstrap5-migration.spec.md`
+- WCAG 2.1 AA audit — `eaf-angular-accessibility-a11y.spec.md`
+- PWA offline queue, push notifications and install prompt — `eaf-angular-pwa-offline.spec.md`
+- Customizable dashboard — `eaf-angular-customizable-dashboard.spec.md`
+- Audit logs / entity history UI modernization — `eaf-angular-audit-logs-ui.spec.md`
 
 ## 4. ABP vs ASP.NET Zero vs EAF Comparison
 
@@ -91,7 +128,7 @@ See `eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md` for the full matrix.
 Key takeaways:
 - EAF is closest to ABP; many Zero enterprise features are still missing.
 - EAF has already closed several Zero gaps (Organization Units, Mass Notifications, User Delegation, Tenant Join Requests, Dashboard, Payment Gateway).
-- Largest gaps: subscription lifecycle, Redis, Blob, MailKit, SignalR module, SMS, Push, modern Angular UI (dark mode, Bootstrap 5, PWA offline).
+- Largest gaps now have dedicated specs: Redis, MailKit, Blob, SignalR, OpenIddict, SMS/Push, Dynamic Properties, Subscription lifecycle, Customizable Dashboard, Audit Logs UI.
 
 ## 5. Recommended Next Steps (Q3 2026)
 
@@ -102,14 +139,20 @@ High-level priorities:
 2. `Eaf.MailKit` and `Eaf.BlobStoring` modules.
 3. `Eaf.SignalR` module with backplane support.
 4. Subscription lifecycle on top of existing payment gateways.
-5. Angular PrimeNG completion, Bootstrap 5/Metronic 8 layout spike, dark mode design tokens.
-6. PWA offline MVP and push notifications.
+5. `Eaf.DynamicEntityProperties` backend + Angular manager.
+6. Angular PrimeNG completion, Bootstrap 5/Metronic 8 layout spike, dark mode design tokens.
+7. PWA offline MVP and push notifications.
+8. `Eaf.OpenIddict` OAuth2/OIDC server.
+9. SMS and Web Push notification channels.
+10. Customizable dashboard and audit logs UI modernization.
 
 ## 6. References
 
 - `.specs/` directory
+- `.specs/eaf-spec-template.md`
 - `src/Eaf.*` middleware modules
 - `Templates/Angular/Eaf.ProjectName.UI`
 - `Templates/Api`
 - ABP docs: <https://abp.io/docs/latest/modules/index>
 - ASP.NET Zero docs: <https://docs.aspnetzero.com/aspnet-core-angular/latest/>
+- ABP Boilerplate docs: <https://aspnetboilerplate.com/Pages/Documents>
