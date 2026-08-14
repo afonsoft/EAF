@@ -406,7 +406,7 @@ namespace Eaf.Middleware.Payments
             };
         }
 
-        private (decimal Amount, bool IsUpgrade) CalculateProration(SubscriptionPayment currentPayment, decimal newAmount)
+        private static (decimal Amount, bool IsUpgrade) CalculateProration(SubscriptionPayment currentPayment, decimal newAmount)
         {
             if (!currentPayment.SubscriptionEndDate.HasValue || !currentPayment.SubscriptionStartDate.HasValue)
             {
@@ -441,7 +441,7 @@ namespace Eaf.Middleware.Payments
             return await _tenantRepository.UpdateAsync(tenant);
         }
 
-        private string GenerateInvoiceNo(long paymentId)
+        private static string GenerateInvoiceNo(long paymentId)
         {
             return $"EAF{Clock.Now:yyyy}-{paymentId:D6}";
         }
