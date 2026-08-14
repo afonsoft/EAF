@@ -31,7 +31,7 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-abp-docs-gap-analysis.spec.md` | ABP Boilerplate docs gap analysis | Created (en-us) |
 | `eaf-module-redis-cache.spec.md` | `Eaf.RedisCache` module | Implemented |
 | `eaf-module-mailkit.spec.md` | `Eaf.MailKit` module | Created (en-us) |
-| `eaf-module-blob-storage.spec.md` | `Eaf.BlobStoring` module | Created (en-us) |
+| `eaf-module-blob-storage.spec.md` | `Eaf.BlobStoring` module | Implemented |
 | `eaf-module-signalr.spec.md` | `Eaf.SignalR` module | Created (en-us) |
 | `eaf-module-subscription-payments.spec.md` | Subscription payment lifecycle | Created (en-us) |
 | `eaf-module-dynamic-entity-properties.spec.md` | Dynamic entity properties | Created (en-us) |
@@ -69,7 +69,7 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 
 ### 3.1 Backend Modules (`src/`)
 
-Existing modules: 14
+Existing modules: 15
 - `Eaf.Castle.Serilog`
 - `Eaf.KeyVault` / `Eaf.KeyVault.AspNetCore`
 - `Eaf.Log4NetServiceBus`
@@ -83,6 +83,7 @@ Existing modules: 14
 - `Eaf.SqlServerCache`
 - `Eaf.SqliteCache`
 - `Eaf.RedisCache`
+- `Eaf.BlobStoring`
 
 Implemented since last review:
 - `OrganizationUnitAppService` + Angular `admin/organization-units`
