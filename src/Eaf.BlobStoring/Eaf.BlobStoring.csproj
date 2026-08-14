@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Eaf</RootNamespace>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>Eaf.BlobStoring</AssemblyName>
+    <PackageId>Eaf.BlobStoring</PackageId>
+    <PackageTags>asp.net;boilerplate;abp;blob;storage;azure;filesystem;Eaf;NET10</PackageTags>
+    <Description>Enterprise Application Foundation - Blob Storing implementation (FileSystem and Azure)</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp" Version="10.5.0" />
+    <PackageReference Include="Abp.BlobStoring" Version="10.5.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Eaf.BlobStoring.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
