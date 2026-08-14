@@ -221,3 +221,4 @@ N/A — roadmap can be revised by a new PR.
 - `.specs/eaf-aspnetzero-functional-gap.spec.md`
 - `.specs/eaf-backend-modularization.spec.md`
 - `.specs/eaf-angular-remaining-modernization-features.spec.md`
+- `.specs/eaf-implementation-plan-q3-2026.spec.md`
