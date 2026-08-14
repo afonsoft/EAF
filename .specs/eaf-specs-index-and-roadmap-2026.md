@@ -95,7 +95,6 @@ Implemented since last review:
 
 Missing ABP-equivalent modules (with dedicated specs):
 - `Eaf.MailKit` — `eaf-module-mailkit.spec.md`
-- `Eaf.BlobStoring` — `eaf-module-blob-storage.spec.md`
 - `Eaf.SignalR` — `eaf-module-signalr.spec.md`
 - `Eaf.OpenIddict` — `eaf-module-openiddict.spec.md`
 - `Eaf.Notifications.Sms` / `Eaf.Notifications.Push` — `eaf-module-sms-push-notifications.spec.md`

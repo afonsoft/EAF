@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Abp" Version="10.5.0" />
     <PackageReference Include="Abp.BlobStoring" Version="10.5.0" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.101.4" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
   </ItemGroup>

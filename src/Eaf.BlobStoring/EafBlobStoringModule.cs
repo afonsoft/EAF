@@ -91,6 +91,15 @@ namespace Eaf.BlobStoring
                 container.SetConfiguration(AzureBlobProviderConfiguration.ConnectionString, configuration.AzureConnectionString ?? string.Empty);
                 container.SetConfiguration(AzureBlobProviderConfiguration.ContainerName, configuration.AzureContainerName);
                 container.SetConfiguration(AzureBlobProviderConfiguration.CreateContainerIfNotExists, configuration.AzureCreateContainerIfNotExists);
+
+                container.SetConfiguration(CloudBlobProviderConfiguration.CloudProvider, configuration.CloudProvider ?? string.Empty);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.AccessKeyId, configuration.AwsAccessKeyId ?? string.Empty);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.SecretAccessKey, configuration.AwsSecretAccessKey ?? string.Empty);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.Region, configuration.AwsRegion ?? string.Empty);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.BucketName, configuration.AwsBucketName ?? string.Empty);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.ServiceUrl, configuration.AwsServiceUrl ?? string.Empty);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.ForcePathStyle, configuration.AwsForcePathStyle);
+                container.SetConfiguration(AwsS3BlobProviderConfiguration.CreateBucketIfNotExists, configuration.AwsCreateBucketIfNotExists);
             });
         }
     }

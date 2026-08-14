@@ -21,6 +21,10 @@ namespace Eaf.BlobStoring.Tests
             configuration.DefaultProvider.ShouldBe(typeof(FileSystemBlobProvider));
             configuration.FileSystemAppendContainerNameToBasePath.ShouldBeTrue();
             configuration.AzureCreateContainerIfNotExists.ShouldBeFalse();
+            configuration.CloudProvider.ShouldBe("Azure");
+            configuration.AwsRegion.ShouldBe("us-east-1");
+            configuration.AwsForcePathStyle.ShouldBeFalse();
+            configuration.AwsCreateBucketIfNotExists.ShouldBeFalse();
             configuration.NamingNormalizers.ShouldContain(typeof(EafDefaultBlobNamingNormalizer));
         }
     }
