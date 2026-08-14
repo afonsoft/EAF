@@ -9,7 +9,6 @@ import {
     IPaymentGatewayDto,
     ISubscriptionPaymentDto,
     PaymentServiceProxy,
-    CreateSubscriptionPaymentInput,
     ProcessPaymentInput,
 } from '@shared/service-proxies/service-proxies';
 import { PaymentGatewaySettingsModalComponent } from './payment-gateway-settings-modal.component';
@@ -184,10 +183,9 @@ export class PaymentsComponent extends AppComponentBase implements OnInit {
         }
 
         this.saving = true;
-        const input = new CreateSubscriptionPaymentInput(this.newPayment as any);
-        (input as any).isRecurring = this.newPayment.isRecurring;
+        const input = { ...this.newPayment };
         this._paymentService
-            .createPayment(input)
+            .createPayment(input as any)
             .pipe(finalize(() => (this.saving = false)))
             .subscribe(() => {
                 this.notify.success(this.l('SavedSuccessfully'));
