@@ -99,7 +99,7 @@ Create a consolidated Q3 2026 implementation plan that schedules all pending EAF
 |---|---|---|---|---|---|
 | 1 | `Eaf.RedisCache` | P1 | `eaf-module-redis-cache.spec.md` | Implemented | Drop-in distributed cache; no other dependencies |
 | 2 | `Eaf.BlobStoring` | P1 | `eaf-module-blob-storage.spec.md` | Implemented (Azure + AWS S3 generic cloud provider) | Required for file uploads across templates |
-| 3 | `Eaf.MailKit` | P1 | `eaf-module-mailkit.spec.md` | Not started | Rich email templates; prerequisite for some notifications |
+| 3 | `Eaf.MailKit` | P1 | `eaf-module-mailkit.spec.md` | Implemented | Rich email templates; prerequisite for some notifications |
 | 4 | `Eaf.SignalR` | P1 | `eaf-module-signalr.spec.md` | Not started | Real-time notifications/chat; separate from `Web.Core` |
 | 5 | `Eaf.Webhooks` | P2 | `eaf-module-webhooks.spec.md` | Spec created | Outgoing webhooks; depends on events/jobs |
 | 6 | `Eaf.FluentValidation` | P2 | `eaf-module-fluent-validation.spec.md` | Spec created | Optional validation provider |

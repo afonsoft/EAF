@@ -30,7 +30,7 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-aspnetzero-docs-gap-analysis.spec.md` | ASP.NET Zero docs gap analysis | Created (en-us) |
 | `eaf-abp-docs-gap-analysis.spec.md` | ABP Boilerplate docs gap analysis | Created (en-us) |
 | `eaf-module-redis-cache.spec.md` | `Eaf.RedisCache` module | Implemented |
-| `eaf-module-mailkit.spec.md` | `Eaf.MailKit` module | Created (en-us) |
+| `eaf-module-mailkit.spec.md` | `Eaf.MailKit` module | Implemented |
 | `eaf-module-blob-storage.spec.md` | `Eaf.BlobStoring` module | Implemented |
 | `eaf-module-signalr.spec.md` | `Eaf.SignalR` module | Created (en-us) |
 | `eaf-module-subscription-payments.spec.md` | Subscription payment lifecycle | Created (en-us) |
