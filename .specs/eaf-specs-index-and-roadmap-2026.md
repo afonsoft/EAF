@@ -29,7 +29,7 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-abp-feature-parity.spec.md` | Backend modules vs ABP | Updated (en-us); partial parity, modules missing |
 | `eaf-aspnetzero-docs-gap-analysis.spec.md` | ASP.NET Zero docs gap analysis | Created (en-us) |
 | `eaf-abp-docs-gap-analysis.spec.md` | ABP Boilerplate docs gap analysis | Created (en-us) |
-| `eaf-module-redis-cache.spec.md` | `Eaf.RedisCache` module | Created (en-us) |
+| `eaf-module-redis-cache.spec.md` | `Eaf.RedisCache` module | Implemented |
 | `eaf-module-mailkit.spec.md` | `Eaf.MailKit` module | Created (en-us) |
 | `eaf-module-blob-storage.spec.md` | `Eaf.BlobStoring` module | Created (en-us) |
 | `eaf-module-signalr.spec.md` | `Eaf.SignalR` module | Created (en-us) |
@@ -82,6 +82,7 @@ Existing modules: 14
 - `Eaf.OpenTelemetry`
 - `Eaf.SqlServerCache`
 - `Eaf.SqliteCache`
+- `Eaf.RedisCache`
 
 Implemented since last review:
 - `OrganizationUnitAppService` + Angular `admin/organization-units`
@@ -92,7 +93,6 @@ Implemented since last review:
 - `DashboardAppService` + Angular `main/dashboard`
 
 Missing ABP-equivalent modules (with dedicated specs):
-- `Eaf.RedisCache` — `eaf-module-redis-cache.spec.md`
 - `Eaf.MailKit` — `eaf-module-mailkit.spec.md`
 - `Eaf.BlobStoring` — `eaf-module-blob-storage.spec.md`
 - `Eaf.SignalR` — `eaf-module-signalr.spec.md`
@@ -136,7 +136,7 @@ See `eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md` for the full matrix.
 Key takeaways:
 - EAF is closest to ABP; many Zero enterprise features are still missing.
 - EAF has already closed several Zero gaps (Organization Units, Mass Notifications, User Delegation, Tenant Join Requests, Dashboard, Payment Gateway).
-- Largest gaps now have dedicated specs: Redis, MailKit, Blob, SignalR, OpenIddict, SMS/Push, Dynamic Properties, Subscription lifecycle, Customizable Dashboard, Audit Logs UI.
+- Largest gaps now have dedicated specs: MailKit, Blob, SignalR, OpenIddict, SMS/Push, Dynamic Properties, Subscription lifecycle, Customizable Dashboard, Audit Logs UI. (`Eaf.RedisCache` implemented.)
 
 ## 5. Recommended Next Steps (Q3 2026)
 
