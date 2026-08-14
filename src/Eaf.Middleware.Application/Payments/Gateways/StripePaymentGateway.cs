@@ -16,8 +16,13 @@ namespace Eaf.Middleware.Payments.Gateways
     /// <summary>
     /// Gateway de pagamento Stripe para assinaturas (one-shot e recorrente).
     /// </summary>
-    public class StripePaymentGateway : IPaymentGateway, ISubscriptionPaymentGateway, ITransientDependency
+    public class StripePaymentGateway : ISubscriptionPaymentGateway, ITransientDependency
     {
+        private const string GatewayName = "Stripe";
+        private const string MonthInterval = "month";
+        private const string DefaultSuccessUrl = "https://example.com/payment/success?session_id={CHECKOUT_SESSION_ID}";
+        private const string DefaultErrorUrl = "https://example.com/payment/error";
+
         private readonly ISettingManager _settingManager;
 
         /// <summary>
@@ -62,7 +67,7 @@ namespace Eaf.Middleware.Payments.Gateways
             {
                 PaymentId = intent.Id,
                 GatewayPaymentId = null,
-                Gateway = "Stripe",
+                Gateway = GatewayName,
                 IsSuccess = !string.IsNullOrEmpty(intent.Id),
                 CheckoutUrl = null
             };
@@ -84,7 +89,7 @@ namespace Eaf.Middleware.Payments.Gateways
                 return new PaymentResultDto
                 {
                     ExternalPaymentId = input.ExternalPaymentId,
-                    Gateway = "Stripe",
+                    Gateway = GatewayName,
                     IsSuccess = intent.Status == "succeeded"
                 };
             }
@@ -107,7 +112,7 @@ namespace Eaf.Middleware.Payments.Gateways
                     ExternalPaymentId = input.ExternalPaymentId,
                     GatewaySubscriptionId = session.SubscriptionId,
                     SubscriptionEndDate = subscriptionEndDate,
-                    Gateway = "Stripe",
+                    Gateway = GatewayName,
                     IsSuccess = session.PaymentStatus == "paid"
                 };
             }
@@ -115,7 +120,7 @@ namespace Eaf.Middleware.Payments.Gateways
             return new PaymentResultDto
             {
                 ExternalPaymentId = input.ExternalPaymentId,
-                Gateway = "Stripe",
+                Gateway = GatewayName,
                 IsSuccess = false
             };
         }
@@ -134,7 +139,7 @@ namespace Eaf.Middleware.Payments.Gateways
             return new PaymentResultDto
             {
                 GatewaySubscriptionId = subscription.Id,
-                Gateway = "Stripe",
+                Gateway = GatewayName,
                 IsSuccess = subscription.Status == "canceled"
             };
         }
@@ -173,7 +178,7 @@ namespace Eaf.Middleware.Payments.Gateways
                 "invoice.paid" => await HandleInvoicePaidAsync(stripeEvent),
                 "invoice.payment_failed" => await HandleInvoiceFailedAsync(stripeEvent),
                 "checkout.session.completed" => await HandleCheckoutSessionCompletedAsync(stripeEvent),
-                _ => new PaymentResultDto { Gateway = "Stripe", IsSuccess = false }
+                _ => new PaymentResultDto { Gateway = GatewayName, IsSuccess = false }
             };
         }
 
@@ -223,7 +228,7 @@ namespace Eaf.Middleware.Payments.Gateways
                 CustomerCreation = "always",
                 LineItems = lineItems,
                 SuccessUrl = GetSuccessUrl(input.SuccessUrl),
-                CancelUrl = input.ErrorUrl ?? "https://example.com/payment/error",
+                CancelUrl = input.ErrorUrl ?? DefaultErrorUrl,
                 Metadata = new Dictionary<string, string>
                 {
                     { "editionId", input.EditionId.ToString() },
@@ -237,7 +242,7 @@ namespace Eaf.Middleware.Payments.Gateways
             {
                 PaymentId = session.Id,
                 GatewayPaymentId = session.SubscriptionId,
-                Gateway = "Stripe",
+                Gateway = GatewayName,
                 IsSuccess = !string.IsNullOrEmpty(session.Id),
                 CheckoutUrl = session.Url
             };
@@ -251,7 +256,7 @@ namespace Eaf.Middleware.Payments.Gateways
 
             if (string.IsNullOrWhiteSpace(subscriptionId))
             {
-                return new PaymentResultDto { Gateway = "Stripe", IsSuccess = false };
+                return new PaymentResultDto { Gateway = GatewayName, IsSuccess = false };
             }
 
             var secretKey = await GetSecretKeyAsync();
@@ -262,10 +267,10 @@ namespace Eaf.Middleware.Payments.Gateways
             return new PaymentResultDto
             {
                 GatewaySubscriptionId = subscription.Id,
-                InvoiceNo = invoice?.Number,
+                InvoiceNo = invoice.Number,
                 ExternalPaymentId = paymentIntentId,
-                SubscriptionEndDate = invoice?.PeriodEnd,
-                Gateway = "Stripe",
+                SubscriptionEndDate = invoice.PeriodEnd,
+                Gateway = GatewayName,
                 IsSuccess = true
             };
         }
@@ -277,7 +282,7 @@ namespace Eaf.Middleware.Payments.Gateways
             {
                 GatewaySubscriptionId = invoice?.Parent?.SubscriptionDetails?.SubscriptionId,
                 ExternalPaymentId = invoice?.Payments?.Data?.FirstOrDefault()?.Payment?.PaymentIntentId,
-                Gateway = "Stripe",
+                Gateway = GatewayName,
                 IsSuccess = false
             });
         }
@@ -287,7 +292,7 @@ namespace Eaf.Middleware.Payments.Gateways
             var session = stripeEvent.Data.Object as Session;
             if (session?.SubscriptionId == null)
             {
-                return new PaymentResultDto { Gateway = "Stripe", IsSuccess = false };
+                return new PaymentResultDto { Gateway = GatewayName, IsSuccess = false };
             }
 
             var secretKey = await GetSecretKeyAsync();
@@ -300,7 +305,7 @@ namespace Eaf.Middleware.Payments.Gateways
                 GatewaySubscriptionId = subscription.Id,
                 ExternalPaymentId = session.PaymentIntentId,
                 SubscriptionEndDate = subscription.Items?.Data?.FirstOrDefault()?.CurrentPeriodEnd,
-                Gateway = "Stripe",
+                Gateway = GatewayName,
                 IsSuccess = session.PaymentStatus == "paid"
             };
         }
@@ -309,7 +314,7 @@ namespace Eaf.Middleware.Payments.Gateways
         {
             if (string.IsNullOrWhiteSpace(inputSuccessUrl))
             {
-                return "https://example.com/payment/success?session_id={CHECKOUT_SESSION_ID}";
+                return DefaultSuccessUrl;
             }
 
             return inputSuccessUrl.Contains("{CHECKOUT_SESSION_ID}", StringComparison.OrdinalIgnoreCase)
@@ -323,11 +328,11 @@ namespace Eaf.Middleware.Payments.Gateways
             {
                 PaymentPeriodType.Daily => new SessionLineItemPriceDataRecurringOptions { Interval = "day", IntervalCount = 1 },
                 PaymentPeriodType.Weekly => new SessionLineItemPriceDataRecurringOptions { Interval = "week", IntervalCount = 1 },
-                PaymentPeriodType.Monthly => new SessionLineItemPriceDataRecurringOptions { Interval = "month", IntervalCount = 1 },
-                PaymentPeriodType.Quarterly => new SessionLineItemPriceDataRecurringOptions { Interval = "month", IntervalCount = 3 },
-                PaymentPeriodType.Biannual => new SessionLineItemPriceDataRecurringOptions { Interval = "month", IntervalCount = 6 },
+                PaymentPeriodType.Monthly => new SessionLineItemPriceDataRecurringOptions { Interval = MonthInterval, IntervalCount = 1 },
+                PaymentPeriodType.Quarterly => new SessionLineItemPriceDataRecurringOptions { Interval = MonthInterval, IntervalCount = 3 },
+                PaymentPeriodType.Biannual => new SessionLineItemPriceDataRecurringOptions { Interval = MonthInterval, IntervalCount = 6 },
                 PaymentPeriodType.Annual => new SessionLineItemPriceDataRecurringOptions { Interval = "year", IntervalCount = 1 },
-                _ => new SessionLineItemPriceDataRecurringOptions { Interval = "month", IntervalCount = 1 }
+                _ => new SessionLineItemPriceDataRecurringOptions { Interval = MonthInterval, IntervalCount = 1 }
             };
         }
 

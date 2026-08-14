@@ -136,7 +136,7 @@ namespace Eaf.Middleware.Web
             }
             catch (Exception ex)
             {
-                Logger.WarnFormat("Could not register SubscriptionRenewalWorker recurring job: {0}", ex.Message);
+                Logger.WarnFormat(ex, "Could not register SubscriptionRenewalWorker recurring job: {0}", ex.Message);
             }
         }
 
