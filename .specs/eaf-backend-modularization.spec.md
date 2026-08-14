@@ -278,16 +278,25 @@ Disable modules by removing `[DependsOn]` and revert the branch.
 | `Eaf.MailKit` | High | Not started | Rich email templates |
 | `Eaf.SignalR` | High | Not started | Real-time notifications/chat |
 | `Eaf.OpenIddict` | Medium | Not started | OAuth2/OIDC server |
-| `Eaf.HtmlSanitizer` | Medium | Not started | XSS-safe rich content |
-| `Eaf.Dapper` | Medium | Not started | Complex query support |
-| `Eaf.FluentValidation` | Medium | Not started | Fluent DTO validation |
-| `Eaf.MongoDB` | Low | Not started | NoSQL option |
-| `Eaf.Quartz` | Low | Not started | Alternative scheduler |
-| `Eaf.Sms` | Medium | Not started | SMS provider |
-| `Eaf.PushNotifications` | Medium | Not started | Web Push for PWA |
+| `Eaf.HtmlSanitizer` | Medium | Spec created | XSS-safe rich content — `eaf-module-html-sanitizer.spec.md` |
+| `Eaf.Dapper` | Medium | Spec created | Complex query support — `eaf-module-dapper.spec.md` |
+| `Eaf.FluentValidation` | Medium | Spec created | Fluent DTO validation — `eaf-module-fluent-validation.spec.md` |
+| `Eaf.MongoDB` | Low | Spec created | NoSQL option — `eaf-module-mongodb.spec.md` |
+| `Eaf.Quartz` | Low | Spec created | Alternative scheduler — `eaf-module-quartz.spec.md` |
+| `Eaf.Sms` | Medium | Spec created | SMS provider — `eaf-module-sms-push-notifications.spec.md` |
+| `Eaf.PushNotifications` | Medium | Spec created | Web Push for PWA — `eaf-module-sms-push-notifications.spec.md` |
+| `Eaf.Webhooks` | Medium | Spec created | Outgoing webhooks — `eaf-module-webhooks.spec.md` |
+| `Eaf.RateLimiting` | Medium | Spec created | IP/user throttling — `eaf-module-rate-limiting.spec.md` |
 
 ## References
 
 - `.specs/eaf-abp-feature-parity.spec.md`
 - `.specs/eaf-next-steps-q3-2026.spec.md`
+- `.specs/eaf-module-html-sanitizer.spec.md`
+- `.specs/eaf-module-dapper.spec.md`
+- `.specs/eaf-module-fluent-validation.spec.md`
+- `.specs/eaf-module-mongodb.spec.md`
+- `.specs/eaf-module-quartz.spec.md`
+- `.specs/eaf-module-webhooks.spec.md`
+- `.specs/eaf-module-rate-limiting.spec.md`
 - ABP module docs: <https://abp.io/docs/latest/modules/index>

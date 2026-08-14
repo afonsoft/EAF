@@ -37,6 +37,13 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-module-dynamic-entity-properties.spec.md` | Dynamic entity properties | Created (en-us) |
 | `eaf-module-openiddict.spec.md` | `Eaf.OpenIddict` integration | Created (en-us) |
 | `eaf-module-sms-push-notifications.spec.md` | SMS and push notifications | Created (en-us) |
+| `eaf-module-html-sanitizer.spec.md` | `Eaf.HtmlSanitizer` module | Created (en-us) |
+| `eaf-module-dapper.spec.md` | `Eaf.Dapper` module | Created (en-us) |
+| `eaf-module-fluent-validation.spec.md` | `Eaf.FluentValidation` module | Created (en-us) |
+| `eaf-module-mongodb.spec.md` | `Eaf.MongoDB` module | Created (en-us) |
+| `eaf-module-quartz.spec.md` | `Eaf.Quartz` module | Created (en-us) |
+| `eaf-module-webhooks.spec.md` | `Eaf.Webhooks` module | Created (en-us) |
+| `eaf-module-rate-limiting.spec.md` | `Eaf.RateLimiting` module | Created (en-us) |
 | `eaf-angular-customizable-dashboard.spec.md` | Customizable dashboard UI | Created (en-us) |
 | `eaf-angular-audit-logs-ui.spec.md` | Audit logs / entity history UI | Created (en-us) |
 | `eaf-angular-accessibility-a11y.spec.md` | Angular a11y/WCAG | Updated (en-us); not started |
@@ -54,6 +61,7 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-template-migration-9.4.1.md` | Migration guide | Updated (en-us); done |
 | `eaf-template-migration-and-update.spec.md` | Migration spec | Updated (en-us); in progress |
 | `eaf-next-steps-q3-2026.spec.md` | Q3 2026 roadmap | Created (en-us) |
+| `eaf-implementation-plan-q3-2026.spec.md` | Q3 2026 implementation plan | Created (en-us) |
 | `eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md` | Cross-project comparison | Created (en-us) |
 | `prompt-migracao-eaf-9.4.0-para-9.4.3.md` | Migration prompt | Updated (en-us); done |
 
@@ -93,14 +101,14 @@ Missing ABP-equivalent modules (with dedicated specs):
 - `Eaf.DynamicEntityProperties` — `eaf-module-dynamic-entity-properties.spec.md`
 - Subscription payment lifecycle — `eaf-module-subscription-payments.spec.md`
 
-Other missing modules (future specs):
-- `Eaf.HtmlSanitizer` — XSS-safe rich content
-- `Eaf.Dapper` — complex query support
-- `Eaf.FluentValidation` — fluent DTO validation
-- `Eaf.MongoDB` / `Eaf.Middleware.MongoDB` — NoSQL option
-- `Eaf.Quartz` — alternative scheduler
-- `Eaf.Webhooks` — outgoing webhooks
-- `Eaf.RateLimiting` — IP/user throttling
+Other missing modules (specs created):
+- `Eaf.HtmlSanitizer` — `eaf-module-html-sanitizer.spec.md`
+- `Eaf.Dapper` — `eaf-module-dapper.spec.md`
+- `Eaf.FluentValidation` — `eaf-module-fluent-validation.spec.md`
+- `Eaf.MongoDB` / `Eaf.Middleware.MongoDB` — `eaf-module-mongodb.spec.md`
+- `Eaf.Quartz` — `eaf-module-quartz.spec.md`
+- `Eaf.Webhooks` — `eaf-module-webhooks.spec.md`
+- `Eaf.RateLimiting` — `eaf-module-rate-limiting.spec.md`
 
 ### 3.2 Angular UI (`Templates/Angular/Eaf.ProjectName.UI`)
 
@@ -144,7 +152,12 @@ High-level priorities:
 7. PWA offline MVP and push notifications.
 8. `Eaf.OpenIddict` OAuth2/OIDC server.
 9. SMS and Web Push notification channels.
-10. Customizable dashboard and audit logs UI modernization.
+10. `Eaf.Webhooks` outgoing webhooks.
+11. `Eaf.HtmlSanitizer`, `Eaf.FluentValidation`, `Eaf.RateLimiting`, `Eaf.Dapper` security/validation/query modules.
+12. `Eaf.MongoDB` and `Eaf.Quartz` optional backends (future waves).
+13. Customizable dashboard and audit logs UI modernization.
+
+See `.specs/eaf-implementation-plan-q3-2026.spec.md` for the sequenced wave plan.
 
 ## 6. References
 
