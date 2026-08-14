@@ -184,7 +184,7 @@ namespace Eaf.Runtime.Caching.Redis
         private static async Task<byte[]> CompressBytesAsync(byte[] bytes, CancellationToken cancel = default)
         {
             if (bytes == null)
-                return null!;
+                return null;
 
             if (bytes.Length == 0)
                 return Array.Empty<byte>();
@@ -272,8 +272,8 @@ namespace Eaf.Runtime.Caching.Redis
                     }
                 }
 
-                return new ConditionalValue<object>(false, null!);
-            }, "TryGetValue", new ConditionalValue<object>(false, null!));
+                return new ConditionalValue<object>(false, null);
+            }, "TryGetValue", new ConditionalValue<object>(false, null));
 
             value = result.Value;
             return result.HasValue;
@@ -297,8 +297,8 @@ namespace Eaf.Runtime.Caching.Redis
                     }
                 }
 
-                return new ConditionalValue<object>(false, null!);
-            }, "TryGetValueAsync", new ConditionalValue<object>(false, null!));
+                return new ConditionalValue<object>(false, null);
+            }, "TryGetValueAsync", new ConditionalValue<object>(false, null));
         }
 
         /// <summary>
