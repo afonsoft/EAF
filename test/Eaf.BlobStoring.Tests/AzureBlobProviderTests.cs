@@ -21,7 +21,8 @@ namespace Eaf.BlobStoring.Tests
         [Fact]
         public void Dado_ProvedorAzure_Quando_Instanciar_Entao_Deve_ImplementarIBlobProvider()
         {
-            var provider = new AzureBlobProvider(NullAbpSession.Instance, Substitute.For<IBlobNormalizeNamingService>());
+            var client = new AzureBlobClient(NullAbpSession.Instance, Substitute.For<IBlobNormalizeNamingService>());
+            var provider = new AzureBlobProvider(client);
 
             provider.ShouldBeAssignableTo<IBlobProvider>();
         }
@@ -32,7 +33,8 @@ namespace Eaf.BlobStoring.Tests
         [Fact]
         public async Task Dado_ProvedorAzureSemConnectionString_Quando_Salvar_Entao_Deve_LancarExcecao()
         {
-            var provider = new AzureBlobProvider(NullAbpSession.Instance, Substitute.For<IBlobNormalizeNamingService>());
+            var client = new AzureBlobClient(NullAbpSession.Instance, Substitute.For<IBlobNormalizeNamingService>());
+            var provider = new AzureBlobProvider(client);
             var configuration = new BlobContainerConfiguration { ProviderType = typeof(AzureBlobProvider) };
             var args = new BlobProviderSaveArgs(
                 "default",

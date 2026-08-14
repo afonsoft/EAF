@@ -47,6 +47,46 @@ namespace Eaf.BlobStoring
         bool AzureCreateContainerIfNotExists { get; set; }
 
         /// <summary>
+        /// Tipo de provider de nuvem para o EafCloudBlobProvider (Azure ou Aws).
+        /// </summary>
+        string CloudProvider { get; set; }
+
+        /// <summary>
+        /// Access Key ID da AWS.
+        /// </summary>
+        string AwsAccessKeyId { get; set; }
+
+        /// <summary>
+        /// Secret Access Key da AWS.
+        /// </summary>
+        string AwsSecretAccessKey { get; set; }
+
+        /// <summary>
+        /// Região AWS (ex: us-east-1).
+        /// </summary>
+        string AwsRegion { get; set; }
+
+        /// <summary>
+        /// Nome do bucket S3.
+        /// </summary>
+        string AwsBucketName { get; set; }
+
+        /// <summary>
+        /// URL de serviço personalizada para S3-compatível (MinIO, LocalStack, Wasabi, etc).
+        /// </summary>
+        string AwsServiceUrl { get; set; }
+
+        /// <summary>
+        /// Força o estilo de path no endpoint S3 (necessário para MinIO/LocalStack).
+        /// </summary>
+        bool AwsForcePathStyle { get; set; }
+
+        /// <summary>
+        /// Cria o bucket S3 automaticamente caso não exista.
+        /// </summary>
+        bool AwsCreateBucketIfNotExists { get; set; }
+
+        /// <summary>
         /// Lista de normalizadores de nomes de BLOBs.
         /// </summary>
         IList<Type> NamingNormalizers { get; }
@@ -68,6 +108,10 @@ namespace Eaf.BlobStoring
             FileSystemIsolation = "HostAndTenant";
             AzureContainerName = "eaf-blobs";
             AzureCreateContainerIfNotExists = false;
+            CloudProvider = "Azure";
+            AwsRegion = "us-east-1";
+            AwsForcePathStyle = false;
+            AwsCreateBucketIfNotExists = false;
             NamingNormalizers = new List<Type> { typeof(EafDefaultBlobNamingNormalizer) };
         }
 
@@ -91,6 +135,30 @@ namespace Eaf.BlobStoring
 
         /// <inheritdoc />
         public bool AzureCreateContainerIfNotExists { get; set; }
+
+        /// <inheritdoc />
+        public string CloudProvider { get; set; }
+
+        /// <inheritdoc />
+        public string AwsAccessKeyId { get; set; }
+
+        /// <inheritdoc />
+        public string AwsSecretAccessKey { get; set; }
+
+        /// <inheritdoc />
+        public string AwsRegion { get; set; }
+
+        /// <inheritdoc />
+        public string AwsBucketName { get; set; }
+
+        /// <inheritdoc />
+        public string AwsServiceUrl { get; set; }
+
+        /// <inheritdoc />
+        public bool AwsForcePathStyle { get; set; }
+
+        /// <inheritdoc />
+        public bool AwsCreateBucketIfNotExists { get; set; }
 
         /// <inheritdoc />
         public IList<Type> NamingNormalizers { get; }
