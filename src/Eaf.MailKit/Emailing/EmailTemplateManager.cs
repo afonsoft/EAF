@@ -1,5 +1,6 @@
 using Abp.Dependency;
 using Abp.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -82,7 +83,7 @@ namespace Eaf.MailKit.Emailing
                 }
 
                 return value ?? string.Empty;
-            });
+            }, RegexOptions.None, TimeSpan.FromSeconds(1));
         }
     }
 }
