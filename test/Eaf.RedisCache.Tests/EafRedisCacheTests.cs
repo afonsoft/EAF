@@ -146,7 +146,7 @@ namespace Eaf.RedisCache.Tests
             server.Keys(pattern: Arg.Any<RedisValue>(), pageSize: Arg.Any<int>())
                 .Returns(new RedisKey[] { "EAF:test-cache_Clear_key1", "EAF:test-cache_Clear_key2" });
 
-            var (distributedCache, _, cache) = CreateCache("test-cache_Clear", multiplexer);
+            var (_, _, cache) = CreateCache("test-cache_Clear", multiplexer);
             cache.Set("key1", "value1");
             cache.Set("key2", "value2");
 

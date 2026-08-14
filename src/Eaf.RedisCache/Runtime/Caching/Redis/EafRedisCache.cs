@@ -1,3 +1,4 @@
+using Abp.Data;
 using Abp.Runtime.Caching;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -8,6 +9,7 @@ using System.Buffers;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -60,6 +62,82 @@ namespace Eaf.Runtime.Caching.Redis
             DefaultSlidingExpireTime = _distributedCacheEntryOptions.SlidingExpiration.Value;
         }
 
+        #region Fail-Open Helpers
+
+        /// <summary>
+        /// Determina se uma exceção é fatal e não deve ser interceptada pelo cache.
+        /// </summary>
+        private static bool IsFatalException(Exception exception)
+        {
+            return exception is OutOfMemoryException
+                || exception is StackOverflowException
+                || exception is ThreadAbortException;
+        }
+
+        /// <summary>
+        /// Executa uma ação com comportamento fail-open: falhas são logadas e não quebram o host.
+        /// </summary>
+        private void ExecuteFailOpen(Action action, string context)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex) when (!IsFatalException(ex))
+            {
+                Logger.Error($"Error in {context} in EafRedisCache", ex);
+            }
+        }
+
+        /// <summary>
+        /// Executa uma ação com retorno e comportamento fail-open.
+        /// </summary>
+        private T ExecuteFailOpen<T>(Func<T> action, string context, T defaultValue)
+        {
+            try
+            {
+                return action();
+            }
+            catch (Exception ex) when (!IsFatalException(ex))
+            {
+                Logger.Error($"Error in {context} in EafRedisCache", ex);
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Executa uma ação assíncrona com comportamento fail-open.
+        /// </summary>
+        private async Task ExecuteFailOpenAsync(Func<Task> action, string context)
+        {
+            try
+            {
+                await action();
+            }
+            catch (Exception ex) when (!IsFatalException(ex))
+            {
+                Logger.Error($"Error in {context} in EafRedisCache", ex);
+            }
+        }
+
+        /// <summary>
+        /// Executa uma ação assíncrona com retorno e comportamento fail-open.
+        /// </summary>
+        private async Task<T> ExecuteFailOpenAsync<T>(Func<Task<T>> action, string context, T defaultValue)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception ex) when (!IsFatalException(ex))
+            {
+                Logger.Error($"Error in {context} in EafRedisCache", ex);
+                return defaultValue;
+            }
+        }
+
+        #endregion Fail-Open Helpers
+
         #region FixKey
 
         private string FixKey(string key)
@@ -94,7 +172,7 @@ namespace Eaf.Runtime.Caching.Redis
                 }
                 return outputStream.ToArray();
             }
-            catch
+            catch (Exception ex) when (!IsFatalException(ex))
             {
                 return bytes;
             }
@@ -120,7 +198,7 @@ namespace Eaf.Runtime.Caching.Redis
                 }
                 return outputStream.ToArray();
             }
-            catch
+            catch (Exception ex) when (!IsFatalException(ex))
             {
                 return bytes;
             }
@@ -144,7 +222,7 @@ namespace Eaf.Runtime.Caching.Redis
                 }
                 return outputStream.ToArray();
             }
-            catch
+            catch (Exception ex) when (!IsFatalException(ex))
             {
                 return bytes;
             }
@@ -168,7 +246,7 @@ namespace Eaf.Runtime.Caching.Redis
                 }
                 return outputStream.ToArray();
             }
-            catch
+            catch (Exception ex) when (!IsFatalException(ex))
             {
                 return bytes;
             }
@@ -181,7 +259,7 @@ namespace Eaf.Runtime.Caching.Redis
         /// </summary>
         public override bool TryGetValue(string key, out object value)
         {
-            try
+            var result = ExecuteFailOpen(() =>
             {
                 var encodedCached = _cache.Get(FixKey(key));
 
@@ -190,26 +268,23 @@ namespace Eaf.Runtime.Caching.Redis
                     var cached = ByteArrayToObject(DecompressBytes(encodedCached));
                     if (cached != null)
                     {
-                        value = cached;
-                        return true;
+                        return new ConditionalValue<object>(true, cached);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in TryGetValue in EafRedisCache", ex);
-            }
 
-            value = null!;
-            return false;
+                return new ConditionalValue<object>(false, null!);
+            }, "TryGetValue", new ConditionalValue<object>(false, null!));
+
+            value = result.Value;
+            return result.HasValue;
         }
 
         /// <summary>
         /// Tenta recuperar um valor do cache de forma assíncrona.
         /// </summary>
-        public override async Task<Abp.Data.ConditionalValue<object>> TryGetValueAsync(string key)
+        public override async Task<ConditionalValue<object>> TryGetValueAsync(string key)
         {
-            try
+            return await ExecuteFailOpenAsync(async () =>
             {
                 var encodedCached = await _cache.GetAsync(FixKey(key));
 
@@ -218,16 +293,12 @@ namespace Eaf.Runtime.Caching.Redis
                     var cached = ByteArrayToObject(await DecompressBytesAsync(encodedCached));
                     if (cached != null)
                     {
-                        return new Abp.Data.ConditionalValue<object>(true, cached);
+                        return new ConditionalValue<object>(true, cached);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in TryGetValueAsync in EafRedisCache", ex);
-            }
 
-            return new Abp.Data.ConditionalValue<object>(false, null!);
+                return new ConditionalValue<object>(false, null!);
+            }, "TryGetValueAsync", new ConditionalValue<object>(false, null!));
         }
 
         /// <summary>
@@ -235,35 +306,27 @@ namespace Eaf.Runtime.Caching.Redis
         /// </summary>
         public override void Set(string key, object value, TimeSpan? slidingExpireTime = null, DateTimeOffset? absoluteExpireTime = null)
         {
-            try
+            ExecuteFailOpen(() =>
             {
                 var encodedCurrent = ObjectToByteArray(value);
                 var compressedData = CompressBytes(encodedCurrent);
 
                 _cache.Set(FixKey(key), compressedData, CreateOptions(slidingExpireTime, absoluteExpireTime));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in Set in EafRedisCache", ex);
-            }
+            }, "Set");
         }
 
         /// <summary>
         /// Armazena um valor no cache de forma assíncrona.
         /// </summary>
-        public override async Task SetAsync(string key, object value, TimeSpan? slidingExpireTime = null, DateTimeOffset? absoluteExpireTime = null)
+        public override Task SetAsync(string key, object value, TimeSpan? slidingExpireTime = null, DateTimeOffset? absoluteExpireTime = null)
         {
-            try
+            return ExecuteFailOpenAsync(async () =>
             {
                 var encodedCurrent = ObjectToByteArray(value);
                 var compressedData = await CompressBytesAsync(encodedCurrent);
 
                 await _cache.SetAsync(FixKey(key), compressedData, CreateOptions(slidingExpireTime, absoluteExpireTime));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in SetAsync in EafRedisCache", ex);
-            }
+            }, "SetAsync");
         }
 
         /// <summary>
@@ -271,14 +334,7 @@ namespace Eaf.Runtime.Caching.Redis
         /// </summary>
         public override void Remove(string key)
         {
-            try
-            {
-                _cache.Remove(FixKey(key));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in Remove in EafRedisCache", ex);
-            }
+            ExecuteFailOpen(() => _cache.Remove(FixKey(key)), "Remove");
         }
 
         /// <summary>
@@ -286,15 +342,7 @@ namespace Eaf.Runtime.Caching.Redis
         /// </summary>
         public override Task RemoveAsync(string key)
         {
-            try
-            {
-                return _cache.RemoveAsync(FixKey(key));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in RemoveAsync in EafRedisCache", ex);
-                return Task.CompletedTask;
-            }
+            return ExecuteFailOpenAsync(() => _cache.RemoveAsync(FixKey(key)), "RemoveAsync");
         }
 
         /// <summary>
@@ -302,7 +350,7 @@ namespace Eaf.Runtime.Caching.Redis
         /// </summary>
         public override void Clear()
         {
-            try
+            ExecuteFailOpen(() =>
             {
                 if (_connectionMultiplexer != null)
                 {
@@ -316,11 +364,7 @@ namespace Eaf.Runtime.Caching.Redis
 
                 using var connection = ConnectionMultiplexer.Connect(connectionString);
                 ClearWithMultiplexer(connection);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Error in Clear in EafRedisCache", ex);
-            }
+            }, "Clear");
         }
 
         /// <summary>
@@ -404,7 +448,7 @@ namespace Eaf.Runtime.Caching.Redis
 
                 return buffer.WrittenMemory.ToArray();
             }
-            catch
+            catch (Exception ex) when (!IsFatalException(ex))
             {
                 return Array.Empty<byte>();
             }
@@ -436,7 +480,7 @@ namespace Eaf.Runtime.Caching.Redis
 
                 return JsonSerializer.Deserialize(jsonSpan, type, _jsonOptions)!;
             }
-            catch
+            catch (Exception ex) when (!IsFatalException(ex))
             {
                 return default!;
             }
