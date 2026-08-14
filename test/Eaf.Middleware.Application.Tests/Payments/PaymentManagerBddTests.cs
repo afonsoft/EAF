@@ -3,6 +3,7 @@ using Abp.Localization;
 using Abp.ObjectMapping;
 using Abp.Runtime.Session;
 using Abp.Timing;
+using Abp.UI;
 using Eaf.Middleware.Application.Tests.Helpers;
 using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.MultiTenancy;
@@ -163,6 +164,58 @@ namespace Eaf.Middleware.Application.Tests.Payments
             tenant.EditionId.ShouldBe(1);
             tenant.SubscriptionEndDateUtc.HasValue.ShouldBeTrue();
             result.Status.ShouldBe(SubscriptionPaymentStatus.Completed.ToString());
+        }
+
+        [Fact]
+        public async Task Dado_PagamentoRecorrente_Quando_CancelRecurringAsync_Entao_DeveCancelarAssinatura()
+        {
+            // Dado
+            var payment = new SubscriptionPayment
+            {
+                Id = 1,
+                TenantId = 1,
+                EditionId = 1,
+                Amount = 100,
+                Status = SubscriptionPaymentStatus.Completed,
+                Gateway = "Stripe",
+                IsRecurring = true,
+                GatewaySubscriptionId = "sub_123",
+                PaymentPeriodType = PaymentPeriodType.Monthly,
+            };
+            _subscriptionPaymentRepository.GetAsync(1).Returns(payment);
+            _subscriptionPaymentProductRepository.GetAllListAsync(Arg.Any<System.Linq.Expressions.Expression<Func<SubscriptionPaymentProduct, bool>>>())
+                .Returns(new List<SubscriptionPaymentProduct>());
+
+            // Quando
+            var result = await _sut.CancelRecurringAsync(1);
+
+            // Então
+            payment.IsRecurring.ShouldBeFalse();
+            payment.Status.ShouldBe(SubscriptionPaymentStatus.Canceled);
+            result.IsRecurring.ShouldBeFalse();
+            result.Status.ShouldBe(SubscriptionPaymentStatus.Canceled.ToString());
+            await _subscriptionPaymentRepository.Received(1).UpdateAsync(payment);
+        }
+
+        [Fact]
+        public async Task Dado_PagamentoNaoRecorrente_Quando_CancelRecurringAsync_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var payment = new SubscriptionPayment
+            {
+                Id = 1,
+                TenantId = 1,
+                EditionId = 1,
+                Amount = 100,
+                Status = SubscriptionPaymentStatus.Completed,
+                Gateway = "Stripe",
+                IsRecurring = false,
+                PaymentPeriodType = PaymentPeriodType.Monthly,
+            };
+            _subscriptionPaymentRepository.GetAsync(1).Returns(payment);
+
+            // Quando / Então
+            await Should.ThrowAsync<UserFriendlyException>(async () => await _sut.CancelRecurringAsync(1));
         }
 
         [Fact]
