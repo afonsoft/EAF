@@ -8,7 +8,6 @@ using Eaf.Middleware.Authorization;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Friendships;
-using Eaf.Middleware.RealTime;
 using System;
 
 namespace Eaf.Middleware
@@ -36,9 +35,6 @@ namespace Eaf.Middleware
         {
             IocManager.RegisterIfNot<IChatCommunicator, NullChatCommunicator>();
             IocManager.RegisterIfNot<IAuditingStore, AuditingStore>(DependencyLifeStyle.Singleton);
-            IocManager.RegisterIfNot<IOnlineClientStore<ChatChannel>, InMemoryOnlineClientStore<ChatChannel>>(DependencyLifeStyle.Singleton);
-            IocManager.RegisterIfNot<IOnlineClientManager<ChatChannel>, OnlineClientManager<ChatChannel>>(DependencyLifeStyle.Singleton);
-            IocManager.Resolve<ChatUserStateWatcher>().Initialize();
         }
 
         /// <summary>

@@ -8,7 +8,6 @@ using Castle.MicroKernel.Registration;
 using Eaf.Middleware;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Friendships.Cache;
-using Eaf.Middleware.RealTime;
 using NSubstitute;
 using Shouldly;
 using System.Reflection;
@@ -45,8 +44,6 @@ namespace Eaf.Middleware.Application.Tests.Middleware
 
             iocManager.IsRegistered<IChatCommunicator>().ShouldBeTrue();
             iocManager.IsRegistered<IAuditingStore>().ShouldBeTrue();
-            iocManager.IsRegistered<IOnlineClientStore<ChatChannel>>().ShouldBeTrue();
-            iocManager.IsRegistered<IOnlineClientManager<ChatChannel>>().ShouldBeTrue();
         }
     }
 }

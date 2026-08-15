@@ -2,7 +2,7 @@
 using Abp.AspNetCore.Configuration;
 using Abp.AspNetCore.Mvc.Antiforgery;
 using Abp.AspNetCore.Mvc.Extensions;
-using Abp.AspNetCore.SignalR.Hubs;
+using Eaf.SignalR.Hubs;
 using Abp.Extensions;
 using Abp.PlugIns;
 using Castle.Facilities.Logging;
@@ -198,7 +198,7 @@ namespace Eaf.ProjectName.Web.Startup
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<AbpCommonHub>("/signalr");
+                endpoints.MapHub<EafCommonHub>("/signalr");
                 endpoints.MapHub<ChatHub>("/signalr-chat");
                 endpoints.MapControllerRoute("defaultWithArea", "{area}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

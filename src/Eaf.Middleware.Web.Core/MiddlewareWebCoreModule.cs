@@ -1,7 +1,7 @@
 using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
-using Abp.AspNetCore.SignalR;
 using Abp.Configuration.Startup;
+using Eaf.SignalR;
 using Abp.Dependency;
 using Abp.Extensions;
 using Abp.Hangfire;
@@ -46,7 +46,7 @@ namespace Eaf.Middleware.Web
     [DependsOn(
         typeof(MiddlewareApplicationModule),
         typeof(AbpAspNetCoreModule),
-        typeof(AbpAspNetCoreSignalRModule),
+        typeof(EafSignalRModule),
         typeof(AbpHangfireAspNetCoreModule),
         typeof(AbpRedisCacheModule),
         typeof(EafSqlServerCacheModule)
@@ -98,6 +98,11 @@ namespace Eaf.Middleware.Web
         /// </summary>
         public override void PostInitialize()
         {
+            if (IocManager.IsRegistered<Eaf.Middleware.Friendships.ChatUserStateWatcher>())
+            {
+                IocManager.Resolve<Eaf.Middleware.Friendships.ChatUserStateWatcher>().Initialize();
+            }
+
             SetAppFolders();
             ConfigureExternalAuthProviders();
             ConfigureBackgroundJobs();
