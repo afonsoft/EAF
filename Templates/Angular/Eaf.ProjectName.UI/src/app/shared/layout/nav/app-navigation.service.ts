@@ -37,6 +37,7 @@ export class AppNavigationService {
       new AppMenuItem('Editions', 'Pages.Administration.Editions', 'flaticon-layers', '/app/admin/editions'),
       new AppMenuItem('Features', 'Pages.Administration.Editions', 'flaticon-interface-8', '/app/admin/features'),
       new AppMenuItem('AuditLogs', 'Pages.Administration.AuditLogs', 'flaticon-folder-1', '/app/admin/auditLogs'),
+      new AppMenuItem('DynamicProperties', 'Pages.Administration.DynamicProperties', 'flaticon-interface-8', '/app/admin/dynamic-properties'),
       new AppMenuItem('VisualSettings', 'Pages.Administration.UiCustomization', 'flaticon-imac', '/app/admin/ui-customization'),
       new AppMenuItem('Maintenance', 'Pages.Administration.Maintenance', 'flaticon-lock', '/app/admin/maintenance'),
       new AppMenuItem('Settings', 'Pages.Administration.Settings', 'flaticon-settings', '/app/admin/settings'),
