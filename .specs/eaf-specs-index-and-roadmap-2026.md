@@ -32,17 +32,17 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-module-redis-cache.spec.md` | `Eaf.RedisCache` module | Implemented |
 | `eaf-module-mailkit.spec.md` | `Eaf.MailKit` module | Implemented |
 | `eaf-module-blob-storage.spec.md` | `Eaf.BlobStoring` module | Implemented |
-| `eaf-module-signalr.spec.md` | `Eaf.SignalR` module | Created (en-us) |
+| `eaf-module-signalr.spec.md` | `Eaf.SignalR` module | Implemented |
 | `eaf-module-subscription-payments.spec.md` | Subscription payment lifecycle | Created (en-us) |
 | `eaf-module-dynamic-entity-properties.spec.md` | Dynamic entity properties | Created (en-us) |
 | `eaf-module-openiddict.spec.md` | `Eaf.OpenIddict` integration | Created (en-us) |
 | `eaf-module-sms-push-notifications.spec.md` | SMS and push notifications | Created (en-us) |
-| `eaf-module-html-sanitizer.spec.md` | `Eaf.HtmlSanitizer` module | Created (en-us) |
+| `eaf-module-html-sanitizer.spec.md` | `Eaf.HtmlSanitizer` module | Implemented |
 | `eaf-module-dapper.spec.md` | `Eaf.Dapper` module | Created (en-us) |
-| `eaf-module-fluent-validation.spec.md` | `Eaf.FluentValidation` module | Created (en-us) |
+| `eaf-module-fluent-validation.spec.md` | `Eaf.FluentValidation` module | Implemented |
 | `eaf-module-mongodb.spec.md` | `Eaf.MongoDB` module | Created (en-us) |
 | `eaf-module-quartz.spec.md` | `Eaf.Quartz` module | Created (en-us) |
-| `eaf-module-webhooks.spec.md` | `Eaf.Webhooks` module | Created (en-us) |
+| `eaf-module-webhooks.spec.md` | `Eaf.Webhooks` module | Implemented |
 | `eaf-module-rate-limiting.spec.md` | `Eaf.RateLimiting` module | Created (en-us) |
 | `eaf-angular-customizable-dashboard.spec.md` | Customizable dashboard UI | Created (en-us) |
 | `eaf-angular-audit-logs-ui.spec.md` | Audit logs / entity history UI | Created (en-us) |

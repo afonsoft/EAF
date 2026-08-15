@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Eaf</RootNamespace>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>Eaf.FluentValidation</AssemblyName>
+    <PackageId>Eaf.FluentValidation</PackageId>
+    <PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;FluentValidation;Validation;Eaf;Boilerplate;NET10</PackageTags>
+    <Description>Enterprise Application Foundation - FluentValidation integration module</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp" Version="10.5.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Eaf.FluentValidation.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+  </ItemGroup>
+
+</Project>
