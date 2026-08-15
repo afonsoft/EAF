@@ -12,5 +12,24 @@
     <text name="StartJob">Iniciar Job</text>
     <text name="UseCaptchaOnLogin">Usar ReCaptcha no Login</text>
     <text name="ReCaptcha">ReCaptcha</text>
+    <text name="GatewaySelection">Selecionar gateway</text>
+    <text name="Subscriptions">Assinaturas</text>
+    <text name="SubscriptionsHeaderInfo">Gerenciar pagamentos de assinatura</text>
+    <text name="PaymentPeriod">Período de pagamento</text>
+    <text name="AmountPreview">Prévia do valor</text>
+    <text name="Gateway">Gateway</text>
+    <text name="GatewayDoesNotSupportRecurring">Este gateway não suporta pagamentos recorrentes</text>
+    <text name="IsRecurring">Pagamento recorrente</text>
+    <text name="PaymentSuccessful">Pagamento realizado com sucesso</text>
+    <text name="PaymentFailed">Falha no pagamento</text>
+    <text name="PaymentReturnMissingPaymentId">Identificador do pagamento ausente na URL de retorno</text>
+    <text name="PaymentCreationFailed">Falha ao criar pagamento</text>
+    <text name="CreatePayment">Criar pagamento</text>
+    <text name="UpgradeSubscription">Fazer upgrade da assinatura</text>
+    <text name="CancelRecurring">Cancelar recorrência</text>
+    <text name="CancelRecurringWarning">Tem certeza de que deseja cancelar o pagamento recorrente {0}?</text>
+    <text name="EditionIsRequired">A edição é obrigatória</text>
+    <text name="GatewayIsRequired">O gateway é obrigatório</text>
+    <text name="PaymentStatus">Status do pagamento</text>
   </texts>
 </localizationDictionary>

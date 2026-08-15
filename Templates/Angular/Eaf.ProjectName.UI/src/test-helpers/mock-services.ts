@@ -458,6 +458,24 @@ export class MockPaymentServiceProxy {
   }
 }
 
+export class MockPaymentExtendedService {
+  getAll(input?: any): Observable<any> {
+    return of({ totalCount: 0, items: [] });
+  }
+  getPayment(id: number): Observable<any> {
+    return of({ id });
+  }
+  createPayment(input: any): Observable<any> {
+    return of({ isSuccess: true, subscriptionPaymentId: 1, checkoutUrl: 'https://checkout.example.com' });
+  }
+  upgradeSubscription(input: any): Observable<any> {
+    return of({ isSuccess: true });
+  }
+  cancelRecurring(paymentId: number): Observable<any> {
+    return of({ id: paymentId, status: 'Canceled' });
+  }
+}
+
 export class MockOrganizationUnitServiceProxy {
   getOrganizationUnits(...args: any[]): Observable<any> {
     return of({ items: [] });
@@ -577,6 +595,8 @@ export class MockActivatedRoute {
     queryParams: {},
     params: {},
   };
+  queryParams = of({});
+  params = of({});
 }
 
 export class MockSessionServiceProxy {

@@ -50,6 +50,7 @@ import { CreateOrEditRoleModalComponent } from './roles/create-or-edit-role-moda
 import { OrganizationUnitsComponent } from './organization-units/organization-units.component';
 import { PaymentGatewaySettingsModalComponent } from './payments/payment-gateway-settings-modal.component';
 import { PaymentsComponent } from './payments/payments.component';
+import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
 import { UserDelegationsComponent } from './user-delegations/user-delegations.component';
 import { RolesComponent } from './roles/roles.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -129,6 +130,7 @@ import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-
     MassNotificationsComponent,
     OrganizationUnitsComponent,
     PaymentsComponent,
+    SubscriptionsComponent,
     PaymentGatewaySettingsModalComponent,
     SettingsComponent,
     UserDelegationsComponent,
