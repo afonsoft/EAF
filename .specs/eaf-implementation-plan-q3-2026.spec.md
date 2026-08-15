@@ -106,7 +106,7 @@ Create a consolidated Q3 2026 implementation plan that schedules all pending EAF
 | 7 | `Eaf.HtmlSanitizer` | P2 | `eaf-module-html-sanitizer.spec.md` | Implemented | Security primitive for rich content |
 | 8 | `Eaf.DynamicEntityProperties` | P2 | `eaf-module-dynamic-entity-properties.spec.md` | Not started | Dynamic entity fields + Angular manager |
 | 9 | `Eaf.OpenIddict` | P2 | `eaf-module-openiddict.spec.md` | Not started | OAuth2/OIDC server |
-| 10 | `Eaf.Notifications.Sms` / `Push` | P2 | `eaf-module-sms-push-notifications.spec.md` | Not started | SMS and Web Push channels |
+| 10 | `Eaf.Notifications.Sms` / `Push` | P2 | `eaf-module-sms-push-notifications.spec.md` | Implemented | SMS generic HTTP + Twilio; Web Push VAPID + generic HTTP; optional in `Eaf.Middleware.Web.Core` |
 | 11 | `Eaf.Dapper` | P3 | `eaf-module-dapper.spec.md` | Spec created | Complex query complement to EF Core |
 | 12 | `Eaf.RateLimiting` | P3 | `eaf-module-rate-limiting.spec.md` | Spec created | API throttling/resilience |
 | 13 | `Eaf.MongoDB` | P4 | `eaf-module-mongodb.spec.md` | Spec created | Optional NoSQL backend |

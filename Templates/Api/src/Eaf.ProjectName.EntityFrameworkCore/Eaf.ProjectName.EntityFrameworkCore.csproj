@@ -22,6 +22,7 @@
 		<PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="10.5.0" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\..\src\Eaf.Notifications.Push\Eaf.Notifications.Push.csproj" />
 		<ProjectReference Include="..\Eaf.ProjectName.Core\Eaf.ProjectName.Core.csproj" />
 	</ItemGroup>
 </Project>

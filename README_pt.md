@@ -90,7 +90,8 @@ O **EAF (Enterprise Application Foundation)** é uma implementação open source
 - **Chat System**: Sistema de chat entre usuários
 - **Contextual Chat Messages**: Mensagens de chat com contexto de conversa, jogo e partida
 - **SignalR Integration**: WebSockets para comunicação bidirecional
-- **Notificações Push**: Sistema de notificações em tempo real
+- **Notificações Push**: Web Push VAPID com providers HTTP genéricos
+- **Notificações SMS**: Providers HTTP genérico e Twilio com suporte a Zenvia via configuração
 - **Tenant-to-Host Chat**: Chat entre inquilinos e host
 - **Group Chat**: Chat em grupo para colaboração
 - **Rate Limiting e Auditoria de Moderação**: Abstrações compartilhadas `IRateLimitManager` e `IModerationAuditWriter` para integrações com consumidores
@@ -691,6 +692,15 @@ public void Dado_ParametroValido_Quando_ChamarMetodo_Entao_DeveRetornarSucesso()
 | [Eaf.SqlServerCache](https://www.nuget.org/packages/Eaf.SqlServerCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqlServerCache.svg)](https://badge.fury.io/nu/Eaf.SqlServerCache) | Cache SQL Server |
 | [Eaf.SqliteCache](https://www.nuget.org/packages/Eaf.SqliteCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqliteCache.svg)](https://badge.fury.io/nu/Eaf.SqliteCache) | Cache SQLite |
 | [Eaf.Middleware.Worker](https://www.nuget.org/packages/Eaf.Middleware.Worker/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Worker.svg)](https://badge.fury.io/nu/Eaf.Middleware.Worker) | Background services |
+| [Eaf.BlobStoring](https://www.nuget.org/packages/Eaf.BlobStoring/) | [![NuGet version](https://badge.fury.io/nu/Eaf.BlobStoring.svg)](https://badge.fury.io/nu/Eaf.BlobStoring) | Armazenamento de BLOBs com providers FileSystem, Azure e AWS S3 |
+| [Eaf.FluentValidation](https://www.nuget.org/packages/Eaf.FluentValidation/) | [![NuGet version](https://badge.fury.io/nu/Eaf.FluentValidation.svg)](https://badge.fury.io/nu/Eaf.FluentValidation) | Integração do FluentValidation com validação do ABP |
+| [Eaf.HtmlSanitizer](https://www.nuget.org/packages/Eaf.HtmlSanitizer/) | [![NuGet version](https://badge.fury.io/nu/Eaf.HtmlSanitizer.svg)](https://badge.fury.io/nu/Eaf.HtmlSanitizer) | Sanitização de HTML removendo scripts e URIs inseguras |
+| [Eaf.MailKit](https://www.nuget.org/packages/Eaf.MailKit/) | [![NuGet version](https://badge.fury.io/nu/Eaf.MailKit.svg)](https://badge.fury.io/nu/Eaf.MailKit) | Envio de e-mails com MailKit, retry e templates |
+| [Eaf.Notifications.Push](https://www.nuget.org/packages/Eaf.Notifications.Push/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Notifications.Push.svg)](https://badge.fury.io/nu/Eaf.Notifications.Push) | Notificações push via VAPID e providers HTTP genéricos |
+| [Eaf.Notifications.Sms](https://www.nuget.org/packages/Eaf.Notifications.Sms/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Notifications.Sms.svg)](https://badge.fury.io/nu/Eaf.Notifications.Sms) | Envio de SMS com providers HTTP genérico e Twilio |
+| [Eaf.RedisCache](https://www.nuget.org/packages/Eaf.RedisCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.RedisCache.svg)](https://badge.fury.io/nu/Eaf.RedisCache) | Cache distribuído usando Redis |
+| [Eaf.SignalR](https://www.nuget.org/packages/Eaf.SignalR/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SignalR.svg)](https://badge.fury.io/nu/Eaf.SignalR) | Comunicação em tempo real com SignalR |
+| [Eaf.Webhooks](https://www.nuget.org/packages/Eaf.Webhooks/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Webhooks.svg)](https://badge.fury.io/nu/Eaf.Webhooks) | Envio de webhooks HTTP com assinatura HMAC |
 
 ---
 

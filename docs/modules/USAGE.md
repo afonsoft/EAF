@@ -22,6 +22,8 @@ Este documento centraliza exemplos práticos de como usar cada módulo de middle
 - [Eaf.HtmlSanitizer](#eafhtmlsanitizer)
 - [Eaf.MailKit](#eafmailkit)
 - [Eaf.RedisCache](#eafrediscache)
+- [Eaf.Notifications.Push](#eafnotificationspush)
+- [Eaf.Notifications.Sms](#eafnotificationssms)
 - [Eaf.SignalR](#eafsignalr)
 - [Eaf.Webhooks](#eafwebhooks)
 
@@ -2804,3 +2806,222 @@ public class MyProjectModule : AbpModule
 ```
 
 > Documentação completa: [`src/Eaf.Webhooks/README.md`](../../src/Eaf.Webhooks/README.md)
+
+## <a id="eafnotificationspush"></a>Eaf.Notifications.Push
+
+**Propósito resumido:** O **Eaf.Notifications.Push** envia notificações push aos usuários via Web Push (VAPID) ou providers HTTP genéricos. Suporta múltiplos tenants, subscriptions persistentes e remoção automática de subscriptions expiradas.
+
+### Pré-requisitos
+
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+- `Eaf.Middleware.Web.Core` para registro opcional
+
+### Instalação via NuGet
+
+```bash
+dotnet add package Eaf.Notifications.Push --version 9.4.5
+```
+
+### 1. Registrando o Módulo
+
+Em `Startup.cs` (com `Eaf.Middleware.Web.Core`):
+
+```csharp
+services.AddEafConfigurer(
+    _appConfiguration,
+    addSmsNotifications: false,
+    addPushNotifications: true);
+```
+
+Ou manualmente:
+
+```csharp
+[DependsOn(typeof(EafNotificationsPushModule))]
+public class MyProjectModule : AbpModule
+{
+}
+```
+
+### 2. Configuração
+
+```json
+{
+  "Eaf": {
+    "Push": {
+      "IsEnabled": true,
+      "Provider": "WebPush",
+      "WebPush": {
+        "Subject": "mailto:contato@exemplo.com",
+        "PublicKey": "BP4...",
+        "PrivateKey": "MHc..."
+      },
+      "GenericHttp": {
+        "BaseUrl": "https://api.zenvia.com",
+        "Endpoint": "/v2/channels/whatsapp/messages",
+        "AuthenticationType": "Bearer",
+        "Token": "seu-token",
+        "Template": "{ \"from\": \"{{from}}\", \"to\": \"{{endpoint}}\", \"contents\": [{\"type\":\"text\",\"text\":\"{{title}}: {{body}}\"}] }"
+      }
+    }
+  }
+}
+```
+
+### 3. Enviando uma notificação push
+
+```csharp
+public class MyService : ApplicationService
+{
+    private readonly IPushNotificationSender _pushSender;
+
+    public MyService(IPushNotificationSender pushSender)
+    {
+        _pushSender = pushSender;
+    }
+
+    public async Task Enviar(PushSubscription subscription)
+    {
+        await _pushSender.SendAsync(subscription, new PushNotificationMessage
+        {
+            Title = "Aviso",
+            Body = "Você tem uma nova mensagem."
+        });
+    }
+}
+```
+
+### 4. Recebedor de notificações em tempo real
+
+O `PushRealTimeNotifier` é registrado automaticamente no `Eaf.Middleware.Web.Core` e envia notificações push para as subscriptions de cada destinatário. Use `PushNotificationData` para publicar:
+
+```csharp
+await _notificationPublisher.PublishAsync(
+    "NovaMensagem",
+    new PushNotificationData("Você recebeu uma nova mensagem")
+    {
+        Icon = "/assets/icon.png",
+        Data = "{\"url\":\"/mensagens\"}",
+        Tag = "mensagem"
+    },
+    userIds: new[] { userId });
+```
+
+> Documentação completa: [`src/Eaf.Notifications.Push/README.md`](../../src/Eaf.Notifications.Push/README.md)
+
+## <a id="eafnotificationssms"></a>Eaf.Notifications.Sms
+
+**Propósito resumido:** O **Eaf.Notifications.Sms** envia SMS através de providers configuráveis. Inclui um provider HTTP genérico que suporta Zenvia, Twilio e qualquer gateway compatível com requisições POST/Form, além de um provider específico para Twilio.
+
+### Pré-requisitos
+
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+- `Eaf.Middleware.Web.Core` para registro opcional
+
+### Instalação via NuGet
+
+```bash
+dotnet add package Eaf.Notifications.Sms --version 9.4.5
+```
+
+### 1. Registrando o Módulo
+
+Em `Startup.cs` (com `Eaf.Middleware.Web.Core`):
+
+```csharp
+services.AddEafConfigurer(
+    _appConfiguration,
+    addSmsNotifications: true,
+    addPushNotifications: false);
+```
+
+Ou manualmente:
+
+```csharp
+[DependsOn(typeof(EafNotificationsSmsModule))]
+public class MyProjectModule : AbpModule
+{
+}
+```
+
+### 2. Configuração genérica (exemplo Zenvia)
+
+```json
+{
+  "Eaf": {
+    "Sms": {
+      "IsEnabled": true,
+      "Provider": "GenericHttp",
+      "DefaultFrom": "EAF",
+      "GenericHttp": {
+        "BaseUrl": "https://api.zenvia.com",
+        "Endpoint": "/v2/channels/sms/messages",
+        "AuthenticationType": "Bearer",
+        "Token": "seu-token-zenvia",
+        "ContentType": "application/json",
+        "Template": "{ \"from\": \"{{from}}\", \"to\": [\"{{phoneNumber}}\"], \"contents\": [{\"type\":\"text\",\"text\":\"{{body}}\"}] }"
+      }
+    }
+  }
+}
+```
+
+### 3. Configuração Twilio
+
+```json
+{
+  "Eaf": {
+    "Sms": {
+      "IsEnabled": true,
+      "Provider": "Twilio",
+      "DefaultFrom": "+15551234567",
+      "Twilio": {
+        "AccountSid": "AC...",
+        "AuthToken": "seu-auth-token",
+        "From": "+15551234567"
+      }
+    }
+  }
+}
+```
+
+### 4. Enviando SMS
+
+```csharp
+public class MyService : ApplicationService
+{
+    private readonly ISmsSender _smsSender;
+
+    public MyService(ISmsSender smsSender)
+    {
+        _smsSender = smsSender;
+    }
+
+    public async Task<SmsSendResult> Enviar(string numero, string mensagem)
+    {
+        return await _smsSender.SendAsync(new SmsMessage
+        {
+            PhoneNumber = numero,
+            Body = mensagem,
+            From = "EAF"
+        });
+    }
+}
+```
+
+### 5. Notificador em tempo real
+
+O `SmsRealTimeNotifier` é registrado automaticamente no `Eaf.Middleware.Web.Core` quando o módulo é ativo. Publique notificações com `SmsNotificationData` para disparar SMS:
+
+```csharp
+await _notificationPublisher.PublishAsync(
+    "AlertaSms",
+    new SmsNotificationData("Seu código de verificação é 123456")
+    {
+        PhoneNumber = "+5511999999999"
+    },
+    userIds: new[] { userId });
+```
+
+> Documentação completa: [`src/Eaf.Notifications.Sms/README.md`](../../src/Eaf.Notifications.Sms/README.md)
