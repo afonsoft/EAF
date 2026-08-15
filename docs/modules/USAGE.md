@@ -37,7 +37,7 @@ Este documento centraliza exemplos práticos de como usar cada módulo de middle
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Castle.Serilog --version 9.4.5
+dotnet add package Eaf.Castle.Serilog --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -221,7 +221,7 @@ Log.Logger = new LoggerConfiguration()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.KeyVault --version 9.4.5
+dotnet add package Eaf.KeyVault --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -362,12 +362,12 @@ public override void PreInitialize()
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.KeyVault 9.4.5
+- Eaf.KeyVault 9.4.6
 - Azure Key Vault ou OCI Vault configurado
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.KeyVault.AspNetCore --version 9.4.5
+dotnet add package Eaf.KeyVault.AspNetCore --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -549,7 +549,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Log4NetServiceBus --version 9.4.5
+dotnet add package Eaf.Log4NetServiceBus --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -733,11 +733,11 @@ public class MyService : ApplicationService
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.Middleware.Core 9.4.5
+- Eaf.Middleware.Core 9.4.6
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Application --version 9.4.5
+dotnet add package Eaf.Middleware.Application --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -916,7 +916,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.AzureActiveDirectory --version 9.4.5
+dotnet add package Eaf.Middleware.AzureActiveDirectory --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -1097,7 +1097,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Core --version 9.4.5
+dotnet add package Eaf.Middleware.Core --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -1225,7 +1225,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Ldap --version 9.4.5
+dotnet add package Eaf.Middleware.Ldap --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -1389,11 +1389,11 @@ public override void PreInitialize()
 ### Pré-requisitos
 - .NET 10.0 SDK ou superior
 - ASP.NET Boilerplate 10.5.0
-- Eaf.Middleware.Application 9.4.5
+- Eaf.Middleware.Application 9.4.6
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Web.Core --version 9.4.5
+dotnet add package Eaf.Middleware.Web.Core --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -1619,7 +1619,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Middleware.Worker --version 9.4.5
+dotnet add package Eaf.Middleware.Worker --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -1831,7 +1831,7 @@ protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.OpenTelemetry --version 9.4.5
+dotnet add package Eaf.OpenTelemetry --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2019,7 +2019,7 @@ services.AddEafOpenTelemetry(options =>
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SqlServerCache --version 9.4.5
+dotnet add package Eaf.SqlServerCache --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2197,7 +2197,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SqliteCache --version 9.4.5
+dotnet add package Eaf.SqliteCache --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2367,7 +2367,7 @@ public override void PreInitialize()
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.BlobStoring --version 9.4.5
+dotnet add package Eaf.BlobStoring --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2457,7 +2457,7 @@ public class MinhaAppService : IApplicationService
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.FluentValidation --version 9.4.5
+dotnet add package Eaf.FluentValidation --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2508,7 +2508,7 @@ O ABP executará automaticamente o FluentValidation junto com DataAnnotations.
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.HtmlSanitizer --version 9.4.5
+dotnet add package Eaf.HtmlSanitizer --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2571,7 +2571,7 @@ Quando as coleções estiverem vazias, o módulo utiliza as configurações padr
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.MailKit --version 9.4.5
+dotnet add package Eaf.MailKit --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2644,7 +2644,7 @@ O formato dos placeholders é `{{Propriedade}}`. Propriedades ausentes são subs
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.RedisCache --version 9.4.5
+dotnet add package Eaf.RedisCache --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2706,7 +2706,7 @@ var user = cache.Get("user:1", "default");
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.SignalR --version 9.4.5
+dotnet add package Eaf.SignalR --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2767,7 +2767,7 @@ app.UseEndpoints(endpoints =>
 
 ### Instalação via NuGet
 ```bash
-dotnet add package Eaf.Webhooks --version 9.4.5
+dotnet add package Eaf.Webhooks --version 9.4.6
 ```
 
 ### Instalação via Referência de Projeto
@@ -2820,7 +2820,7 @@ public class MyProjectModule : AbpModule
 ### Instalação via NuGet
 
 ```bash
-dotnet add package Eaf.Notifications.Push --version 9.4.5
+dotnet add package Eaf.Notifications.Push --version 9.4.6
 ```
 
 ### 1. Registrando o Módulo
@@ -2922,7 +2922,7 @@ await _notificationPublisher.PublishAsync(
 ### Instalação via NuGet
 
 ```bash
-dotnet add package Eaf.Notifications.Sms --version 9.4.5
+dotnet add package Eaf.Notifications.Sms --version 9.4.6
 ```
 
 ### 1. Registrando o Módulo

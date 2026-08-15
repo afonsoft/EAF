@@ -1,8 +1,8 @@
 <Project>
 
 	<PropertyGroup>
-		<Version>9.4.5</Version>
-		<TemplateVersion>9.4.5.0</TemplateVersion>
+		<Version>9.4.6</Version>
+		<TemplateVersion>9.4.6.0</TemplateVersion>
 		<PackageProjectUrl>http://www.projectname.com.br/</PackageProjectUrl>
 		<PackageLicenseUrl>https://https://github.com/afonsoft/projectname/</PackageLicenseUrl>
 		<RepositoryType>git</RepositoryType>

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ## [Unreleased]
 
+## [9.4.6] - 2026-08-14
+
+### Changed
+
+* chore: bump da versão dos pacotes EAF e templates para 9.4.6
+
 ## [9.4.5] - 2026-08-13
 
 ### Added
