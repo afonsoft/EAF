@@ -3,6 +3,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { EafHttpInterceptor } from '../../assets/lib/eaf-ng2-module/src/eafHttpInterceptor';
 import * as ApiServiceProxies from './service-proxies';
+import { DynamicEntityPropertyService } from './dynamic-entity-property.service';
 import { TenantJoinRequestService } from './tenant-join-request.service';
 
 @NgModule({
@@ -38,6 +39,7 @@ import { TenantJoinRequestService } from './tenant-join-request.service';
     ApiServiceProxies.OrganizationUnitServiceProxy,
     ApiServiceProxies.PaymentServiceProxy,
     ApiServiceProxies.UserDelegationServiceProxy,
+    DynamicEntityPropertyService,
     TenantJoinRequestService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],

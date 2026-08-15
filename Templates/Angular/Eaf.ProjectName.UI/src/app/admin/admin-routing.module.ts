@@ -2,6 +2,7 @@
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 
 import { AuditLogsComponent } from './audit-logs/audit-logs.component';
+import { DynamicPropertiesComponent } from './dynamic-properties/dynamic-properties.component';
 import { FeaturesComponent } from './features/features.component';
 import { LanguageTextsComponent } from './languages/language-texts.component';
 import { LanguagesComponent } from './languages/languages.component';
@@ -27,6 +28,7 @@ import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-
           { path: 'users', component: UsersComponent, data: { permission: 'Pages.Administration.Users' } },
           { path: 'roles', component: RolesComponent, data: { permission: 'Pages.Administration.Roles' } },
           { path: 'auditLogs', component: AuditLogsComponent, data: { permission: 'Pages.Administration.AuditLogs' } },
+          { path: 'dynamic-properties', component: DynamicPropertiesComponent, data: { permission: 'Pages.Administration.DynamicProperties' } },
           { path: 'languages', component: LanguagesComponent, data: { permission: 'Pages.Administration.Languages' } },
           {
             path: 'languages/:name/texts',
