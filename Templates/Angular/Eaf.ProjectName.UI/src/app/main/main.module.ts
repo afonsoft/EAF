@@ -23,7 +23,6 @@ import { DragDropModule } from 'primeng/dragdrop';
 import { PaginatorModule } from 'primeng/paginator';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { AutoCompleteModule } from 'primeng/autocomplete';
-import { EditorModule } from 'primeng/editor';
 
 import { TableModule } from 'primeng/table';
 import { TimepickerModule } from 'ngx-bootstrap/timepicker';
@@ -56,7 +55,6 @@ NgxBootstrapDatePickerConfigService.registerNgxBootstrapDatePickerLocales();
     ContextMenuModule,
     PaginatorModule,
     AutoCompleteModule,
-    EditorModule,
     InputMaskModule,
     NgxChartsModule,
   ],

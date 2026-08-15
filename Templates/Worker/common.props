@@ -16,7 +16,7 @@
 		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
 		<Platform>Any CPU</Platform>
 		<SelfContained>false</SelfContained>
-		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277;NU1903</NoWarn>
+		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277;NU1903;NU1510</NoWarn>
 		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3253;MSB3277</MSBuildWarningsAsMessages>
 		<CheckEolTargetFramework>false</CheckEolTargetFramework>
 		<ServerGarbageCollection>true</ServerGarbageCollection>
@@ -28,5 +28,7 @@
 	<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched free 14.x exists; Abp.AutoMapper 10.5.0 is binary-incompatible with AutoMapper >= 15.0.0. -->
 	<ItemGroup>
 		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
+		<!-- Pin patched transitive package -->
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.10" />
 	</ItemGroup>
 </Project>
