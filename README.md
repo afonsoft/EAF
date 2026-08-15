@@ -90,7 +90,8 @@ The **EAF (Enterprise Application Foundation)** is an open-source implementation
 - **Chat System**: Chat system between users
 - **Contextual Chat Messages**: Chat messages with conversation, game and match context
 - **SignalR Integration**: WebSockets for bidirectional communication
-- **Push Notifications**: Real-time notification system
+- **Push Notifications**: VAPID Web Push with generic HTTP providers
+- **SMS Notifications**: Generic HTTP and Twilio providers with Zenvia support via configuration
 - **Tenant-to-Host Chat**: Chat between tenants and host
 - **Group Chat**: Group chat for collaboration
 - **Rate Limiting and Moderation Audit**: Shared `IRateLimitManager` and `IModerationAuditWriter` abstractions for consumer integrations
@@ -511,6 +512,8 @@ This example demonstrates several EAF features:
 | [Eaf.Middleware.Core](https://www.nuget.org/packages/Eaf.Middleware.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Core) | Core features |
 | [Eaf.Middleware.Ldap](https://www.nuget.org/packages/Eaf.Middleware.Ldap/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Ldap.svg)](https://badge.fury.io/nu/Eaf.Middleware.Ldap) | LDAP authentication |
 | [Eaf.Middleware.Web.Core](https://www.nuget.org/packages/Eaf.Middleware.Web.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Web.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Web.Core) | Web components |
+| [Eaf.Notifications.Push](https://www.nuget.org/packages/Eaf.Notifications.Push/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Notifications.Push.svg)](https://badge.fury.io/nu/Eaf.Notifications.Push) | VAPID push and generic HTTP providers |
+| [Eaf.Notifications.Sms](https://www.nuget.org/packages/Eaf.Notifications.Sms/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Notifications.Sms.svg)](https://badge.fury.io/nu/Eaf.Notifications.Sms) | Generic HTTP and Twilio SMS providers |
 | [Eaf.Middleware.Worker](https://www.nuget.org/packages/Eaf.Middleware.Worker/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Worker.svg)](https://badge.fury.io/nu/Eaf.Middleware.Worker) | Background services |
 | [Eaf.OpenTelemetry](https://www.nuget.org/packages/Eaf.OpenTelemetry/) | [![NuGet version](https://badge.fury.io/nu/Eaf.OpenTelemetry.svg)](https://badge.fury.io/nu/Eaf.OpenTelemetry) | Telemetry and observability |
 | [Eaf.RedisCache](https://www.nuget.org/packages/Eaf.RedisCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.RedisCache.svg)](https://badge.fury.io/nu/Eaf.RedisCache) | Redis distributed cache |

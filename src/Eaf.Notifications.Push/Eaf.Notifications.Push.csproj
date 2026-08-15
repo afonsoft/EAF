@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\common.props"></Import>
+	<PropertyGroup>
+		<RootNamespace>Eaf</RootNamespace>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>Eaf.Notifications.Push</AssemblyName>
+		<PackageId>Eaf.Notifications.Push</PackageId>
+		<PackageTags>asp.net;asp.net mvc;application framework;web framework;framework;domain driven design;multitenancy;push;notification;webpush;Eaf;Boilerplate</PackageTags>
+		<Description>Enterprise Application Foundation - Module Notifications - Push Sender</Description>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Abp" Version="10.5.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.9" />
+		<PackageReference Include="WebPush" Version="1.0.12" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
+	</ItemGroup>
+</Project>

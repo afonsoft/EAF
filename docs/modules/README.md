@@ -16,6 +16,8 @@ Para exemplos práticos de uso de cada módulo, consulte o [Guia de Uso dos Mód
 * [Eaf.Middleware.Ldap](./eaf-middleware-ldap.md) - Integração com LDAP/Active Directory para autenticação
 * [Eaf.Middleware.Web.Core](./eaf-middleware-web-core.md) - Módulo web core do middleware EAF
 * [Eaf.Middleware.Worker](./eaf-middleware-worker.md) - Módulo worker para background jobs
+* [Eaf.Notifications.Push](./USAGE.md#eafnotificationspush) - Envio de notificações push com VAPID e providers HTTP genéricos
+* [Eaf.Notifications.Sms](./USAGE.md#eafnotificationssms) - Envio de SMS com providers HTTP genérico e Twilio
 * [Eaf.OpenTelemetry](./eaf-opentelemetry.md) - Integração com OpenTelemetry para observabilidade
 * [Eaf.SqlServerCache](./eaf-sqlservercache.md) - Cache distribuído usando SQL Server
 * [Eaf.SqliteCache](./eaf-sqlitecache.md) - Cache distribuído usando SQLite

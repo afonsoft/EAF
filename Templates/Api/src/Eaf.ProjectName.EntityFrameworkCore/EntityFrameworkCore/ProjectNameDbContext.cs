@@ -10,6 +10,7 @@ using Eaf.Middleware.MultiTenancy;
 using Eaf.Middleware.Payments;
 using Eaf.Middleware.Storage;
 using Eaf.Middleware.UserDelegations;
+using Eaf.Notifications.Push;
 using Eaf.ProjectName.Airplanes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -77,6 +78,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<MassNotification> MassNotifications { get; set; }
         public virtual DbSet<UserDelegation> UserDelegations { get; set; }
         public virtual DbSet<SubscribableEdition> SubscribableEditions { get; set; }
+        public virtual DbSet<PushSubscription> PushSubscriptions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -150,6 +152,12 @@ namespace Eaf.ProjectName.EntityFrameworkCore
                 b.Property(e => e.QuarterlyPrice).HasPrecision(18, 2);
                 b.Property(e => e.BiannualPrice).HasPrecision(18, 2);
                 b.Property(e => e.PermanentPrice).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<PushSubscription>(b =>
+            {
+                b.HasIndex(e => new { e.TenantId, e.UserId });
+                b.HasIndex(e => e.Endpoint).IsUnique();
             });
 
             modelBuilder.Entity<SubscriptionPayment>(b =>

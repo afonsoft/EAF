@@ -38,6 +38,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Eaf.Middleware.Application\Eaf.Middleware.Application.csproj" />
+		<ProjectReference Include="..\Eaf.Notifications.Push\Eaf.Notifications.Push.csproj" />
+		<ProjectReference Include="..\Eaf.Notifications.Sms\Eaf.Notifications.Sms.csproj" />
 		<ProjectReference Include="..\Eaf.SignalR\Eaf.SignalR.csproj" />
 		<ProjectReference Include="..\Eaf.SqlServerCache\Eaf.SqlServerCache.csproj" />
 		<ProjectReference Include="..\Eaf.Webhooks\Eaf.Webhooks.csproj" />
