@@ -1,6 +1,8 @@
 using Abp.AspNetCore.Webhook;
 using Eaf.Configuration;
 using Eaf.Middleware.Identity;
+using Eaf.Notifications.Push.Configuration;
+using Eaf.Notifications.Sms.Configuration;
 using Eaf.SignalR.Configuration;
 using Eaf.Webhooks;
 using Eaf.Webhooks.Configuration;
@@ -27,7 +29,7 @@ namespace Eaf.Middleware.Web.Startup
         /// <summary>
         /// IdentityRegistrar, AuthConfigurer, HangFireConfigurer, RedisConfigurer, HealthChecks
         /// </summary>
-        public static void AddEafConfigurer(this IServiceCollection services, IConfiguration configuration)
+        public static void AddEafConfigurer(this IServiceCollection services, IConfiguration configuration, bool addSmsNotifications = true, bool addPushNotifications = true)
         {
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, configuration);
@@ -42,6 +44,8 @@ namespace Eaf.Middleware.Web.Startup
 
             services.AddEafSignalR(configuration);
             services.AddEafWebhooks(configuration);
+            services.AddEafSmsNotifications(configuration, addSmsNotifications);
+            services.AddEafPushNotifications(configuration, addPushNotifications);
 
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();

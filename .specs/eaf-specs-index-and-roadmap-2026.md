@@ -92,22 +92,23 @@ Implemented since last review:
 - `UserDelegationAppService` + Angular `admin/user-delegations`
 - `TenantJoinRequest` flow + Angular `admin/tenant-join-requests`
 - `DashboardAppService` + Angular `main/dashboard`
+- `Eaf.RedisCache` distributed cache module
+- `Eaf.BlobStoring` with FileSystem, Azure Blob and AWS S3 providers
+- `Eaf.MailKit` email sender with retry and templates
+- `Eaf.SignalR` real-time communication module
+- `Eaf.Webhooks` outgoing HTTP webhooks with HMAC signature
+- `Eaf.FluentValidation` and `Eaf.HtmlSanitizer`
+- `Eaf.Notifications.Sms` / `Eaf.Notifications.Push` with generic HTTP providers (Zenvia/Twilio) and VAPID Web Push
 
 Missing ABP-equivalent modules (with dedicated specs):
-- `Eaf.MailKit` — `eaf-module-mailkit.spec.md`
-- `Eaf.SignalR` — `eaf-module-signalr.spec.md`
 - `Eaf.OpenIddict` — `eaf-module-openiddict.spec.md`
-- `Eaf.Notifications.Sms` / `Eaf.Notifications.Push` — `eaf-module-sms-push-notifications.spec.md`
 - `Eaf.DynamicEntityProperties` — `eaf-module-dynamic-entity-properties.spec.md`
 - Subscription payment lifecycle — `eaf-module-subscription-payments.spec.md`
 
 Other missing modules (specs created):
-- `Eaf.HtmlSanitizer` — `eaf-module-html-sanitizer.spec.md`
 - `Eaf.Dapper` — `eaf-module-dapper.spec.md`
-- `Eaf.FluentValidation` — `eaf-module-fluent-validation.spec.md`
 - `Eaf.MongoDB` / `Eaf.Middleware.MongoDB` — `eaf-module-mongodb.spec.md`
 - `Eaf.Quartz` — `eaf-module-quartz.spec.md`
-- `Eaf.Webhooks` — `eaf-module-webhooks.spec.md`
 - `Eaf.RateLimiting` — `eaf-module-rate-limiting.spec.md`
 
 ### 3.2 Angular UI (`Templates/Angular/Eaf.ProjectName.UI`)

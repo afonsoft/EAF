@@ -1,6 +1,8 @@
 using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
 using Abp.Configuration.Startup;
+using Eaf.Notifications.Push;
+using Eaf.Notifications.Sms;
 using Eaf.SignalR;
 using Eaf.Webhooks;
 using Abp.Dependency;
@@ -47,6 +49,8 @@ namespace Eaf.Middleware.Web
     [DependsOn(
         typeof(MiddlewareApplicationModule),
         typeof(AbpAspNetCoreModule),
+        typeof(EafNotificationsSmsModule),
+        typeof(EafNotificationsPushModule),
         typeof(EafSignalRModule),
         typeof(EafWebhooksModule),
         typeof(AbpHangfireAspNetCoreModule),
@@ -104,6 +108,9 @@ namespace Eaf.Middleware.Web
             {
                 IocManager.Resolve<Eaf.Middleware.Friendships.ChatUserStateWatcher>().Initialize();
             }
+
+            Configuration.Notifications?.Notifiers.Add<Eaf.Notifications.SmsRealTimeNotifier>();
+            Configuration.Notifications?.Notifiers.Add<Eaf.Notifications.PushRealTimeNotifier>();
 
             SetAppFolders();
             ConfigureExternalAuthProviders();
