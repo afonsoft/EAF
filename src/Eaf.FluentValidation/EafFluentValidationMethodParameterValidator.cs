@@ -10,7 +10,7 @@ namespace Eaf.FluentValidation
     /// <summary>
     /// Adaptador que executa validadores FluentValidation dentro do pipeline de validação do ABP.
     /// </summary>
-    public class EafFluentValidationMethodParameterValidator : IMethodParameterValidator, ITransientDependency
+    public class EafFluentValidationMethodParameterValidator : IMethodParameterValidator
     {
         private readonly EafFluentValidationValidatorFactory _validatorFactory;
 
