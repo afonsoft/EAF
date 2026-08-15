@@ -1,0 +1,8 @@
+<Project>
+	<PropertyGroup>
+		<!-- Quando a solução Eaf.ApiWithSrc for usada, referencia os projetos-fonte do EAF em vez dos pacotes NuGet.
+			 Isso permite validar o template antes da publicação dos pacotes. -->
+		<UseSourceProjects Condition="'$(SolutionName)' == 'Eaf.ApiWithSrc'">true</UseSourceProjects>
+		<UseSourceProjects Condition="'$(UseSourceProjects)' == ''">false</UseSourceProjects>
+	</PropertyGroup>
+</Project>
