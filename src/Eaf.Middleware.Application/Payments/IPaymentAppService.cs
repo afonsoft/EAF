@@ -17,6 +17,13 @@ namespace Eaf.Middleware.Payments
         Task<PagedResultDto<SubscriptionPaymentDto>> GetAllAsync(GetSubscriptionPaymentsInput input);
 
         /// <summary>
+        /// Obtém um pagamento de assinatura pelo identificador.
+        /// </summary>
+        /// <param name="id">Identificador do pagamento.</param>
+        /// <returns>DTO do pagamento de assinatura.</returns>
+        Task<SubscriptionPaymentDto> GetPaymentAsync(long id);
+
+        /// <summary>
         /// Cria uma solicitação de pagamento para assinatura.
         /// </summary>
         Task<PaymentRequestDto> CreatePaymentAsync(CreateSubscriptionPaymentInput input);

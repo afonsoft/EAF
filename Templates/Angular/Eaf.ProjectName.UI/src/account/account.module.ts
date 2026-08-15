@@ -21,6 +21,7 @@ import { ForgotPasswordComponent } from './password/forgot-password.component';
 import { ResetPasswordComponent } from './password/reset-password.component';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { SsoComponent } from './login/sso.component';
+import { GatewaySelectionComponent } from './gateway-selection/gateway-selection.component';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
@@ -50,6 +51,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     EmailActivationComponent,
     SsoComponent,
     ConfirmEmailComponent,
+    GatewaySelectionComponent,
   ],
   providers: [LoginService, RegisterService, AccountRouteGuard],
 })

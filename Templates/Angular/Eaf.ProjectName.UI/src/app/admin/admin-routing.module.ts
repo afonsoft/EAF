@@ -11,6 +11,7 @@ import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { MassNotificationsComponent } from './mass-notifications/mass-notifications.component';
 import { OrganizationUnitsComponent } from './organization-units/organization-units.component';
 import { PaymentsComponent } from './payments/payments.component';
+import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
 import { RolesComponent } from './roles/roles.component';
 import { UserDelegationsComponent } from './user-delegations/user-delegations.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -42,6 +43,7 @@ import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-
           { path: 'mass-notifications', component: MassNotificationsComponent, data: { permission: 'Pages.Administration.MassNotifications' } },
           { path: 'user-delegations', component: UserDelegationsComponent, data: { permission: 'Pages.Administration.Users.Delegation' } },
           { path: 'payments', component: PaymentsComponent, data: { permission: 'Pages.Administration.Payments' } },
+          { path: 'subscriptions', component: SubscriptionsComponent, data: { permission: 'Pages.Administration.Payments' } },
           { path: 'settings', component: SettingsComponent, data: { permission: 'Pages.Administration.Settings' } },
           { path: 'maintenance', component: MaintenanceComponent, data: { permission: 'Pages.Administration.Maintenance' } },
           { path: 'tenant-join-requests', component: TenantJoinRequestsComponent, data: { permission: 'Pages.Administration.Users' } },
