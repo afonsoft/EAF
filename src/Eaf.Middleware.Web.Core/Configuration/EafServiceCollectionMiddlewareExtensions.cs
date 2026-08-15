@@ -2,6 +2,8 @@ using Abp.AspNetCore.Webhook;
 using Eaf.Configuration;
 using Eaf.Middleware.Identity;
 using Eaf.SignalR.Configuration;
+using Eaf.Webhooks;
+using Eaf.Webhooks.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,6 +41,7 @@ namespace Eaf.Middleware.Web.Startup
             var isProduction = !IsDevelopmentEnvironment();
 
             services.AddEafSignalR(configuration);
+            services.AddEafWebhooks(configuration);
 
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();

@@ -2,6 +2,7 @@ using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
 using Abp.Configuration.Startup;
 using Eaf.SignalR;
+using Eaf.Webhooks;
 using Abp.Dependency;
 using Abp.Extensions;
 using Abp.Hangfire;
@@ -47,6 +48,7 @@ namespace Eaf.Middleware.Web
         typeof(MiddlewareApplicationModule),
         typeof(AbpAspNetCoreModule),
         typeof(EafSignalRModule),
+        typeof(EafWebhooksModule),
         typeof(AbpHangfireAspNetCoreModule),
         typeof(AbpRedisCacheModule),
         typeof(EafSqlServerCacheModule)
