@@ -20,6 +20,7 @@ export interface OfflineAction {
  */
 @Injectable({ providedIn: 'root' })
 export class OfflineService {
+  private static idCounter = 0;
   private readonly queueKey = 'eaf-offline-queue';
   private readonly online = new BehaviorSubject<boolean>(true);
   private readonly pending = new BehaviorSubject<number>(0);
@@ -139,6 +140,18 @@ export class OfflineService {
   }
 
   private generateId(): string {
-    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+    if (
+      isPlatformBrowser(this.platformId) &&
+      typeof window !== 'undefined' &&
+      window.crypto?.getRandomValues
+    ) {
+      const bytes = new Uint8Array(8);
+      window.crypto.getRandomValues(bytes);
+      const random = Array.from(bytes, (b: number) => b.toString(16).padStart(2, '0')).join('');
+      return `${Date.now().toString(36)}-${random}`;
+    }
+
+    OfflineService.idCounter += 1;
+    return `${Date.now().toString(36)}-${OfflineService.idCounter.toString(36)}`;
   }
 }
