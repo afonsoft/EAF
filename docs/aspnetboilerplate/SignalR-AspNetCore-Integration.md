@@ -13,31 +13,31 @@ Install the
 NuGet package to your project (generally to your Web layer) and add a
 **dependency** to your module:
 
-    [DependsOn(typeof(AbpAspNetCoreSignalRModule))]
+    [DependsOn(typeof(EafSignalRModule))]
     public class YourProjectWebModule : AbpModule
     {
         //...
     }
 
 
-Then use the **AddSignalR** and **UseSignalR** methods in your Startup class:
+Then use the **AddEafSignalR** and **UseSignalR** methods in your Startup class:
 
-    using Abp.AspNetCore.SignalR.Hubs;
+    using Eaf.SignalR.Hubs;
     
     namespace MyProject.Web.Startup
     {
         public class Startup
         {
-            public void ConfigureServices(IServiceCollection services)
+            public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
             {
-                services.AddSignalR();
+                services.AddEafSignalR(configuration);
             }
     
             public void Configure(IApplicationBuilder app)
             {
                 app.UseEndpoints(endpoints =>
                 {
-                    endpoints.MapHub<AbpCommonHub>("/signalr");
+                    endpoints.MapHub<EafCommonHub>("/signalr");
                 });
             }
         }

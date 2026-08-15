@@ -1,6 +1,7 @@
 using Abp.AspNetCore.Webhook;
 using Eaf.Configuration;
 using Eaf.Middleware.Identity;
+using Eaf.SignalR.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,13 +38,7 @@ namespace Eaf.Middleware.Web.Startup
 
             var isProduction = !IsDevelopmentEnvironment();
 
-            services.AddSignalR(options =>
-            {
-                options.EnableDetailedErrors = !isProduction;
-                options.HandshakeTimeout = TimeSpan.FromSeconds(30);
-                options.KeepAliveInterval = TimeSpan.FromSeconds(30);
-                options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
-            });
+            services.AddEafSignalR(configuration);
 
             services.AddMemoryCache();
             services.AddDistributedMemoryCache();
