@@ -48,7 +48,7 @@ namespace Eaf.SignalR.Tests.Notifications
 
         public ISingleClientProxy Client(string connectionId) => _clientProxy;
 
-        public IClientProxy Clients(IReadOnlyList<string> connectionIds) => throw new NotImplementedException();
+        public IClientProxy Clients(IReadOnlyList<string> connectionIds) => _clientProxy;
 
         public IClientProxy Group(string groupName) => throw new NotImplementedException();
 

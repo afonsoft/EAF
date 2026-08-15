@@ -17,6 +17,13 @@ Este documento centraliza exemplos práticos de como usar cada módulo de middle
 - [Eaf.OpenTelemetry](#eafopentelemetry)
 - [Eaf.SqlServerCache](#eafsqlservercache)
 - [Eaf.SqliteCache](#eafsqlitecache)
+- [Eaf.BlobStoring](#eafblobstoring)
+- [Eaf.FluentValidation](#eaffluentvalidation)
+- [Eaf.HtmlSanitizer](#eafhtmlsanitizer)
+- [Eaf.MailKit](#eafmailkit)
+- [Eaf.RedisCache](#eafrediscache)
+- [Eaf.SignalR](#eafsignalr)
+- [Eaf.Webhooks](#eafwebhooks)
 
 ## <a id="eafcastleserilog"></a>Eaf.Castle.Serilog
 
@@ -2347,3 +2354,453 @@ public override void PreInitialize()
 ```
 
 > Documentação completa: [`src/Eaf.SqliteCache/README.md`](../../src/Eaf.SqliteCache/README.md) e [`docs/modules/eaf-sqlitecache.md`](./eaf-sqlitecache.md)
+
+## <a id="eafblobstoring"></a>Eaf.BlobStoring
+
+**Propósito resumido:** O **Eaf.BlobStoring** é um módulo de armazenamento de BLOBs do EAF. Ele implementa provedores compatíveis com a API `IBlobContainer` / `IBlobContainerFactory` do ABP, oferecendo suporte nativo a FileSystem, Azure Blob Storage e AWS S3 (ou serviços compatíveis com S3).
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.BlobStoring --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.BlobStoring\Eaf.BlobStoring.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+```csharp
+[DependsOn(typeof(EafBlobStoringModule))]
+public class MeuModulo : AbpModule
+{
+    public override void PreInitialize()
+    {
+        Configuration.Modules.EafBlobStoring().DefaultProvider = typeof(FileSystemBlobProvider);
+        Configuration.Modules.EafBlobStoring().FileSystemBasePath = @"C:\EAF\Blobs";
+    }
+}
+```
+
+### 2. Configurando Azure Blob Storage
+
+```csharp
+[DependsOn(typeof(EafBlobStoringModule))]
+public class MeuModulo : AbpModule
+{
+    public override void PreInitialize()
+    {
+        Configuration.Modules.EafBlobStoring().DefaultProvider = typeof(AzureBlobProvider);
+        Configuration.Modules.EafBlobStoring().AzureConnectionString = "UseDevelopmentStorage=true";
+        Configuration.Modules.EafBlobStoring().AzureContainerName = "eaf-blobs";
+        Configuration.Modules.EafBlobStoring().AzureCreateContainerIfNotExists = true;
+    }
+}
+```
+
+### 3. Configurando AWS S3
+
+```csharp
+[DependsOn(typeof(EafBlobStoringModule))]
+public class MeuModulo : AbpModule
+{
+    public override void PreInitialize()
+    {
+        Configuration.Modules.EafBlobStoring().DefaultProvider = typeof(EafCloudBlobProvider);
+        Configuration.Modules.EafBlobStoring().CloudProvider = "Aws";
+        Configuration.Modules.EafBlobStoring().AwsAccessKeyId = "AKIA...";
+        Configuration.Modules.EafBlobStoring().AwsSecretAccessKey = "...";
+        Configuration.Modules.EafBlobStoring().AwsRegion = "us-east-1";
+        Configuration.Modules.EafBlobStoring().AwsBucketName = "eaf-blobs";
+        Configuration.Modules.EafBlobStoring().AwsCreateBucketIfNotExists = true;
+    }
+}
+```
+
+> Atenção: nunca armazene credenciais no código-fonte. Prefira variáveis de ambiente, AWS IAM roles ou gerenciadores de secrets como o `Eaf.KeyVault`.
+
+### Uso
+
+```csharp
+public class MinhaAppService : IApplicationService
+{
+    private readonly IBlobContainer _blobContainer;
+
+    public MinhaAppService(IBlobContainer blobContainer)
+    {
+        _blobContainer = blobContainer;
+    }
+
+    public async Task SalvarAsync(string nome, byte[] bytes)
+    {
+        await _blobContainer.SaveAsync(nome, bytes);
+    }
+}
+```
+
+> Documentação completa: [`src/Eaf.BlobStoring/README.md`](../../src/Eaf.BlobStoring/README.md)
+
+## <a id="eaffluentvalidation"></a>Eaf.FluentValidation
+
+**Propósito resumido:** O **Eaf.FluentValidation** integra o FluentValidation ao pipeline de validação do ABP, sem remover o suporte a DataAnnotations.
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.FluentValidation --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.FluentValidation\Eaf.FluentValidation.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+```csharp
+[DependsOn(typeof(EafFluentValidationModule))]
+public class MyProjectModule : AbpModule
+{
+    public override void PreInitialize()
+    {
+        Configuration.Modules.Configure<EafFluentValidationOptions>(options =>
+        {
+            options.ValidatorAssemblies.Add(typeof(MyProjectModule).GetAssembly());
+        });
+    }
+}
+```
+
+### Uso
+
+```csharp
+public class CreateUserInputValidator : AbstractValidator<CreateUserInput>
+{
+    public CreateUserInputValidator()
+    {
+        RuleFor(x => x.Email).EmailAddress();
+        RuleFor(x => x.Password).MinimumLength(8);
+    }
+}
+```
+
+O ABP executará automaticamente o FluentValidation junto com DataAnnotations.
+
+> Documentação completa: [`src/Eaf.FluentValidation/README.md`](../../src/Eaf.FluentValidation/README.md)
+
+## <a id="eafhtmlsanitizer"></a>Eaf.HtmlSanitizer
+
+**Propósito resumido:** O **Eaf.HtmlSanitizer** é um módulo de sanitização de HTML baseado no HtmlSanitizer, removendo scripts, atributos de eventos e URIs `javascript:` por padrão.
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.HtmlSanitizer --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.HtmlSanitizer\Eaf.HtmlSanitizer.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+```csharp
+[DependsOn(typeof(EafHtmlSanitizerModule))]
+public class MyProjectModule : AbpModule
+{
+}
+```
+
+### Uso
+
+```csharp
+public class MyService : ITransientDependency
+{
+    private readonly IHtmlSanitizer _htmlSanitizer;
+
+    public MyService(IHtmlSanitizer htmlSanitizer)
+    {
+        _htmlSanitizer = htmlSanitizer;
+    }
+
+    public void Process(string input)
+    {
+        var safeHtml = _htmlSanitizer.Sanitize(input);
+    }
+}
+```
+
+### Configuração
+
+```csharp
+var options = new EafHtmlSanitizerOptions
+{
+    AllowedTags = { "p", "strong", "em" },
+    AllowedAttributes = { "style" },
+    AllowedUriSchemes = { "https", "mailto" }
+};
+
+var safe = htmlSanitizer.Sanitize(input, options);
+```
+
+Quando as coleções estiverem vazias, o módulo utiliza as configurações padrão do sanitizer.
+
+> Documentação completa: [`src/Eaf.HtmlSanitizer/README.md`](../../src/Eaf.HtmlSanitizer/README.md)
+
+## <a id="eafmailkit"></a>Eaf.MailKit
+
+**Propósito resumido:** O **Eaf.MailKit** é um módulo EAF para envio de e-mails baseado no MailKit, estendendo as abstrações `Abp.MailKit` com retry, templates e configurações específicas do EAF.
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.MailKit --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.MailKit\Eaf.MailKit.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+```csharp
+[DependsOn(typeof(EafMailKitModule))]
+public class MyProjectModule : AbpModule
+{
+}
+```
+
+### 2. Configuração
+
+As configurações podem ser definidas via `ISettingManager` ou injetando `EafMailKitConfiguration`:
+
+| Setting | Padrão | Descrição |
+|---|---|---|
+| `Eaf.MailKit.RetryCount` | `3` | Número máximo de tentativas. |
+| `Eaf.MailKit.RetryDelayMilliseconds` | `500` | Tempo base entre tentativas (ms). |
+| `Eaf.MailKit.DisableCertificateValidation` | `false` | Desabilita validação do certificado SMTP. |
+
+Configure as credenciais SMTP padrão do ABP (`Abp.Net.Mail.EmailSettingNames.Smtp.Host`, `Port`, `UserName`, `Password` etc.).
+
+### Uso
+
+```csharp
+public class MyService
+{
+    private readonly IEmailSender _emailSender;
+    private readonly IEmailTemplateManager _templateManager;
+
+    public MyService(IEmailSender emailSender, IEmailTemplateManager templateManager)
+    {
+        _emailSender = emailSender;
+        _templateManager = templateManager;
+    }
+
+    public async Task SendWelcomeEmail(string email, string name)
+    {
+        var body = await _templateManager.RenderAsync("Welcome", new { Name = name });
+        await _emailSender.SendAsync(email, "Bem-vindo", body, isBodyHtml: true);
+    }
+}
+```
+
+### Templates
+
+Armazene templates em memória (padrão) ou substitua `IEmailTemplateStore` por uma implementação que use banco de dados:
+
+```csharp
+var store = Resolve<IEmailTemplateStore>();
+```
+
+O formato dos placeholders é `{{Propriedade}}`. Propriedades ausentes são substituídas por vazio.
+
+> Documentação completa: [`src/Eaf.MailKit/README.md`](../../src/Eaf.MailKit/README.md)
+
+## <a id="eafrediscache"></a>Eaf.RedisCache
+
+**Propósito resumido:** O **Eaf.RedisCache** é um módulo de cache distribuído do EAF baseado em Redis, utilizando `StackExchange.Redis` através do `Microsoft.Extensions.Caching.StackExchangeRedis`.
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.RedisCache --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.RedisCache\Eaf.RedisCache.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+```csharp
+[DependsOn(typeof(EafRedisCacheModule))]
+public class YourModule : AbpModule
+{
+    public override void PreInitialize()
+    {
+        Configuration.Caching.UseRedis(options =>
+        {
+            options.ConnectionString = "localhost:6379";
+            options.InstanceName = "EAF";
+        });
+    }
+}
+```
+
+A string de conexão também pode ser obtida do `appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "Redis": "localhost:6379"
+  },
+  "Eaf": {
+    "RedisCache": {
+      "ConnectionString": "localhost:6379"
+    }
+  }
+}
+```
+
+### Uso
+
+```csharp
+var cacheManager = Resolve<ICacheManager>();
+var cache = cacheManager.GetCache("Users");
+
+cache.Set("user:1", new UserDto { Id = 1, Name = "Alice" });
+var user = cache.Get("user:1", "default");
+```
+
+> Documentação completa: [`src/Eaf.RedisCache/README.md`](../../src/Eaf.RedisCache/README.md)
+
+## <a id="eafsignalr"></a>Eaf.SignalR
+
+**Propósito resumido:** O **Eaf.SignalR** encapsula a infraestrutura real-time do EAF, reutilizando `Abp.AspNetCore.SignalR` e adicionando configurações específicas, notificações e gerenciamento de clientes online.
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.SignalR --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.SignalR\Eaf.SignalR.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+No módulo Web, substitua `AbpAspNetCoreSignalRModule` por `EafSignalRModule`:
+
+```csharp
+[DependsOn(typeof(EafSignalRModule))]
+public class MyWebModule : AbpModule { }
+```
+
+E utilize a extensão no `Startup`:
+
+```csharp
+services.AddEafSignalR(configuration);
+```
+
+### 2. Configuração
+
+```json
+{
+  "EafSignalR": {
+    "UseDetailedErrors": null,
+    "HandshakeTimeoutSeconds": 30,
+    "KeepAliveIntervalSeconds": 30,
+    "ClientTimeoutIntervalSeconds": 60,
+    "UseRedisBackplane": false,
+    "RedisConnectionString": "",
+    "RedisDatabase": null
+  }
+}
+```
+
+### 3. Mapeando os Hubs
+
+```csharp
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<EafCommonHub>("/signalr");
+    endpoints.MapHub<ChatHub>("/signalr-chat");
+});
+```
+
+> Documentação completa: [`src/Eaf.SignalR/README.md`](../../src/Eaf.SignalR/README.md)
+
+## <a id="eafwebhooks"></a>Eaf.Webhooks
+
+**Propósito resumido:** O **Eaf.Webhooks** é um módulo EAF para envio de webhooks HTTP. Reutiliza `Abp.Webhooks` e `Abp.AspNetCore.Webhook` e aplica assinatura HMAC-SHA256, guarda HTTPS, criptografia do segredo e deduplicação de assinaturas.
+
+### Pré-requisitos
+- .NET 10.0 SDK ou superior
+- ASP.NET Boilerplate 10.5.0
+
+### Instalação via NuGet
+```bash
+dotnet add package Eaf.Webhooks --version 9.4.5
+```
+
+### Instalação via Referência de Projeto
+```xml
+<ProjectReference Include="..\Eaf.Webhooks\Eaf.Webhooks.csproj" />
+```
+
+### 1. Registrando o Módulo
+
+```csharp
+[DependsOn(typeof(EafWebhooksModule))]
+public class MyProjectModule : AbpModule
+{
+    public override void PreInitialize()
+    {
+        Configuration.Modules.EafWebhooks().AllowHttp = false;
+    }
+}
+```
+
+### 2. Configuração
+
+```json
+{
+  "EafWebhooks": {
+    "AllowHttp": false,
+    "TimeoutSeconds": 30,
+    "MaxSendAttemptCount": 5,
+    "IsAutomaticSubscriptionDeactivationEnabled": true,
+    "MaxConsecutiveFailCountBeforeDeactivateSubscription": 10,
+    "SignatureHeaderName": "X-Eaf-Signature-256",
+    "SignatureValueTemplate": "sha256={0}",
+    "DataProtectionPurpose": "eaf-webhooks-subscription-secret"
+  }
+}
+```
+
+> Documentação completa: [`src/Eaf.Webhooks/README.md`](../../src/Eaf.Webhooks/README.md)

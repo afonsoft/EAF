@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Abp.Dependency;
 using Abp.Notifications;
@@ -50,17 +51,11 @@ namespace Eaf.SignalR.Notifications
                 try
                 {
                     var onlineClients = await _onlineClientManager.GetAllByUserIdAsync(userNotification);
+                    var connectionIds = onlineClients.Select(client => client.ConnectionId).ToList();
 
-                    foreach (var client in onlineClients)
+                    if (connectionIds.Count > 0)
                     {
-                        var signalRClient = _hubContext.Clients.Client(client.ConnectionId);
-                        if (signalRClient == null)
-                        {
-                            Logger.Debug($"Can not get user {userNotification.UserId} with connectionId {client.ConnectionId} from SignalR hub!");
-                            continue;
-                        }
-
-                        await signalRClient.SendAsync("getNotification", userNotification);
+                        await _hubContext.Clients.Clients(connectionIds).SendAsync("getNotification", userNotification);
                     }
                 }
                 catch (Exception ex)

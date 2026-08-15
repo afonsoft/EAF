@@ -40,17 +40,17 @@
       >
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="name">
+            <th pSortableColumn="name" scope="col">
               {{ 'Name' | localize }}
               <p-sortIcon field="name"></p-sortIcon>
             </th>
-            <th pSortableColumn="displayName">
+            <th pSortableColumn="displayName" scope="col">
               {{ 'DisplayName' | localize }}
               <p-sortIcon field="displayName"></p-sortIcon>
             </th>
-            <th>{{ 'DefaultValue' | localize }}</th>
-            <th>{{ 'InputType' | localize }}</th>
-            <th>{{ 'Parent' | localize }}</th>
+            <th scope="col">{{ 'DefaultValue' | localize }}</th>
+            <th scope="col">{{ 'InputType' | localize }}</th>
+            <th scope="col">{{ 'Parent' | localize }}</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-feature>

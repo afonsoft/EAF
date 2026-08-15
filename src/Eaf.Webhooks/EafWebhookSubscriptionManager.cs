@@ -45,7 +45,7 @@ namespace Eaf.Webhooks
             {
                 await CheckIfPermissionsGrantedAsync(webhookSubscription);
 
-                if (webhookSubscription.Id == default)
+                if (webhookSubscription.Id == Guid.Empty)
                     await CreateSubscriptionAsync(webhookSubscription);
                 else
                     await UpdateSubscriptionAsync(webhookSubscription);
@@ -61,7 +61,7 @@ namespace Eaf.Webhooks
             {
                 CheckIfPermissionsGranted(webhookSubscription);
 
-                if (webhookSubscription.Id == default)
+                if (webhookSubscription.Id == Guid.Empty)
                     CreateSubscription(webhookSubscription);
                 else
                     UpdateSubscription(webhookSubscription);
@@ -152,7 +152,7 @@ namespace Eaf.Webhooks
             ThrowIfDuplicate(webhookSubscription, existing);
         }
 
-        private void ThrowIfDuplicate(WebhookSubscription webhookSubscription, List<WebhookSubscriptionInfo> existing)
+        private static void ThrowIfDuplicate(WebhookSubscription webhookSubscription, List<WebhookSubscriptionInfo> existing)
         {
             var inputEvents = new HashSet<string>(webhookSubscription.Webhooks);
 

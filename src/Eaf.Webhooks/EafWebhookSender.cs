@@ -31,11 +31,8 @@ namespace Eaf.Webhooks
             if (string.IsNullOrWhiteSpace(webhookSenderArgs.WebhookUri))
                 throw new ArgumentException("A URI do webhook é obrigatória.", nameof(webhookSenderArgs));
 
-            if (!_options.AllowHttp)
-            {
-                if (!Uri.TryCreate(webhookSenderArgs.WebhookUri, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
-                    throw new UserFriendlyException("A URI do webhook deve usar HTTPS.");
-            }
+            if (!_options.AllowHttp && (!Uri.TryCreate(webhookSenderArgs.WebhookUri, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps))
+                throw new UserFriendlyException("A URI do webhook deve usar HTTPS.");
 
             return base.CreateWebhookRequestMessage(webhookSenderArgs);
         }

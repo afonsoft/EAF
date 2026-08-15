@@ -13,6 +13,7 @@ namespace Eaf.BlobStoring.Naming
     /// </summary>
     public class EafDefaultBlobNamingNormalizer : IBlobNamingNormalizer, ITransientDependency
     {
+        private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(1);
         /// <inheritdoc />
         public virtual string NormalizeContainerName(string containerName)
         {
@@ -25,10 +26,10 @@ namespace Eaf.BlobStoring.Naming
                     containerName = containerName.Substring(0, 63);
                 }
 
-                containerName = Regex.Replace(containerName, "[^a-z0-9-]", "-");
-                containerName = Regex.Replace(containerName, "-{2,}", "-");
-                containerName = Regex.Replace(containerName, "^-", string.Empty);
-                containerName = Regex.Replace(containerName, "-$", string.Empty);
+                containerName = Regex.Replace(containerName, "[^a-z0-9-]", "-", RegexOptions.None, RegexTimeout);
+                containerName = Regex.Replace(containerName, "-{2,}", "-", RegexOptions.None, RegexTimeout);
+                containerName = Regex.Replace(containerName, "^-", string.Empty, RegexOptions.None, RegexTimeout);
+                containerName = Regex.Replace(containerName, "-$", string.Empty, RegexOptions.None, RegexTimeout);
 
                 if (containerName.Length < 3)
                 {

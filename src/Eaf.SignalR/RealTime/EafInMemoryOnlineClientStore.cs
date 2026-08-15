@@ -7,6 +7,12 @@ namespace Eaf.SignalR.RealTime
     /// </summary>
     public class EafInMemoryOnlineClientStore : InMemoryOnlineClientStore
     {
+        /// <summary>
+        /// Cria uma nova instância do armazenamento em memória de clientes online.
+        /// </summary>
+        public EafInMemoryOnlineClientStore()
+        {
+        }
     }
 
     /// <summary>
