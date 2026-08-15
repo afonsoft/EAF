@@ -20,6 +20,8 @@ namespace Eaf.Webhooks.Tests
     /// </summary>
     public class EafWebhookSenderTests
     {
+        private const string SignatureHeaderName = "X-Eaf-Signature-256";
+
         private static (EafWebhookSender Sender, FakeHttpMessageHandler Handler) CriarSender(EafWebhooksOptions options = null)
         {
             var handler = new FakeHttpMessageHandler();
@@ -80,7 +82,7 @@ namespace Eaf.Webhooks.Tests
 
             // Então
             handler.LastRequest.ShouldNotBeNull();
-            handler.LastRequest.Headers.ShouldContain(h => h.Key == "X-Eaf-Signature-256");
+            handler.LastRequest.Headers.ShouldContain(h => h.Key == SignatureHeaderName);
         }
 
         [Fact]

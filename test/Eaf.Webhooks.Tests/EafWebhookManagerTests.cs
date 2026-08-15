@@ -20,6 +20,8 @@ namespace Eaf.Webhooks.Tests
     /// </summary>
     public class EafWebhookManagerTests
     {
+        private const string SignatureHeaderName = "X-Eaf-Signature-256";
+
         private static EafWebhookManager CriarGerenciador(IWebhookSubscriptionSecretProtector protector = null)
         {
             var configuration = Substitute.For<IWebhooksConfiguration>();
@@ -110,8 +112,8 @@ namespace Eaf.Webhooks.Tests
             sut.SignWebhookRequest(request, corpo, segredo);
 
             // Então
-            request.Headers.ShouldContain(h => h.Key == "X-Eaf-Signature-256");
-            var valor = request.Headers.GetValues("X-Eaf-Signature-256").Single();
+            request.Headers.ShouldContain(h => h.Key == SignatureHeaderName);
+            var valor = request.Headers.GetValues(SignatureHeaderName).Single();
             valor.ShouldStartWith("sha256=");
 
             using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(segredo)))

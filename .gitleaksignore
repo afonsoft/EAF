@@ -1,0 +1,4 @@
+# Ignore false positives for Eaf.Webhooks tests: header name "X-Eaf-Signature-256"
+# matched by the generic-api-key rule due to the `h.Key == "..."` comparison.
+850c3e24de0d5105432483f4584dd3703fc93283:test/Eaf.Webhooks.Tests/EafWebhookSenderTests.cs:generic-api-key:83
+850c3e24de0d5105432483f4584dd3703fc93283:test/Eaf.Webhooks.Tests/EafWebhookManagerTests.cs:generic-api-key:113
