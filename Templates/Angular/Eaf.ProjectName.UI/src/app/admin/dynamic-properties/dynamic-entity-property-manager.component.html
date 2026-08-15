@@ -5,8 +5,10 @@
   </div>
 
   <div class="form-group" *ngIf="dynamicEntityProperty">
-    <label>{{ dynamicEntityProperty.dynamicProperty?.displayName || dynamicEntityProperty.dynamicProperty?.propertyName }}</label>
-    <input type="text" class="form-control" [(ngModel)]="valueInput" [disabled]="loading" />
+    <label [attr.for]="'dynamicEntityPropertyValue-' + dynamicPropertyId">
+      {{ dynamicEntityProperty.dynamicProperty?.displayName || dynamicEntityProperty.dynamicProperty?.propertyName }}
+    </label>
+    <input [id]="'dynamicEntityPropertyValue-' + dynamicPropertyId" type="text" class="form-control" [(ngModel)]="valueInput" [disabled]="loading" />
     <small class="form-text text-muted">{{ dynamicEntityProperty.dynamicProperty?.inputType }}</small>
   </div>
 

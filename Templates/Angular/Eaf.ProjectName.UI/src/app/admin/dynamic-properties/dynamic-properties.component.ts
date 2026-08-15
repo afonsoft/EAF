@@ -84,7 +84,7 @@ export class DynamicPropertiesComponent extends AppComponentBase implements OnIn
       });
   }
 
-  delete(item: DynamicPropertyDto): void {
+  remove(item: DynamicPropertyDto): void {
     this.message.confirm(this.l('DynamicPropertyDeleteWarningMessage', item.propertyName), this.l('AreYouSure'), isConfirmed => {
       if (!isConfirmed || !item.id) {
         return;

@@ -25,10 +25,10 @@
           <p-table [value]="properties" [loading]="loading" [rows]="10" [paginator]="true" responsiveLayout="scroll">
             <ng-template pTemplate="header">
               <tr>
-                <th>{{ l('PropertyName') }}</th>
-                <th>{{ l('DisplayName') }}</th>
-                <th>{{ l('InputType') }}</th>
-                <th>{{ l('Actions') }}</th>
+                <th scope="col">{{ l('PropertyName') }}</th>
+                <th scope="col">{{ l('DisplayName') }}</th>
+                <th scope="col">{{ l('InputType') }}</th>
+                <th scope="col">{{ l('Actions') }}</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-item>
@@ -50,7 +50,7 @@
                     type="button"
                     class="btn btn-sm btn-clean btn-icon btn-icon-md"
                     *ngIf="isGranted('Pages.Administration.DynamicProperties.Delete')"
-                    (click)="delete(item)"
+                    (click)="remove(item)"
                     [attr.aria-label]="l('Delete')"
                   >
                     <i class="flaticon-delete"></i>
