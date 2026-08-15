@@ -40,6 +40,7 @@
 		<ProjectReference Include="..\Eaf.Middleware.Application\Eaf.Middleware.Application.csproj" />
 		<ProjectReference Include="..\Eaf.SignalR\Eaf.SignalR.csproj" />
 		<ProjectReference Include="..\Eaf.SqlServerCache\Eaf.SqlServerCache.csproj" />
+		<ProjectReference Include="..\Eaf.Webhooks\Eaf.Webhooks.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="\" />
