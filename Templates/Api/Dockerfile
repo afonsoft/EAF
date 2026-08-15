@@ -29,11 +29,12 @@ ENV App__ClientRootAddress=http://localhost:8000/
 ENV App__CorsOrigins=
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG USE_SOURCE_PROJECTS=true
 WORKDIR /src
 COPY . .
 WORKDIR "/src/Templates/Api/src/Eaf.ProjectName.Web.Host"
-RUN dotnet restore "Eaf.ProjectName.Web.Host.csproj"
-RUN dotnet publish "Eaf.ProjectName.Web.Host.csproj" \
+RUN dotnet restore "Eaf.ProjectName.Web.Host.csproj" -p:UseSourceProjects=${USE_SOURCE_PROJECTS}
+RUN dotnet publish "Eaf.ProjectName.Web.Host.csproj" -p:UseSourceProjects=${USE_SOURCE_PROJECTS} \
     -c Release \
     -o /app/publish \
     --no-restore \
