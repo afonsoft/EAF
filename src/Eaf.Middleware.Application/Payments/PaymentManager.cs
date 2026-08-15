@@ -72,6 +72,12 @@ namespace Eaf.Middleware.Payments
                 payment.Products.Add(product);
             }
 
+            await _subscriptionPaymentRepository.InsertAsync(payment);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            payment.SuccessUrl = ReplacePaymentIdPlaceholder(input.SuccessUrl, payment.Id);
+            payment.ErrorUrl = ReplacePaymentIdPlaceholder(input.ErrorUrl, payment.Id);
+
             var gateway = _paymentGatewayResolver.Resolve(input.Gateway);
             var request = await gateway.CreatePaymentAsync(new CreatePaymentRequestInput
             {
@@ -82,14 +88,14 @@ namespace Eaf.Middleware.Payments
                 IsRecurring = input.IsRecurring,
                 Description = input.Description,
                 Gateway = input.Gateway,
-                SuccessUrl = input.SuccessUrl,
-                ErrorUrl = input.ErrorUrl,
+                SuccessUrl = payment.SuccessUrl,
+                ErrorUrl = payment.ErrorUrl,
                 Products = input.Products ?? new List<SubscriptionPaymentProductInput>(),
             });
 
             payment.ExternalPaymentId = request.PaymentId;
 
-            await _subscriptionPaymentRepository.InsertAsync(payment);
+            await _subscriptionPaymentRepository.UpdateAsync(payment);
             await CurrentUnitOfWork.SaveChangesAsync();
 
             return new PaymentRequestDto
@@ -101,6 +107,16 @@ namespace Eaf.Middleware.Payments
                 CheckoutUrl = request.CheckoutUrl,
                 IsSuccess = request.IsSuccess && payment.Id > 0,
             };
+        }
+
+        private static string ReplacePaymentIdPlaceholder(string url, long paymentId)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return url;
+            }
+
+            return url.Replace("{paymentId}", paymentId.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

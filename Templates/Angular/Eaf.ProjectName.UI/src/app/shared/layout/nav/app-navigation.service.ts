@@ -33,6 +33,7 @@ export class AppNavigationService {
       new AppMenuItem('MassNotifications', 'Pages.Administration.MassNotifications', 'flaticon-speech-bubble', '/app/admin/mass-notifications'),
       new AppMenuItem('UserDelegation', 'Pages.Administration.Users.Delegation', 'flaticon-user-ok', '/app/admin/user-delegations'),
       new AppMenuItem('Payments', 'Pages.Administration.Payments', 'flaticon-coins', '/app/admin/payments'),
+      new AppMenuItem('Subscriptions', 'Pages.Administration.Payments', 'flaticon-money', '/app/admin/subscriptions'),
       new AppMenuItem('Languages', 'Pages.Administration.Languages', 'flaticon-tabs', '/app/admin/languages'),
       new AppMenuItem('Editions', 'Pages.Administration.Editions', 'flaticon-layers', '/app/admin/editions'),
       new AppMenuItem('Features', 'Pages.Administration.Editions', 'flaticon-interface-8', '/app/admin/features'),

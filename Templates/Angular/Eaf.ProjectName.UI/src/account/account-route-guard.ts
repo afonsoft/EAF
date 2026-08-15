@@ -16,12 +16,20 @@ export class AccountRouteGuard implements CanActivate {
       return true;
     }
 
+    if (this.isPaymentRoute(state.url)) {
+      return true;
+    }
+
     if (this._sessionService.user) {
       this._router.navigate([this.selectBestRoute()]);
       return false;
     }
 
     return true;
+  }
+
+  private isPaymentRoute(url: string): boolean {
+    return url.includes('/gateway-selection');
   }
 
   selectBestRoute(): string {

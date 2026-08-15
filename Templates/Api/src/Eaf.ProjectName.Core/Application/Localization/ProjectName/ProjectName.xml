@@ -19,5 +19,24 @@
     <text name="YouAreOffline">You are offline</text>
     <text name="NewVersionAvailable">A new version is available</text>
     <text name="UpdateNow">Update now</text>
+    <text name="GatewaySelection">Gateway selection</text>
+    <text name="Subscriptions">Subscriptions</text>
+    <text name="SubscriptionsHeaderInfo">Manage subscription payments</text>
+    <text name="PaymentPeriod">Payment period</text>
+    <text name="AmountPreview">Amount preview</text>
+    <text name="Gateway">Gateway</text>
+    <text name="GatewayDoesNotSupportRecurring">This gateway does not support recurring payments</text>
+    <text name="IsRecurring">Recurring payment</text>
+    <text name="PaymentSuccessful">Payment successful</text>
+    <text name="PaymentFailed">Payment failed</text>
+    <text name="PaymentReturnMissingPaymentId">Payment identifier missing in return URL</text>
+    <text name="PaymentCreationFailed">Failed to create payment</text>
+    <text name="CreatePayment">Create payment</text>
+    <text name="UpgradeSubscription">Upgrade subscription</text>
+    <text name="CancelRecurring">Cancel recurring</text>
+    <text name="CancelRecurringWarning">Are you sure you want to cancel recurring payment {0}?</text>
+    <text name="EditionIsRequired">Edition is required</text>
+    <text name="GatewayIsRequired">Gateway is required</text>
+    <text name="PaymentStatus">Payment status</text>
   </texts>
 </localizationDictionary>
