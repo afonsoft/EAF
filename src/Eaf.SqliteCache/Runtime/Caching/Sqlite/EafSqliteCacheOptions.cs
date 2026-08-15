@@ -51,20 +51,29 @@ namespace Abp.Runtime.Caching.Sqlite
         /// </summary>
         public TimeSpan? CleanupInterval { get; set; } = TimeSpan.FromMinutes(30);
 
-        internal string ConnectionString
-        {
-            get
-            {
-                var sb = new SqliteConnectionStringBuilder();
-                sb.DataSource = MemoryOnly
-                    ? ":memory:" : CachePath;
-                sb.Mode = MemoryOnly
-                    ? SqliteOpenMode.Memory : SqliteOpenMode.ReadWriteCreate;
-                sb.Cache = SqliteCacheMode.Shared;
-                sb.Pooling = false;
+        internal string ConnectionString => GetConnectionString(null);
 
-                return sb.ConnectionString;
-            }
+        internal string GetConnectionString(string? cacheName)
+        {
+            var sb = new SqliteConnectionStringBuilder();
+            sb.DataSource = MemoryOnly
+                ? (string.IsNullOrEmpty(cacheName) ? ":memory:" : SanitizeCacheName(cacheName))
+                : CachePath;
+            sb.Mode = MemoryOnly
+                ? SqliteOpenMode.Memory : SqliteOpenMode.ReadWriteCreate;
+            sb.Cache = SqliteCacheMode.Shared;
+            sb.Pooling = false;
+
+            return sb.ConnectionString;
+        }
+
+        private static string SanitizeCacheName(string cacheName)
+        {
+            return cacheName
+                .Replace(";", "_")
+                .Replace("=", "_")
+                .Replace("\r", "_")
+                .Replace("\n", "_");
         }
     }
 }

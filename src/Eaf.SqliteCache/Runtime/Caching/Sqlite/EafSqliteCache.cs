@@ -186,13 +186,13 @@ namespace Abp.Runtime.Caching.Sqlite
         /// <returns>Resultado da operação.</returns>
         public EafSqliteCache(string name, EafSqliteCacheOptions options) : base(name)
         {
-            _db = Connect(options, Logger);
+            _db = Connect(options, name, Logger);
             Commands = new DbCommandPool(_db);
 
             // This has to be after the call to Connect()
             if (options.CleanupInterval.HasValue)
             {
-                _cleanupTimer = new Timer(_ => { RemoveExpired(); }, null, TimeSpan.Zero,
+                _cleanupTimer = new Timer(_ => { RemoveExpired(); }, null, options.CleanupInterval.Value,
                     options.CleanupInterval.Value);
             }
         }
@@ -249,14 +249,15 @@ namespace Abp.Runtime.Caching.Sqlite
 
         #region Database Connection Initialization
 
-        private static DbConnection Connect(EafSqliteCacheOptions config, ILogger logger)
+        private static DbConnection Connect(EafSqliteCacheOptions config, string cacheName, ILogger logger)
         {
             DbConnection? db = null;
+            var connectionString = config.GetConnectionString(cacheName);
 
             // First try to open an existing database
             if (!config.MemoryOnly && File.Exists(config.CachePath))
             {
-                db = new DbConnection(config.ConnectionString);
+                db = new DbConnection(connectionString);
                 try
                 {
                     db.Open();
@@ -281,7 +282,7 @@ namespace Abp.Runtime.Caching.Sqlite
 
             if (db is null)
             {
-                db = new DbConnection(config.ConnectionString);
+                db = new DbConnection(connectionString);
                 db.Open();
                 Initialize(db);
             }
