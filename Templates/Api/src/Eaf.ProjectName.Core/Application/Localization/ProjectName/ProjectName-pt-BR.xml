@@ -12,5 +12,12 @@
     <text name="StartJob">Iniciar Job</text>
     <text name="UseCaptchaOnLogin">Usar ReCaptcha no Login</text>
     <text name="ReCaptcha">ReCaptcha</text>
+    <text name="SyncingPendingActions">Sincronizando ações pendentes</text>
+    <text name="InstallAppPrompt">Instale o aplicativo para acesso rápido</text>
+    <text name="InstallNow">Instalar agora</text>
+    <text name="YouAreOnline">Você está online</text>
+    <text name="YouAreOffline">Você está offline</text>
+    <text name="NewVersionAvailable">Uma nova versão está disponível</text>
+    <text name="UpdateNow">Atualizar agora</text>
   </texts>
 </localizationDictionary>

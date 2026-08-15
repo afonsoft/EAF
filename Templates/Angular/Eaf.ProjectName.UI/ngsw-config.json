@@ -49,6 +49,7 @@
       },
       "name": "api-read",
       "urls": [
+        "/AbpUserConfiguration/GetAll",
         "/api/AbpUserConfiguration/GetAll",
         "/api/services/app/**/Get*",
         "/api/services/app/**/GetAll*"
@@ -63,7 +64,6 @@
       },
       "name": "api-write",
       "urls": [
-        "/api/AbpUserConfiguration/GetAll",
         "/api/services/app/**/Create*",
         "/api/services/app/**/Update*",
         "/api/services/app/**/Delete*"
