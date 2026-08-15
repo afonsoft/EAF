@@ -37,6 +37,7 @@
 
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Eaf.DynamicEntityProperties\Eaf.DynamicEntityProperties.csproj" />
 		<ProjectReference Include="..\Eaf.Middleware.Application\Eaf.Middleware.Application.csproj" />
 		<ProjectReference Include="..\Eaf.Notifications.Push\Eaf.Notifications.Push.csproj" />
 		<ProjectReference Include="..\Eaf.Notifications.Sms\Eaf.Notifications.Sms.csproj" />

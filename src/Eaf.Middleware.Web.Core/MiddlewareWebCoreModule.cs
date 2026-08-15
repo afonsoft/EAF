@@ -1,6 +1,7 @@
 using Abp.AspNetCore;
 using Abp.AspNetCore.Configuration;
 using Abp.Configuration.Startup;
+using Eaf.DynamicEntityProperties;
 using Eaf.Notifications.Push;
 using Eaf.Notifications.Sms;
 using Eaf.SignalR;
@@ -49,6 +50,7 @@ namespace Eaf.Middleware.Web
     [DependsOn(
         typeof(MiddlewareApplicationModule),
         typeof(AbpAspNetCoreModule),
+        typeof(EafDynamicEntityPropertiesModule),
         typeof(EafNotificationsSmsModule),
         typeof(EafNotificationsPushModule),
         typeof(EafSignalRModule),
