@@ -189,10 +189,14 @@ EAF follows Domain-Driven Design (DDD) principles and implements patterns such a
 #### Cache and Persistence
 - **Eaf.SqlServerCache**: Distributed cache implementation using SQL Server as backend for high availability scenarios.
 - **Eaf.SqliteCache**: Local cache implementation using SQLite for development and low-scale scenarios.
+- **Eaf.RedisCache**: Distributed cache implementation using Redis with JSON serialization and GZip compression.
+- **Eaf.BlobStoring**: BLOB storage abstraction with FileSystem, Azure Blob Storage, AWS S3 and S3-compatible providers.
 
 #### Security
 - **Eaf.KeyVault**: Secret management supporting Azure Key Vault and Oracle Cloud Infrastructure (OCI) for secure credential storage.
 - **Eaf.KeyVault.AspNetCore**: ASP.NET Core integration for automatic loading of configurations and secrets from Key Vault.
+- **Eaf.FluentValidation**: Integration of FluentValidation into the ABP validation pipeline while keeping DataAnnotations support.
+- **Eaf.HtmlSanitizer**: HTML sanitization module that removes scripts, event handlers and unsafe URIs by default.
 
 #### Observability
 - **Eaf.OpenTelemetry**: Complete OpenTelemetry implementation for distributed telemetry, tracing, and metrics with support for multiple exporters.
@@ -201,6 +205,13 @@ EAF follows Domain-Driven Design (DDD) principles and implements patterns such a
 #### Processing
 - **Eaf.Middleware.Worker**: Background services (Worker Services) for asynchronous processing, scheduled jobs, and long-running tasks.
 - **Eaf.Log4NetServiceBus**: Integration with Azure Service Bus using log4net for message logging and messaging events.
+
+#### Real-time Communication
+- **Eaf.SignalR**: Real-time communication module with notifications, online client management and Redis backplane support.
+- **Eaf.Webhooks**: HTTP webhook sender with HMAC-SHA256 signature, HTTPS guard and secret protection.
+
+#### Email
+- **Eaf.MailKit**: Email sending module based on MailKit with retry, templates and EAF-specific configuration.
 
 ---
 
@@ -487,19 +498,26 @@ This example demonstrates several EAF features:
 
 | Package | NuGet | Description |
 |--------|-------|-------------|
+| [Eaf.BlobStoring](https://www.nuget.org/packages/Eaf.BlobStoring/) | [![NuGet version](https://badge.fury.io/nu/Eaf.BlobStoring.svg)](https://badge.fury.io/nu/Eaf.BlobStoring) | BLOB storage providers |
+| [Eaf.Castle.Serilog](https://www.nuget.org/packages/Eaf.Castle.Serilog/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Castle.Serilog.svg)](https://badge.fury.io/nu/Eaf.Castle.Serilog) | Structured logging |
+| [Eaf.FluentValidation](https://www.nuget.org/packages/Eaf.FluentValidation/) | [![NuGet version](https://badge.fury.io/nu/Eaf.FluentValidation.svg)](https://badge.fury.io/nu/Eaf.FluentValidation) | FluentValidation integration |
+| [Eaf.HtmlSanitizer](https://www.nuget.org/packages/Eaf.HtmlSanitizer/) | [![NuGet version](https://badge.fury.io/nu/Eaf.HtmlSanitizer.svg)](https://badge.fury.io/nu/Eaf.HtmlSanitizer) | HTML sanitization |
+| [Eaf.KeyVault](https://www.nuget.org/packages/Eaf.KeyVault/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.svg)](https://badge.fury.io/nu/Eaf.KeyVault) | Secret management |
+| [Eaf.KeyVault.AspNetCore](https://www.nuget.org/packages/Eaf.KeyVault.AspNetCore/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore.svg)](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore) | ASP.NET Core integration |
+| [Eaf.Log4NetServiceBus](https://www.nuget.org/packages/Eaf.Log4NetServiceBus/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Log4NetServiceBus.svg)](https://badge.fury.io/nu/Eaf.Log4NetServiceBus) | Service bus logging |
+| [Eaf.MailKit](https://www.nuget.org/packages/Eaf.MailKit/) | [![NuGet version](https://badge.fury.io/nu/Eaf.MailKit.svg)](https://badge.fury.io/nu/Eaf.MailKit) | Email sending with MailKit |
 | [Eaf.Middleware.Application](https://www.nuget.org/packages/Eaf.Middleware.Application/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Application.svg)](https://badge.fury.io/nu/Eaf.Middleware.Application) | Application layer |
 | [Eaf.Middleware.AzureActiveDirectory](https://www.nuget.org/packages/Eaf.Middleware.AzureActiveDirectory/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.AzureActiveDirectory.svg)](https://badge.fury.io/nu/Eaf.Middleware.AzureActiveDirectory) | Azure AD integration |
 | [Eaf.Middleware.Core](https://www.nuget.org/packages/Eaf.Middleware.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Core) | Core features |
 | [Eaf.Middleware.Ldap](https://www.nuget.org/packages/Eaf.Middleware.Ldap/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Ldap.svg)](https://badge.fury.io/nu/Eaf.Middleware.Ldap) | LDAP authentication |
 | [Eaf.Middleware.Web.Core](https://www.nuget.org/packages/Eaf.Middleware.Web.Core/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Web.Core.svg)](https://badge.fury.io/nu/Eaf.Middleware.Web.Core) | Web components |
-| [Eaf.Castle.Serilog](https://www.nuget.org/packages/Eaf.Castle.Serilog/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Castle.Serilog.svg)](https://badge.fury.io/nu/Eaf.Castle.Serilog) | Structured logging |
-| [Eaf.KeyVault](https://www.nuget.org/packages/Eaf.KeyVault/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.svg)](https://badge.fury.io/nu/Eaf.KeyVault) | Secret management |
-| [Eaf.KeyVault.AspNetCore](https://www.nuget.org/packages/Eaf.KeyVault.AspNetCore/) | [![NuGet version](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore.svg)](https://badge.fury.io/nu/Eaf.KeyVault.AspNetCore) | ASP.NET Core integration |
-| [Eaf.OpenTelemetry](https://www.nuget.org/packages/Eaf.OpenTelemetry/) | [![NuGet version](https://badge.fury.io/nu/Eaf.OpenTelemetry.svg)](https://badge.fury.io/nu/Eaf.OpenTelemetry) | Telemetry and observability |
-| [Eaf.Log4NetServiceBus](https://www.nuget.org/packages/Eaf.Log4NetServiceBus/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Log4NetServiceBus.svg)](https://badge.fury.io/nu/Eaf.Log4NetServiceBus) | Service bus logging |
-| [Eaf.SqlServerCache](https://www.nuget.org/packages/Eaf.SqlServerCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqlServerCache.svg)](https://badge.fury.io/nu/Eaf.SqlServerCache) | SQL Server cache |
-| [Eaf.SqliteCache](https://www.nuget.org/packages/Eaf.SqliteCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqliteCache.svg)](https://badge.fury.io/nu/Eaf.SqliteCache) | SQLite cache |
 | [Eaf.Middleware.Worker](https://www.nuget.org/packages/Eaf.Middleware.Worker/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Middleware.Worker.svg)](https://badge.fury.io/nu/Eaf.Middleware.Worker) | Background services |
+| [Eaf.OpenTelemetry](https://www.nuget.org/packages/Eaf.OpenTelemetry/) | [![NuGet version](https://badge.fury.io/nu/Eaf.OpenTelemetry.svg)](https://badge.fury.io/nu/Eaf.OpenTelemetry) | Telemetry and observability |
+| [Eaf.RedisCache](https://www.nuget.org/packages/Eaf.RedisCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.RedisCache.svg)](https://badge.fury.io/nu/Eaf.RedisCache) | Redis distributed cache |
+| [Eaf.SignalR](https://www.nuget.org/packages/Eaf.SignalR/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SignalR.svg)](https://badge.fury.io/nu/Eaf.SignalR) | SignalR real-time |
+| [Eaf.SqliteCache](https://www.nuget.org/packages/Eaf.SqliteCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqliteCache.svg)](https://badge.fury.io/nu/Eaf.SqliteCache) | SQLite cache |
+| [Eaf.SqlServerCache](https://www.nuget.org/packages/Eaf.SqlServerCache/) | [![NuGet version](https://badge.fury.io/nu/Eaf.SqlServerCache.svg)](https://badge.fury.io/nu/Eaf.SqlServerCache) | SQL Server cache |
+| [Eaf.Webhooks](https://www.nuget.org/packages/Eaf.Webhooks/) | [![NuGet version](https://badge.fury.io/nu/Eaf.Webhooks.svg)](https://badge.fury.io/nu/Eaf.Webhooks) | HTTP webhooks |
 
 ---
 

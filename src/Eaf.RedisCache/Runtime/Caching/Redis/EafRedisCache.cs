@@ -460,7 +460,7 @@ namespace Eaf.Runtime.Caching.Redis
         private static object ByteArrayToObject(byte[] byteArray)
         {
             if (byteArray == null || byteArray.Length == 0)
-                return default!;
+                return default;
 
             try
             {
@@ -468,7 +468,7 @@ namespace Eaf.Runtime.Caching.Redis
                 var separatorIndex = span.IndexOf((byte)'\n');
                 if (separatorIndex < 0)
                 {
-                    return JsonSerializer.Deserialize<object>(byteArray, _jsonOptions)!;
+                    return JsonSerializer.Deserialize<object>(byteArray, _jsonOptions);
                 }
 
                 var typeName = Encoding.UTF8.GetString(span.Slice(0, separatorIndex));
@@ -476,13 +476,13 @@ namespace Eaf.Runtime.Caching.Redis
                 var jsonSpan = span.Slice(separatorIndex + 1);
 
                 if (typeName.StartsWith("System.Tuple") || typeName.StartsWith("System.ValueTuple"))
-                    return JsonSerializer.Deserialize<object>(jsonSpan, _jsonOptions)!;
+                    return JsonSerializer.Deserialize<object>(jsonSpan, _jsonOptions);
 
-                return JsonSerializer.Deserialize(jsonSpan, type, _jsonOptions)!;
+                return JsonSerializer.Deserialize(jsonSpan, type, _jsonOptions);
             }
             catch (Exception ex) when (!IsFatalException(ex))
             {
-                return default!;
+                return default;
             }
         }
 
