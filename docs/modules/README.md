@@ -19,6 +19,13 @@ Para exemplos práticos de uso de cada módulo, consulte o [Guia de Uso dos Mód
 * [Eaf.OpenTelemetry](./eaf-opentelemetry.md) - Integração com OpenTelemetry para observabilidade
 * [Eaf.SqlServerCache](./eaf-sqlservercache.md) - Cache distribuído usando SQL Server
 * [Eaf.SqliteCache](./eaf-sqlitecache.md) - Cache distribuído usando SQLite
+* [Eaf.BlobStoring](./USAGE.md#eafblobstoring) - Armazenamento de BLOBs com providers FileSystem, Azure Blob Storage e AWS S3
+* [Eaf.FluentValidation](./USAGE.md#eaffluentvalidation) - Integração do FluentValidation ao pipeline de validação do ABP
+* [Eaf.HtmlSanitizer](./USAGE.md#eafhtmlsanitizer) - Sanitização de HTML removendo scripts e URIs inseguras
+* [Eaf.MailKit](./USAGE.md#eafmailkit) - Envio de e-mails baseado em MailKit com retry e templates
+* [Eaf.RedisCache](./USAGE.md#eafrediscache) - Cache distribuído usando Redis
+* [Eaf.SignalR](./USAGE.md#eafsignalr) - Comunicação em tempo real com SignalR
+* [Eaf.Webhooks](./USAGE.md#eafwebhooks) - Envio de webhooks HTTP com assinatura HMAC
 * [Contratos para consumidores realtime e sociais](../integration/gamehub-consumer-contracts.md) - Contratos versionados para chat contextual, notificações, social, rate limit, auditoria de moderação e SignalR
 
 ## Módulos do ASP.NET Boilerplate (Base)

@@ -69,6 +69,7 @@ namespace Eaf.BlobStoring
     {
         private readonly IDisposable _scope;
         private readonly IIocManager _iocManager;
+        private bool _disposed;
 
         /// <inheritdoc />
         public IServiceProvider ServiceProvider => new EafServiceProvider(_iocManager);
@@ -87,7 +88,25 @@ namespace Eaf.BlobStoring
         /// <inheritdoc />
         public void Dispose()
         {
-            _scope.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Libera os recursos gerenciados do escopo.
+        /// </summary>
+        /// <param name="disposing">Indica se está liberando recursos gerenciados.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _scope.Dispose();
+                }
+
+                _disposed = true;
+            }
         }
     }
 }

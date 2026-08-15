@@ -72,8 +72,8 @@
     </div>
 
     <div *ngIf="model.isJoiningTenant" class="form-group m-form__group">
-      <label>{{ 'Tenant' | localize }}</label>
-      <select [(ngModel)]="model.existingTenantId" name="existingTenantId" class="form-control m-input" [required]="model.isJoiningTenant">
+      <label for="existingTenantId">{{ 'Tenant' | localize }}</label>
+      <select [(ngModel)]="model.existingTenantId" id="existingTenantId" name="existingTenantId" class="form-control m-input" [required]="model.isJoiningTenant">
         <option [ngValue]="undefined">{{ 'SelectTenant' | localize }}</option>
         <option *ngFor="let tenant of tenants" [ngValue]="tenant.id">{{ tenant.name }}</option>
       </select>
