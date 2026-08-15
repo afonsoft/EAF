@@ -18,7 +18,6 @@ namespace Eaf.Middleware.Payments
     /// <summary>
     /// Serviço de aplicação para gerenciamento de pagamentos de assinatura.
     /// </summary>
-    [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Payments)]
     public class PaymentAppService : MiddlewareAppServiceBase, IPaymentAppService
     {
         private readonly IRepository<SubscriptionPayment, long> _subscriptionPaymentRepository;
@@ -38,13 +37,15 @@ namespace Eaf.Middleware.Payments
         /// <summary>
         /// Obtém os pagamentos de assinatura paginados.
         /// </summary>
+        [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Payments)]
         public virtual async Task<PagedResultDto<SubscriptionPaymentDto>> GetAllAsync(GetSubscriptionPaymentsInput input)
         {
             var query = (await _subscriptionPaymentRepository.GetAllAsync())
                 .WhereIf(!input.Filter.IsNullOrWhiteSpace(), p =>
                     p.Gateway.Contains(input.Filter) ||
                     p.Status.ToString() == input.Filter ||
-                    p.ExternalPaymentId.Contains(input.Filter));
+                    p.ExternalPaymentId.Contains(input.Filter) ||
+                    p.Id.ToString().Contains(input.Filter));
 
             var total = await query.CountAsync();
             var ordered = System.Linq.Dynamic.Core.DynamicQueryableExtensions.OrderBy(query, input.Sorting ?? "CreationTime desc");
@@ -54,8 +55,35 @@ namespace Eaf.Middleware.Payments
         }
 
         /// <summary>
+        /// Obtém um pagamento de assinatura pelo identificador.
+        /// </summary>
+        /// <param name="id">Identificador do pagamento.</param>
+        /// <returns>DTO do pagamento de assinatura.</returns>
+        [AbpAuthorize]
+        public virtual async Task<SubscriptionPaymentDto> GetPaymentAsync(long id)
+        {
+            var payment = await _subscriptionPaymentRepository
+                .GetAll()
+                .Include(p => p.Products)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (payment == null)
+            {
+                throw new AbpAuthorizationException();
+            }
+
+            if (payment.TenantId != AbpSession.TenantId && !await PermissionChecker.IsGrantedAsync(MiddlewarePermissions.Pages_Administration_Payments))
+            {
+                throw new AbpAuthorizationException();
+            }
+
+            return ObjectMapper.Map<SubscriptionPaymentDto>(payment);
+        }
+
+        /// <summary>
         /// Cria uma solicitação de pagamento para assinatura.
         /// </summary>
+        [AbpAuthorize]
         public virtual async Task<PaymentRequestDto> CreatePaymentAsync(CreateSubscriptionPaymentInput input)
         {
             return await _paymentManager.CreatePaymentAsync(input);
@@ -64,6 +92,7 @@ namespace Eaf.Middleware.Payments
         /// <summary>
         /// Processa o retorno de pagamento e ativa a assinatura.
         /// </summary>
+        [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Payments_Process)]
         public virtual async Task<SubscriptionPaymentDto> ProcessPaymentAsync(long paymentId, ProcessPaymentInput input)
         {
             return await _paymentManager.ProcessPaymentAsync(paymentId, input);
@@ -72,6 +101,7 @@ namespace Eaf.Middleware.Payments
         /// <summary>
         /// Realiza upgrade/downgrade de edição com cálculo de prorração.
         /// </summary>
+        [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Payments)]
         public virtual async Task<PaymentRequestDto> UpgradeSubscriptionAsync(UpgradeSubscriptionInput input)
         {
             return await _paymentManager.UpgradeSubscriptionAsync(input);
@@ -80,6 +110,7 @@ namespace Eaf.Middleware.Payments
         /// <summary>
         /// Cancela uma assinatura recorrente.
         /// </summary>
+        [AbpAuthorize(MiddlewarePermissions.Pages_Administration_Payments)]
         public virtual async Task<SubscriptionPaymentDto> CancelRecurringAsync(long paymentId)
         {
             return await _paymentManager.CancelRecurringAsync(paymentId);
@@ -88,6 +119,7 @@ namespace Eaf.Middleware.Payments
         /// <summary>
         /// Lista os gateways de pagamento disponíveis e suas configurações.
         /// </summary>
+        [AbpAuthorize]
         public virtual async Task<List<PaymentGatewayDto>> GetGatewayListAsync()
         {
             var defaultGateway = await SettingManager.GetSettingValueForApplicationAsync(AppSettings.Payment.DefaultGateway);
