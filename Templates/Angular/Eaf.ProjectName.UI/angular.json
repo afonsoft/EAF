@@ -31,8 +31,6 @@
               "moment/min/locales.min",
               "lodash",
               "rtl-detect",
-              "quill-delta",
-              "quill",
               "@swimlane/ngx-charts",
               "bezier-easing"
             ],
@@ -53,8 +51,6 @@
             ],
             "styles": [
               "node_modules/animate.css/animate.min.css",
-              "node_modules/quill/dist/quill.core.css",
-              "node_modules/quill/dist/quill.snow.css",
               "node_modules/famfamfam-flags/dist/sprite/famfamfam-flags.css",
               "node_modules/angular-calendar/css/angular-calendar.css",
               "node_modules/@ng-select/ng-select/themes/default.theme.css",
@@ -79,7 +75,6 @@
               "node_modules/moment/min/moment-with-locales.js",
               "node_modules/moment-timezone/builds/moment-timezone-with-data.js",
               "node_modules/push.js/bin/push.js",
-              "node_modules/quill/dist/quill.js",
               "node_modules/sweetalert2/dist/sweetalert2.js",
               "node_modules/cookieconsent/build/cookieconsent.min.js",
               "node_modules/html2canvas/dist/html2canvas.min.js",
@@ -103,7 +98,7 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "allowedCommonJsDependencies": ["rfdc", "push.js", "bezier-easing", "quill", "object-path", "moment-timezone", "moment", "localforage"]
+            "allowedCommonJsDependencies": ["rfdc", "push.js", "bezier-easing", "object-path", "moment-timezone", "moment", "localforage"]
           },
           "configurations": {
             "development": {
@@ -192,8 +187,6 @@
             ],
             "styles": [
               "node_modules/animate.css/animate.min.css",
-              "node_modules/quill/dist/quill.core.css",
-              "node_modules/quill/dist/quill.snow.css",
               "node_modules/famfamfam-flags/dist/sprite/famfamfam-flags.css",
               "node_modules/angular-calendar/css/angular-calendar.css",
               "node_modules/@ng-select/ng-select/themes/default.theme.css",
@@ -218,7 +211,6 @@
               "node_modules/moment/min/moment-with-locales.js",
               "node_modules/moment-timezone/builds/moment-timezone-with-data.js",
               "node_modules/push.js/bin/push.js",
-              "node_modules/quill/dist/quill.js",
               "node_modules/sweetalert2/dist/sweetalert2.js",
               "node_modules/cookieconsent/build/cookieconsent.min.js",
               "node_modules/html2canvas/dist/html2canvas.min.js",

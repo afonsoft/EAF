@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ## [Unreleased]
 
+### Fixed
+
+* fix(security): pin de pacotes NuGet vulneráveis (`System.Security.Cryptography.Xml` 10.0.10, `MessagePack` 2.5.301) e supressão de `NU1510` nos `common.props`
+* fix(dependencies): remoção de dependências Angular não utilizadas (`quill`, `simple-line-icons`, `browserify-sign`, `jshint`) e overrides para zerar `npm audit` (`less`, `uuid`, `sockjs/uuid`, `webpack-dev-server`, `micromatch`, `yaml`)
+
 ## [9.4.6] - 2026-08-14
 
 ### Changed

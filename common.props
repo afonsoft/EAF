@@ -1,7 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<Version>9.4.6</Version>
-		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277;CS8632</NoWarn>
+		<NoWarn>$(NoWarn);CS1591;SYSLIB0001;SYSLIB0002;SYSLIB0003;MSB3277;CS8632;NU1510</NoWarn>
 		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3253;MSB3277</MSBuildWarningsAsMessages>
 		<PackageProjectUrl>https://github.com/afonsoft/EAF</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
@@ -39,10 +39,13 @@
 		<Nullable>disable</Nullable>
 		<!-- Suppress AutoMapper 14.0.0 vulnerability (GHSA-rvv3-g6hj-g44x) - no patched 14.x exists;
 		     Abp.AutoMapper 10.5.0 is binary-incompatible with AutoMapper >= 15.0.0 -->
-		<NoWarn>$(NoWarn);NU1903;NU1902</NoWarn>
+		<NoWarn>$(NoWarn);NU1903;NU1902;NU1510</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
+		<!-- Pin patched transitive packages -->
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.10" />
+		<PackageReference Include="MessagePack" Version="2.5.301" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release' ">
