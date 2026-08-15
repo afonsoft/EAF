@@ -12,6 +12,13 @@
     <text name="StartJob">Start Job</text>
     <text name="UseCaptchaOnLogin">Use Captcha On Login</text>
     <text name="ReCaptcha">ReCaptcha</text>
+    <text name="SyncingPendingActions">Syncing pending actions</text>
+    <text name="InstallAppPrompt">Install the app for quick access</text>
+    <text name="InstallNow">Install now</text>
+    <text name="YouAreOnline">You are online</text>
+    <text name="YouAreOffline">You are offline</text>
+    <text name="NewVersionAvailable">A new version is available</text>
+    <text name="UpdateNow">Update now</text>
     <text name="GatewaySelection">Gateway selection</text>
     <text name="Subscriptions">Subscriptions</text>
     <text name="SubscriptionsHeaderInfo">Manage subscription payments</text>

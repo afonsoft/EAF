@@ -7,6 +7,8 @@ import { of, Subject } from 'rxjs';
 
 import { AppComponent } from './app.component';
 import { ChatSignalrService } from '@app/shared/layout/chat/chat-signalr.service';
+import { OfflineService } from '@shared/common/offline.service';
+import { PwaInstallService } from '@shared/common/pwa-install.service';
 import { UserNotificationHelper } from '@app/shared/layout/notifications/UserNotificationHelper';
 import { AppAuthenticationService } from '@shared/common/auth/app-authentication-service';
 import { CookieService } from 'ngx-cookie-service';
@@ -127,6 +129,23 @@ class MockSwUpdate {
   }
 }
 
+class MockOfflineService {
+  online$ = of(true);
+  pending$ = of(0);
+  syncActive$ = of(false);
+  initialize(): void {}
+  queueAction(): Promise<void> { return Promise.resolve(); }
+  syncQueue(): Promise<void> { return Promise.resolve(); }
+  getQueue(): Promise<any[]> { return Promise.resolve([]); }
+  clearQueue(): Promise<void> { return Promise.resolve(); }
+}
+
+class MockPwaInstallService {
+  installPrompt$ = of(null);
+  initialize(): void {}
+  promptInstall(): Promise<void> { return Promise.resolve(); }
+}
+
 describe('AppComponent', () => {
   beforeEach(async () => {
     setupEafGlobals();
@@ -150,6 +169,8 @@ describe('AppComponent', () => {
         { provide: EafMultiTenancyService, useClass: MockEafMultiTenancyService },
         { provide: AppUrlService, useClass: MockAppUrlService },
         { provide: SwUpdate, useClass: MockSwUpdate },
+        { provide: OfflineService, useClass: MockOfflineService },
+        { provide: PwaInstallService, useClass: MockPwaInstallService },
       ],
     }).compileComponents();
   });

@@ -12,6 +12,8 @@ import { AppConsts } from '@shared/AppConsts';
 import { AppAuthenticationService } from '@shared/common/auth/app-authentication-service';
 import { NameValueDto } from '@shared/service-proxies/service-proxies';
 import { ChatSignalrService } from 'app/shared/layout/chat/chat-signalr.service';
+import { OfflineService } from '@shared/common/offline.service';
+import { PwaInstallService } from '@shared/common/pwa-install.service';
 import { filter } from 'rxjs/operators';
 import { ThemeService } from '@shared/common/theme.service';
 import { AppComponentBase } from 'shared/common/app-component-base';
@@ -32,6 +34,8 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
   isOnline = true;
   updateAvailable = false;
   updateVersion = '';
+  pendingCount = 0;
+  showInstallButton = false;
 
   @ViewChild('loginAttemptsModal', { static: true }) loginAttemptsModal: LoginAttemptsModalComponent;
   @ViewChild('changePasswordModal', { static: true }) changePasswordModal: ChangePasswordModalComponent;
@@ -50,6 +54,8 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     private readonly _swUpdate: SwUpdate,
     private readonly router: Router,
     private readonly _themeService: ThemeService,
+    private readonly _offlineService: OfflineService,
+    private readonly _pwaInstallService: PwaInstallService,
   ) {
     super(injector);
   }
@@ -68,6 +74,8 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     this.setUpAnalytics();
     this.setUpTagManager();
     this.setUpPwa();
+    this.setUpOfflineQueue();
+    this.setUpInstallPrompt();
   }
 
   ngAfterViewInit(): void {
@@ -114,6 +122,7 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
   onOnline(): void {
     this.isOnline = true;
     this.notify.info(this.l('YouAreOnline'));
+    this._offlineService.syncQueue();
   }
 
   @HostListener('window:offline')
@@ -126,6 +135,24 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     this._swUpdate.activateUpdate().then(() => {
       window.location.reload();
     });
+  }
+
+  setUpOfflineQueue(): void {
+    this._offlineService.initialize();
+    this._offlineService.pending$.subscribe(count => {
+      this.pendingCount = count;
+    });
+  }
+
+  setUpInstallPrompt(): void {
+    this._pwaInstallService.initialize();
+    this._pwaInstallService.installPrompt$.subscribe(event => {
+      this.showInstallButton = event !== null;
+    });
+  }
+
+  async installApp(): Promise<void> {
+    await this._pwaInstallService.promptInstall();
   }
 
   registerModalOpenEvents(): void {
