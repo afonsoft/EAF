@@ -19,7 +19,6 @@ import { ContextMenuModule } from 'primeng/contextmenu';
 import { DialogModule } from 'primeng/dialog';
 import { DragDropModule } from 'primeng/dragdrop';
 import { DropdownModule } from 'primeng/dropdown';
-import { EditorModule } from 'primeng/editor';
 import { InputMaskModule } from 'primeng/inputmask';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
@@ -97,7 +96,6 @@ import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-
     PaginatorModule,
     PrimeNgFileUploadModule,
     AutoCompleteModule,
-    EditorModule,
     InputMaskModule,
     NgxChartsModule,
     DialogModule,
