@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/pt-BR/
 
 ## [Unreleased]
 
+### Added
+
+* docs(skill): agent skill `testing-eaf-angular-visual` com script Playwright para verificação visual do admin Angular (login, dashboard, gateway-selection, subscriptions)
+
 ### Fixed
 
 * fix(security): pin de pacotes NuGet vulneráveis (`System.Security.Cryptography.Xml` 10.0.10, `MessagePack` 2.5.301) e supressão de `NU1510` nos `common.props`
