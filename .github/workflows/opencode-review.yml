@@ -1,0 +1,36 @@
+name: OpenCode Review
+
+permissions: {}
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  opencode-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      issues: write
+    env:
+      OMNIROUTE_BASE_URL: https://omniroute.afonsoft.dev/v1
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7
+      with:
+        fetch-depth: 1
+        persist-credentials: false
+
+    - name: Run OpenCode PR Review
+      uses: anomalyco/opencode/github@02546dfc2e4515a4f90aaf9ceb3890df2ac2b479   # v1.18.17
+      env:
+        OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        model: omniroute/auto/claude-sonnet
+        agent: build
+        use_github_token: true
+        prompt: |
+          Review the current pull request. Inspect the diff for code quality, security issues, bugs, maintainability, and adherence to project conventions. Provide a concise summary and actionable suggestions as PR review comments.
