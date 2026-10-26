@@ -25,7 +25,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG USE_SOURCE_PROJECTS=true
 WORKDIR /src
 COPY . .
-WORKDIR "/src/Templates/Worker/src/Eaf.ProjectName.WorkerService"
+WORKDIR /src/Templates/Worker/src/Eaf.ProjectName.WorkerService
 RUN dotnet restore "Eaf.ProjectName.WorkerService.csproj" -p:UseSourceProjects=${USE_SOURCE_PROJECTS}
 RUN dotnet build "Eaf.ProjectName.WorkerService.csproj" -p:UseSourceProjects=${USE_SOURCE_PROJECTS} \
     -c Release \
