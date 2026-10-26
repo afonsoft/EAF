@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["Eaf.ProjectName.WorkerService/Eaf.ProjectName.WorkerService.csproj", "Eaf.ProjectName.WorkerService/"]
 RUN dotnet restore "Eaf.ProjectName.WorkerService/Eaf.ProjectName.WorkerService.csproj"
 COPY . .
-WORKDIR "/src/Eaf.ProjectName.WorkerService"
+WORKDIR /src/Eaf.ProjectName.WorkerService
 RUN dotnet build "Eaf.ProjectName.WorkerService.csproj" -c Release -o /app/build
 
 FROM build AS publish
