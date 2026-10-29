@@ -20,7 +20,7 @@
 	<PropertyGroup Condition=" '$(RunConfiguration)' == 'Eaf.Middleware.Web.Core' " />
 	<ItemGroup>
 
-		<PackageReference Include="MimeKit" Version="4.16.0" />
+		<PackageReference Include="MimeKit" Version="4.17.0" />
 
 		<PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
 		<PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
@@ -54,11 +54,11 @@
 
 	<ItemGroup>
 
-		<PackageReference Include="Abp.AspNetCore" Version="10.5.0" />
-		<PackageReference Include="Abp.Zero.Common" Version="10.5.0" />
-		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.5.0" />
-		<PackageReference Include="Abp.AspNetCore.PerRequestRedisCache" Version="10.5.0" />
-		<PackageReference Include="Abp" Version="10.5.0" />
+		<PackageReference Include="Abp.AspNetCore" Version="10.5.1" />
+		<PackageReference Include="Abp.Zero.Common" Version="10.5.1" />
+		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.5.1" />
+		<PackageReference Include="Abp.AspNetCore.PerRequestRedisCache" Version="10.5.1" />
+		<PackageReference Include="Abp" Version="10.5.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
