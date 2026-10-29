@@ -222,6 +222,7 @@ jobs:
           --framework net10.0 \
           --runtime win-x86 \
           --self-contained \
+          -p:UseSourceProjects=true \
           --ignore-failed-sources
 
     - name: 🔧 Inject production connection string
