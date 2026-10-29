@@ -185,6 +185,123 @@ namespace Eaf.Webhooks.Tests
         }
 
         [Fact]
+        public void Dado_NovaAssinaturaHttps_Quando_AdicionarSincrono_Entao_DeveGerarESalvarSegredoCifrado()
+        {
+            // Dado
+            var sut = CriarGerenciador();
+            var assinatura = new WebhookSubscription
+            {
+                TenantId = 1,
+                WebhookUri = "https://example.com/webhook-sync",
+                Webhooks = new List<string> { "UserUpdated" }
+            };
+
+            // Quando
+            sut.AddOrUpdateSubscription(assinatura);
+
+            // Então
+            sut.WebhookSubscriptionsStore.Received(1).Insert(Arg.Is<WebhookSubscriptionInfo>(info =>
+                info.WebhookUri == "https://example.com/webhook-sync" &&
+                info.GetSubscribedWebhooks().Contains("UserUpdated") &&
+                info.Secret.StartsWith("P:whs_")));
+
+            assinatura.Id.ShouldNotBe(Guid.Empty);
+        }
+
+        [Fact]
+        public void Dado_AssinaturaExistente_Quando_AtualizarSincronoComNovoSegredo_Entao_DeveCifrarSegredo()
+        {
+            // Dado
+            var id = Guid.NewGuid();
+            var existente = new WebhookSubscriptionInfo
+            {
+                Id = id,
+                TenantId = 1,
+                WebhookUri = "https://example.com/webhook",
+                Webhooks = "[\"UserUpdated\"]",
+                Secret = "P:antigo-segredo",
+                IsActive = true
+            };
+
+            var sut = CriarGerenciador();
+            sut.WebhookSubscriptionsStore.Get(id).Returns(existente);
+
+            var assinatura = new WebhookSubscription
+            {
+                Id = id,
+                TenantId = 1,
+                WebhookUri = "https://example.com/webhook",
+                Webhooks = new List<string> { "UserUpdated" },
+                Secret = "novo-segredo-sync",
+                Headers = null
+            };
+
+            // Quando
+            sut.AddOrUpdateSubscription(assinatura);
+
+            // Então
+            sut.WebhookSubscriptionsStore.Received(1).Update(Arg.Is<WebhookSubscriptionInfo>(info =>
+                info.Secret == "P:novo-segredo-sync" && info.Headers == "{}"));
+        }
+
+        [Fact]
+        public void Dado_AssinaturaDuplicada_Quando_AdicionarSincrono_Entao_DeveLancarExcecao()
+        {
+            // Dado
+            var existente = new WebhookSubscriptionInfo
+            {
+                Id = Guid.NewGuid(),
+                TenantId = 1,
+                WebhookUri = "https://example.com/webhook",
+                Webhooks = "[\"UserUpdated\"]",
+                IsActive = true
+            };
+
+            var sut = CriarGerenciador();
+            sut.WebhookSubscriptionsStore.GetAllSubscriptions(1).Returns(new List<WebhookSubscriptionInfo> { existente });
+
+            var assinatura = new WebhookSubscription
+            {
+                TenantId = 1,
+                WebhookUri = "https://example.com/webhook",
+                Webhooks = new List<string> { "UserUpdated" }
+            };
+
+            // Quando / Então
+            Should.Throw<UserFriendlyException>(() => sut.AddOrUpdateSubscription(assinatura));
+        }
+
+        [Fact]
+        public void Dado_AssinaturaHttpComAllowHttp_Quando_AdicionarSincrono_Entao_DeveAceitar()
+        {
+            // Dado
+            var sut = CriarGerenciador(new EafWebhooksOptions { AllowHttp = true });
+            var assinatura = new WebhookSubscription
+            {
+                TenantId = 1,
+                WebhookUri = "http://example.com/webhook",
+                Webhooks = new List<string> { "UserUpdated" }
+            };
+
+            // Quando
+            sut.AddOrUpdateSubscription(assinatura);
+
+            // Então
+            sut.WebhookSubscriptionsStore.Received(1).Insert(Arg.Is<WebhookSubscriptionInfo>(info =>
+                info.WebhookUri == "http://example.com/webhook"));
+        }
+
+        [Fact]
+        public void Dado_AssinaturaNula_Quando_Adicionar_Entao_DeveLancarArgumentNull()
+        {
+            // Dado
+            var sut = CriarGerenciador();
+
+            // Quando / Então
+            Should.Throw<ArgumentNullException>(() => sut.AddOrUpdateSubscription(null));
+        }
+
+        [Fact]
         public async Task Dado_AssinaturaExistente_Quando_AtualizarComNovoSegredo_Entao_DeveCifrarENovoSegredo()
         {
             // Dado
