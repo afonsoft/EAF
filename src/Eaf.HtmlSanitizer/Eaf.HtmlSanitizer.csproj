@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Abp" Version="10.5.0" />
+    <PackageReference Include="Abp" Version="10.5.1" />
     <PackageReference Include="HtmlSanitizer" Version="9.2.995" />
   </ItemGroup>
 

@@ -14,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
-        <PackageReference Include="MimeKit" Version="4.16.0" />
+        <PackageReference Include="MimeKit" Version="4.17.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
@@ -34,11 +34,11 @@
         <PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="6.0.0" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Abp" Version="10.5.0" />
-        <PackageReference Include="Abp.AutoMapper" Version="10.5.0" />
+        <PackageReference Include="Abp" Version="10.5.1" />
+        <PackageReference Include="Abp.AutoMapper" Version="10.5.1" />
         <PackageReference Include="AutoMapper" Version="14.0.0" />
-        <PackageReference Include="Abp.MailKit" Version="10.5.0" />
-        <PackageReference Include="Abp.Zero.Common" Version="10.5.0" />
+        <PackageReference Include="Abp.MailKit" Version="10.5.1" />
+        <PackageReference Include="Abp.Zero.Common" Version="10.5.1" />
     </ItemGroup>
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
