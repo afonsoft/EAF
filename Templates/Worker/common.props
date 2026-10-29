@@ -29,6 +29,6 @@
 	<ItemGroup>
 		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
 		<!-- Pin patched transitive package -->
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.13" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.14" />
 	</ItemGroup>
 </Project>
