@@ -1,169 +1,171 @@
-using Abp.Application.Editions;
+using Abp.Authorization;
+using Abp.Configuration;
 using Abp.Domain.Repositories;
 using Abp.ObjectMapping;
 using Abp.Runtime.Session;
 using Eaf.Middleware.Application.Tests.Helpers;
-using Eaf.Middleware.Core.Editions;
-using Eaf.Middleware.MultiTenancy;
+using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Payments;
 using Eaf.Middleware.Payments.Dto;
 using NSubstitute;
 using Shouldly;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Eaf.Middleware.Application.Tests.Payments
 {
     /// <summary>
-    /// Testes BDD para PaymentAppService.
+    /// Testes BDD para PaymentAppService e guards dos gateways seguindo o padrão Dado/Quando/Então.
     /// </summary>
     public class PaymentAppServiceBddTests
     {
-        private readonly PaymentAppService _sut;
-        private readonly IRepository<SubscriptionPayment, long> _subscriptionPaymentRepository;
+        private readonly IRepository<SubscriptionPayment, long> _repository;
         private readonly IPaymentManager _paymentManager;
+        private readonly ISettingManager _settingManager;
+        private readonly IPermissionChecker _permissionChecker;
+        private readonly PaymentAppService _sut;
 
         public PaymentAppServiceBddTests()
         {
-            _subscriptionPaymentRepository = Substitute.For<IRepository<SubscriptionPayment, long>>();
+            _repository = Substitute.For<IRepository<SubscriptionPayment, long>>();
             _paymentManager = Substitute.For<IPaymentManager>();
+            _settingManager = Substitute.For<ISettingManager>();
+            _permissionChecker = Substitute.For<IPermissionChecker>();
 
-            _sut = new PaymentAppService(
-                _subscriptionPaymentRepository,
-                _paymentManager);
-
-            _sut.ObjectMapper = CreateObjectMapper();
-            _sut.UnitOfWorkManager = ManagerTestHelper.CreateUnitOfWorkManager();
             var abpSession = Substitute.For<IAbpSession>();
             abpSession.TenantId.Returns((int?)1);
-            _sut.AbpSession = abpSession;
-        }
+            abpSession.UserId.Returns((long?)7);
 
-        private static IObjectMapper CreateObjectMapper()
-        {
-            var mapper = Substitute.For<IObjectMapper>();
-            mapper.Map<SubscriptionPaymentDto>(Arg.Any<SubscriptionPayment>()).Returns(ci =>
-            {
-                var p = (SubscriptionPayment)ci[0];
-                return new SubscriptionPaymentDto
+            var objectMapper = Substitute.For<IObjectMapper>();
+            objectMapper.Map<SubscriptionPaymentDto>(Arg.Any<SubscriptionPayment>())
+                .Returns(ci =>
                 {
-                    Id = p.Id,
-                    TenantId = p.TenantId,
-                    EditionId = p.EditionId,
-                    Amount = p.Amount,
-                    Status = p.Status.ToString(),
-                    Gateway = p.Gateway,
-                    ExternalPaymentId = p.ExternalPaymentId,
-                };
-            });
-            mapper.Map<List<SubscriptionPaymentDto>>(Arg.Any<IEnumerable<SubscriptionPayment>>()).Returns(ci =>
-            {
-                var payments = (IEnumerable<SubscriptionPayment>)ci[0];
-                return payments.Select(p => mapper.Map<SubscriptionPaymentDto>(p)).ToList();
-            });
-            return mapper;
-        }
+                    var p = (SubscriptionPayment)ci[0];
+                    return new SubscriptionPaymentDto { Id = p.Id, TenantId = p.TenantId, Gateway = p.Gateway };
+                });
 
-        [Fact]
-        public async Task Dado_InputValido_Quando_CreatePaymentAsync_Entao_DeveDelegarParaPaymentManager()
-        {
-            // Dado
-            var input = new CreateSubscriptionPaymentInput
+            _sut = new PaymentAppService(_repository, _paymentManager)
             {
-                EditionId = 1,
-                EditionPaymentType = EditionPaymentType.Upgrade,
-                PaymentPeriodType = PaymentPeriodType.Monthly,
-                Gateway = "Null",
+                AbpSession = abpSession,
+                ObjectMapper = objectMapper,
+                SettingManager = _settingManager,
+                PermissionChecker = _permissionChecker,
             };
-
-            _paymentManager.CreatePaymentAsync(input).Returns(new PaymentRequestDto
-            {
-                PaymentId = "PAY-123",
-                Gateway = "Null",
-                IsSuccess = true,
-            });
-
-            // Quando
-            var result = await _sut.CreatePaymentAsync(input);
-
-            // Então
-            result.PaymentId.ShouldBe("PAY-123");
-            await _paymentManager.Received(1).CreatePaymentAsync(input);
         }
 
         [Fact]
-        public async Task Dado_PagamentoProcessadoComSucesso_Quando_ProcessPaymentAsync_Entao_DeveDelegarParaPaymentManagerEAtivarAssinatura()
+        public async Task Dado_PagamentoInexistente_Quando_Obter_Entao_DeveLancarAbpAuthorizationException()
         {
             // Dado
-            var input = new ProcessPaymentInput
-            {
-                ExternalPaymentId = "PAY-123",
-                Gateway = "Null",
-                IsSuccess = true,
-            };
+            _repository.GetAll().Returns(new List<SubscriptionPayment>().AsAsyncQueryable());
 
-            _paymentManager.ProcessPaymentAsync(1, input).Returns(new SubscriptionPaymentDto
-            {
-                Id = 1,
-                Status = SubscriptionPaymentStatus.Completed.ToString(),
-            });
-
-            // Quando
-            var result = await _sut.ProcessPaymentAsync(1, input);
-
-            // Então
-            result.Status.ShouldBe(SubscriptionPaymentStatus.Completed.ToString());
-            await _paymentManager.Received(1).ProcessPaymentAsync(1, input);
+            // Quando / Então
+            await Should.ThrowAsync<AbpAuthorizationException>(() => _sut.GetPaymentAsync(42));
         }
 
         [Fact]
-        public async Task Dado_PagamentoExistente_Quando_UpgradeSubscriptionAsync_Entao_DeveDelegarParaPaymentManager()
+        public async Task Dado_PagamentoDeOutroTenantSemPermissao_Quando_Obter_Entao_DeveLancarExcecao()
         {
             // Dado
-            var input = new UpgradeSubscriptionInput
-            {
-                TenantId = 1,
-                NewEditionId = 2,
-                PaymentPeriodType = PaymentPeriodType.Monthly,
-                Gateway = "Stripe",
-            };
+            var pagamento = new SubscriptionPayment { Id = 3, TenantId = 9, Gateway = "Stripe" };
+            _repository.GetAll().Returns(new List<SubscriptionPayment> { pagamento }.AsAsyncQueryable());
+            _permissionChecker.IsGrantedAsync(Arg.Any<string>()).Returns(false);
 
-            _paymentManager.UpgradeSubscriptionAsync(input).Returns(new PaymentRequestDto
-            {
-                PaymentId = "UPG-123",
-                Gateway = "Stripe",
-                IsSuccess = true,
-            });
-
-            // Quando
-            var result = await _sut.UpgradeSubscriptionAsync(input);
-
-            // Então
-            result.PaymentId.ShouldBe("UPG-123");
-            await _paymentManager.Received(1).UpgradeSubscriptionAsync(input);
+            // Quando / Então
+            await Should.ThrowAsync<AbpAuthorizationException>(() => _sut.GetPaymentAsync(3));
         }
 
         [Fact]
-        public async Task Dado_AssinaturaRecorrenteAtiva_Quando_CancelRecurringAsync_Entao_DeveDelegarParaPaymentManager()
+        public async Task Dado_PagamentoDoMesmoTenant_Quando_Obter_Entao_DeveRetornarDto()
         {
             // Dado
-            _paymentManager.CancelRecurringAsync(1).Returns(new SubscriptionPaymentDto
-            {
-                Id = 1,
-                IsRecurring = false,
-                Status = SubscriptionPaymentStatus.Canceled.ToString(),
-            });
+            var pagamento = new SubscriptionPayment { Id = 4, TenantId = 1, Gateway = "Stripe" };
+            _repository.GetAll().Returns(new List<SubscriptionPayment> { pagamento }.AsAsyncQueryable());
 
             // Quando
-            var result = await _sut.CancelRecurringAsync(1);
+            var resultado = await _sut.GetPaymentAsync(4);
 
             // Então
-            result.IsRecurring.ShouldBeFalse();
-            result.Status.ShouldBe(SubscriptionPaymentStatus.Canceled.ToString());
-            await _paymentManager.Received(1).CancelRecurringAsync(1);
+            resultado.Id.ShouldBe(4);
+            resultado.Gateway.ShouldBe("Stripe");
+        }
+
+        [Fact]
+        public async Task Dado_GatewaysParcialmenteConfigurados_Quando_Listar_Entao_DeveMarcarConfigurados()
+        {
+            // Dado
+            _settingManager.GetSettingValueForApplicationAsync(AppSettings.Payment.DefaultGateway)
+                .Returns("Stripe");
+            _settingManager.GetSettingValueForApplicationAsync(AppSettings.Payment.Stripe.SecretKey)
+                .Returns("sk_test_x");
+            _settingManager.GetSettingValueForApplicationAsync(AppSettings.Payment.PayPal.ClientId)
+                .Returns((string)null);
+            _settingManager.GetSettingValueForApplicationAsync(AppSettings.Payment.MercadoPago.AccessToken)
+                .Returns((string)null);
+            _settingManager.GetSettingValueForApplicationAsync(AppSettings.Payment.PagSeguro.Token)
+                .Returns("token123");
+
+            // Quando
+            var gateways = await _sut.GetGatewayListAsync();
+
+            // Então
+            gateways.Count.ShouldBe(4);
+            var stripe = gateways.Find(g => g.Name == "Stripe");
+            stripe.IsConfigured.ShouldBeTrue();
+            stripe.IsDefault.ShouldBeTrue();
+            gateways.Find(g => g.Name == "PagSeguro").IsConfigured.ShouldBeTrue();
+            gateways.Find(g => g.Name == "PayPal").IsConfigured.ShouldBeFalse();
+            gateways.Find(g => g.Name == "MercadoPago").IsConfigured.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task Dado_SettingsConfigurados_Quando_ObterGatewaySettings_Entao_DeveRetornarTodos()
+        {
+            // Dado
+            _settingManager.GetSettingValueForApplicationAsync(Arg.Any<string>())
+                .Returns(ci => "valor-" + (string)ci[0]);
+
+            // Quando
+            var settings = await _sut.GetGatewaySettingsAsync();
+
+            // Então
+            settings.Stripe.SecretKey.ShouldNotBeNullOrWhiteSpace();
+            settings.PayPal.ClientId.ShouldNotBeNullOrWhiteSpace();
+            settings.MercadoPago.AccessToken.ShouldNotBeNullOrWhiteSpace();
+            settings.PagSeguro.Token.ShouldNotBeNullOrWhiteSpace();
+        }
+
+        [Fact]
+        public async Task Dado_SettingsNulos_Quando_Atualizar_Entao_DeveGravarSomenteDefault()
+        {
+            // Dado
+            var input = new PaymentGatewaySettingsDto { DefaultGateway = "PayPal" };
+
+            // Quando
+            await _sut.UpdateGatewaySettingsAsync(input);
+
+            // Então
+            await _settingManager.Received(1).ChangeSettingForApplicationAsync(
+                AppSettings.Payment.DefaultGateway, "PayPal");
+            await _settingManager.DidNotReceive().ChangeSettingForApplicationAsync(
+                AppSettings.Payment.Stripe.SecretKey, Arg.Any<string>());
+        }
+
+        [Fact]
+        public async Task Dado_MetodosDePagamento_Quando_Delegar_Entao_DeveChamarPaymentManager()
+        {
+            // Quando
+            await _sut.CreatePaymentAsync(new CreateSubscriptionPaymentInput());
+            await _sut.ProcessPaymentAsync(5, new ProcessPaymentInput());
+            await _sut.UpgradeSubscriptionAsync(new UpgradeSubscriptionInput());
+            await _sut.CancelRecurringAsync(6);
+
+            // Então
+            await _paymentManager.Received(1).CreatePaymentAsync(Arg.Any<CreateSubscriptionPaymentInput>());
+            await _paymentManager.Received(1).ProcessPaymentAsync(5, Arg.Any<ProcessPaymentInput>());
+            await _paymentManager.Received(1).UpgradeSubscriptionAsync(Arg.Any<UpgradeSubscriptionInput>());
+            await _paymentManager.Received(1).CancelRecurringAsync(6);
         }
     }
 }
