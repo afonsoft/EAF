@@ -10,6 +10,7 @@ using Castle.MicroKernel.Registration;
 using Eaf.AspNetCore.SignalR.Chat;
 using Eaf.Castle.Logging.SerilogIntegration;
 using Eaf.Middleware.Configuration;
+using Eaf.Middleware.Web.Authentication.ApiKeys;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Eaf.Middleware.Web.Serilog;
 using Eaf.Middleware.Web.Startup;
@@ -71,6 +72,7 @@ namespace Eaf.ProjectName.Web.Tests
             });
 
             app.UseJwtTokenMiddleware();
+            app.UseApiKeyTokenMiddleware();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
              {

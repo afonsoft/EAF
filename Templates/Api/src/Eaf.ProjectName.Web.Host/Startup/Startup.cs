@@ -12,6 +12,7 @@ using Eaf.AspNetCore.SignalR.Chat;
 using Eaf.Castle.Logging.SerilogIntegration;
 using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Swagger;
+using Eaf.Middleware.Web.Authentication.ApiKeys;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Eaf.Middleware.Web.Serilog;
 using Eaf.Middleware.Web.Filters;
@@ -194,6 +195,7 @@ namespace Eaf.ProjectName.Web.Startup
             app.UseEafPublicErrorMiddleware();
             app.UseCors(ProjectNameConsts.DefaultCorsPolicyName); //Enable CORS!
             app.UseJwtTokenMiddleware();
+            app.UseApiKeyTokenMiddleware();
             app.UseAbpRequestLocalization();
             app.UseRouting();
             app.UseEndpoints(endpoints =>

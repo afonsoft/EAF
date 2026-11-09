@@ -1,11 +1,14 @@
 using Abp.Authorization;
 using Abp.Dependency;
+using Eaf.Middleware.Authentication.ApiKeys;
+using Eaf.Middleware.Web.Authentication.ApiKeys;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Abp.Runtime.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -51,6 +54,13 @@ namespace Eaf.Middleware.Web.Startup
         public static void Configure(IServiceCollection services, IConfiguration configuration)
         {
             var authenticationBuilder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
+
+            authenticationBuilder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+                ApiKeyConsts.SchemeName,
+                _ => { });
+
+            // Restringe permissões ao escopo da API key quando a requisição usa esse esquema.
+            services.Replace(ServiceDescriptor.Transient<IPermissionChecker, ApiKeyScopedPermissionChecker>());
 
             if (configuration["Authentication:JwtBearer:IsEnabled"] != null && bool.Parse(configuration["Authentication:JwtBearer:IsEnabled"]))
             {

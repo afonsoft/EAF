@@ -6,6 +6,7 @@ import * as ApiServiceProxies from './service-proxies';
 import { DynamicEntityPropertyService } from './dynamic-entity-property.service';
 import { PaymentExtendedService } from './payment-extended.service';
 import { TenantJoinRequestService } from './tenant-join-request.service';
+import { AdminApiKeyService, ApiKeyService } from './api-key.service';
 
 @NgModule({
   providers: [
@@ -43,6 +44,8 @@ import { TenantJoinRequestService } from './tenant-join-request.service';
     DynamicEntityPropertyService,
     PaymentExtendedService,
     TenantJoinRequestService,
+    ApiKeyService,
+    AdminApiKeyService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],
 })

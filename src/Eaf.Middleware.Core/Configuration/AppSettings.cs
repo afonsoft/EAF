@@ -149,6 +149,17 @@ namespace Eaf.Middleware.Configuration
                 public const string IsRememberBrowserEnabled = "App.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled";
                 public const string IsSmsProviderEnabled = "App.UserManagement.TwoFactorLogin.IsSmsProviderEnabled";
             }
+
+            /// <summary>
+            /// Representa a classe ApiKeys.
+            /// </summary>
+            public static class ApiKeys
+            {
+                public const string IsEnabled = "App.UserManagement.ApiKeys.IsEnabled";
+                public const string MaxKeysPerUser = "App.UserManagement.ApiKeys.MaxKeysPerUser";
+                public const string MaxLifetimeDays = "App.UserManagement.ApiKeys.MaxLifetimeDays";
+                public const string RequireScope = "App.UserManagement.ApiKeys.RequireScope";
+            }
         }
     }
 }

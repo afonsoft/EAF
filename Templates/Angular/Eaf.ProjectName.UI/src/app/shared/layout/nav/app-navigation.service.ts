@@ -20,6 +20,7 @@ export class AppNavigationService {
     return new AppMenu('MainMenu', 'MainMenu', [
       new AppMenuItem('Dashboard', 'Pages.Dashboard', 'flaticon-line-graph', '/app/main/dashboard'),
       new AppMenuItem('Metrics', 'Pages.Dashboard', 'flaticon-graph', '/app/main/dashboard'),
+      new AppMenuItem('MyApiKeys', '', 'flaticon-lock', '/app/main/api-keys'),
     ]);
   }
 
@@ -32,6 +33,7 @@ export class AppNavigationService {
       new AppMenuItem('OrganizationUnits', 'Pages.Administration.OrganizationUnits', 'flaticon-network', '/app/admin/organization-units'),
       new AppMenuItem('MassNotifications', 'Pages.Administration.MassNotifications', 'flaticon-speech-bubble', '/app/admin/mass-notifications'),
       new AppMenuItem('UserDelegation', 'Pages.Administration.Users.Delegation', 'flaticon-user-ok', '/app/admin/user-delegations'),
+      new AppMenuItem('ApiKeys', 'Pages.Administration.ApiKeys', 'flaticon-lock', '/app/admin/api-keys'),
       new AppMenuItem('Payments', 'Pages.Administration.Payments', 'flaticon-coins', '/app/admin/payments'),
       new AppMenuItem('Subscriptions', 'Pages.Administration.Payments', 'flaticon-money', '/app/admin/subscriptions'),
       new AppMenuItem('Languages', 'Pages.Administration.Languages', 'flaticon-tabs', '/app/admin/languages'),

@@ -1,4 +1,5 @@
 ﻿using Abp.Zero.EntityFrameworkCore;
+using Eaf.Middleware.Authentication.ApiKeys;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
@@ -79,6 +80,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<UserDelegation> UserDelegations { get; set; }
         public virtual DbSet<SubscribableEdition> SubscribableEditions { get; set; }
         public virtual DbSet<PushSubscription> PushSubscriptions { get; set; }
+        public virtual DbSet<ApiKey> ApiKeys { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
