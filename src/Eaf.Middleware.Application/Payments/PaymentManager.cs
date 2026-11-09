@@ -215,9 +215,10 @@ namespace Eaf.Middleware.Payments
 
             if (!isUpgrade && prorationAmount <= 0)
             {
+                // Downgrade entra em vigor no fim do ciclo de cobrança atual —
+                // o SubscriptionExpirationCheckWorker aplica a edição após SubscriptionEndDate.
                 prorationPayment.Status = SubscriptionPaymentStatus.Completed;
                 prorationPayment.PaymentTime = Clock.Now;
-                await _tenantRepository.UpdateAsync(await ActivateTenantEditionAsync(tenantId, input.NewEditionId, currentPayment.SubscriptionEndDate.Value));
                 await _subscriptionPaymentRepository.InsertAsync(prorationPayment);
                 await CurrentUnitOfWork.SaveChangesAsync();
 

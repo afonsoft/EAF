@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-subscription-lifecycle` |
 | Technical owner | Core Team |
-| Status | In Review |
+| Status | Completed |
 | Date | 2026-08-13 |
 | Target agent | Claude Code / Devin |
 
@@ -176,7 +176,7 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 - [x] Recurring Stripe payment creates a subscription.
 - [x] Webhook updates payment and tenant dates.
-- [ ] Failed payment sets tenant into grace period (optional).
+- [x] Failed payment sets tenant into grace period (optional).
 
 ### FR-004: Proration and upgrade/downgrade
 
@@ -192,7 +192,7 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 
 - [x] Upgrade triggers proration payment.
 - [x] Tenant gets new edition immediately after successful proration payment.
-- [ ] Downgrade effective at next billing cycle.
+- [x] Downgrade effective at next billing cycle.
 
 ### FR-005: Background renewal/expiry job
 
@@ -207,7 +207,7 @@ Implement the full subscription payment lifecycle on top of the existing EAF pay
 **Acceptance criteria:**
 
 - [x] Job runs daily and logs actions.
-- [ ] Reminder notifications created.
+- [x] Reminder notifications created.
 - [ ] Expired tenants see downgrade/renewal prompt.
 
 ## 7. Business Rules
