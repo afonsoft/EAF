@@ -48,6 +48,24 @@ namespace Eaf.Middleware
         public override void Initialize()
         {
             IocManager.RegisterAssemblyByConvention(typeof(MiddlewareCoreModule).GetAssembly());
+
+            // AutoMapper→Mapperly transition (see .specs/eaf-mapperly-migration-report.md):
+            // the adapter routes owned pairs to source-generated mappers and falls
+            // back to the still-registered AutoMapper IMapper for everything else.
+            var generated = new Eaf.Middleware.Mapping.MiddlewareCoreMapperly();
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Chat.ChatMessage, Chat.Dto.ChatMessageDto>(generated.ToDto);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<System.Collections.Generic.List<Chat.ChatMessage>, System.Collections.Generic.List<Chat.Dto.ChatMessageDto>>(generated.ToDtoList);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Friendships.Friendship, Friendships.Dto.FriendshipDto>(generated.ToDto);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Friendships.Friendship, Friendships.Cache.FriendCacheItem>(generated.ToCacheItem);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Friendships.Cache.FriendCacheItem, Friendships.Dto.FriendshipDto>(generated.ToDto);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<System.Collections.Generic.List<Friendships.Friendship>, System.Collections.Generic.List<Friendships.Dto.FriendshipDto>>(generated.ToDtoList);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<System.Collections.Generic.List<Friendships.Cache.FriendCacheItem>, System.Collections.Generic.List<Friendships.Dto.FriendshipDto>>(generated.ToDtoList);
+            IocManager.IocContainer.Register(
+                Castle.MicroKernel.Registration.Component
+                    .For<Abp.ObjectMapping.IObjectMapper>()
+                    .ImplementedBy<Eaf.Middleware.Mapping.EafMapperlyObjectMapper>()
+                    .IsDefault()
+                    .LifestyleTransient());
         }
 
         /// <summary>

@@ -34,12 +34,22 @@ namespace Eaf.ProjectName
         {
             IocManager.RegisterAssemblyByConvention(typeof(ProjectNameApplicationModule).GetAssembly());
 
+#if EAF_USE_SOURCE_PROJECTS
+            // AutoMapper→Mapperly transition: register source-generated pairs with
+            // the shared adapter (available when building against module sources).
+            var generatedMapper = new Eaf.ProjectName.Mapping.ProjectNameMapperly();
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Eaf.ProjectName.Airplanes.Dtos.CreateOrEditAirplaneDto, Eaf.ProjectName.Airplanes.Airplane>(generatedMapper.ToEntity);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Eaf.ProjectName.Airplanes.Airplane, Eaf.ProjectName.Airplanes.Dtos.AirplaneDto>(generatedMapper.ToDto);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<System.Collections.Generic.List<Eaf.ProjectName.Airplanes.Airplane>, System.Collections.Generic.List<Eaf.ProjectName.Airplanes.Dtos.AirplaneDto>>(generatedMapper.ToDtoList);
+#endif
+
             // Phase B: real workflow user directory overrides the module's null default.
             IocManager.IocContainer.Register(
                 Castle.MicroKernel.Registration.Component
                     .For<Eaf.Workflow.Domain.IWorkflowUserDirectory>()
                     .ImplementedBy<Workflows.WorkflowUserDirectory>()
                     .IsDefault()
+                    .Named("EafWorkflowUserDirectory")
                     .LifestyleTransient());
         }
 

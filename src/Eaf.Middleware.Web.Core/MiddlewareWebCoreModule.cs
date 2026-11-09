@@ -94,6 +94,11 @@ namespace Eaf.Middleware.Web
         {
             IocManager.RegisterAssemblyByConvention(typeof(MiddlewareWebCoreModule).GetAssembly());
             IocManager.RegisterIfNot<IChatCommunicator, SignalRChatCommunicator>();
+
+            // AutoMapper→Mapperly transition: register source-generated pairs.
+            var generated = new Eaf.Middleware.Web.Mapping.MiddlewareWebCoreMapperly();
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<Eaf.Middleware.Core.Authentication.External.ExternalLoginProviderInfo, Eaf.Middleware.Web.Models.TokenAuth.ExternalLoginProviderInfoModel>(generated.ToModel);
+            Eaf.Middleware.Mapping.EafMapperlyObjectMapper.Register<System.Collections.Generic.List<Eaf.Middleware.Core.Authentication.External.ExternalLoginProviderInfo>, System.Collections.Generic.List<Eaf.Middleware.Web.Models.TokenAuth.ExternalLoginProviderInfoModel>>(generated.ToModelList);
             if ((_appConfiguration["RedisCache:IsRedisEnabled"] != null && bool.Parse(_appConfiguration["RedisCache:IsRedisEnabled"]))
                 || _appConfiguration["RedisCache:IsEnabled"] != null && bool.Parse(_appConfiguration["RedisCache:IsEnabled"]))
             {
