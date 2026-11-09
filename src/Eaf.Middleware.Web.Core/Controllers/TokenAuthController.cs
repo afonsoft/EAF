@@ -339,7 +339,6 @@ namespace Eaf.Middleware.Web.Controllers
 
                     var refreshToken = await GenerateAndStoreRefreshTokenAsync(shadowUser);
                     var accessToken = CreateAccessToken(await CreateJwtClaims(identity, shadowUser, sessionId: refreshToken.SessionId), expiration);
-                    var refreshToken = await GenerateAndStoreRefreshTokenAsync(shadowUser);
                     AppendRefreshTokenCookie(refreshToken.Token, refreshToken.ExpireDate);
 
                     return new AuthenticateResultModel
