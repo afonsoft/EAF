@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\common.props"></Import>
+	<PropertyGroup>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<AssemblyName>Eaf.OpenIddict</AssemblyName>
+		<PackageId>Eaf.OpenIddict</PackageId>
+		<UserSecretsId>Eaf-OpenIddict-A1B2C3D4-5E6F-4A5B-8C9D-0E1F2A3B4C5D</UserSecretsId>
+		<RootNamespace>Eaf.OpenIddict</RootNamespace>
+		<OutputType>Library</OutputType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Abp.AspNetCore" Version="10.5.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
+		<PackageReference Include="OpenIddict.AspNetCore" Version="7.7.2" />
+		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="7.7.2" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Eaf.Middleware.Application\Eaf.Middleware.Application.csproj" />
+		<ProjectReference Include="..\Eaf.Middleware.Web.Core\Eaf.Middleware.Web.Core.csproj" />
+	</ItemGroup>
+</Project>
