@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-angular21-primeng` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W4 (ASP.NET Zero v15.5 parity plan) |
@@ -84,3 +84,7 @@ Upgrade the Angular template to Angular 21 and latest compatible PrimeNG, adapti
 
 - Exact PrimeNG target major (19 vs 20/21 if released) — pick latest stable compatible with Angular 21 at implementation time.
 - Karma vs Web Test Runner — Angular 21 defaults may warrant test-runner migration; decide at implementation (minimal disruption preferred).
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #460).

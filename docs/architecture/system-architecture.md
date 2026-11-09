@@ -110,3 +110,13 @@ O EAF fornece 14 módulos reutilizáveis organizados em camadas modulares:
 6. **Eaf.SqlServerCache / SqliteCache**: Cache distribuído de alta performance.
 7. **Eaf.Worker**: Processamento de tarefas em segundo plano com Hangfire.
 8. **Eaf.Log4NetServiceBus**: Log estruturado e mensageria integrada.
+
+## 4. Extensões de Autenticação e Workflow (2026-11)
+
+Módulos adicionados para paridade com ASP.NET Zero v15.5 (ver `AD-0001-zero-parity-modules.md`):
+
+- **`Eaf.Middleware.Web.Core`** — além de JWT via `TokenAuthController`, agora inclui autenticação por API Key (`X-API-Key`, hash SHA-256), login passkey/WebAuthn (Fido2), QR login aprovado via cache, e registro de sessões (`UserSessionInfo` + `SessionRegistry`, claim `eaf_session_id`, revogação e idle timeout).
+- **`Eaf.OpenIddict`** — servidor OAuth2/OIDC (`/connect/token`, `/connect/authorize`, `/connect/userinfo`, `/connect/logout`) compartilhando a mesma chave simétrica HMAC-SHA256 do JwtBearer; tokens JWS são aceitos por `[AbpAuthorize]` via `Authentication:JwtBearer:AdditionalIssuers`.
+- **`Eaf.Workflow`** — engine de aprovação multi-etapas com definições versionadas (publicação cria snapshot imutável), quorum por step (any/quorum/all), send-back, simulação, timeline auditável, resolução de assignees via `IWorkflowUserDirectory` (role/OU/manager no template), SLA via Hangfire e designer Angular.
+
+Diagrama: `eaf-auth-workflow-extensions.mmd` (Mermaid) — fluxo entre UI, endpoints de auth, OpenIddict, engine de workflow, cache e SQL Server.

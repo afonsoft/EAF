@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-mapperly-spike` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W2 (ASP.NET Zero v15.5 parity plan) |
@@ -76,3 +76,7 @@ Spike: prove Mapperly can replace AutoMapper in one bounded module end-to-end, t
 
 - Mapperly package/version compatible with net10.0 — verify at spike.
 - Coexistence: `Abp.AutoMapper` stays for untouched modules during transition — confirm no DI conflicts when both registered.
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #453).

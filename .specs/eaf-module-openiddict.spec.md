@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-openiddict` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-08-13 |
 | Target agent | Claude Code / Devin |
 
@@ -356,3 +356,7 @@ curl -X POST https://localhost:44301/connect/token \
 ## 24. Key Reminder
 
 > OpenIddict is a security feature. Follow the framework and do not implement custom cryptography. Keep existing JWT auth intact.
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #459).

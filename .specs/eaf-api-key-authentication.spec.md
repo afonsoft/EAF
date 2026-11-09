@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-api-key-auth` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W1 (ASP.NET Zero v15.5 parity plan) |
@@ -165,3 +165,7 @@ New table `EafApiKeys`; migration required (up + down). Indexes: `(KeyHash)` uni
 
 - Naming: `EafApiKeys` table vs `AbpApiKeys` — decide at implementation (prefer `Eaf` prefix per convention).
 - Scope storage format: JSON array of permission names vs join table — recommend JSON for simplicity.
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #448).

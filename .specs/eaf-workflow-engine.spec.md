@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-workflow-engine` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W3 (ASP.NET Zero v15.5 parity plan) |
@@ -130,3 +130,7 @@ Tables `EafWorkflow*` (definitions, versions, fields, steps, instances, tasks, t
 - Step-graph serialization: JSON column vs normalized step tables — recommend JSON per version (immutable blobs) + normalized current-instance state.
 - Manager resolution source (existing user.Manager? org chart?) — verify what EAF already has before Phase B.
 - Phase D integrations deliberately deferred.
+
+## Delivered
+
+Implementado e mergeado em `main` (PRs #454, #455, #456).

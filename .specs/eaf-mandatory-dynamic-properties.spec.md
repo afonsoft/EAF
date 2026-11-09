@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-mandatory-dynamic-properties` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W2 (ASP.NET Zero v15.5 parity plan) |
@@ -86,3 +86,7 @@ Extend `src/Eaf.DynamicEntityProperties/` and its Angular admin pages (`dynamic-
 ## Pending Questions and Ambiguities
 
 - Should mandatory apply per-entity-instance or globally for the entity type? Default: global per definition (matches Zero semantics).
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #452).

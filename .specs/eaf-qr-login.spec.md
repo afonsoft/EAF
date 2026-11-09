@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-qr-login` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W4 (ASP.NET Zero v15.5 parity plan) |
@@ -74,3 +74,7 @@ Reuse SignalR (`Eaf.SignalR`) for real-time approval push to the waiting browser
 ## Pending Questions and Ambiguities
 
 - Transport for the waiting browser: SignalR (preferred, module exists) vs polling — support polling fallback regardless.
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #458).

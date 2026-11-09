@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-email-template-management` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W4 (ASP.NET Zero v15.5 parity plan) |
@@ -76,3 +76,7 @@ First step: grep `EmailTemplate`/`IEmailTemplate` in `src/` and `Templates/` to 
 
 - Exact current template mechanism — resolved by the audit step at implementation.
 - Placeholder syntax — follow whatever Eaf.MailKit already uses; document it.
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #457).
