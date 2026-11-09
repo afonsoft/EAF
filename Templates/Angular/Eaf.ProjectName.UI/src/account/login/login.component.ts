@@ -12,6 +12,7 @@ import {
 import { ReCaptchaV3Service } from 'ngx-captcha';
 import { UrlHelper } from 'shared/helpers/UrlHelper';
 
+import { PasskeyService } from '@shared/service-proxies/passkey.service';
 import { ExternalLoginProvider, LoginService } from './login.service';
 @Component({
   standalone: false,
@@ -34,6 +35,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
   constructor(
     injector: Injector,
     public loginService: LoginService,
+    public passkeyService: PasskeyService,
     private readonly _sessionService: EafSessionService,
     private readonly _accountService: AccountServiceProxy,
     private readonly _sessionAppService: SessionServiceProxy,
@@ -214,5 +216,33 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     this.dataTableHelper.showLoadingIndicator();
     this.submitting = true;
     this.loginService.externalAuthenticate(provider);
+  }
+
+
+get passkeySupported(): boolean {
+    return PasskeyService.isSupported();
+  }
+
+  async loginWithPasskey(): Promise<void> {
+    this.submitting = true;
+    try {
+      const result = await this.passkeyService.authenticatePasskey(
+        this.loginService.authenticateModel.userNameOrEmailAddress,
+        this.loginService.authenticateModel.tenancyName,
+      );
+      this.loginService.login(
+        result.accessToken,
+        result.encryptedAccessToken,
+        result.expireInSeconds,
+        this.loginService.rememberMe,
+        undefined,
+      );
+    } catch (e: any) {
+      if (e && e.name !== 'NotAllowedError') {
+        this.message.error(this.l('PasskeyLoginFailed'));
+      }
+    } finally {
+      this.submitting = false;
+    }
   }
 }
