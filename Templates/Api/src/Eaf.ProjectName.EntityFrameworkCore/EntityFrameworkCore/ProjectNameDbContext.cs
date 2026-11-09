@@ -11,6 +11,7 @@ using Eaf.Middleware.Core.Editions;
 using Eaf.Middleware.Friendships;
 using Eaf.Middleware.MassNotifications;
 using Eaf.Middleware.MultiTenancy;
+using Eaf.Middleware.Net.Emailing;
 using Eaf.Middleware.Payments;
 using Eaf.Middleware.Storage;
 using Eaf.Middleware.UserDelegations;
@@ -91,6 +92,8 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<WorkflowInstance> WorkflowInstances { get; set; }
         public virtual DbSet<WorkflowTask> WorkflowTasks { get; set; }
         public virtual DbSet<WorkflowTimelineEntry> WorkflowTimeline { get; set; }
+
+        public virtual DbSet<EmailTemplateOverride> EmailTemplateOverrides { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

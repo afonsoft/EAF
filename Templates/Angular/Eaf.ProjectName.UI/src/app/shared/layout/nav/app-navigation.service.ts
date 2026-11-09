@@ -41,6 +41,7 @@ export class AppNavigationService {
       new AppMenuItem('UserSessions', 'Pages.Administration.UserSessions', 'flaticon-users', '/app/admin/user-sessions'),
                             new AppMenuItem('ApiKeys', 'Pages.Administration.ApiKeys', 'flaticon-lock', '/app/admin/api-keys'),
                             new AppMenuItem('Workflows', 'Pages.Administration.Workflows', 'flaticon-map', '/app/admin/workflows'),
+                            new AppMenuItem('EmailTemplates', 'Pages.Administration.EmailTemplates', 'flaticon-mail', '/app/admin/email-templates'),
       new AppMenuItem('Payments', 'Pages.Administration.Payments', 'flaticon-coins', '/app/admin/payments'),
       new AppMenuItem('Subscriptions', 'Pages.Administration.Payments', 'flaticon-money', '/app/admin/subscriptions'),
       new AppMenuItem('Languages', 'Pages.Administration.Languages', 'flaticon-tabs', '/app/admin/languages'),

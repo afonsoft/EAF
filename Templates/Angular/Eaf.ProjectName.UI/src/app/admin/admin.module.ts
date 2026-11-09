@@ -76,6 +76,7 @@ import { UserSessionsComponent } from './user-sessions/user-sessions.component';
 import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
 import { WorkflowsComponent } from './workflows/workflows.component';
 import { WorkflowDesignerComponent } from './workflows/designer.component';
+import { EmailTemplatesComponent } from './email-templates/email-templates.component';
 
 @NgModule({
   imports: [
@@ -154,7 +155,7 @@ import { WorkflowDesignerComponent } from './workflows/designer.component';
     Theme3ThemeUiSettingsComponent,
     TenantJoinRequestsComponent,
     AdminApiKeysComponent, UserSessionsComponent,
-    WorkflowsComponent, WorkflowDesignerComponent],
+    WorkflowsComponent, WorkflowDesignerComponent, EmailTemplatesComponent],
   exports: [],
   providers: [
     ImpersonationService,

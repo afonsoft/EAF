@@ -10,6 +10,7 @@ import { AdminApiKeyService, ApiKeyService } from './api-key.service';
 import { PasskeyService } from './passkey.service';
 import { SessionService, AdminSessionService } from './session.service';
 import { WorkflowApprovalService, AdminWorkflowService, WorkflowRequestService } from './workflow.service';
+import { EmailTemplateService } from './email-template.service';
 
 @NgModule({
   providers: [
@@ -53,6 +54,7 @@ import { WorkflowApprovalService, AdminWorkflowService, WorkflowRequestService }
     WorkflowApprovalService,
     AdminWorkflowService,
     WorkflowRequestService,
+    EmailTemplateService,
     SessionService,
     AdminSessionService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }

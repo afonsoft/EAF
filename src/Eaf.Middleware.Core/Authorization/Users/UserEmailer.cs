@@ -9,6 +9,7 @@ using Abp.Extensions;
 using Abp.Localization;
 using Abp.Net.Mail;
 using Abp.Runtime.Security;
+using Abp.Timing;
 using Eaf.Middleware.Chat;
 using Eaf.Middleware.Localization;
 using Eaf.Middleware.MultiTenancy;
@@ -32,6 +33,7 @@ namespace Eaf.Middleware.Authorization.Users
 
         private readonly IEmailSender _emailSender;
         private readonly IEmailTemplateProvider _emailTemplateProvider;
+        private readonly IEmailTemplateManager _emailTemplateManager;
         private readonly ISettingManager _settingManager;
         private readonly IRepository<Tenant> _tenantRepository;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -56,10 +58,12 @@ namespace Eaf.Middleware.Authorization.Users
             ICurrentUnitOfWorkProvider unitOfWorkProvider,
             IUnitOfWorkManager unitOfWorkManager,
             IRepository<User, long> userRepository,
-            ISettingManager settingManager
+            ISettingManager settingManager,
+            IEmailTemplateManager emailTemplateManager = null
         )
         {
             _emailTemplateProvider = emailTemplateProvider;
+            _emailTemplateManager = emailTemplateManager;
             _emailSender = emailSender;
             _tenantRepository = tenantRepository;
             _unitOfWorkProvider = unitOfWorkProvider;
@@ -122,7 +126,7 @@ namespace Eaf.Middleware.Authorization.Users
             link = EncryptQueryParameters(linkBuilder.ToString());
 
             var tenancyName = GetTenancyNameOrNull(user.TenantId);
-            var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("EmailActivation_Title"), L("EmailActivation_SubTitle"));
+            var emailTemplate = await GetTitleAndSubTitle(user.TenantId, L("EmailActivation_Title"), L("EmailActivation_SubTitle"));
             var mailMessage = new StringBuilder();
 
             mailMessage.Append("<b>").Append(L("NameSurname")).Append(HtmlBoldEndWithColon).Append(user.Name).Append(" ").Append(user.Surname).AppendLine(HtmlBreak);
@@ -159,7 +163,7 @@ namespace Eaf.Middleware.Authorization.Users
             }
             var authenticationSource = user.AuthenticationSource;
             var tenancyName = GetTenancyNameOrNull(user.TenantId);
-            var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("PasswordResetEmail_Title"), L("PasswordResetEmail_SubTitle"));
+            var emailTemplate = await GetTitleAndSubTitle(user.TenantId, L("PasswordResetEmail_Title"), L("PasswordResetEmail_SubTitle"));
             var mailMessage = new StringBuilder();
 
             mailMessage.Append("<b>").Append(L("NameSurname")).Append(HtmlBoldEndWithColon).Append(user.Name).Append(" ").Append(user.Surname).AppendLine(HtmlBreak);
@@ -206,7 +210,7 @@ namespace Eaf.Middleware.Authorization.Users
         {
             try
             {
-                var emailTemplate = GetTitleAndSubTitle(user.TenantId, L("NewChatMessageEmail_Title"), L("NewChatMessageEmail_SubTitle"));
+                var emailTemplate = await GetTitleAndSubTitle(user.TenantId, L("NewChatMessageEmail_Title"), L("NewChatMessageEmail_SubTitle"));
                 var mailMessage = new StringBuilder();
 
                 mailMessage.Append("<b>").Append(L("Sender")).Append(HtmlBoldEndWithColon).Append(senderTenancyName).Append("/").Append(senderUsername).AppendLine(HtmlBreak);
@@ -243,7 +247,7 @@ namespace Eaf.Middleware.Authorization.Users
 
                         var hostAdminLanguage = await _settingManager.GetSettingValueForUserAsync(LocalizationSettingNames.DefaultLanguage, tenantAdmin.TenantId, tenantAdmin.Id);
                         var culture = CultureHelper.GetCultureInfoByChecking(hostAdminLanguage);
-                        var emailTemplate = GetTitleAndSubTitle(tenantId, L("SubscriptionExpire_Title"), L("SubscriptionExpire_SubTitle"));
+                        var emailTemplate = await GetTitleAndSubTitle(tenantId, L("SubscriptionExpire_Title"), L("SubscriptionExpire_SubTitle"));
                         var mailMessage = new StringBuilder();
 
                         mailMessage.Append("<b>").Append(L("Message")).Append(HtmlBoldEndWithColon).Append(L("SubscriptionExpire_Email_Body", culture, utcNow.ToString("yyyy-MM-dd") + " UTC")).AppendLine(HtmlBreak);
@@ -286,11 +290,16 @@ namespace Eaf.Middleware.Authorization.Users
             }
         }
 
-        private StringBuilder GetTitleAndSubTitle(int? tenantId, string title, string subTitle)
+        private async Task<StringBuilder> GetTitleAndSubTitle(int? tenantId, string title, string subTitle)
         {
-            var emailTemplate = new StringBuilder(_emailTemplateProvider.GetDefaultTemplate(tenantId));
+            var template = _emailTemplateManager != null
+                ? await _emailTemplateManager.ResolveBodyAsync(tenantId, EmailTemplateDefinitions.Default, CultureInfo.CurrentUICulture.Name)
+                : _emailTemplateProvider.GetDefaultTemplate(tenantId);
+
+            var emailTemplate = new StringBuilder(template);
             emailTemplate.Replace("{EMAIL_TITLE}", title);
             emailTemplate.Replace("{EMAIL_SUB_TITLE}", subTitle);
+            emailTemplate.Replace("{THIS_YEAR}", Clock.Now.Year.ToString());
 
             return emailTemplate;
         }

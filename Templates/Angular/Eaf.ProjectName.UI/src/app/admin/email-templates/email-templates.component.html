@@ -1,0 +1,93 @@
+<div [@routerTransition]>
+    <div class="m-subheader">
+        <div class="d-flex align-items-center">
+            <div class="mr-auto">
+                <h1>{{ "EmailTemplates" | localize }}</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="m-content">
+        <div class="m-portlet m-portlet--mobile">
+            <div class="m-portlet__body" [busyIf]="loading">
+
+                <div *ngFor="let group of groups" class="mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <h3 class="mb-0 mr-2">{{ group.displayName }}</h3>
+                        <input class="form-control form-control-sm d-inline-block" style="max-width: 140px;"
+                               [(ngModel)]="group.newCulture"
+                               placeholder="pt-BR" aria-label="new culture" />
+                        <button class="btn btn-sm btn-outline-primary ml-1" (click)="openEditForNewCulture(group)">
+                            <i class="fa fa-plus"></i> {{ "EmailTemplateAddCulture" | localize }}
+                        </button>
+                    </div>
+
+                    <table class="table table-sm table-striped" aria-label="email template overrides">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ "EmailTemplateCulture" | localize }}</th>
+                                <th scope="col">{{ "EmailTemplateIsOverride" | localize }}</th>
+                                <th scope="col">{{ "LastModificationTime" | localize }}</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of group.rows">
+                                <td>{{ item.culture || '—' }}</td>
+                                <td>
+                                    <span class="badge" [class.badge-warning]="item.isOverride" [class.badge-secondary]="!item.isOverride">
+                                        {{ item.isOverride ? ("EmailTemplateIsOverride" | localize) : ("Default" | localize) }}
+                                    </span>
+                                </td>
+                                <td>{{ item.lastModificationTime || '—' }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" (click)="openEdit(item.name, item.culture)">
+                                        {{ "Edit" | localize }}
+                                    </button>
+                                    <button *ngIf="item.isOverride" class="btn btn-sm btn-outline-danger ml-1" (click)="reset(item)">
+                                        {{ "EmailTemplateResetToDefault" | localize }}
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade show d-block" tabindex="-1" role="dialog" *ngIf="edit" style="background: rgba(0,0,0,.3);">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ "EmailTemplateEditOverride" | localize }} — {{ edit.name }} <small class="text-muted">{{ edit.culture || "Default" }}</small></h5>
+                <button type="button" class="close" (click)="closeEdit()" aria-label="close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="d-block">{{ "EmailTemplatePlaceholders" | localize }}:
+                        <code *ngFor="let ph of edit.placeholders" class="mx-1">{{ '{' + ph + '}' }}</code>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="emailTemplateBody">{{ "EmailTemplateBody" | localize }}</label>
+                    <textarea id="emailTemplateBody" class="form-control" rows="14" style="font-family: monospace;" [(ngModel)]="editBody"></textarea>
+                </div>
+                <div *ngIf="previewHtml" class="border p-2" aria-label="preview">
+                    <div [innerHTML]="previewHtml"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" (click)="preview()" [disabled]="saving">
+                    <i class="fa fa-eye"></i> {{ "EmailTemplatePreview" | localize }}
+                </button>
+                <button class="btn btn-default" (click)="closeEdit()" [disabled]="saving">{{ "Cancel" | localize }}</button>
+                <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+                    <i class="fa fa-save"></i> {{ "Save" | localize }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -564,5 +564,16 @@
 		<text name="Reject">Reject</text>
 		<text name="SuccessfullyApproved">Request approved successfully.</text>
 		<text name="SuccessfullyRejected">Request rejected successfully.</text>
-	</texts>
+			<text name="EmailTemplates">Email templates</text>
+		<text name="EmailTemplate_Default">Default email layout</text>
+		<text name="EmailTemplateCulture">Culture</text>
+		<text name="EmailTemplateIsOverride">Customized</text>
+		<text name="EmailTemplateEditOverride">Edit template</text>
+		<text name="EmailTemplateBody">Body (HTML)</text>
+		<text name="EmailTemplatePlaceholders">Allowed placeholders</text>
+		<text name="EmailTemplatePreview">Preview</text>
+		<text name="EmailTemplateResetToDefault">Reset to default</text>
+		<text name="EmailTemplateResetWarningMessage">The override will be removed and the system default will be used again.</text>
+		<text name="EmailTemplateAddCulture">Add culture override</text>
+</texts>
 </localizationDictionary>

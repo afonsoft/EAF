@@ -115,5 +115,16 @@
     <text name="Label">Label</text>
     <text name="Options">Options</text>
     <text name="Condition">Condition</text>
+		<text name="EmailTemplates">Email templates</text>
+		<text name="EmailTemplate_Default">Default email layout</text>
+		<text name="EmailTemplateCulture">Culture</text>
+		<text name="EmailTemplateIsOverride">Customized</text>
+		<text name="EmailTemplateEditOverride">Edit template</text>
+		<text name="EmailTemplateBody">Body (HTML)</text>
+		<text name="EmailTemplatePlaceholders">Allowed placeholders</text>
+		<text name="EmailTemplatePreview">Preview</text>
+		<text name="EmailTemplateResetToDefault">Reset to default</text>
+		<text name="EmailTemplateResetWarningMessage">The override will be removed and the system default will be used again.</text>
+		<text name="EmailTemplateAddCulture">Add culture override</text>
 </texts>
 </localizationDictionary>

@@ -21,6 +21,9 @@ namespace Eaf.Middleware.Authorization
 
         /// <summary>Pages.Administration.UserSessions — admin vê/revoga sessões do tenant.</summary>
         public const string Pages_Administration_UserSessions = "Pages.Administration.UserSessions";
+
+        /// <summary>Pages.Administration.EmailTemplates — admin gerencia templates de e-mail do tenant.</summary>
+        public const string Pages_Administration_EmailTemplates = "Pages.Administration.EmailTemplates";
         public const string Pages_Administration_Roles = "Pages.Administration.Roles";
         public const string Pages_Administration_Roles_Create = "Pages.Administration.Roles.Create";
         public const string Pages_Administration_Roles_Delete = "Pages.Administration.Roles.Delete";
