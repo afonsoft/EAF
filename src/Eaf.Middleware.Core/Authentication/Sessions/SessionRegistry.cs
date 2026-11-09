@@ -18,6 +18,15 @@ namespace Eaf.Middleware.Authentication.Sessions
         /// <summary>Registra/atualiza uma sessão.</summary>
         Task SetAsync(UserSessionInfo session);
 
+        /// <summary>Versão síncrona de <see cref="GetAsync"/> para caminhos não-async (ex.: validação JWT).</summary>
+        UserSessionInfo Get(string sessionId);
+
+        /// <summary>Versão síncrona de <see cref="IsRevokedAsync"/>.</summary>
+        bool IsRevoked(string sessionId);
+
+        /// <summary>Versão síncrona de <see cref="TouchAsync"/>.</summary>
+        void Touch(string sessionId);
+
         /// <summary>Busca uma sessão pelo id.</summary>
         Task<UserSessionInfo> GetAsync(string sessionId);
 
@@ -164,6 +173,33 @@ namespace Eaf.Middleware.Authentication.Sessions
         {
             return !string.IsNullOrEmpty(sessionId)
                 && (await _revoked.GetOrDefaultAsync(sessionId)) != default;
+        }
+
+        /// <inheritdoc />
+        public UserSessionInfo Get(string sessionId)
+        {
+            return string.IsNullOrEmpty(sessionId) ? null : _sessions.GetOrDefault(sessionId);
+        }
+
+        /// <inheritdoc />
+        public bool IsRevoked(string sessionId)
+        {
+            return !string.IsNullOrEmpty(sessionId)
+                && _revoked.GetOrDefault(sessionId) != default;
+        }
+
+        /// <inheritdoc />
+        public void Touch(string sessionId)
+        {
+            var session = _sessions.GetOrDefault(sessionId);
+            if (session == null)
+            {
+                return;
+            }
+
+            session.LastActivityTime = DateTime.UtcNow;
+            _sessions.Set(session.SessionId, session,
+                absoluteExpireTime: new DateTimeOffset(session.ExpireDate));
         }
 
         private static string IndexKey(UserIdentifier user) => $"{user.TenantId}:{user.UserId}";

@@ -77,7 +77,7 @@ namespace Eaf.Log4NetServiceBus.Logging
                     messages.Add(new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(log))));
                 }
 
-                Task.Run(() => queueClient.SendAsync(messages)).GetAwaiter().GetResult();
+                Abp.Threading.AsyncHelper.RunSync(() => queueClient.SendAsync(messages));
             }
             catch (ServiceBusException ex)
             {
@@ -96,7 +96,7 @@ namespace Eaf.Log4NetServiceBus.Logging
             {
                 if (_serviceBusConnection != null && !_serviceBusConnection.IsClosedOrClosing)
                 {
-                    Task.Run(() => _serviceBusConnection.CloseAsync()).GetAwaiter().GetResult();
+                    Abp.Threading.AsyncHelper.RunSync(() => _serviceBusConnection.CloseAsync());
                 }
             }
             catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)

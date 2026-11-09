@@ -18,12 +18,21 @@ namespace Eaf.RateLimiting
             public DateTimeOffset ResetsAt;
         }
 
+        private const int SweepEveryN = 512;
+
         private readonly ConcurrentDictionary<string, Bucket> _buckets = new();
+        private long _hitCount;
 
         /// <inheritdoc />
         public Task<EafRateLimitResult> HitAsync(string key, TimeSpan window, long limit, CancellationToken cancellationToken = default)
         {
             var now = DateTimeOffset.UtcNow;
+
+            // Sweep preguiçoso: evita retenção ilimitada de buckets expirados.
+            if (Interlocked.Increment(ref _hitCount) % SweepEveryN == 0)
+            {
+                SweepExpired(now);
+            }
 
             var bucket = _buckets.AddOrUpdate(
                 key,
@@ -49,6 +58,17 @@ namespace Eaf.RateLimiting
                 Limit = limit,
                 ResetsAt = bucket.ResetsAt
             });
+        }
+
+        private void SweepExpired(DateTimeOffset now)
+        {
+            foreach (var kvp in _buckets)
+            {
+                if (kvp.Value.ResetsAt < now)
+                {
+                    _buckets.TryRemove(kvp.Key, out _);
+                }
+            }
         }
     }
 }

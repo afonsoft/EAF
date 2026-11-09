@@ -66,7 +66,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
             if (!string.IsNullOrEmpty(sessionId))
             {
                 var sessionRegistry = IocManager.Instance.Resolve<ISessionRegistry>();
-                if (AsyncHelper.RunSync(() => sessionRegistry.IsRevokedAsync(sessionId)))
+                if (sessionRegistry.IsRevoked(sessionId))
                 {
                     throw new SecurityTokenException("Session revoked");
                 }
@@ -151,10 +151,10 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
             try
             {
                 var sessionRegistry = IocManager.Instance.Resolve<ISessionRegistry>();
-                var session = AsyncHelper.RunSync(() => sessionRegistry.GetAsync(sessionId));
+                var session = sessionRegistry.Get(sessionId);
                 if (session != null && session.LastActivityTime < DateTime.UtcNow.Subtract(SessionConsts.ActivityThrottle))
                 {
-                    AsyncHelper.RunSync(() => sessionRegistry.TouchAsync(sessionId));
+                    sessionRegistry.Touch(sessionId);
                 }
             }
             catch
