@@ -31,6 +31,8 @@ import { FileUploadModule as PrimeNgFileUploadModule } from 'primeng/fileupload'
 import { PaginatorModule } from 'primeng/paginator';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TableModule } from 'primeng/table';
+import { providePrimeNG } from 'primeng/config';
+import Lara from '@primeuix/themes/lara';
 import { AppConsts } from 'shared/AppConsts';
 
 import { environment } from '../environments/environment';
@@ -126,6 +128,12 @@ export const googleTagManager = () => AppConsts.googleTagManager;
     LayoutRefService,
     CookieService,
     { provide: 'googleTagManagerId', useValue: googleTagManager() },
+    providePrimeNG({
+      theme: {
+        preset: Lara,
+        options: { darkModeSelector: '.dark-mode' }
+      }
+    }),
   ],
 })
 export class AppModule {

@@ -14,10 +14,12 @@
           <i class="far fa-file-excel"></i>
           {{ 'ExportToExcel' | localize }}
         </button>
-        <button (click)="createUser()" *ngIf="isGranted('Pages.Administration.Users.Create')" class="btn btn-primary">
+        @if (isGranted('Pages.Administration.Users.Create')) {
+        <button (click)="createUser()" class="btn btn-primary">
           <i class="fa fa-plus"></i>
           {{ 'Create' | localize }}
         </button>
+        }
       </div>
     </div>
   </div>
@@ -65,7 +67,8 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th scope="col"
+                  <th
+                    scope="col"
                     [hidden]="
                       !isGrantedAny(
                         'Pages.Administration.Users.Edit',
@@ -129,104 +132,102 @@
                       </button>
                       <ul *dropdownMenu class="dropdown-menu">
                         <li>
-                          <a
-                            (click)="_impersonationService.impersonate(record.id, appSession.tenantId)"
-                            *ngIf="permission.isGranted('Pages.Administration.Users.Impersonation') && record.id !== appSession.userId"
-                            href="javascript:;"
-                          >
+                          @if (permission.isGranted('Pages.Administration.Users.Impersonation') && record.id !== appSession.userId) {
+                          <a (click)="_impersonationService.impersonate(record.id, appSession.tenantId)" href="javascript:;">
                             {{ 'LoginAsThisUser' | localize }}
                           </a>
+                          }
                         </li>
                         <li>
-                          <a
-                            (click)="editUserPermissionsModal.show(record.id, record.userName)"
-                            *ngIf="permission.isGranted('Pages.Administration.Users.ChangePermissions')"
-                            href="javascript:;"
-                          >
+                          @if (permission.isGranted('Pages.Administration.Users.ChangePermissions')) {
+                          <a (click)="editUserPermissionsModal.show(record.id, record.userName)" href="javascript:;">
                             {{ 'Permissions' | localize }}
                           </a>
+                          }
                         </li>
                         <li>
-                          <a
-                            (click)="unlockUser(record)"
-                            *ngIf="permission.isGranted('Pages.Administration.Users.ChangePermissions')"
-                            href="javascript:;"
-                          >
+                          @if (permission.isGranted('Pages.Administration.Users.ChangePermissions')) {
+                          <a (click)="unlockUser(record)" href="javascript:;">
                             {{ 'Unlock' | localize }}
                           </a>
+                          }
                         </li>
                         <li>
-                          <a
-                            (click)="closeSessionUser(record)"
-                            *ngIf="permission.isGranted('Pages.Administration.Users.ChangePermissions')"
-                            href="javascript:;"
-                          >
+                          @if (permission.isGranted('Pages.Administration.Users.ChangePermissions')) {
+                          <a (click)="closeSessionUser(record)" href="javascript:;">
                             {{ 'CloseSession' | localize }}
                           </a>
+                          }
                         </li>
                         <li>
-                          <a
-                            (click)="createOrEditUserModal.show(record.id, record.authenticationSource)"
-                            *ngIf="permission.isGranted('Pages.Administration.Users.Edit')"
-                            href="javascript:;"
-                          >
+                          @if (permission.isGranted('Pages.Administration.Users.Edit')) {
+                          <a (click)="createOrEditUserModal.show(record.id, record.authenticationSource)" href="javascript:;">
                             {{ 'Edit' | localize }}
                           </a>
+                          }
                         </li>
 
                         <li>
-                          <a
-                            (click)="deleteUser(record)"
-                            *ngIf="permission.isGranted('Pages.Administration.Users.Delete')"
-                            href="javascript:;"
-                          >
+                          @if (permission.isGranted('Pages.Administration.Users.Delete')) {
+                          <a (click)="deleteUser(record)" href="javascript:;">
                             {{ 'Delete' | localize }}
                           </a>
+                          }
                         </li>
                         <li>
-                          <a (click)="showHistory(record)" *ngIf="entityHistoryEnabled" href="javascript:;">
+                          @if (entityHistoryEnabled) {
+                          <a (click)="showHistory(record)" href="javascript:;">
                             {{ 'History' | localize }}
                           </a>
+                          }
                         </li>
                       </ul>
                     </div>
                   </td>
                   <td style="width: 140px">
-                    <span *ngIf="record.authenticationSource == undefined">
+                    @if (record.authenticationSource == undefined) {
+                    <span>
                       <span class="m-badge m-badge--light m-badge--wide">
                         {{ 'SystemName' | localize }}
                       </span>
                     </span>
-                    <span *ngIf="record.authenticationSource == 'ActiveDirectory'">
+                    } @if (record.authenticationSource == 'ActiveDirectory') {
+                    <span>
                       <span class="m-badge m-badge--danger m-badge--wide">
                         {{ 'ActiveDirectoryName' | localize }}
                       </span>
                     </span>
-                    <span *ngIf="record.authenticationSource == 'LDAP'">
+                    } @if (record.authenticationSource == 'LDAP') {
+                    <span>
                       <span class="m-badge m-badge--success m-badge--wide">
                         {{ 'LDAP' | localize }}
                       </span>
                     </span>
-                    <span *ngIf="record.authenticationSource == 'Microsoft'">
+                    } @if (record.authenticationSource == 'Microsoft') {
+                    <span>
                       <span class="m-badge m-badge--metal m-badge--wide">
                         {{ 'Microsoft' | localize }}
                       </span>
                     </span>
-                    <span *ngIf="record.authenticationSource == 'Google'">
+                    } @if (record.authenticationSource == 'Google') {
+                    <span>
                       <span class="m-badge m-badge--brand m-badge--wide">
                         {{ 'Google' | localize }}
                       </span>
                     </span>
-                    <span *ngIf="record.authenticationSource == 'OpenIdConnect'">
+                    } @if (record.authenticationSource == 'OpenIdConnect') {
+                    <span>
                       <span class="m-badge m-badge--warning m-badge--wide">
                         {{ 'OpenIdConnect' | localize }}
                       </span>
                     </span>
-                    <span *ngIf="record.authenticationSource == 'AuthZero'">
+                    } @if (record.authenticationSource == 'AuthZero') {
+                    <span>
                       <span class="m-badge m-badge--warning m-badge--wide">
                         {{ 'Auth0' | localize }}
                       </span>
                     </span>
+                    }
                   </td>
                   <td style="width: 150px">
                     {{ record.userName }}
@@ -260,7 +261,9 @@
                 </tr>
               </ng-template>
             </p-table>
-            <app-empty-state *ngIf="dataTableHelper.totalRecordsCount == 0 && !dataTableHelper.isLoading" [message]="'NoData' | localize"></app-empty-state>
+            @if (dataTableHelper.totalRecordsCount == 0 && !dataTableHelper.isLoading) {
+            <app-empty-state [message]="'NoData' | localize"></app-empty-state>
+            }
             <div class="primeng-paging-container">
               <p-paginator
                 (onPageChange)="getUsers($event)"

@@ -15,14 +15,17 @@
     <div class="m-portlet m-portlet--mobile">
       <div class="m-portlet__head">
         <div class="m-portlet__head-tools">
-          <button *ngIf="isGranted('Pages.Administration.Payments.Create')" (click)="showCreateModal()" class="btn btn-primary mr-2">
+          @if (isGranted('Pages.Administration.Payments.Create')) {
+          <button (click)="showCreateModal()" class="btn btn-primary mr-2">
             <i class="flaticon-add"></i>
             {{ 'Create' | localize }}
           </button>
-          <button *ngIf="isGranted('Pages.Administration.Payments.GatewaySettings')" (click)="showGatewaySettings()" class="btn btn-info">
+          } @if (isGranted('Pages.Administration.Payments.GatewaySettings')) {
+          <button (click)="showGatewaySettings()" class="btn btn-info">
             <i class="flaticon-settings-1"></i>
             {{ 'GatewaySettings' | localize }}
           </button>
+          }
         </div>
       </div>
       <div class="m-portlet__body">
@@ -32,7 +35,14 @@
               <div class="col-xl-6">
                 <label for="PaymentsFilterText">{{ 'Filter' | localize }}</label>
                 <div class="input-group">
-                  <input [(ngModel)]="filters.filterText" [placeholder]="l('SearchWithThreeDot')" class="form-control m-input" id="PaymentsFilterText" name="filterText" type="text" />
+                  <input
+                    [(ngModel)]="filters.filterText"
+                    [placeholder]="l('SearchWithThreeDot')"
+                    class="form-control m-input"
+                    id="PaymentsFilterText"
+                    name="filterText"
+                    type="text"
+                  />
                   <span class="input-group-btn">
                     <button (click)="getPayments()" class="btn btn-primary" type="submit">
                       <i [attr.aria-label]="l('Search')" class="flaticon-search-1"></i>
@@ -42,7 +52,13 @@
               </div>
               <div class="col-xl-6">
                 <label for="PaymentsStatusFilter">{{ 'Status' | localize }}</label>
-                <select id="PaymentsStatusFilter" class="form-control m-input" [(ngModel)]="filters.status" name="statusFilter" (change)="getPayments()">
+                <select
+                  id="PaymentsStatusFilter"
+                  class="form-control m-input"
+                  [(ngModel)]="filters.status"
+                  name="statusFilter"
+                  (change)="getPayments()"
+                >
                   <option value="">{{ 'All' | localize }}</option>
                   <option value="Pending">{{ 'Pending' | localize }}</option>
                   <option value="Completed">{{ 'Completed' | localize }}</option>
@@ -56,7 +72,18 @@
 
         <div class="align-items-center">
           <div [busyIf]="dataTableHelper.isLoading" class="primeng-datatable-container">
-            <p-table (onLazyLoad)="getPayments($event)" [lazy]="true" [paginator]="false" [resizableColumns]="dataTableHelper.resizableColumns" [scrollable]="true" [value]="dataTableHelper.records" [loading]="dataTableHelper.isLoading" #dataTable rows="{{ dataTableHelper.defaultRecordsCountPerPage }}" ScrollWidth="100%">
+            <p-table
+              (onLazyLoad)="getPayments($event)"
+              [lazy]="true"
+              [paginator]="false"
+              [resizableColumns]="dataTableHelper.resizableColumns"
+              [scrollable]="true"
+              [value]="dataTableHelper.records"
+              [loading]="dataTableHelper.isLoading"
+              #dataTable
+              rows="{{ dataTableHelper.defaultRecordsCountPerPage }}"
+              ScrollWidth="100%"
+            >
               <ng-template pTemplate="header">
                 <tr>
                   <th scope="col" pSortableColumn="editionId" style="width: 15%">
@@ -90,21 +117,37 @@
                 <tr>
                   <td style="width: 15%">{{ getEditionDisplayName(record.editionId) }}</td>
                   <td style="width: 15%">{{ record.amount | number: '1.2-2' }}</td>
-                  <td style="width: 15%"><span [ngClass]="getStatusClass(record.status)">{{ getStatusLabel(record.status) }}</span></td>
+                  <td style="width: 15%">
+                    <span [ngClass]="getStatusClass(record.status)">{{ getStatusLabel(record.status) }}</span>
+                  </td>
                   <td style="width: 15%">{{ record.gateway }}</td>
                   <td style="width: 20%">{{ record.externalPaymentId }}</td>
                   <td style="width: 15%">{{ record.paymentTime | momentFormat: 'L LT' }}</td>
                   <td style="width: 10%">
-                    <button *ngIf="isGranted('Pages.Administration.Payments.Process') && record.status === 'Pending'" (click)="showProcessModal(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('ProcessPayment')">
+                    @if (isGranted('Pages.Administration.Payments.Process') && record.status === 'Pending') {
+                    <button
+                      (click)="showProcessModal(record)"
+                      class="btn btn-sm btn-clean btn-icon btn-icon-md"
+                      [attr.aria-label]="l('ProcessPayment')"
+                    >
                       <i class="flaticon-cogwheel"></i>
                     </button>
+                    }
                   </td>
                 </tr>
               </ng-template>
             </p-table>
-            <app-empty-state *ngIf="dataTableHelper.totalRecordsCount === 0 && !dataTableHelper.isLoading" [message]="'NoData' | localize"></app-empty-state>
+            @if (dataTableHelper.totalRecordsCount === 0 && !dataTableHelper.isLoading) {
+            <app-empty-state [message]="'NoData' | localize"></app-empty-state>
+            }
             <div class="primeng-paging-container">
-              <p-paginator (onPageChange)="getPayments($event)" [rows]="dataTableHelper.defaultRecordsCountPerPage" [rowsPerPageOptions]="dataTableHelper.predefinedRecordsCountPerPage" [totalRecords]="dataTableHelper.totalRecordsCount" #paginator>
+              <p-paginator
+                (onPageChange)="getPayments($event)"
+                [rows]="dataTableHelper.defaultRecordsCountPerPage"
+                [rowsPerPageOptions]="dataTableHelper.predefinedRecordsCountPerPage"
+                [totalRecords]="dataTableHelper.totalRecordsCount"
+                #paginator
+              >
               </p-paginator>
               <span class="total-records-count">
                 {{ 'TotalRecordsCount' | localize: dataTableHelper.totalRecordsCount }}
@@ -130,7 +173,9 @@
         <div class="form-group">
           <label for="PaymentEdition">{{ 'Edition' | localize }}</label>
           <select id="PaymentEdition" class="form-control" [(ngModel)]="newPayment.editionId" name="editionId">
-            <option *ngFor="let edition of editions" [ngValue]="edition.id">{{ edition.displayName }}</option>
+            @for (edition of editions; track edition) {
+            <option [ngValue]="edition.id">{{ edition.displayName }}</option>
+            }
           </select>
         </div>
         <div class="form-group">
@@ -157,29 +202,50 @@
         <div class="form-group">
           <label for="PaymentGateway">{{ 'Gateway' | localize }}</label>
           <select id="PaymentGateway" class="form-control" [(ngModel)]="newPayment.gateway" name="gateway">
-            <option *ngFor="let gateway of gateways" [ngValue]="gateway.name">{{ gateway.displayName }}</option>
+            @for (gateway of gateways; track gateway) {
+            <option [ngValue]="gateway.name">{{ gateway.displayName }}</option>
+            }
           </select>
-          <small *ngIf="newPayment.gateway && !isRecurringSupported(newPayment.gateway)" class="form-text text-muted">{{ 'GatewayDoesNotSupportRecurring' | localize }}</small>
+          @if (newPayment.gateway && !isRecurringSupported(newPayment.gateway)) {
+          <small class="form-text text-muted">{{ 'GatewayDoesNotSupportRecurring' | localize }}</small>
+          }
         </div>
         <div class="form-group">
           <div class="form-check">
-            <input id="PaymentIsRecurring" class="form-check-input" type="checkbox" [(ngModel)]="newPayment.isRecurring" name="isRecurring" [disabled]="!isRecurringSupported(newPayment.gateway)" />
+            <input
+              id="PaymentIsRecurring"
+              class="form-check-input"
+              type="checkbox"
+              [(ngModel)]="newPayment.isRecurring"
+              name="isRecurring"
+              [disabled]="!isRecurringSupported(newPayment.gateway)"
+            />
             <label class="form-check-label" for="PaymentIsRecurring">{{ 'IsRecurring' | localize }}</label>
           </div>
         </div>
-        <div class="form-group" *ngIf="getAmountPreview() !== undefined">
+        @if (getAmountPreview() !== undefined) {
+        <div class="form-group">
           <label>{{ 'AmountPreview' | localize }}</label>
           <p class="form-control-static font-weight-bold">{{ getAmountPreview() | number: '1.2-2' }}</p>
         </div>
+        }
         <div class="form-group">
           <label for="PaymentDescription">{{ 'Description' | localize }}</label>
-          <textarea id="PaymentDescription" class="form-control" [(ngModel)]="newPayment.description" name="description" rows="2"></textarea>
+          <textarea
+            id="PaymentDescription"
+            class="form-control"
+            [(ngModel)]="newPayment.description"
+            name="description"
+            rows="2"
+          ></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">{{ 'Cancel' | localize }}</button>
         <button type="button" class="btn btn-primary" [disabled]="saving" (click)="savePayment()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'Save' | localize }}
         </button>
       </div>
@@ -199,17 +265,31 @@
       <div class="modal-body">
         <div class="form-group">
           <label for="ProcessExternalPaymentId">{{ 'ExternalPaymentId' | localize }}</label>
-          <input id="ProcessExternalPaymentId" class="form-control" [(ngModel)]="processInput.externalPaymentId" name="externalPaymentId" type="text" />
+          <input
+            id="ProcessExternalPaymentId"
+            class="form-control"
+            [(ngModel)]="processInput.externalPaymentId"
+            name="externalPaymentId"
+            type="text"
+          />
         </div>
         <div class="form-group">
           <label for="ProcessGateway">{{ 'Gateway' | localize }}</label>
           <select id="ProcessGateway" class="form-control" [(ngModel)]="processInput.gateway" name="gateway">
-            <option *ngFor="let gateway of gateways" [ngValue]="gateway.name">{{ gateway.displayName }}</option>
+            @for (gateway of gateways; track gateway) {
+            <option [ngValue]="gateway.name">{{ gateway.displayName }}</option>
+            }
           </select>
         </div>
         <div class="form-group">
           <label for="ProcessGatewayResponse">{{ 'GatewayResponse' | localize }}</label>
-          <textarea id="ProcessGatewayResponse" class="form-control" [(ngModel)]="processInput.gatewayResponse" name="gatewayResponse" rows="2"></textarea>
+          <textarea
+            id="ProcessGatewayResponse"
+            class="form-control"
+            [(ngModel)]="processInput.gatewayResponse"
+            name="gatewayResponse"
+            rows="2"
+          ></textarea>
         </div>
         <div class="form-check">
           <input id="ProcessIsSuccess" class="form-check-input" [(ngModel)]="processInput.isSuccess" name="isSuccess" type="checkbox" />
@@ -219,7 +299,9 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeProcessModal()">{{ 'Cancel' | localize }}</button>
         <button type="button" class="btn btn-primary" [disabled]="saving" (click)="processPayment()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'ProcessPayment' | localize }}
         </button>
       </div>

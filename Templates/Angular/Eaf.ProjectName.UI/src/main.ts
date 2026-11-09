@@ -2,7 +2,7 @@
 import 'moment-timezone';
 import 'moment/min/locales.min';
 
-import { enableProdMode } from '@angular/core';
+import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { environment } from './environments/environment';
@@ -13,7 +13,7 @@ if (environment.production) {
 }
 
 const bootstrap = () => {
-  return platformBrowserDynamic().bootstrapModule(RootModule);
+  return platformBrowserDynamic().bootstrapModule(RootModule, { applicationProviders: [provideZoneChangeDetection()] });
 };
 
 bootstrap(); //Regular bootstrap

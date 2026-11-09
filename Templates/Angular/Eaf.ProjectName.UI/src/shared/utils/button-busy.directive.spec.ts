@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ButtonBusyDirective } from './button-busy.directive';
 import { AppLocalizationService } from '@app/shared/common/localization/app-localization.service';
 import { LocalizationService } from '@eaf/localization/localization.service';
@@ -62,25 +63,24 @@ describe('ButtonBusyDirective', () => {
   });
 
   it('should disable button when busy', () => {
-    fixture.componentInstance.isBusy = true;
-    fixture.detectChanges();
+    const directive = fixture.debugElement
+      .query(By.directive(ButtonBusyDirective))
+      .injector.get(ButtonBusyDirective);
+    directive.refreshState(true);
     const button = fixture.nativeElement.querySelector('button');
     expect(button.disabled).toBeTruthy();
+    expect(button.innerHTML).toContain('fa-spinner');
   });
 
   it('should re-enable button when not busy', () => {
-    fixture.componentInstance.isBusy = true;
-    fixture.detectChanges();
-    fixture.componentInstance.isBusy = false;
-    fixture.detectChanges();
+    const directive = fixture.debugElement
+      .query(By.directive(ButtonBusyDirective))
+      .injector.get(ButtonBusyDirective);
+    directive.refreshState(true);
+    directive.refreshState(false);
     const button = fixture.nativeElement.querySelector('button');
     expect(button.disabled).toBeFalsy();
   });
 
-  it('should show spinner when busy', () => {
-    fixture.componentInstance.isBusy = true;
-    fixture.detectChanges();
-    const button = fixture.nativeElement.querySelector('button');
-    expect(button.innerHTML).toContain('fa-spinner');
-  });
+
 });

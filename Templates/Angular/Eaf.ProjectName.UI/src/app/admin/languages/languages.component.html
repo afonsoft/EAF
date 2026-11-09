@@ -10,13 +10,11 @@
         </span>
       </div>
       <div class="col text-right mt-3 mt-md-0">
-        <button
-          *ngIf="isGranted('Pages.Administration.Languages.Create')"
-          (click)="createOrEditLanguageModal.show()"
-          class="btn btn-primary"
-        >
+        @if (isGranted('Pages.Administration.Languages.Create')) {
+        <button (click)="createOrEditLanguageModal.show()" class="btn btn-primary">
           <i class="fa fa-plus"></i> {{ 'Create' | localize }}
         </button>
+        }
       </div>
     </div>
   </div>
@@ -62,7 +60,8 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th scope="col"
+                  <th
+                    scope="col"
                     style="width: 80px"
                     [hidden]="
                       !isGrantedAny(
@@ -83,7 +82,9 @@
                     <p-sortIcon field="displayName"></p-sortIcon>
                   </th>
 
-                  <th scope="col" *ngIf="appSession.tenantId ? true : false">{{ 'Default' | localize }} *</th>
+                  @if (appSession.tenantId ? true : false) {
+                  <th scope="col">{{ 'Default' | localize }} *</th>
+                  }
                   <th scope="col" pSortableColumn="creationTime" style="width: 160px">
                     {{ 'ModificationTime' | localize }}
                     <p-sortIcon field="creationTime"></p-sortIcon>
@@ -103,82 +104,82 @@
                       </button>
                       <ul class="dropdown-menu" *dropdownMenu>
                         <li>
-                          <a
-                            href="javascript:;"
-                            *ngIf="permission.isGranted('Pages.Administration.Languages.Edit')"
-                            (click)="setAsDefaultLanguage(record)"
-                            >{{ 'SetAsDefaultLanguage' | localize }}</a
-                          >
+                          @if (permission.isGranted('Pages.Administration.Languages.Edit')) {
+                          <a href="javascript:;" (click)="setAsDefaultLanguage(record)">{{ 'SetAsDefaultLanguage' | localize }}</a>
+                          }
                         </li>
                         <li>
-                          <a
-                            href="javascript:;"
-                            *ngIf="permission.isGranted('Pages.Administration.Languages.ChangeTexts')"
-                            (click)="changeTexts(record)"
-                            >{{ 'ChangeTexts' | localize }}</a
-                          >
+                          @if (permission.isGranted('Pages.Administration.Languages.ChangeTexts')) {
+                          <a href="javascript:;" (click)="changeTexts(record)">{{ 'ChangeTexts' | localize }}</a>
+                          }
                         </li>
                         <li>
-                          <a
-                            href="javascript:;"
-                            *ngIf="permission.isGranted('Pages.Administration.Languages.Edit') && record.tenantId === appSession.tenantId"
-                            (click)="createOrEditLanguageModal.show(record.id)"
-                            >{{ 'Edit' | localize }}</a
-                          >
+                          @if (permission.isGranted('Pages.Administration.Languages.Edit') && record.tenantId === appSession.tenantId) {
+                          <a href="javascript:;" (click)="createOrEditLanguageModal.show(record.id)">{{ 'Edit' | localize }}</a>
+                          }
                         </li>
                         <li>
-                          <a
-                            href="javascript:;"
-                            *ngIf="permission.isGranted('Pages.Administration.Languages.Delete') && record.tenantId === appSession.tenantId"
-                            (click)="deleteLanguage(record)"
-                            >{{ 'Delete' | localize }}</a
-                          >
+                          @if (permission.isGranted('Pages.Administration.Languages.Delete') && record.tenantId === appSession.tenantId) {
+                          <a href="javascript:;" (click)="deleteLanguage(record)">{{ 'Delete' | localize }}</a>
+                          }
                         </li>
                       </ul>
                     </div>
                   </td>
                   <td>
-                                        {{ record.name }}
+                    {{ record.name }}
                   </td>
                   <td>
-                                        <span [ngClass]="{ 'text-bold': defaultLanguageName === record.name }">
+                    <span [ngClass]="{ 'text-bold': defaultLanguageName === record.name }">
                       <i [ngClass]="record.icon" class="margin-right-5"></i>
                       {{ record.displayName }}
-                      <span class="m-badge m-badge--brand m-badge--wide" *ngIf="defaultLanguageName === record.name">{{
-                        'Default' | localize
-                      }}</span>
+                      @if (defaultLanguageName === record.name) {
+                      <span class="m-badge m-badge--brand m-badge--wide">{{ 'Default' | localize }}</span>
+                      }
                     </span>
                   </td>
 
-                  <td *ngIf="appSession.tenantId ? true : false">
-                                        <span class="label m-badge m-badge--success m-badge--wide" *ngIf="record.tenantId !== appSession.tenantId">
+                  @if (appSession.tenantId ? true : false) {
+                  <td>
+                    @if (record.tenantId !== appSession.tenantId) {
+                    <span class="label m-badge m-badge--success m-badge--wide">
                       {{ 'Yes' | localize }}
                     </span>
-                    <span class="label m-badge m-badge--metal m-badge--wide" *ngIf="record.tenantId === appSession.tenantId">
+                    } @if (record.tenantId === appSession.tenantId) {
+                    <span class="label m-badge m-badge--metal m-badge--wide">
                       {{ 'No' | localize }}
                     </span>
+                    }
                   </td>
+                  }
 
                   <td>
-                                        {{ record.lastModificationDate | momentFormat: 'L LT' }}
+                    {{ record.lastModificationDate | momentFormat: 'L LT' }}
                   </td>
                   <td>
-                                        <span class="label m-badge m-badge--success m-badge--wide" *ngIf="!record.isDisabled">
+                    @if (!record.isDisabled) {
+                    <span class="label m-badge m-badge--success m-badge--wide">
                       {{ 'Yes' | localize }}
                     </span>
-                    <span class="label m-badge m-badge--metal m-badge--wide" *ngIf="record.isDisabled">
+                    } @if (record.isDisabled) {
+                    <span class="label m-badge m-badge--metal m-badge--wide">
                       {{ 'No' | localize }}
                     </span>
+                    }
                   </td>
                 </tr>
               </ng-template>
             </p-table>
-            <div class="primeng-no-data" *ngIf="dataTableHelper.totalRecordsCount == 0">
+            @if (dataTableHelper.totalRecordsCount == 0) {
+            <div class="primeng-no-data">
               {{ 'NoData' | localize }}
             </div>
+            }
           </div>
 
-          <p class="margin-top-20" *ngIf="appSession.tenantId">* {{ 'CanNotEditOrDeleteDefaultLanguages' | localize }}</p>
+          @if (appSession.tenantId) {
+          <p class="margin-top-20">* {{ 'CanNotEditOrDeleteDefaultLanguages' | localize }}</p>
+          }
         </div>
       </div>
     </div>

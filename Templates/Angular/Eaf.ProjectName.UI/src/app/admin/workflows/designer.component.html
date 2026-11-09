@@ -1,156 +1,201 @@
 <div [@routerTransition]>
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    <h1>{{ (isNew ? "CreateNewWorkflow" : "EditWorkflow") | localize }}</h1>
-                </div>
-                <div class="col-6 text-right">
-                    <button class="btn btn-default mr-1" [routerLink]="['/app/admin/workflows']">
-                        <i class="fa fa-arrow-left"></i> {{ "Back" | localize }}
-                    </button>
-                    <button class="btn btn-primary mr-1" (click)="save(false)" [disabled]="saving">
-                        <i class="fa fa-save"></i> {{ "Save" | localize }}
-                    </button>
-                    <button class="btn btn-success" (click)="save(true)" [disabled]="saving">
-                        <i class="fa fa-upload"></i> {{ "SaveAndPublish" | localize }}
-                    </button>
-                </div>
-            </div>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-6">
+          <h1>{{ (isNew ? 'CreateNewWorkflow' : 'EditWorkflow') | localize }}</h1>
         </div>
-    </section>
-    <section class="content px-2">
-        <div class="container-fluid" *ngIf="!loading">
-            <div class="card">
-                <div class="card-header"><h3 class="card-title">{{ "WorkflowDefinition" | localize }}</h3></div>
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group col-md-4">
-                            <label for="wfName">{{ "Name" | localize }} *</label>
-                            <input id="wfName" class="form-control" [(ngModel)]="definition.name" />
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="wfCategory">{{ "Category" | localize }}</label>
-                            <input id="wfCategory" class="form-control" [(ngModel)]="definition.category" />
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="wfDescription">{{ "Description" | localize }}</label>
-                            <input id="wfDescription" class="form-control" [(ngModel)]="definition.description" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">{{ "FormFields" | localize }}</h3>
-                    <button class="btn btn-sm btn-primary" (click)="addField()"><i class="fa fa-plus"></i> {{ "AddField" | localize }}</button>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col">{{ "FieldId" | localize }}</th>
-                                <th scope="col">{{ "Label" | localize }}</th>
-                                <th scope="col">{{ "Type" | localize }}</th>
-                                <th scope="col">{{ "Required" | localize }}</th>
-                                <th scope="col">{{ "Options" | localize }}</th>
-                                <th scope="col" style="width: 60px"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let f of form.fields; let i = index">
-                                <td><input class="form-control form-control-sm" [(ngModel)]="f.id" aria-label="field id" /></td>
-                                <td><input class="form-control form-control-sm" [(ngModel)]="f.label" aria-label="field label" /></td>
-                                <td>
-                                    <select class="form-control form-control-sm" [(ngModel)]="f.type" aria-label="field type">
-                                        <option *ngFor="let t of fieldTypes" [value]="t">{{ t }}</option>
-                                    </select>
-                                </td>
-                                <td><input type="checkbox" [(ngModel)]="f.required" aria-label="field required" /></td>
-                                <td><input class="form-control form-control-sm" [ngModel]="(f.options || []).join(',')"
-                                           (ngModelChange)="setFieldOptions(f, $event)"
-                                           aria-label="field options" /></td>
-                                <td><button class="btn btn-sm btn-danger" (click)="removeField(i)" aria-label="remove field"><i class="fa fa-trash"></i></button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">{{ "Steps" | localize }}</h3>
-                    <button class="btn btn-sm btn-primary" (click)="addStep()"><i class="fa fa-plus"></i> {{ "AddStep" | localize }}</button>
-                </div>
-                <div class="card-body">
-                    <div class="form-group col-md-4 px-0">
-                        <label for="wfStart">{{ "StartStep" | localize }}</label>
-                        <select id="wfStart" class="form-control" [(ngModel)]="flow.startStepId">
-                            <option *ngFor="let sid of stepIds()" [value]="sid">{{ sid }}</option>
-                        </select>
-                    </div>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col">{{ "StepId" | localize }}</th>
-                                <th scope="col">{{ "Name" | localize }}</th>
-                                <th scope="col">{{ "Type" | localize }}</th>
-                                <th scope="col">{{ "NextStep" | localize }}</th>
-                                <th scope="col">{{ "RejectStep" | localize }}</th>
-                                <th scope="col">{{ "Condition" | localize }}</th>
-                                <th scope="col">{{ "Assignee" | localize }}</th>
-                                <th scope="col">{{ "Quorum" | localize }}</th>
-                                <th scope="col">{{ "SlaHours" | localize }}</th>
-                                <th scope="col" style="width: 60px"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let s of flow.steps; let i = index">
-                                <td><input class="form-control form-control-sm" [(ngModel)]="s.id" aria-label="step id" /></td>
-                                <td><input class="form-control form-control-sm" [(ngModel)]="s.name" aria-label="step name" /></td>
-                                <td>
-                                    <select class="form-control form-control-sm" [(ngModel)]="s.type" aria-label="step type">
-                                        <option *ngFor="let t of stepTypes" [value]="t">{{ t }}</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <select class="form-control form-control-sm" [(ngModel)]="s.nextStepId" aria-label="next step">
-                                        <option [value]="">-</option>
-                                        <option *ngFor="let sid of stepIds()" [value]="sid">{{ sid }}</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <select class="form-control form-control-sm" [(ngModel)]="s.rejectStepId" aria-label="reject step">
-                                        <option [value]="">-</option>
-                                        <option *ngFor="let sid of stepIds()" [value]="sid">{{ sid }}</option>
-                                    </select>
-                                </td>
-                                <td><input class="form-control form-control-sm" [(ngModel)]="s.condition" aria-label="condition" /></td>
-                                <td>
-                                    <select class="form-control form-control-sm mb-1" [(ngModel)]="s.assignee.kind"
-                                            *ngIf="s.type === 'approval' && s.assignee" aria-label="assignee kind">
-                                        <option *ngFor="let k of assigneeKinds" [value]="k">{{ k }}</option>
-                                    </select>
-                                    <input class="form-control form-control-sm" *ngIf="s.type === 'approval' && s.assignee && s.assignee.kind !== 'manager'"
-                                           [ngModel]="assigneeIdsText(s)" (ngModelChange)="setAssigneeIds(s, $event)"
-                                           placeholder="ids, comma separated" aria-label="assignee ids" />
-                                </td>
-                                <td>
-                                    <select class="form-control form-control-sm mb-1" [(ngModel)]="s.assignee.quorum"
-                                            *ngIf="s.type === 'approval' && s.assignee" aria-label="quorum">
-                                        <option *ngFor="let q of quorumKinds" [value]="q">{{ q }}</option>
-                                    </select>
-                                    <input class="form-control form-control-sm" type="number" *ngIf="s.type === 'approval' && s.assignee && s.assignee.quorum === 'quorum'"
-                                           [(ngModel)]="s.assignee.quorumCount" aria-label="quorum count" />
-                                </td>
-                                <td><input class="form-control form-control-sm" type="number" [(ngModel)]="s.dueTimeHours" aria-label="sla hours" /></td>
-                                <td><button class="btn btn-sm btn-danger" (click)="removeStep(i)" aria-label="remove step"><i class="fa fa-trash"></i></button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="col-6 text-right">
+          <button class="btn btn-default mr-1" [routerLink]="['/app/admin/workflows']">
+            <i class="fa fa-arrow-left"></i> {{ 'Back' | localize }}
+          </button>
+          <button class="btn btn-primary mr-1" (click)="save(false)" [disabled]="saving">
+            <i class="fa fa-save"></i> {{ 'Save' | localize }}
+          </button>
+          <button class="btn btn-success" (click)="save(true)" [disabled]="saving">
+            <i class="fa fa-upload"></i> {{ 'SaveAndPublish' | localize }}
+          </button>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
+  <section class="content px-2">
+    @if (!loading) {
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ 'WorkflowDefinition' | localize }}</h3>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="wfName">{{ 'Name' | localize }} *</label>
+              <input id="wfName" class="form-control" [(ngModel)]="definition.name" />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="wfCategory">{{ 'Category' | localize }}</label>
+              <input id="wfCategory" class="form-control" [(ngModel)]="definition.category" />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="wfDescription">{{ 'Description' | localize }}</label>
+              <input id="wfDescription" class="form-control" [(ngModel)]="definition.description" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="card-title">{{ 'FormFields' | localize }}</h3>
+          <button class="btn btn-sm btn-primary" (click)="addField()"><i class="fa fa-plus"></i> {{ 'AddField' | localize }}</button>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'FieldId' | localize }}</th>
+                <th scope="col">{{ 'Label' | localize }}</th>
+                <th scope="col">{{ 'Type' | localize }}</th>
+                <th scope="col">{{ 'Required' | localize }}</th>
+                <th scope="col">{{ 'Options' | localize }}</th>
+                <th scope="col" style="width: 60px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of form.fields; track f; let i = $index) {
+              <tr>
+                <td><input class="form-control form-control-sm" [(ngModel)]="f.id" aria-label="field id" /></td>
+                <td><input class="form-control form-control-sm" [(ngModel)]="f.label" aria-label="field label" /></td>
+                <td>
+                  <select class="form-control form-control-sm" [(ngModel)]="f.type" aria-label="field type">
+                    @for (t of fieldTypes; track t) {
+                    <option [value]="t">{{ t }}</option>
+                    }
+                  </select>
+                </td>
+                <td><input type="checkbox" [(ngModel)]="f.required" aria-label="field required" /></td>
+                <td>
+                  <input
+                    class="form-control form-control-sm"
+                    [ngModel]="(f.options || []).join(',')"
+                    (ngModelChange)="setFieldOptions(f, $event)"
+                    aria-label="field options"
+                  />
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="removeField(i)" aria-label="remove field">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="card-title">{{ 'Steps' | localize }}</h3>
+          <button class="btn btn-sm btn-primary" (click)="addStep()"><i class="fa fa-plus"></i> {{ 'AddStep' | localize }}</button>
+        </div>
+        <div class="card-body">
+          <div class="form-group col-md-4 px-0">
+            <label for="wfStart">{{ 'StartStep' | localize }}</label>
+            <select id="wfStart" class="form-control" [(ngModel)]="flow.startStepId">
+              @for (sid of stepIds(); track sid) {
+              <option [value]="sid">{{ sid }}</option>
+              }
+            </select>
+          </div>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'StepId' | localize }}</th>
+                <th scope="col">{{ 'Name' | localize }}</th>
+                <th scope="col">{{ 'Type' | localize }}</th>
+                <th scope="col">{{ 'NextStep' | localize }}</th>
+                <th scope="col">{{ 'RejectStep' | localize }}</th>
+                <th scope="col">{{ 'Condition' | localize }}</th>
+                <th scope="col">{{ 'Assignee' | localize }}</th>
+                <th scope="col">{{ 'Quorum' | localize }}</th>
+                <th scope="col">{{ 'SlaHours' | localize }}</th>
+                <th scope="col" style="width: 60px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of flow.steps; track s; let i = $index) {
+              <tr>
+                <td><input class="form-control form-control-sm" [(ngModel)]="s.id" aria-label="step id" /></td>
+                <td><input class="form-control form-control-sm" [(ngModel)]="s.name" aria-label="step name" /></td>
+                <td>
+                  <select class="form-control form-control-sm" [(ngModel)]="s.type" aria-label="step type">
+                    @for (t of stepTypes; track t) {
+                    <option [value]="t">{{ t }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <select class="form-control form-control-sm" [(ngModel)]="s.nextStepId" aria-label="next step">
+                    <option [value]="">-</option>
+                    @for (sid of stepIds(); track sid) {
+                    <option [value]="sid">{{ sid }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <select class="form-control form-control-sm" [(ngModel)]="s.rejectStepId" aria-label="reject step">
+                    <option [value]="">-</option>
+                    @for (sid of stepIds(); track sid) {
+                    <option [value]="sid">{{ sid }}</option>
+                    }
+                  </select>
+                </td>
+                <td><input class="form-control form-control-sm" [(ngModel)]="s.condition" aria-label="condition" /></td>
+                <td>
+                  @if (s.type === 'approval' && s.assignee) {
+                  <select class="form-control form-control-sm mb-1" [(ngModel)]="s.assignee.kind" aria-label="assignee kind">
+                    @for (k of assigneeKinds; track k) {
+                    <option [value]="k">{{ k }}</option>
+                    }
+                  </select>
+                  } @if (s.type === 'approval' && s.assignee && s.assignee.kind !== 'manager') {
+                  <input
+                    class="form-control form-control-sm"
+                    [ngModel]="assigneeIdsText(s)"
+                    (ngModelChange)="setAssigneeIds(s, $event)"
+                    placeholder="ids, comma separated"
+                    aria-label="assignee ids"
+                  />
+                  }
+                </td>
+                <td>
+                  @if (s.type === 'approval' && s.assignee) {
+                  <select class="form-control form-control-sm mb-1" [(ngModel)]="s.assignee.quorum" aria-label="quorum">
+                    @for (q of quorumKinds; track q) {
+                    <option [value]="q">{{ q }}</option>
+                    }
+                  </select>
+                  } @if (s.type === 'approval' && s.assignee && s.assignee.quorum === 'quorum') {
+                  <input
+                    class="form-control form-control-sm"
+                    type="number"
+                    [(ngModel)]="s.assignee.quorumCount"
+                    aria-label="quorum count"
+                  />
+                  }
+                </td>
+                <td><input class="form-control form-control-sm" type="number" [(ngModel)]="s.dueTimeHours" aria-label="sla hours" /></td>
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="removeStep(i)" aria-label="remove step">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    }
+  </section>
 </div>

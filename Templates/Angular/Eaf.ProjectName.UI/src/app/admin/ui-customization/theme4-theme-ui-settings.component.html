@@ -1,4 +1,5 @@
-﻿<tabset class="tab-container tabbable-line" *ngIf="settings">
+﻿@if (settings) {
+<tabset class="tab-container tabbable-line">
   <tab heading="{{ 'UiCustomization_Header' | localize }}" customClass="m-tabs__item">
     <form autocomplete="off" id="HeaderSettingsForm">
       <div class="form-group m-form__group">
@@ -37,15 +38,18 @@
     </form>
   </tab>
 </tabset>
+}
 
 <div class="m--margin-top-40">
-  <button *ngIf="isGranted('Pages.Administration.UiCustomization')" (click)="updateDefaultUiManagementSettings()" class="btn btn-primary">
+  @if (isGranted('Pages.Administration.UiCustomization')) {
+  <button (click)="updateDefaultUiManagementSettings()" class="btn btn-primary">
     <i class="fa fa-save"></i> {{ 'SaveAsSystemDefault' | localize }}
   </button>
-  <button *ngIf="!isGranted('Pages.Administration.UiCustomization')" (click)="updateUiManagementSettings()" class="btn btn-primary">
-    <i class="fa fa-save"></i> {{ 'Save' | localize }}
-  </button>
-  <button *ngIf="!isGranted('Pages.Administration.UiCustomization')" (click)="useSystemDefaultSettings()" class="btn btn-metal">
+  } @if (!isGranted('Pages.Administration.UiCustomization')) {
+  <button (click)="updateUiManagementSettings()" class="btn btn-primary"><i class="fa fa-save"></i> {{ 'Save' | localize }}</button>
+  } @if (!isGranted('Pages.Administration.UiCustomization')) {
+  <button (click)="useSystemDefaultSettings()" class="btn btn-metal">
     {{ 'UseSystemDefaults' | localize }}
   </button>
+  }
 </div>

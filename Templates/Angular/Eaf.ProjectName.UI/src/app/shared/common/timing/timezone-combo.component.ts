@@ -7,7 +7,9 @@ import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@an
   standalone: false,
   selector: 'timezone-combo',
   template: ` <select class="form-control" [formControl]="selectedTimeZone">
-    <option *ngFor="let timeZone of timeZones" [value]="timeZone.value">{{ timeZone.name }}</option>
+    @for (timeZone of timeZones; track timeZone) {
+    <option [value]="timeZone.value">{{ timeZone.name }}</option>
+    }
   </select>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -34,7 +36,6 @@ export class TimeZoneComboComponent extends AppComponentBase implements OnInit, 
   }
 
   ngOnInit(): void {
-
     this._timingService.getTimezones(this.defaultTimezoneScope).subscribe(result => {
       this.timeZones = result.items;
     });
@@ -54,8 +55,10 @@ export class TimeZoneComboComponent extends AppComponentBase implements OnInit, 
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void { //NOSONAR ControlValueAccessor interface requires a boolean flag
-    if (isDisabled) { //NOSONAR ControlValueAccessor interface requires a boolean flag
+  setDisabledState?(isDisabled: boolean): void {
+    //NOSONAR ControlValueAccessor interface requires a boolean flag
+    if (isDisabled) {
+      //NOSONAR ControlValueAccessor interface requires a boolean flag
       this.selectedTimeZone.disable();
     } else {
       this.selectedTimeZone.enable();

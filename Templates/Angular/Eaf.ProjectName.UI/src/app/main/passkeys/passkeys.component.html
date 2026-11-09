@@ -1,105 +1,93 @@
 <div [@routerTransition]>
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    <h1>{{ "Passkeys" | localize }}</h1>
-                </div>
-                <div class="col-6 text-right">
-                    <button
-                        class="btn btn-primary"
-                        (click)="openCreateModal()"
-                        [disabled]="!webauthnSupported">
-                        <i class="fa fa-plus"></i> {{ "RegisterPasskey" | localize }}
-                    </button>
-                </div>
-            </div>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-6">
+          <h1>{{ 'Passkeys' | localize }}</h1>
         </div>
-    </section>
-    <section class="content px-2">
-        <div class="container-fluid">
-            <div class="card" *ngIf="!webauthnSupported">
-                <div class="card-body">
-                    <p class="text-warning m-0">{{ "PasskeysNotSupportedBrowser" | localize }}</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <p-table
-                        [value]="passkeys"
-                        [loading]="loading"
-                        [paginator]="true"
-                        [rows]="10">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th>{{ "Name" | localize }}</th>
-                                <th>{{ "Transports" | localize }}</th>
-                                <th>{{ "LastUsedTime" | localize }}</th>
-                                <th>{{ "CreationTime" | localize }}</th>
-                                <th style="width: 120px">{{ "Actions" | localize }}</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-passkey>
-                            <tr>
-                                <td>{{ passkey.name }}</td>
-                                <td>{{ passkey.transports }}</td>
-                                <td>
-                                    <ng-container *ngIf="passkey.lastUsedTime; else neverUsed">
-                                        {{ passkey.lastUsedTime | momentFormat: "lll" }}
-                                    </ng-container>
-                                    <ng-template #neverUsed>-</ng-template>
-                                </td>
-                                <td>{{ passkey.creationTime | momentFormat: "lll" }}</td>
-                                <td>
-                                    <button
-                                        class="btn btn-sm btn-danger"
-                                        (click)="deletePasskey(passkey)">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr>
-                                <td colspan="5" class="text-center">
-                                    {{ "NoDataAvailable" | localize }}
-                                </td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
-                </div>
-            </div>
+        <div class="col-6 text-right">
+          <button class="btn btn-primary" (click)="openCreateModal()" [disabled]="!webauthnSupported">
+            <i class="fa fa-plus"></i> {{ 'RegisterPasskey' | localize }}
+          </button>
         </div>
-    </section>
-
-    <div bsModal #createModal="bs-modal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">{{ "RegisterPasskey" | localize }}</h4>
-                    <button type="button" class="close" (click)="createModal.hide()">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>{{ "PasskeyName" | localize }}</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            [(ngModel)]="newKeyName"
-                            [placeholder]="l('PasskeyNameHint')" />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-default" (click)="createModal.hide()">
-                        {{ "Cancel" | localize }}
-                    </button>
-                    <button class="btn btn-primary" (click)="save()" [disabled]="saving">
-                        {{ "Register" | localize }}
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </section>
+  <section class="content px-2">
+    <div class="container-fluid">
+      @if (!webauthnSupported) {
+      <div class="card">
+        <div class="card-body">
+          <p class="text-warning m-0">{{ 'PasskeysNotSupportedBrowser' | localize }}</p>
+        </div>
+      </div>
+      }
+      <div class="card">
+        <div class="card-body">
+          <p-table [value]="passkeys" [loading]="loading" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>{{ 'Name' | localize }}</th>
+                <th>{{ 'Transports' | localize }}</th>
+                <th>{{ 'LastUsedTime' | localize }}</th>
+                <th>{{ 'CreationTime' | localize }}</th>
+                <th style="width: 120px">{{ 'Actions' | localize }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-passkey>
+              <tr>
+                <td>{{ passkey.name }}</td>
+                <td>{{ passkey.transports }}</td>
+                <td>
+                  @if (passkey.lastUsedTime) {
+                  {{ passkey.lastUsedTime | momentFormat: 'lll' }}
+                  } @else { - }
+                </td>
+                <td>{{ passkey.creationTime | momentFormat: 'lll' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="deletePasskey(passkey)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5" class="text-center">
+                  {{ 'NoDataAvailable' | localize }}
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div bsModal #createModal="bs-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{ 'RegisterPasskey' | localize }}</h4>
+          <button type="button" class="close" (click)="createModal.hide()">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>{{ 'PasskeyName' | localize }}</label>
+            <input type="text" class="form-control" [(ngModel)]="newKeyName" [placeholder]="l('PasskeyNameHint')" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default" (click)="createModal.hide()">
+            {{ 'Cancel' | localize }}
+          </button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+            {{ 'Register' | localize }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

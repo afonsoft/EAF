@@ -12,8 +12,10 @@
     </div>
 
     <div class="m-content">
-      <div class="row" *ngIf="!loading">
-        <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let tile of tiles">
+      @if (!loading) {
+      <div class="row">
+        @for (tile of tiles; track tile) {
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
           <div class="m-portlet m-portlet--bordered-semi m-portlet--skin-dark" [ngClass]="'bg-' + tile.style">
             <div class="m-portlet__head">
               <div class="m-portlet__head-caption">
@@ -36,13 +38,15 @@
             </div>
           </div>
         </div>
+        }
       </div>
-
-      <div class="text-center p-5" *ngIf="loading">
+      } @if (loading) {
+      <div class="text-center p-5">
         <i class="fa fa-spinner fa-spin fa-2x"></i>
       </div>
-
-      <app-empty-state *ngIf="!loading && tiles.length === 0" [message]="'NoData' | localize"></app-empty-state>
+      } @if (!loading && tiles.length === 0) {
+      <app-empty-state [message]="'NoData' | localize"></app-empty-state>
+      }
     </div>
   </div>
 </div>

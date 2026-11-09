@@ -15,25 +15,42 @@
     <div class="m-portlet m-portlet--mobile">
       <div class="m-portlet__head">
         <div class="m-portlet__head-tools">
-          <button *ngIf="isGranted('Pages.Administration.Users.Delegation')" (click)="showCreateModal()" class="btn btn-primary">
+          @if (isGranted('Pages.Administration.Users.Delegation')) {
+          <button (click)="showCreateModal()" class="btn btn-primary">
             <i class="flaticon-add"></i>
             {{ 'Create' | localize }}
           </button>
+          }
         </div>
       </div>
       <div class="m-portlet__body">
         <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item">
-            <a class="nav-link" [class.active]="activeTab === 'myDelegations'" (click)="activeTab = 'myDelegations'" href="javascript:;" role="tab">{{ 'MyDelegations' | localize }}</a>
+            <a
+              class="nav-link"
+              [class.active]="activeTab === 'myDelegations'"
+              (click)="activeTab = 'myDelegations'"
+              href="javascript:;"
+              role="tab"
+              >{{ 'MyDelegations' | localize }}</a
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link" [class.active]="activeTab === 'delegatedUsers'" (click)="activeTab = 'delegatedUsers'" href="javascript:;" role="tab">{{ 'DelegatedUsers' | localize }}</a>
+            <a
+              class="nav-link"
+              [class.active]="activeTab === 'delegatedUsers'"
+              (click)="activeTab = 'delegatedUsers'"
+              href="javascript:;"
+              role="tab"
+              >{{ 'DelegatedUsers' | localize }}</a
+            >
           </li>
         </ul>
 
         <div class="tab-content pt-3" [busyIf]="loading">
           <div class="tab-pane active" role="tabpanel">
-            <p-table [value]="activeTab === 'myDelegations' ? myDelegations : delegatedUsers" [scrollable]="true" ScrollWidth="100%" *ngIf="(activeTab === 'myDelegations' ? myDelegations : delegatedUsers).length > 0">
+            @if ((activeTab === 'myDelegations' ? myDelegations : delegatedUsers).length > 0) {
+            <p-table [value]="activeTab === 'myDelegations' ? myDelegations : delegatedUsers" [scrollable]="true" ScrollWidth="100%">
               <ng-template pTemplate="header">
                 <tr>
                   <th scope="col" style="width: 20%">{{ 'SourceUser' | localize }}</th>
@@ -51,17 +68,25 @@
                   <td style="width: 15%">{{ record.startTime | momentFormat: 'L LT' }}</td>
                   <td style="width: 15%">{{ record.endTime | momentFormat: 'L LT' }}</td>
                   <td style="width: 15%">
-                    <app-status-badge [value]="record.isActive" [trueLabel]="'Yes' | localize" [falseLabel]="'No' | localize"></app-status-badge>
+                    <app-status-badge
+                      [value]="record.isActive"
+                      [trueLabel]="'Yes' | localize"
+                      [falseLabel]="'No' | localize"
+                    ></app-status-badge>
                   </td>
                   <td style="width: 15%">
-                    <button *ngIf="isGranted('Pages.Administration.Users.Delegation')" (click)="cancel(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Cancel')">
+                    @if (isGranted('Pages.Administration.Users.Delegation')) {
+                    <button (click)="cancel(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Cancel')">
                       <i class="flaticon-cancel"></i>
                     </button>
+                    }
                   </td>
                 </tr>
               </ng-template>
             </p-table>
-            <app-empty-state *ngIf="(activeTab === 'myDelegations' ? myDelegations : delegatedUsers).length === 0 && !loading" [message]="'NoData' | localize"></app-empty-state>
+            } @if ((activeTab === 'myDelegations' ? myDelegations : delegatedUsers).length === 0 && !loading) {
+            <app-empty-state [message]="'NoData' | localize"></app-empty-state>
+            }
           </div>
         </div>
       </div>
@@ -83,12 +108,20 @@
           <label for="DelegationTargetUserId">{{ 'TargetUser' | localize }}</label>
           <select id="DelegationTargetUserId" class="form-control" [(ngModel)]="newDelegation.targetUserId" name="targetUserId">
             <option [ngValue]="undefined">{{ 'Select' | localize }}</option>
-            <option *ngFor="let user of allUsers" [ngValue]="user.id">{{ user.name }} {{ user.surname }} ({{ user.userName }})</option>
+            @for (user of allUsers; track user) {
+            <option [ngValue]="user.id">{{ user.name }} {{ user.surname }} ({{ user.userName }})</option>
+            }
           </select>
         </div>
         <div class="form-group">
           <label for="DelegationStartTime">{{ 'StartTime' | localize }}</label>
-          <input id="DelegationStartTime" class="form-control" [(ngModel)]="newDelegation.startTime" name="startTime" type="datetime-local" />
+          <input
+            id="DelegationStartTime"
+            class="form-control"
+            [(ngModel)]="newDelegation.startTime"
+            name="startTime"
+            type="datetime-local"
+          />
         </div>
         <div class="form-group">
           <label for="DelegationEndTime">{{ 'EndTime' | localize }}</label>
@@ -96,13 +129,21 @@
         </div>
         <div class="form-group">
           <label for="DelegationDescription">{{ 'Description' | localize }}</label>
-          <textarea id="DelegationDescription" class="form-control" [(ngModel)]="newDelegation.description" name="description" rows="2"></textarea>
+          <textarea
+            id="DelegationDescription"
+            class="form-control"
+            [(ngModel)]="newDelegation.description"
+            name="description"
+            rows="2"
+          ></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="closeModal()">{{ 'Cancel' | localize }}</button>
         <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'Save' | localize }}
         </button>
       </div>

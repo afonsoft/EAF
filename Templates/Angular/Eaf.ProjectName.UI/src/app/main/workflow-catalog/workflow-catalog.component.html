@@ -1,86 +1,110 @@
 <div [@routerTransition]>
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <h1>{{ "WorkflowCatalog" | localize }}</h1>
-                </div>
-            </div>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <h1>{{ 'WorkflowCatalog' | localize }}</h1>
         </div>
-    </section>
-    <section class="content px-2">
-        <div class="container-fluid">
-            <div class="card">
-                <div class="card-body">
-                    <p-table [value]="definitions" [loading]="loading" [paginator]="true" [rows]="10">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th scope="col">{{ "Name" | localize }}</th>
-                                <th scope="col">{{ "Category" | localize }}</th>
-                                <th scope="col">{{ "Description" | localize }}</th>
-                                <th scope="col" style="width: 160px">{{ "Actions" | localize }}</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-def>
-                            <tr>
-                                <td>{{ def.name }}</td>
-                                <td>{{ def.category || "-" }}</td>
-                                <td>{{ def.description || "-" }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" (click)="openStart(def)">
-                                        <i class="fa fa-play"></i> {{ "StartRequest" | localize }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr><td colspan="4">{{ "NoPublishedWorkflows" | localize }}</td></tr>
-                        </ng-template>
-                    </p-table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="modal show d-block" tabindex="-1" role="dialog" *ngIf="showStartModal" style="background: rgba(0,0,0,.4)">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ selected?.name }}</h5>
-                    <button type="button" class="close" (click)="closeStart()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group" *ngFor="let f of fields">
-                        <label [for]="'wf_field_' + f.id">{{ f.label }}<span *ngIf="f.required"> *</span></label>
-                        <textarea *ngIf="f.type === 'textarea'" class="form-control" [id]="'wf_field_' + f.id" [(ngModel)]="values[f.id]"></textarea>
-                        <select *ngIf="f.type === 'select'" class="form-control" [id]="'wf_field_' + f.id" [(ngModel)]="values[f.id]">
-                            <option *ngFor="let o of f.options" [value]="o">{{ o }}</option>
-                        </select>
-                        <input *ngIf="f.type !== 'textarea' && f.type !== 'select' && f.type !== 'checkbox'"
-                               class="form-control" [id]="'wf_field_' + f.id"
-                               [type]="f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'"
-                               [(ngModel)]="values[f.id]" />
-                        <input *ngIf="f.type === 'checkbox'" type="checkbox" class="form-check-input" [id]="'wf_field_' + f.id" [(ngModel)]="values[f.id]" />
-                    </div>
-                    <div class="alert alert-info" *ngIf="simulation">
-                        <strong>{{ "SimulatedPath" | localize }}:</strong>
-                        {{ simulation.path.join(' → ') }}
-                        <div *ngFor="let step of simulation.path | keyvalue">
-                            <small *ngIf="simulation.assignees[step.key]">{{ "Assignees" | localize }}: {{ simulation.assignees[step.key].join(', ') }}</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-default" (click)="simulate()" *ngIf="!submitting">
-                        <i class="fa fa-eye"></i> {{ "Simulate" | localize }}
-                    </button>
-                    <button class="btn btn-primary" (click)="start()" [disabled]="submitting">
-                        <i class="fa fa-play"></i> {{ "Submit" | localize }}
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </section>
+  <section class="content px-2">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-body">
+          <p-table [value]="definitions" [loading]="loading" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th scope="col">{{ 'Name' | localize }}</th>
+                <th scope="col">{{ 'Category' | localize }}</th>
+                <th scope="col">{{ 'Description' | localize }}</th>
+                <th scope="col" style="width: 160px">{{ 'Actions' | localize }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-def>
+              <tr>
+                <td>{{ def.name }}</td>
+                <td>{{ def.category || '-' }}</td>
+                <td>{{ def.description || '-' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary" (click)="openStart(def)">
+                    <i class="fa fa-play"></i> {{ 'StartRequest' | localize }}
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="4">{{ 'NoPublishedWorkflows' | localize }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @if (showStartModal) {
+  <div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0, 0, 0, 0.4)">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ selected?.name }}</h5>
+          <button type="button" class="close" (click)="closeStart()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          @for (f of fields; track f) {
+          <div class="form-group">
+            <label [for]="'wf_field_' + f.id"
+              >{{ f.label }}@if (f.required) {
+              <span> *</span>
+              }</label
+            >
+            @if (f.type === 'textarea') {
+            <textarea class="form-control" [id]="'wf_field_' + f.id" [(ngModel)]="values[f.id]"></textarea>
+            } @if (f.type === 'select') {
+            <select class="form-control" [id]="'wf_field_' + f.id" [(ngModel)]="values[f.id]">
+              @for (o of f.options; track o) {
+              <option [value]="o">{{ o }}</option>
+              }
+            </select>
+            } @if (f.type !== 'textarea' && f.type !== 'select' && f.type !== 'checkbox') {
+            <input
+              class="form-control"
+              [id]="'wf_field_' + f.id"
+              [type]="f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'"
+              [(ngModel)]="values[f.id]"
+            />
+            } @if (f.type === 'checkbox') {
+            <input type="checkbox" class="form-check-input" [id]="'wf_field_' + f.id" [(ngModel)]="values[f.id]" />
+            }
+          </div>
+          } @if (simulation) {
+          <div class="alert alert-info">
+            <strong>{{ 'SimulatedPath' | localize }}:</strong>
+            {{ simulation.path.join(' → ') }}
+            @for (step of simulation.path | keyvalue; track step) {
+            <div>
+              @if (simulation.assignees[step.key]) {
+              <small>{{ 'Assignees' | localize }}: {{ simulation.assignees[step.key].join(', ') }}</small>
+              }
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="modal-footer">
+          @if (!submitting) {
+          <button class="btn btn-default" (click)="simulate()"><i class="fa fa-eye"></i> {{ 'Simulate' | localize }}</button>
+          }
+          <button class="btn btn-primary" (click)="start()" [disabled]="submitting">
+            <i class="fa fa-play"></i> {{ 'Submit' | localize }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
 </div>

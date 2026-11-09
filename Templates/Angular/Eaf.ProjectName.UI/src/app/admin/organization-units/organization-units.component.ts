@@ -1,8 +1,8 @@
 import { Component, Injector, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { AppComponentBase } from '@shared/common/app-component-base';
+import type { IOrganizationUnitDto } from '@shared/service-proxies/service-proxies';
 import {
-    IOrganizationUnitDto,
     OrganizationUnitServiceProxy,
     CreateOrganizationUnitInput,
     UpdateOrganizationUnitInput,

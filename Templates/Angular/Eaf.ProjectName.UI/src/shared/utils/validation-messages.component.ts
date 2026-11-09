@@ -1,7 +1,6 @@
 ﻿import { Component, Input } from '@angular/core';
 import { AppLocalizationService } from '@app/shared/common/localization/app-localization.service';
 
-
 class ErrorDef {
   error: string;
   localizationKey: string;
@@ -11,13 +10,19 @@ class ErrorDef {
 @Component({
   standalone: false,
   selector: '<validation-messages>',
-  template: `<div class="has-danger" *ngIf="formCtrl.invalid && (formCtrl.dirty || formCtrl.touched)">
-    <div *ngFor="let errorDef of errorDefsInternal">
-      <div *ngIf="getErrorDefinitionIsInValid(errorDef)" class="form-control-feedback">
-        {{ getErrorDefinitionMessage(errorDef) }}
+  template: `@if (formCtrl.invalid && (formCtrl.dirty || formCtrl.touched)) {
+    <div class="has-danger">
+      @for (errorDef of errorDefsInternal; track errorDef) {
+      <div>
+        @if (getErrorDefinitionIsInValid(errorDef)) {
+        <div class="form-control-feedback">
+          {{ getErrorDefinitionMessage(errorDef) }}
+        </div>
+        }
       </div>
+      }
     </div>
-  </div>`,
+    }`,
 })
 export class ValidationMessagesComponent {
   _errorDefs: ErrorDef[] = [];

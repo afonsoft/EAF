@@ -20,13 +20,14 @@
       <div class="m-dropdown__content">
         <div class="row">
           <div class="text-left col-md-8">
+            @if (unreadNotificationCount) {
             <a
               class="m-link"
               href="javascript:;"
               (click)="setAllNotificationsAsRead(); $event.preventDefault(); $event.stopPropagation()"
-              *ngIf="unreadNotificationCount"
               >{{ 'SetAllAsRead' | localize }}</a
             >
+            }
           </div>
           <div class="text-right col-md-4">
             <a (click)="openNotificationSettingsModal()" class="m-link text-right" href="javascript:;">{{ 'Settings' | localize }}</a>
@@ -36,8 +37,8 @@
         <div>
           <div class="m-list-timeline m-list-timeline--skin-light m-nav">
             <div class="m-list-timeline__items" [ngClass]="{ empty: !notifications.length }">
+              @for (notification of notifications; track notification) {
               <div
-                *ngFor="let notification of notifications"
                 class="m-list-timeline__item user-notification-item"
                 (click)="gotoUrl(notification.url)"
                 (keyup.enter)="gotoUrl(notification.url)"
@@ -52,27 +53,35 @@
                 </span>
                 <span class="m-list-timeline__time">
                   {{ notification.time | momentFromNow }}
-                  <span *ngIf="notification.isUnread">
+                  @if (notification.isUnread) {
+                  <span>
+                    @if (notification.state == 'UNREAD') {
                     <a
                       href="javascript:;"
-                      *ngIf="notification.state == 'UNREAD'"
                       class="m-link set-notification-as-read"
                       (click)="setNotificationAsRead(notification); $event.preventDefault(); $event.stopPropagation()"
                       >{{ 'SetAsRead' | localize }}</a
                     >
+                    }
                   </span>
+                  }
                 </span>
               </div>
-              <span *ngIf="!notifications.length" class="notification-empty-text">
+              } @if (!notifications.length) {
+              <span class="notification-empty-text">
                 {{ 'ThereIsNoNotification' | localize }}
               </span>
+              }
             </div>
-            <div *ngIf="notifications.length" class="m-nav__separator m-nav__separator--fit"></div>
-            <div *ngIf="notifications.length" class="external notifications-footer">
+            @if (notifications.length) {
+            <div class="m-nav__separator m-nav__separator--fit"></div>
+            } @if (notifications.length) {
+            <div class="external notifications-footer">
               <div class="text-center">
                 <a routerLink="notifications" class="m-dropdown__toggle m-link">{{ 'SeeAllNotifications' | localize }}</a>
               </div>
             </div>
+            }
           </div>
         </div>
       </div>

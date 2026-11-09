@@ -3,15 +3,14 @@
   id="chatSideRight"
   aria-labelledby="chatPanelTitle"
 >
-  <div
-    class="{{ ui.getSideBarMenuClass() }}"
-    id="kt_quick_sidebar"
-    role="dialog"
-    aria-labelledby="chatPanelTitle"
-    aria-modal="false"
-  >
+  <div class="{{ ui.getSideBarMenuClass() }}" id="kt_quick_sidebar" role="dialog" aria-labelledby="chatPanelTitle" aria-modal="false">
     <header class="bs-canvas-header p-3 overflow-auto header-{{ headerSkin }}">
-      <button (click)="reversePinned()" [attr.aria-label]="'Pinned' | localize" class="bs-canvas-close float-left close pinned" type="button">
+      <button
+        (click)="reversePinned()"
+        [attr.aria-label]="'Pinned' | localize"
+        class="bs-canvas-close float-left close pinned"
+        type="button"
+      >
         <i [ngClass]="{ 'fa-rotate-90': !pinned }" aria-hidden="true" class="fa fa-map-pin text-{{ headerTextColor }}"> </i>
       </button>
       <button (click)="closeChat()" aria-label="Close" class="bs-canvas-close float-left close" type="button">
@@ -20,11 +19,16 @@
       <h4 class="d-inline-block text-{{ headerTextColor }} mb-0 float-right" id="chatPanelTitle">{{ 'Chat' | localize }}</h4>
     </header>
     <div class="bs-canvas-content chat-shell">
-      <div class="chat-context-banner" *ngIf="chatContext.gameId || chatContext.matchId || chatContext.conversationId">
+      @if (chatContext.gameId || chatContext.matchId || chatContext.conversationId) {
+      <div class="chat-context-banner">
         <span class="chat-context-label">{{ 'ChatContext' | localize }}</span>
-        <span *ngIf="chatContext.gameId">Game: {{ chatContext.gameId }}</span>
-        <span *ngIf="chatContext.matchId">Match: {{ chatContext.matchId }}</span>
+        @if (chatContext.gameId) {
+        <span>Game: {{ chatContext.gameId }}</span>
+        } @if (chatContext.matchId) {
+        <span>Match: {{ chatContext.matchId }}</span>
+        }
       </div>
+      }
       <div class="flex-row-auto">
         <div [hidden]="selectedUser.friendUserId || selectedUser.groupId" class="card card-custom offcanvas-body bs-canvas-content">
           <div class="card-body">
@@ -38,34 +42,36 @@
                 type="text"
               />
             </div>
-            <button
-              (click)="search()"
-              *ngIf="userNameFilter.length"
-              class="btn btn-block btn-success"
-              id="SearchChatUserButton"
-              type="button"
-            >
+            @if (userNameFilter.length) {
+            <button (click)="search()" class="btn btn-block btn-success" id="SearchChatUserButton" type="button">
               {{ 'AddFriend' | localize }}
             </button>
+            }
             <div class="mt-7 scroll scroll-pull chat-users" style="padding-top: 5px">
               <hr />
-              <div *ngFor="let friend of getFilteredFriends(friendDtoState.Accepted, userNameFilter)" id="friendListFriends">
+              @for (friend of getFilteredFriends(friendDtoState.Accepted, userNameFilter); track friend) {
+              <div id="friendListFriends">
                 <chat-friend-list-item (selectChatFriend)="selectFriend(friend)" [friend]="friend"> </chat-friend-list-item>
               </div>
-              <p *ngIf="getFilteredFriendsCount(friendDtoState.Accepted) === 0" id="EmptyFriendListInfo">
+              } @if (getFilteredFriendsCount(friendDtoState.Accepted) === 0) {
+              <p id="EmptyFriendListInfo">
                 {{ 'YouDontHaveAnyFriend' | localize }}
               </p>
+              }
             </div>
             <div class="mt-20" style="padding-top: 5px">
               <hr />
               <h5>{{ 'BlockedUsers' | localize }}</h5>
               <div id="friendListBlockeds">
-                <div *ngFor="let friend of getFilteredFriends(friendDtoState.Blocked, userNameFilter)">
+                @for (friend of getFilteredFriends(friendDtoState.Blocked, userNameFilter); track friend) {
+                <div>
                   <chat-friend-list-item (selectChatFriend)="selectFriend(friend)" [friend]="friend"> </chat-friend-list-item>
                 </div>
-                <p *ngIf="getFilteredFriendsCount(friendDtoState.Blocked) === 0" id="EmptyBlockedFriendListInfo">
+                } @if (getFilteredFriendsCount(friendDtoState.Blocked) === 0) {
+                <p id="EmptyBlockedFriendListInfo">
                   {{ 'YouDontHaveAnyBlockedFriend' | localize }}
                 </p>
+                }
               </div>
             </div>
           </div>
@@ -103,15 +109,19 @@
                     class="label label-dot mr-1"
                   >
                   </span>
-                  <span *ngIf="selectedUser.isOnline" class="font-weight-bold text-muted font-size-sm">
+                  @if (selectedUser.isOnline) {
+                  <span class="font-weight-bold text-muted font-size-sm">
                     {{ 'Online' | localize }}
                   </span>
-                  <span *ngIf="!selectedUser.isOnline" class="font-weight-bold text-muted font-size-sm">
+                  } @if (!selectedUser.isOnline) {
+                  <span class="font-weight-bold text-muted font-size-sm">
                     {{ 'Offline' | localize }}
                   </span>
-                  <span *ngIf="!_chatSignalrService.isChatConnected" class="chat-connection-status text-warning ml-2">
+                  } @if (!_chatSignalrService.isChatConnected) {
+                  <span class="chat-connection-status text-warning ml-2">
                     {{ 'Reconnecting' | localize }}
                   </span>
+                  }
                 </div>
               </div>
               <div class="text-right flex-grow-1">
@@ -132,7 +142,8 @@
                       <div class="m-dropdown__body">
                         <div class="m-dropdown__content">
                           <ul class="m-nav m-nav--skin-light">
-                            <li *ngIf="selectedUser.state !== friendDtoState.Blocked" class="navi-item" id="liBanChatUser">
+                            @if (selectedUser.state !== friendDtoState.Blocked) {
+                            <li class="navi-item" id="liBanChatUser">
                               <a (click)="block(selectedUser)" class="navi-link" href="javascript:;">
                                 <span class="m-nav__link-icon-light" style="padding-left: 10px; padding-top: 2px; margin: 5px">
                                   <i class="fa fa-ban"> </i>
@@ -142,7 +153,8 @@
                                 </span>
                               </a>
                             </li>
-                            <li *ngIf="selectedUser.state === friendDtoState.Blocked" class="navi-item" id="liUnbanChatUser">
+                            } @if (selectedUser.state === friendDtoState.Blocked) {
+                            <li class="navi-item" id="liUnbanChatUser">
                               <a (click)="unblock(selectedUser)" class="navi-link" href="javascript:;">
                                 <span class="m-nav__link-icon-light" style="padding-left: 10px; padding-top: 2px; margin: 5px">
                                   <i class="fa fa-check"> </i>
@@ -152,6 +164,7 @@
                                 </span>
                               </a>
                             </li>
+                            }
                           </ul>
                         </div>
                       </div>
@@ -167,27 +180,28 @@
               <ng-scrollbar #chatScrollBar class="chat-messages-scroll">
                 <!--begin::Scroll-->
                 <div class="scroll scroll-pull">
-                  <div *ngIf="loadingPreviousUserMessages" class="chat-state" role="status">
+                  @if (loadingPreviousUserMessages) {
+                  <div class="chat-state" role="status">
                     <span class="spinner-border spinner-border-sm mr-2" aria-hidden="true"></span>
                     {{ 'Loading' | localize }}
                   </div>
-                  <div *ngIf="chatError" class="alert alert-warning chat-state" role="alert">
+                  } @if (chatError) {
+                  <div class="alert alert-warning chat-state" role="alert">
                     <span>{{ chatError }}</span>
                     <button (click)="loadPreviousMesssagesOfSelectedUser()" class="btn btn-link p-0 ml-2" type="button">
                       {{ 'Retry' | localize }}
                     </button>
                   </div>
-                  <div
-                    *ngIf="!loadingPreviousUserMessages && !chatError && !selectedUser.messages?.length"
-                    class="chat-state text-muted"
-                    role="status"
-                  >
+                  } @if (!loadingPreviousUserMessages && !chatError && !selectedUser.messages?.length) {
+                  <div class="chat-state text-muted" role="status">
                     {{ 'NoMessages' | localize }}
                   </div>
+                  }
                   <!--begin::Messages-->
-                  <div *ngFor="let message of selectedUser.messages" class="messages" role="log" aria-live="polite">
+                  @for (message of selectedUser.messages; track message) {
+                  <div class="messages" role="log" aria-live="polite">
+                    @if (message.side === 1) {
                     <div
-                      *ngIf="message.side === 1"
                       class="d-flex flex-column mb-3 align-items-start"
                       style="background-color: rgba(0, 0, 0, 0.03); border-radius: 5px; width: 100%"
                     >
@@ -222,8 +236,8 @@
                         <chat-message [message]="message"> </chat-message>
                       </div>
                     </div>
+                    } @if (message.side !== 1) {
                     <div
-                      *ngIf="message.side !== 1"
                       class="d-flex flex-column mb-3 align-items-end"
                       style="background-color: rgba(0, 0, 0, 0.03); border-radius: 5px; width: 100%"
                     >
@@ -258,7 +272,9 @@
                         <chat-message [message]="message"> </chat-message>
                       </div>
                     </div>
+                    }
                   </div>
+                  }
                   <!--end::Messages-->
                 </div>
               </ng-scrollbar>
@@ -271,20 +287,19 @@
               <!--begin::Compose-->
               <form id="chatMessageForm" name="chatMessageForm" style="width: 99%">
                 <div class="files" id="files"></div>
-                <div *ngIf="selectedUser.state === friendDtoState.Blocked" class="col-md-12" style="margin: 5px; padding-right: 25px">
+                @if (selectedUser.state === friendDtoState.Blocked) {
+                <div class="col-md-12" style="margin: 5px; padding-right: 25px">
                   <button (click)="unblock(selectedUser)" class="btn btn-block btn-success" id="UnblockUserButton" type="button">
                     {{ 'UnblockUser' | localize }}
                   </button>
                 </div>
-
-                <div *ngIf="progress > 0" class="col-md-12 chat-progress-bar">
+                } @if (progress > 0) {
+                <div class="col-md-12 chat-progress-bar">
                   <div class="progress" id="chatFileUploadProgress">
-                    <div
-                      [ngStyle]="{ width: progress }"
-                      class="progress-bar progress-bar-success progress-bar-striped"
-                    ></div>
+                    <div [ngStyle]="{ width: progress }" class="progress-bar progress-bar-success progress-bar-striped"></div>
                   </div>
                 </div>
+                }
                 <div class="col-md-12 chat-composer">
                   <textarea
                     (keydown.enter)="sendMessage($event)"
@@ -347,8 +362,11 @@
                       id="SendChatMessageButton"
                       type="button"
                     >
-                      <span *ngIf="!sendingMessage">{{ 'Send' | localize }}</span>
-                      <span *ngIf="sendingMessage" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      @if (!sendingMessage) {
+                      <span>{{ 'Send' | localize }}</span>
+                      } @if (sendingMessage) {
+                      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      }
                     </button>
                   </div>
                 </div>

@@ -1,19 +1,13 @@
-<div
-  bsModal
-  #editModal="bs-modal"
-  class="modal fade"
-  tabindex="-1"
- 
-  aria-labelledby="editModal"
-  [config]="{ backdrop: 'static' }"
->
+<div bsModal #editModal="bs-modal" class="modal fade" tabindex="-1" aria-labelledby="editModal" [config]="{ backdrop: 'static' }">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form autocomplete="off" #userForm="ngForm" novalidate (ngSubmit)="save()">
         <div class="modal-header">
           <h4 class="modal-title">
             <span
-              >{{ 'Permissions' | localize }}<span *ngIf="userName"> - {{ userName }}</span></span
+              >{{ 'Permissions' | localize }}@if (userName) {
+              <span> - {{ userName }}</span>
+              }</span
             >
           </h4>
           <button type="button" class="close" (click)="close()" [attr.aria-label]="l('Close')">

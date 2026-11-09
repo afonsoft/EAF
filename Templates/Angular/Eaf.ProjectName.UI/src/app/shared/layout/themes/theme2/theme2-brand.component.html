@@ -7,24 +7,26 @@
   </div>
   <div class="m-stack__item m-stack__item--middle m-brand__tools">
     <!-- BEGIN: Responsive Aside Left Menu Toggler-->
+    @if (currentTheme.isLeftMenuUsed) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.isLeftMenuUsed"
       id="m_aside_left_offcanvas_toggle"
       class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-tablet-and-mobile-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- END -->
     <!-- begin::Responsive Header Menu Toggler-->
+    @if (currentTheme.isTopMenuUsed || currentTheme.isTabMenuUsed) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.isTopMenuUsed || currentTheme.isTabMenuUsed"
       id="m_aside_header_menu_mobile_toggle"
       class="m-brand__icon m-brand__toggler m--visible-tablet-and-mobile-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- end::Responsive Header Menu Toggler-->
     <!-- BEGIN: Topbar Toggler -->
     <a

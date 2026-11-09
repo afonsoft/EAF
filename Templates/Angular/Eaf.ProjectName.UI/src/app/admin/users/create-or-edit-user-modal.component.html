@@ -4,17 +4,20 @@
   (onShown)="onShown()"
   class="modal fade"
   tabindex="-1"
- 
   aria-labelledby="createOrEditModal"
   [config]="{ backdrop: 'static' }"
 >
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form autocomplete="off" *ngIf="active" #userForm="ngForm" novalidate (ngSubmit)="save()">
+      @if (active) {
+      <form autocomplete="off" #userForm="ngForm" novalidate (ngSubmit)="save()">
         <div class="modal-header">
           <h4 class="modal-title">
-            <span *ngIf="user.id">{{ 'Edit' | localize }}: {{ user.userName }}</span>
-            <span *ngIf="!user.id">{{ 'Create' | localize }}</span>
+            @if (user.id) {
+            <span>{{ 'Edit' | localize }}: {{ user.userName }}</span>
+            } @if (!user.id) {
+            <span>{{ 'Create' | localize }}</span>
+            }
           </h4>
           <button type="button" class="close" (click)="close()" [attr.aria-label]="l('Close')">
             <span aria-hidden="true">&times;</span>
@@ -43,7 +46,6 @@
                     />
                     <validation-messages [formCtrl]="nameInput"></validation-messages>
                   </div>
-
                   <div class="form-group">
                     <label for="Surname">{{ 'Surname' | localize }} *</label>
                     <input
@@ -77,7 +79,6 @@
                 />
                 <validation-messages [formCtrl]="emailAddressInput"></validation-messages>
               </div>
-
               <div class="form-group">
                 <label for="UserName">{{ 'UserName' | localize }} *</label>
                 <input
@@ -93,15 +94,16 @@
                 />
                 <validation-messages [formCtrl]="userNameInput"></validation-messages>
               </div>
-
-              <div class="m-checkbox-list" *ngIf="isCurrentSystemUser">
+              @if (isCurrentSystemUser) {
+              <div class="m-checkbox-list">
                 <label for="EditUser_SetRandomPassword" class="m-checkbox">
                   <input id="EditUser_SetRandomPassword" type="checkbox" name="SetRandomPassword" [(ngModel)]="setRandomPassword" />
                   {{ 'SetRandomPassword' | localize }}
                   <span></span>
                 </label>
               </div>
-              <div class="form-group" *ngIf="!setRandomPassword && isCurrentSystemUser">
+              } @if (!setRandomPassword && isCurrentSystemUser) {
+              <div class="form-group">
                 <div class="right">
                   <label for="Password">{{ 'Password' | localize }}</label>
                   <input
@@ -124,8 +126,10 @@
                   />
                 </div>
               </div>
+              }
               <div [hidden]="setRandomPassword || userForm.form.valid || userForm.form.pristine">
-                <ul class="help-block text-danger" *ngIf="userForm.controls['Password'] && userForm.controls['Password'].errors">
+                @if (userForm.controls['Password'] && userForm.controls['Password'].errors) {
+                <ul class="help-block text-danger">
                   <li [hidden]="!userForm.controls['Password'].errors.requireDigit">
                     {{ 'PasswordComplexity_RequireDigit_Hint' | localize }}
                   </li>
@@ -142,8 +146,10 @@
                     {{ 'PasswordComplexity_RequiredLength_Hint' | localize: passwordComplexitySetting.requiredLength }}
                   </li>
                 </ul>
+                }
               </div>
-              <div class="form-group" *ngIf="!setRandomPassword && isCurrentSystemUser">
+              @if (!setRandomPassword && isCurrentSystemUser) {
+              <div class="form-group">
                 <div class="right">
                   <label for="PasswordRepeat">{{ 'PasswordRepeat' | localize }}</label>
                   <input
@@ -165,11 +171,10 @@
                   />
                 </div>
               </div>
+              }
               <div [hidden]="setRandomPassword || userForm.form.valid || userForm.form.pristine">
-                <ul
-                  class="help-block text-danger"
-                  *ngIf="userForm.controls['PasswordRepeat'] && userForm.controls['PasswordRepeat'].errors"
-                >
+                @if (userForm.controls['PasswordRepeat'] && userForm.controls['PasswordRepeat'].errors) {
+                <ul class="help-block text-danger">
                   <li [hidden]="!userForm.controls['PasswordRepeat'].errors.requireDigit">
                     {{ 'PasswordComplexity_RequireDigit_Hint' | localize }}
                   </li>
@@ -189,9 +194,11 @@
                     {{ 'PasswordsDontMatch' | localize }}
                   </li>
                 </ul>
+                }
               </div>
               <div class="m-checkbox-list">
-                <label for="EditUser_ShouldChangePasswordOnNextLogin" class="m-checkbox" *ngIf="isCurrentSystemUser">
+                @if (isCurrentSystemUser) {
+                <label for="EditUser_ShouldChangePasswordOnNextLogin" class="m-checkbox">
                   <input
                     id="EditUser_ShouldChangePasswordOnNextLogin"
                     type="checkbox"
@@ -201,31 +208,32 @@
                   {{ 'ShouldChangePasswordOnNextLogin' | localize }}
                   <span></span>
                 </label>
-
-                <label for="EditUser_SendActivationEmail" class="m-checkbox" *ngIf="isCurrentSystemUser">
+                } @if (isCurrentSystemUser) {
+                <label for="EditUser_SendActivationEmail" class="m-checkbox">
                   <input id="EditUser_SendActivationEmail" type="checkbox" name="SendActivationEmail" [(ngModel)]="sendActivationEmail" />
                   {{ 'SendActivationEmail' | localize }}
                   <span></span>
                 </label>
-
+                }
                 <label for="EditUser_IsActive" class="m-checkbox">
                   <input id="EditUser_IsActive" type="checkbox" name="IsActive" [(ngModel)]="user.isActive" />
                   {{ 'Active' | localize }}
                   <span></span>
                 </label>
-
-                <label *ngIf="isLockoutEnabled" for="EditUser_IsLockoutEnabled" class="m-checkbox">
+                @if (isLockoutEnabled) {
+                <label for="EditUser_IsLockoutEnabled" class="m-checkbox">
                   <input id="EditUser_IsLockoutEnabled" type="checkbox" name="IsLockoutEnabled" [(ngModel)]="user.isLockoutEnabled" />
                   {{ 'IsLockoutEnabled' | localize }}
                   <span></span>
                 </label>
+                }
               </div>
               <div>
                 <hr class="m--margin-top-20" />
                 <h5>{{ 'Roles' | localize }}</h5>
-
                 <div class="m-checkbox-list">
-                  <label attr.for="EditUserRoleST_{{ roleST.roleName }}" class="m-checkbox" *ngFor="let roleST of systemRoles">
+                  @for (roleST of systemRoles; track roleST) {
+                  <label attr.for="EditUserRoleST_{{ roleST.roleName }}" class="m-checkbox">
                     <input
                       id="EditUserRoleST_{{ roleST.roleName }}"
                       type="checkbox"
@@ -235,15 +243,12 @@
                     {{ roleST.roleDisplayName }}
                     <span></span>
                   </label>
+                  }
                 </div>
               </div>
             </tab>
-            <tab
-              heading="Active Directory"
-              customClass="m-tabs__item"
-              (select)="selectTab('activedirectory')"
-              *ngIf="!user.id && activeDirectoryEnabled"
-            >
+            @if (!user.id && activeDirectoryEnabled) {
+            <tab heading="Active Directory" customClass="m-tabs__item" (select)="selectTab('activedirectory')">
               <form novalidate (ngSubmit)="getActiveDirectoryUsers()" autocomplete="off">
                 <div class="input-group margin-bottom-10">
                   <input
@@ -260,7 +265,6 @@
                     <button class="btn default" type="submit"><i class="flaticon-search-1"></i></button>
                   </span>
                 </div>
-
                 <div class="align-items-center">
                   <div class="primeng-datatable-container" [busyIf]="dataTableHelperAD.isLoading">
                     <p-table
@@ -298,22 +302,22 @@
                             </div>
                           </td>
                           <td style="width: 200px">
-                                                        {{ record.userName }}
+                            {{ record.userName }}
                           </td>
                           <td>
-                                                        {{ record.name }}
+                            {{ record.name }}
                           </td>
                         </tr>
                       </ng-template>
                     </p-table>
-                    <div class="primeng-no-data" *ngIf="dataTableHelperAD.totalRecordsCount == 0">
+                    @if (dataTableHelperAD.totalRecordsCount == 0) {
+                    <div class="primeng-no-data">
                       {{ 'NoData' | localize }}
                     </div>
+                    }
                   </div>
                 </div>
-
                 <br />
-
                 <div class="m-checkbox-list">
                   <label attr.for="EditUserAD_IsActiveActiveDirectory" class="m-checkbox">
                     <input id="EditUserAD_IsActiveActiveDirectory" type="checkbox" name="IsActive" [(ngModel)]="isActiveActiveDirectory" />
@@ -321,17 +325,15 @@
                     <span></span>
                   </label>
                 </div>
-
                 <div class="alert alert-warning" style="margin-top: 30px">
                   <em>{{ 'Note_MaxUserSearch' | localize }}</em>
                 </div>
               </form>
-
               <hr class="m--margin-top-20" />
               <h5>{{ 'Roles' | localize }}</h5>
-
               <div class="m-checkbox-list">
-                <label attr.for="EditUserRoleAD_{{ roleAD.roleName }}" class="m-checkbox" *ngFor="let roleAD of activeDirectoryRoles">
+                @for (roleAD of activeDirectoryRoles; track roleAD) {
+                <label attr.for="EditUserRoleAD_{{ roleAD.roleName }}" class="m-checkbox">
                   <input
                     id="EditUserRoleAD_{{ roleAD.roleName }}"
                     type="checkbox"
@@ -341,9 +343,11 @@
                   {{ roleAD.roleDisplayName }}
                   <span></span>
                 </label>
+                }
               </div>
             </tab>
-            <tab heading="Ldap" customClass="m-tabs__item" (select)="selectTab('ldap')" *ngIf="!user.id && ldapEnabled">
+            } @if (!user.id && ldapEnabled) {
+            <tab heading="Ldap" customClass="m-tabs__item" (select)="selectTab('ldap')">
               <form novalidate (ngSubmit)="getLdapUsers()" autocomplete="off">
                 <div class="input-group margin-bottom-10">
                   <input
@@ -360,7 +364,6 @@
                     <button class="btn default" type="submit"><i class="flaticon-search-1"></i></button>
                   </span>
                 </div>
-
                 <div class="align-items-center">
                   <div class="primeng-datatable-container" [busyIf]="dataTableHelperLDAP.isLoading">
                     <p-table
@@ -398,22 +401,22 @@
                             </div>
                           </td>
                           <td style="width: 200px">
-                                                        {{ record.userName }}
+                            {{ record.userName }}
                           </td>
                           <td>
-                                                        {{ record.name }}
+                            {{ record.name }}
                           </td>
                         </tr>
                       </ng-template>
                     </p-table>
-                    <div class="primeng-no-data" *ngIf="dataTableHelperLDAP.totalRecordsCount == 0">
+                    @if (dataTableHelperLDAP.totalRecordsCount == 0) {
+                    <div class="primeng-no-data">
                       {{ 'NoData' | localize }}
                     </div>
+                    }
                   </div>
                 </div>
-
                 <br />
-
                 <div class="m-checkbox-list">
                   <label attr.for="EditUserLDAP_IsActiveLdap" class="m-checkbox">
                     <input id="EditUserLDAP_IsActiveLdap" type="checkbox" name="IsActive" [(ngModel)]="isActiveLdap" />
@@ -421,17 +424,15 @@
                     <span></span>
                   </label>
                 </div>
-
                 <div class="alert alert-warning" style="margin-top: 30px">
                   <em>{{ 'Note_MaxUserSearch' | localize }}</em>
                 </div>
               </form>
-
               <hr class="m--margin-top-20" />
               <h5>{{ 'Roles' | localize }}</h5>
-
               <div class="m-checkbox-list">
-                <label attr.for="EditUserRoleLDAP_{{ roleLDAP.roleName }}" class="m-checkbox" *ngFor="let roleLDAP of ldapRoles">
+                @for (roleLDAP of ldapRoles; track roleLDAP) {
+                <label attr.for="EditUserRoleLDAP_{{ roleLDAP.roleName }}" class="m-checkbox">
                   <input
                     id="EditUserRoleAD_{{ roleLDAP.roleName }}"
                     type="checkbox"
@@ -441,48 +442,50 @@
                   {{ roleLDAP.roleDisplayName }}
                   <span></span>
                 </label>
+                }
               </div>
             </tab>
+            }
           </tabset>
         </div>
         <div class="modal-footer">
           <button [disabled]="saving" type="button" class="btn btn-default" (click)="close()">{{ 'Cancel' | localize }}</button>
+          @if (userType == 'system' || user.id != undefined) {
           <button
             type="submit"
             class="btn btn-primary"
             [disabled]="!userForm.form.valid || !isValid"
             [buttonBusy]="saving"
             [busyText]="l('SavingWithThreeDot')"
-            *ngIf="userType == 'system' || user.id != undefined"
           >
             <i class="fa fa-save"></i> <span>{{ 'Save' | localize }}</span>
           </button>
-
+          } @if (userType == 'activedirectory' && user.id == undefined) {
           <button
             type="button"
             class="btn btn-primary"
             [disabled]="selectedActiveDirectoryUsers.length == 0 || !isValid"
             [buttonBusy]="saving"
             [busyText]="l('SavingWithThreeDot')"
-            *ngIf="userType == 'activedirectory' && user.id == undefined"
             (click)="saveByActiveDirectoryUser()"
           >
             <i class="fa fa-save"></i> <span class="mobile-hide">{{ 'SaveActiveDirectory' | localize }}</span>
           </button>
-
+          } @if (userType == 'ldap' && user.id == undefined) {
           <button
             type="button"
             class="btn btn-primary"
             [disabled]="selectedLdapUsers.length == 0 || !isValid"
             [buttonBusy]="saving"
             [busyText]="l('SavingWithThreeDot')"
-            *ngIf="userType == 'ldap' && user.id == undefined"
             (click)="saveByLdapUser()"
           >
             <i class="fa fa-save"></i> <span class="mobile-hide">{{ 'SaveLdap' | localize }}</span>
           </button>
+          }
         </div>
       </form>
+      }
     </div>
   </div>
 </div>

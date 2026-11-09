@@ -12,14 +12,11 @@
       <div class="card card-custom gutter-b">
         <div class="card-body">
           <div class="d-flex justify-content-end mb-3">
-            <button
-              type="button"
-              class="btn btn-primary"
-              *ngIf="isGranted('Pages.Administration.DynamicProperties.Create')"
-              (click)="openNew()"
-            >
+            @if (isGranted('Pages.Administration.DynamicProperties.Create')) {
+            <button type="button" class="btn btn-primary" (click)="openNew()">
               <i class="flaticon2-plus"></i> {{ l('CreateNewDynamicProperty') }}
             </button>
+            }
           </div>
 
           <p-table [value]="properties" [loading]="loading" [rows]="10" [paginator]="true" responsiveLayout="scroll">
@@ -37,26 +34,31 @@
                 <td>{{ item.propertyName }}</td>
                 <td>{{ item.displayName }}</td>
                 <td>{{ item.inputType }}</td>
-                <td><span *ngIf="item.isMandatory" class="label label-inline label-light-danger">{{ l('Mandatory') }}</span></td>
                 <td>
+                  @if (item.isMandatory) {
+                  <span class="label label-inline label-light-danger">{{ l('Mandatory') }}</span>
+                  }
+                </td>
+                <td>
+                  @if (isGranted('Pages.Administration.DynamicProperties.Edit')) {
                   <button
                     type="button"
                     class="btn btn-sm btn-clean btn-icon btn-icon-md"
-                    *ngIf="isGranted('Pages.Administration.DynamicProperties.Edit')"
                     (click)="edit(item)"
                     [attr.aria-label]="l('Edit')"
                   >
                     <i class="flaticon-edit"></i>
                   </button>
+                  } @if (isGranted('Pages.Administration.DynamicProperties.Delete')) {
                   <button
                     type="button"
                     class="btn btn-sm btn-clean btn-icon btn-icon-md"
-                    *ngIf="isGranted('Pages.Administration.DynamicProperties.Delete')"
                     (click)="remove(item)"
                     [attr.aria-label]="l('Delete')"
                   >
                     <i class="flaticon-delete"></i>
                   </button>
+                  }
                 </td>
               </tr>
             </ng-template>
@@ -87,7 +89,9 @@
     <div class="form-group">
       <label for="inputType">{{ l('InputType') }}</label>
       <select id="inputType" class="form-control" [(ngModel)]="property.inputType">
-        <option *ngFor="let type of inputTypes" [value]="type">{{ type }}</option>
+        @for (type of inputTypes; track type) {
+        <option [value]="type">{{ type }}</option>
+        }
       </select>
     </div>
 

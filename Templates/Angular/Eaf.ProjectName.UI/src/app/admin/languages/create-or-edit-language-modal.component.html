@@ -3,17 +3,20 @@
   #createOrEditModal="bs-modal"
   class="modal fade"
   tabindex="-1"
- 
   aria-labelledby="createOrEditModal"
   [config]="{ backdrop: 'static' }"
 >
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form autocomplete="off" *ngIf="active" #editForm="ngForm" novalidate (ngSubmit)="save()">
+      @if (active) {
+      <form autocomplete="off" #editForm="ngForm" novalidate (ngSubmit)="save()">
         <div class="modal-header">
           <h4 class="modal-title">
-            <span *ngIf="language.id">{{ 'Edit' | localize }}: {{ language.name }}</span>
-            <span *ngIf="!language.id">{{ 'Create' | localize }}</span>
+            @if (language.id) {
+            <span>{{ 'Edit' | localize }}: {{ language.name }}</span>
+            } @if (!language.id) {
+            <span>{{ 'Create' | localize }}</span>
+            }
           </h4>
           <button type="button" class="close" (click)="close()" [attr.aria-label]="l('Close')">
             <span aria-hidden="true">&times;</span>
@@ -21,16 +24,35 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <select #languageCombobox id="languageName" name="languageName" class="form-control" aria-label="{{ 'LanguageName' | localize }}" [(ngModel)]="language.name" required>
+            <select
+              #languageCombobox
+              id="languageName"
+              name="languageName"
+              class="form-control"
+              aria-label="{{ 'LanguageName' | localize }}"
+              [(ngModel)]="language.name"
+              required
+            >
               <option value="">{{ 'emptyText' | localize }}</option>
-              <option *ngFor="let languageName of languageNames" [value]="languageName.value">{{ languageName.displayText }}</option>
+              @for (languageName of languageNames; track languageName) {
+              <option [value]="languageName.value">{{ languageName.displayText }}</option>
+              }
             </select>
             <validation-messages [formCtrl]="languageCombobox"></validation-messages>
           </div>
           <div class="form-group">
-            <select #iconCombobox id="languageIcon" name="languageIcon" class="form-control" aria-label="{{ 'LanguageIcon' | localize }}" [(ngModel)]="language.icon">
+            <select
+              #iconCombobox
+              id="languageIcon"
+              name="languageIcon"
+              class="form-control"
+              aria-label="{{ 'LanguageIcon' | localize }}"
+              [(ngModel)]="language.icon"
+            >
               <option value="">{{ 'emptyText' | localize }}</option>
-              <option *ngFor="let flag of flags" [value]="flag.value" [attr.data-icon]="flag.value">{{ flag.displayText }}</option>
+              @for (flag of flags; track flag) {
+              <option [value]="flag.value" [attr.data-icon]="flag.value">{{ flag.displayText }}</option>
+              }
             </select>
           </div>
           <div class="m-checkbox-list">
@@ -54,6 +76,7 @@
           </button>
         </div>
       </form>
+      }
     </div>
   </div>
 </div>

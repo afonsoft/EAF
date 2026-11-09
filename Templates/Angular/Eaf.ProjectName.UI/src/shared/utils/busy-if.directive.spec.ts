@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { BusyIfDirective } from './busy-if.directive';
 import { LocalizationService } from '@eaf/localization/localization.service';
 import { PermissionCheckerService } from '@eaf/auth/permission-checker.service';
@@ -63,17 +64,19 @@ describe('BusyIfDirective', () => {
 
   it('should call eaf.ui.setBusy when isBusy is true', () => {
     spyOn((window as any).eaf.ui, 'setBusy');
-    fixture.componentInstance.isBusy = true;
-    fixture.detectChanges();
+    const directive = fixture.debugElement
+      .query(By.directive(BusyIfDirective))
+      .injector.get(BusyIfDirective);
+    directive.refreshState(true);
     expect((window as any).eaf.ui.setBusy).toHaveBeenCalled();
   });
 
   it('should call eaf.ui.clearBusy when isBusy is false', () => {
     spyOn((window as any).eaf.ui, 'clearBusy');
-    fixture.componentInstance.isBusy = true;
-    fixture.detectChanges();
-    fixture.componentInstance.isBusy = false;
-    fixture.detectChanges();
+    const directive = fixture.debugElement
+      .query(By.directive(BusyIfDirective))
+      .injector.get(BusyIfDirective);
+    directive.refreshState(false);
     expect((window as any).eaf.ui.clearBusy).toHaveBeenCalled();
   });
 });
