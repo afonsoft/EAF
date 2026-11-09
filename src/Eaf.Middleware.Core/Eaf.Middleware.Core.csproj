@@ -17,6 +17,7 @@
 		<PackageReference Include="Abp.ZeroCore" Version="10.5.1" />
 		<PackageReference Include="Abp.Zero.Common" Version="10.5.1" />
 		<PackageReference Include="Abp.AutoMapper" Version="10.5.1" />
+		<PackageReference Include="Riok.Mapperly" Version="4.3.1" />
 		<PackageReference Include="AutoMapper" Version="14.0.0" />
 		<PackageReference Include="Abp.MailKit" Version="10.5.1" />
 		<PackageReference Include="Abp.HangFire.AspNetCore" Version="10.5.1" />
