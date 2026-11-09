@@ -19,6 +19,7 @@ import { TenantsComponent } from './tenants/tenants.component';
 import { UiCustomizationComponent } from './ui-customization/ui-customization.component';
 import { UsersComponent } from './users/users.component';
 import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-requests.component';
+import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
 
 @NgModule({
   imports: [
@@ -48,6 +49,7 @@ import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-
           { path: 'maintenance', component: MaintenanceComponent, data: { permission: 'Pages.Administration.Maintenance' } },
           { path: 'tenant-join-requests', component: TenantJoinRequestsComponent, data: { permission: 'Pages.Administration.Users' } },
           { path: 'ui-customization', component: UiCustomizationComponent, data: { permission: 'Pages.Administration.UiCustomization' } },
+          { path: 'api-keys', component: AdminApiKeysComponent, data: { permission: 'Pages.Administration.ApiKeys' } },
         ],
       },
     ]),
