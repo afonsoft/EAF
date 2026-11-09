@@ -70,6 +70,7 @@ namespace Eaf.Middleware.Authorization
             administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_Maintenance, L("Maintenance"), multiTenancySides: _isMultiTenancyEnabled ? MultiTenancySides.Host : MultiTenancySides.Tenant);
             administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_ApiKeys, L("ApiKeys"), multiTenancySides: _isMultiTenancyEnabled ? MultiTenancySides.Host : MultiTenancySides.Tenant);
             administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_UserSessions, L("UserSessions"), multiTenancySides: _isMultiTenancyEnabled ? MultiTenancySides.Host : MultiTenancySides.Tenant);
+            administration.CreateChildPermission(MiddlewarePermissions.Pages_Administration_EmailTemplates, L("EmailTemplates"), multiTenancySides: _isMultiTenancyEnabled ? MultiTenancySides.Host : MultiTenancySides.Tenant);
 
             //HOST-SPECIFIC PERMISSIONS
 

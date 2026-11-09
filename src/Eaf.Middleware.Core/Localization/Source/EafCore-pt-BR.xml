@@ -570,5 +570,16 @@
 		<text name="Reject">Rejeitar</text>
 		<text name="SuccessfullyApproved">Solicitação aprovada com sucesso.</text>
 		<text name="SuccessfullyRejected">Solicitação rejeitada com sucesso.</text>
-	</texts>
+			<text name="EmailTemplates">Templates de e-mail</text>
+		<text name="EmailTemplate_Default">Layout padrão de e-mail</text>
+		<text name="EmailTemplateCulture">Cultura</text>
+		<text name="EmailTemplateIsOverride">Personalizado</text>
+		<text name="EmailTemplateEditOverride">Editar template</text>
+		<text name="EmailTemplateBody">Corpo (HTML)</text>
+		<text name="EmailTemplatePlaceholders">Placeholders permitidos</text>
+		<text name="EmailTemplatePreview">Pré-visualizar</text>
+		<text name="EmailTemplateResetToDefault">Restaurar padrão</text>
+		<text name="EmailTemplateResetWarningMessage">A personalização será removida e o padrão do sistema voltará a ser usado.</text>
+		<text name="EmailTemplateAddCulture">Adicionar personalização por cultura</text>
+</texts>
 </localizationDictionary>

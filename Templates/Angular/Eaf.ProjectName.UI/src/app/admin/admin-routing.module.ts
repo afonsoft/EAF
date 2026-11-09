@@ -23,6 +23,7 @@ import { UserSessionsComponent } from './user-sessions/user-sessions.component';
 import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
 import { WorkflowsComponent } from './workflows/workflows.component';
 import { WorkflowDesignerComponent } from './workflows/designer.component';
+import { EmailTemplatesComponent } from './email-templates/email-templates.component';
 
 @NgModule({
   imports: [
@@ -55,6 +56,7 @@ import { WorkflowDesignerComponent } from './workflows/designer.component';
           { path: 'user-sessions', component: UserSessionsComponent, data: { permission: 'Pages.Administration.UserSessions' } },
                     { path: 'api-keys', component: AdminApiKeysComponent, data: { permission: 'Pages.Administration.ApiKeys' } },
           { path: 'workflows', component: WorkflowsComponent, data: { permission: 'Pages.Administration.Workflows' } },
+          { path: 'email-templates', component: EmailTemplatesComponent, data: { permission: 'Pages.Administration.EmailTemplates' } },
           { path: 'workflows/new', component: WorkflowDesignerComponent, data: { permission: 'Pages.Administration.Workflows' } },
           { path: 'workflows/:id', component: WorkflowDesignerComponent, data: { permission: 'Pages.Administration.Workflows' } },
         ],
