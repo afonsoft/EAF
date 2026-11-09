@@ -363,3 +363,6 @@ MigrationBackup/
 # Allow Angular eaf-ng2-module log service (overrides [Ll]og/ rule)
 !Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-ng2-module/src/log/
 !Templates/Angular/Eaf.ProjectName.UI/src/assets/lib/eaf-ng2-module/src/log/log.service.ts
+
+# Reversa — personal overrides (not committed)
+/.reversa/config.user.toml
