@@ -24,6 +24,7 @@ using Eaf.Middleware.Authorization;
 using Eaf.Middleware.Authorization.Impersonation;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
+using Eaf.Middleware.Authentication.Sessions;
 using Eaf.Middleware.Core.Authentication.External;
 using Eaf.Middleware.AzureActiveDirectory.Configuration;
 using Eaf.Middleware.Ldap.Configuration;
@@ -162,7 +163,8 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
                 Substitute.For<INotificationSubscriptionManager>(),
                 Substitute.For<IWebhookPublisher>(),
                 Substitute.For<IPrincipalAccessor>(),
-                Substitute.For<IRefreshTokenStore>()
+                Substitute.For<IRefreshTokenStore>(),
+                Substitute.For<ISessionRegistry>()
             );
 
             controller.SettingManager = settingManager;
