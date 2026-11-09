@@ -16,7 +16,7 @@ namespace Eaf.Middleware.Friendships.Cache
     /// <summary>
     /// Representa a classe UserFriendsCache.
     /// </summary>
-    public class UserFriendsCache : IUserFriendsCache, ISingletonDependency
+    public class UserFriendsCache : IUserFriendsCache, ITransientDependency
     {
         private readonly ICacheManager _cacheManager;
         private readonly IRepository<ChatMessage, long> _chatMessageRepository;
@@ -295,7 +295,10 @@ namespace Eaf.Middleware.Friendships.Cache
 
         private void UpdateUserOnCache(UserIdentifier userIdentifier, UserWithFriendsCacheItem user)
         {
-            _cacheManager.GetCache(FriendCacheItem.CacheName).Set(userIdentifier.ToUserIdentifierString(), user);
+            _cacheManager.GetCache(FriendCacheItem.CacheName).Set(
+                userIdentifier.ToUserIdentifierString(),
+                user,
+                slidingExpireTime: TimeSpan.FromMinutes(30));
         }
     }
 }
