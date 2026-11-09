@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-html-sanitizer` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed |
 | Date | 2026-08-14 |
 | Target agent | Claude Code / Devin |
 
