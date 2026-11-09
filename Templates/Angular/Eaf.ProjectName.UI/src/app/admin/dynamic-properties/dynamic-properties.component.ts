@@ -58,6 +58,7 @@ export class DynamicPropertiesComponent extends AppComponentBase implements OnIn
     this.property.displayName = item.displayName;
     this.property.inputType = item.inputType;
     this.property.permission = item.permission;
+    this.property.isMandatory = item.isMandatory;
     this.valuesText = (item.values ?? []).map(v => v.value).join(';');
     this.displayDialog = true;
   }

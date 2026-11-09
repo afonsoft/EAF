@@ -25,6 +25,11 @@ namespace Eaf.DynamicEntityProperties.Application.Dto
         public string DisplayName { get; set; }
 
         /// <summary>
+        /// Whether a value is required when writing entities.
+        /// </summary>
+        public bool IsMandatory { get; set; }
+
+        /// <summary>
         /// Input type name (e.g., SingleLineStringInputType).
         /// </summary>
         public string InputType { get; set; }

@@ -16,6 +16,7 @@ export class DynamicPropertyDto {
   propertyName: string | undefined;
   displayName: string | undefined;
   inputType: string | undefined;
+    isMandatory?: boolean;
   permission: string | undefined;
   tenantId: number | undefined;
   values: DynamicPropertyValueDto[] | undefined;
@@ -26,6 +27,7 @@ export class CreateOrUpdateDynamicPropertyInput {
   propertyName: string | undefined;
   displayName: string | undefined;
   inputType: string | undefined;
+    isMandatory?: boolean;
   permission: string | undefined;
   values: DynamicPropertyValueDto[] | undefined;
 }

@@ -5,6 +5,7 @@ using Abp.Reflection.Extensions;
 using Abp.TestBase;
 using Castle.MicroKernel.Registration;
 using Eaf.DynamicEntityProperties;
+using Eaf.DynamicEntityProperties.Domain;
 using NSubstitute;
 
 namespace Eaf.DynamicEntityProperties.Tests
@@ -38,7 +39,8 @@ namespace Eaf.DynamicEntityProperties.Tests
                 Component.For<IDynamicPropertyStore>().Instance(Substitute.For<IDynamicPropertyStore>()).IsDefault(),
                 Component.For<IDynamicPropertyValueManager>().Instance(Substitute.For<IDynamicPropertyValueManager>()).IsDefault(),
                 Component.For<IDynamicEntityPropertyManager>().Instance(Substitute.For<IDynamicEntityPropertyManager>()).IsDefault(),
-                Component.For<IDynamicEntityPropertyValueManager>().Instance(Substitute.For<IDynamicEntityPropertyValueManager>()).IsDefault()
+                Component.For<IDynamicEntityPropertyValueManager>().Instance(Substitute.For<IDynamicEntityPropertyValueManager>()).IsDefault(),
+                Component.For<IDynamicPropertyMetadataManager>().Instance(Substitute.For<IDynamicPropertyMetadataManager>()).IsDefault()
             );
         }
     }
