@@ -4,5 +4,6 @@
 			 Isso permite validar o template antes da publicação dos pacotes. -->
 		<UseSourceProjects Condition="'$(SolutionName)' == 'Eaf.ApiWithSrc'">true</UseSourceProjects>
 		<UseSourceProjects Condition="'$(UseSourceProjects)' == ''">false</UseSourceProjects>
+		<DefineConstants Condition="'$(UseSourceProjects)' == 'true'">$(DefineConstants);EAF_USE_SOURCE_PROJECTS</DefineConstants>
 	</PropertyGroup>
 </Project>

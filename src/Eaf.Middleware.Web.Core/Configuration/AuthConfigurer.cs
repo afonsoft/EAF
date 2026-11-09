@@ -86,6 +86,15 @@ namespace Eaf.Middleware.Web.Startup
                         ValidateIssuer = true,
                         ValidIssuer = tokenAuthConfig.Issuer,
 
+                        // Issuers adicionales (p. ej. el servidor OpenIddict de EAF) que
+                        // firman con la misma clave simétrica.
+                        ValidIssuers = configuration
+                            .GetSection("Authentication:JwtBearer:AdditionalIssuers")
+                            .Get<string[]>()
+                            is { Length: > 0 } extraIssuers
+                            ? extraIssuers.Append(tokenAuthConfig.Issuer)
+                            : null,
+
                         // Validate the JWT Audience (aud) claim
                         ValidateAudience = true,
                         ValidAudience = tokenAuthConfig.Audience,

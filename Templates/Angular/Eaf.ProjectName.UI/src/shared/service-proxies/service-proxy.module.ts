@@ -8,6 +8,7 @@ import { PaymentExtendedService } from './payment-extended.service';
 import { TenantJoinRequestService } from './tenant-join-request.service';
 import { AdminApiKeyService, ApiKeyService } from './api-key.service';
 import { PasskeyService } from './passkey.service';
+import { QrLoginService } from './qr-login.service';
 import { SessionService, AdminSessionService } from './session.service';
 import { WorkflowApprovalService, AdminWorkflowService, WorkflowRequestService } from './workflow.service';
 import { EmailTemplateService } from './email-template.service';
@@ -57,6 +58,7 @@ import { EmailTemplateService } from './email-template.service';
     EmailTemplateService,
     SessionService,
     AdminSessionService,
+    QrLoginService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],
 })
