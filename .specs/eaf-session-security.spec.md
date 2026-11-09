@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-session-security` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W1 (ASP.NET Zero v15.5 parity plan) |
@@ -121,3 +121,7 @@ Extend `RefreshTokenStore` schema → migration for session fields (`EafUserSess
 
 - Reuse `RefreshTokenStore` table vs new `EafUserSessions` — prefer extending existing store to avoid duplicate truth.
 - Access-token (short-lived) behavior on revoked session — accept up to token lifetime or add denylist check (recommend denylist for admin revocations).
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #451).

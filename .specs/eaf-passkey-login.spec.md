@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `feature/eaf-passkey-login` |
 | Technical owner | Core Team |
-| Status | Draft |
+| Status | Completed|
 | Date | 2026-11-08 |
 | Target agent | Devin |
 | Wave | W1 (ASP.NET Zero v15.5 parity plan) |
@@ -155,3 +155,7 @@ New table `EafUserPasskeys`; unique index on credential id; FK to users. Migrati
 
 - Exact Identity passkey API surface in .NET 10 GA — confirm against installed SDK at implementation.
 - Whether to gate per-tenant independently — default: tenant-level setting inherits host toggle.
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #450).

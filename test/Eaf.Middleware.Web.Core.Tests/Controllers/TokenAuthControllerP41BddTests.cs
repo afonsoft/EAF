@@ -437,7 +437,7 @@ namespace Eaf.Middleware.Tests.WebCore.Controllers
             var method = typeof(TokenAuthController).GetMethod("CreateJwtClaims", BindingFlags.NonPublic | BindingFlags.Instance);
             method.ShouldNotBeNull();
 
-            var task = (Task<IEnumerable<Claim>>)method.Invoke(controller, new object[] { identity, user, "" });
+            var task = (Task<IEnumerable<Claim>>)method.Invoke(controller, new object[] { identity, user, "", null });
             var claims = await task;
 
             claims.ShouldNotBeNull();

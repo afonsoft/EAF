@@ -1,0 +1,41 @@
+%% EAF — extensões de autenticação e workflow (paridade ASP.NET Zero v15.5)
+%% Gerado na sessão orchestrator 2026-11-09. Fonte: src/Eaf.Middleware.Web.Core, src/Eaf.OpenIddict, src/Eaf.Workflow
+flowchart LR
+    subgraph Clients
+        UI[Angular UI]
+        OA[External OIDC client]
+    end
+
+    subgraph Auth["src/Eaf.Middleware.Web.Core — Auth"]
+        TAC[TokenAuthController<br/>JWT mint]
+        PWC[PasskeyController<br/>WebAuthn Fido2]
+        QRC[QrLoginController<br/>approve/complete]
+        AKM[UseApiKeyTokenMiddleware<br/>X-API-Key → SHA-256 hash]
+        REG[SessionRegistry cache<br/>eaf_session_id claim<br/>denylist + idle timeout]
+        CONF[AuthConfigurer<br/>ValidIssuers = Issuer + AdditionalIssuers]
+    end
+
+    subgraph OIDC["src/Eaf.OpenIddict"]
+        OIDCS[OpenIddict server<br/>/connect/token authorize userinfo logout]
+        SEED[EafOpenIddictSeedWorker<br/>appsettings.json applications]
+    end
+
+    subgraph WF["src/Eaf.Workflow"]
+        ENG[WorkflowEngine<br/>start/advance/decide quorum]
+        DIR[IWorkflowUserDirectory<br/>role/OU/manager resolution]
+        SLA[WorkflowSlaWorker<br/>Hangfire SLA reminders]
+    end
+
+    DB[(SQL Server<br/>EafApiKeys, EafUserPasskeys,<br/>EafUserSessionInfos,<br/>EafWorkflow*, OpenIddict tables)]
+    CACHE[(ICacheManager<br/>session registry, QR tokens,<br/>passkey challenges)]
+
+    UI -->|Bearer JWT| AKM
+    OA -->|OAuth2/OIDC| OIDCS
+    UI --> TAC & PWC & QRC
+    TAC & PWC & QRC --> REG
+    OIDCS -->|same HMAC key, JWS| CONF
+    OIDCS & AKM & REG --> DB
+    REG & QRC & PWC --> CACHE
+    ENG --> DIR & SLA
+    ENG --> DB
+    SEED --> DB

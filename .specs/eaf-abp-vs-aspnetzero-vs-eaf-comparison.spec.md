@@ -11,7 +11,7 @@
 | Repository | `github.com/afonsoft/EAF` |
 | Suggested branch | `docs/spec-comparison` |
 | Technical owner | Core Team |
-| Status | Approved |
+| Status | Completed|
 | Date | 2026-08-13 |
 | Target agent | Any |
 
@@ -229,3 +229,7 @@ N/A — documentation.
 - ASP.NET Zero: <https://aspnetzero.com/>
 - `.specs/eaf-aspnetzero-functional-gap.spec.md`
 - `.specs/eaf-next-steps-q3-2026.spec.md`
+
+## Delivered
+
+Implementado e mergeado em `main` (PR #447).

@@ -11,3 +11,11 @@ Cobrimos os seguintes tópicos:
 *   **[Injeção de Dependência](./dependency-injection.md)**: Como a Injeção de Dependência (DI) é utilizada em todo o sistema, as principais bibliotecas de DI e padrões de registro.
 
 Navegue pelos links acima para explorar cada aspecto da arquitetura do EAF.
+*   **[AD-0001 — ASP.NET Zero v15.5 Parity](./AD-0001-zero-parity-modules.md)**: Decisões dos módulos de paridade (API keys, passkeys, sessions, OpenIddict, workflow engine, Angular 21 + PrimeNG 21).
+*   **[Diagrama: extensões de auth & workflow](./eaf-auth-workflow-extensions.mmd)**: Mermaid — fluxo entre UI, endpoints de auth, OpenIddict e engine de workflow.
+
+## Índice de ADRs
+
+| AD | Título | Status |
+|----|--------|--------|
+| AD-0001 | ASP.NET Zero v15.5 parity — new auth & workflow modules | Accepted |
