@@ -1,5 +1,6 @@
 import { SessionServiceProxy, AuthenticateResultModel } from '@shared/service-proxies/service-proxies';
 import { PasskeyService } from '@shared/service-proxies/passkey.service';
+import { QrLoginService } from '@shared/service-proxies/qr-login.service';
 import { FormsModule } from '@angular/forms';
 import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -74,6 +75,7 @@ describe('LoginComponent', () => {
       providers: [
         { provide: SessionServiceProxy, useClass: MockSessionServiceProxy },
         { provide: PasskeyService, useValue: { isEnabled: () => of({ isEnabled: false }), isSupported: () => false } },
+        { provide: QrLoginService, useValue: { isEnabled: () => of({ isEnabled: false }) } },
         { provide: LoginService, useClass: MockLoginService },
         { provide: ReCaptchaV3Service, useValue: { execute: () => {} } },
         { provide: ActivatedRoute, useClass: MockActivatedRoute },

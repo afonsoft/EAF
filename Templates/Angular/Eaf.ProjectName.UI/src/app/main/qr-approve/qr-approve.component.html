@@ -1,0 +1,46 @@
+<div [@routerTransition]>
+    <div class="m-subheader">
+        <div class="d-flex align-items-center">
+            <div class="mr-auto">
+                <h3 class="m-subheader__title m-subheader__title--separator">
+                    <span>{{ 'QrLoginApproveTitle' | localize }}</span>
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="m-content">
+        <div class="m-portlet m-portlet--mobile">
+            <div class="m-portlet__body">
+                <div class="row">
+                    <div class="col-md-6 offset-md-3">
+                        <div class="alert alert-success" *ngIf="approved" role="alert">
+                            {{ 'QrLoginApprovedMessage' | localize }}
+                        </div>
+                        <ng-container *ngIf="!approved">
+                            <p>{{ 'QrLoginApproveDescription' | localize }}</p>
+                            <div class="form-group">
+                                <label for="qrTokenId">{{ 'QrLoginTokenId' | localize }}</label>
+                                <input
+                                    id="qrTokenId"
+                                    name="qrTokenId"
+                                    class="form-control"
+                                    [(ngModel)]="tokenId"
+                                    [attr.aria-label]="'QrLoginTokenId' | localize"
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                class="btn btn-primary m-btn m-btn--pill m-btn--custom m-btn--air"
+                                (click)="approve()"
+                                [buttonBusy]="approving"
+                                [disabled]="approving"
+                            >
+                                {{ 'QrLoginApproveButton' | localize }}
+                            </button>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

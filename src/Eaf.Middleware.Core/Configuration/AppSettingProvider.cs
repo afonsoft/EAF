@@ -302,6 +302,7 @@ namespace Eaf.Middleware.Configuration
                 new SettingDefinition(AppSettings.UserManagement.Sessions.IdleTimeoutMinutes, "0", scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
 
             new SettingDefinition(AppSettings.UserManagement.Passkeys.IsEnabled, "true", scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+            new SettingDefinition(AppSettings.UserManagement.QrLogin.IsEnabled, "false", scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
 
             new SettingDefinition(AppSettings.UserManagement.Workflows.IsEnabled, "true", scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
 

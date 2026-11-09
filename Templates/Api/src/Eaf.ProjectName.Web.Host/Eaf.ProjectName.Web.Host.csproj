@@ -53,6 +53,7 @@
 		<ProjectReference Include="..\..\..\..\src\Eaf.KeyVault.AspNetCore\Eaf.KeyVault.AspNetCore.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
 		<ProjectReference Include="..\..\..\..\src\Eaf.Middleware.Web.Core\Eaf.Middleware.Web.Core.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
 		<ProjectReference Include="..\..\..\..\src\Eaf.OpenTelemetry\Eaf.OpenTelemetry.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.OpenIddict\Eaf.OpenIddict.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
 		<PackageReference Include="Eaf.Castle.Serilog" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />
 		<PackageReference Include="Eaf.KeyVault.AspNetCore" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />
 		<PackageReference Include="Eaf.Middleware.Web.Core" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />

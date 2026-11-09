@@ -18,6 +18,9 @@ using Eaf.Middleware.Web.Serilog;
 using Eaf.Middleware.Web.Filters;
 using Eaf.Middleware.Web.Startup;
 using Eaf.Middleware.Web.Swagger;
+#if EAF_USE_SOURCE_PROJECTS
+using Eaf.OpenIddict;
+#endif
 using Eaf.ProjectName.Application.Extensions;
 using Eaf.ProjectName.Debugging;
 using Eaf.ProjectName.Web.Middleware;
@@ -67,6 +70,11 @@ namespace Eaf.ProjectName.Web.Startup
 
             //Configure EAF Middleware
             services.AddEafConfigurer(_appConfiguration);
+
+#if EAF_USE_SOURCE_PROJECTS
+            //Configure OAuth2/OIDC server (OpenIddict)
+            services.AddEafOpenIddict(_appConfiguration);
+#endif
 
             //Configure HealthChecks
             services.AddEafHealthChecks();

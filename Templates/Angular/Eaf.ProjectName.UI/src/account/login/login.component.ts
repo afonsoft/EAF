@@ -1,4 +1,4 @@
-﻿import { Component, Injector, OnInit } from '@angular/core';
+﻿import { Component, Injector, OnDestroy, OnInit } from '@angular/core';
 import { EafSessionService } from '@eaf/session/eaf-session.service';
 import { accountModuleAnimation } from '@shared/animations/routerTransition';
 import { AppConsts } from '@shared/AppConsts';
@@ -13,13 +13,15 @@ import { ReCaptchaV3Service } from 'ngx-captcha';
 import { UrlHelper } from 'shared/helpers/UrlHelper';
 
 import { PasskeyService } from '@shared/service-proxies/passkey.service';
+import { QrLoginService } from '@shared/service-proxies/qr-login.service';
+import * as QRCode from 'qrcode';
 import { ExternalLoginProvider, LoginService } from './login.service';
 @Component({
   standalone: false,
   templateUrl: './login.component.html',
   animations: [accountModuleAnimation()],
 })
-export class LoginComponent extends AppComponentBase implements OnInit {
+export class LoginComponent extends AppComponentBase implements OnInit, OnDestroy {
   submitting = false;
   isMultiTenancyEnabled: boolean = this.multiTenancy.isEnabled;
   recaptchaSiteKey: string = AppConsts.recaptchaSiteKey;
@@ -36,6 +38,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     injector: Injector,
     public loginService: LoginService,
     public passkeyService: PasskeyService,
+    public qrLoginService: QrLoginService,
     private readonly _sessionService: EafSessionService,
     private readonly _accountService: AccountServiceProxy,
     private readonly _sessionAppService: SessionServiceProxy,
@@ -77,6 +80,9 @@ export class LoginComponent extends AppComponentBase implements OnInit {
         location.href = returnUrl;
       });
     }
+    this.qrLoginService.isEnabled().subscribe(enabled => {
+      this.qrLoginEnabled = enabled;
+    });
     this.handleExternalLoginCallbacks();
     this.loginService.init();
     this.submitting = false;
@@ -243,6 +249,75 @@ get passkeySupported(): boolean {
       }
     } finally {
       this.submitting = false;
+    }
+  }
+
+  qrLoginEnabled = false;
+  showQrLogin = false;
+  qrCodeDataUrl: string | undefined;
+  qrExpired = false;
+  private qrTokenId: string | undefined;
+  private qrDeadline = 0;
+  private qrPollTimer: any;
+
+  ngOnDestroy(): void {
+    this.stopQrPolling();
+  }
+
+  startQrLogin(): void {
+    this.showQrLogin = true;
+    this.generateQrToken();
+  }
+
+  cancelQrLogin(): void {
+    this.showQrLogin = false;
+    this.stopQrPolling();
+  }
+
+  generateQrToken(): void {
+    this.stopQrPolling();
+    this.qrExpired = false;
+    this.qrCodeDataUrl = undefined;
+    this.qrLoginService.create().subscribe(result => {
+      this.qrTokenId = result.tokenId;
+      this.qrDeadline = Date.now() + result.expiresInSeconds * 1000;
+      QRCode.toDataURL(result.tokenId, { width: 220, margin: 1 }).then(url => {
+        this.qrCodeDataUrl = url;
+      });
+      this.qrPollTimer = setInterval(() => this.pollQrStatus(), 3000);
+    });
+  }
+
+  private pollQrStatus(): void {
+    if (!this.qrTokenId) {
+      return;
+    }
+    if (Date.now() >= this.qrDeadline) {
+      this.qrExpired = true;
+      this.stopQrPolling();
+      return;
+    }
+    this.qrLoginService.status(this.qrTokenId).subscribe(result => {
+      if (result.status === 'approved' && result.accessToken) {
+        this.stopQrPolling();
+        this.loginService.login(
+          result.accessToken,
+          result.encryptedAccessToken,
+          result.expireInSeconds ?? 0,
+          this.loginService.rememberMe,
+          undefined,
+        );
+      } else if (result.status === 'expired') {
+        this.qrExpired = true;
+        this.stopQrPolling();
+      }
+    });
+  }
+
+  private stopQrPolling(): void {
+    if (this.qrPollTimer) {
+      clearInterval(this.qrPollTimer);
+      this.qrPollTimer = undefined;
     }
   }
 }

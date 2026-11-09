@@ -5,6 +5,9 @@ using Abp.Reflection.Extensions;
 using Eaf.KeyVault.AspNetCore;
 using Eaf.Middleware.Configuration;
 using Eaf.Middleware.Web;
+#if EAF_USE_SOURCE_PROJECTS
+using Eaf.OpenIddict;
+#endif
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +20,9 @@ namespace Eaf.ProjectName.Web.Startup
         typeof(ProjectNameApplicationModule),
         typeof(MiddlewareWebCoreModule),
         typeof(EafKeyVaultAspNetCoreModule)
+#if EAF_USE_SOURCE_PROJECTS
+        , typeof(EafOpenIddictModule)
+#endif
     )]
     public class WebHostModule : AbpModule
     {
