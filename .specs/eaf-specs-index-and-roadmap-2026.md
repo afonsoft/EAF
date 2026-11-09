@@ -64,6 +64,26 @@ All new specs should follow the structure in `.specs/eaf-spec-template.md`.
 | `eaf-implementation-plan-q3-2026.spec.md` | Q3 2026 implementation plan | Created (en-us) |
 | `eaf-abp-vs-aspnetzero-vs-eaf-comparison.spec.md` | Cross-project comparison | Created (en-us) |
 | `prompt-migracao-eaf-9.4.0-para-9.4.3.md` | Migration prompt | Updated (en-us); done |
+| `eaf-api-key-authentication.spec.md` | API key auth (`X-API-Key`) | Created (en-us); W1 — Zero v15.5 parity |
+| `eaf-passkey-login.spec.md` | Passkey/WebAuthn login | Created (en-us); W1 — Zero v15.5 parity |
+| `eaf-session-security.spec.md` | Idle timeout, active sessions, 2FA cache | Created (en-us); W1 — Zero v15.2/15.5 parity |
+| `eaf-mandatory-dynamic-properties.spec.md` | Mandatory dynamic properties | Created (en-us); W2 — Zero v15.5 parity |
+| `eaf-mapperly-migration.spec.md` | AutoMapper→Mapperly spike | Created (en-us); W2 — Zero v15.0 parity |
+| `eaf-workflow-engine.spec.md` | Workflow & approval builder | Created (en-us); W3 — Zero v15.5 parity |
+| `eaf-angular-21-primeng-upgrade.spec.md` | Angular 21 + PrimeNG upgrade (no ng-zorro) | Created (en-us); W4 |
+| `eaf-qr-login.spec.md` | QR code login | Created (en-us); W4 |
+| `eaf-email-template-management.spec.md` | Email template management | Created (en-us); W4 — Zero v15.4 parity |
+| `eaf-abp-11x-upstream-watch.spec.md` | ABP 11.x watch + manual fix porting | Created (en-us); W0 — blocked (ABP 11.x not public; latest 10.5.1) |
+
+## 2.1 ASP.NET Zero v15.5 Parity Waves (2026-11-08)
+
+Approved execution order:
+
+- **W1 Auth & security**: `eaf-api-key-authentication`, `eaf-passkey-login`, `eaf-session-security`
+- **W2 Domain/mapping**: `eaf-mandatory-dynamic-properties`, `eaf-mapperly-migration`
+- **W3 Workflow**: `eaf-workflow-engine` (phases A→D)
+- **W4 UI/misc**: `eaf-angular-21-primeng-upgrade` (PrimeNG stays — decision: no ng-zorro), `eaf-qr-login`, `eaf-email-template-management`, `eaf-module-openiddict` (login linking), Angular 21
+- **W0 ABP 11.x**: `eaf-abp-11x-upstream-watch` — public ABP is 10.5.1; port announced fixes manually until upstream releases
 
 ## 3. Implementation Status by Area
 
