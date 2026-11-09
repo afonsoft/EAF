@@ -20,7 +20,8 @@ export class AppNavigationService {
     return new AppMenu('MainMenu', 'MainMenu', [
       new AppMenuItem('Dashboard', 'Pages.Dashboard', 'flaticon-line-graph', '/app/main/dashboard'),
       new AppMenuItem('Metrics', 'Pages.Dashboard', 'flaticon-graph', '/app/main/dashboard'),
-      new AppMenuItem('MyApiKeys', '', 'flaticon-lock', '/app/main/api-keys'),
+      new AppMenuItem('Passkeys', '', 'flaticon-lock', '/app/main/passkeys'),
+                        new AppMenuItem('MyApiKeys', '', 'flaticon-lock', '/app/main/api-keys'),
     ]);
   }
 

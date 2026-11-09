@@ -1,6 +1,7 @@
 ﻿import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { PasskeysComponent } from './passkeys/passkeys.component';
 import { ApiKeysComponent } from './api-keys/api-keys.component';
 
 @NgModule({
@@ -10,7 +11,9 @@ import { ApiKeysComponent } from './api-keys/api-keys.component';
         path: '',
         children: [
           { path: 'dashboard', component: DashboardComponent, data: { permission: 'Pages.Dashboard' } },
-          { path: 'api-keys', component: ApiKeysComponent },
+          { path: 'passkeys', component: PasskeysComponent },
+                    {
+                        path: 'api-keys', component: ApiKeysComponent },
         ],
       },
     ]),

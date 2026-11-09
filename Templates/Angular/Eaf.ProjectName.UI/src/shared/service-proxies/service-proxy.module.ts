@@ -7,6 +7,7 @@ import { DynamicEntityPropertyService } from './dynamic-entity-property.service'
 import { PaymentExtendedService } from './payment-extended.service';
 import { TenantJoinRequestService } from './tenant-join-request.service';
 import { AdminApiKeyService, ApiKeyService } from './api-key.service';
+import { PasskeyService } from './passkey.service';
 
 @NgModule({
   providers: [
@@ -46,6 +47,7 @@ import { AdminApiKeyService, ApiKeyService } from './api-key.service';
     TenantJoinRequestService,
     ApiKeyService,
     AdminApiKeyService,
+    PasskeyService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],
 })

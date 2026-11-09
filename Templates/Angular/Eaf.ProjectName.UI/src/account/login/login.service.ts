@@ -165,7 +165,10 @@ export class LoginService {
     }
   }
 
-  private login(
+  /**
+   * Finaliza o login com um par de tokens já obtido (passkey, external, etc.).
+   */
+  public login(
     accessToken: string,
     encryptedAccessToken: string,
     expireInSeconds: number,

@@ -142,6 +142,19 @@
           </button>
         </div>
       </div>
+
+      <div class="row" *ngIf="passkeySupported">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-outline-primary m-btn m-btn--pill m-btn--air"
+            (click)="loginWithPasskey()"
+            [disabled]="submitting"
+          >
+            <i class="fa fa-key"></i> {{ 'SignInWithPasskey' | localize }}
+          </button>
+        </div>
+      </div>
     </div>
   </form>
 </div>
