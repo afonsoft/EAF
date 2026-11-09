@@ -2,8 +2,8 @@
 <div id="m_header_topbar" class="m-topbar  m-stack m-stack--ver m-stack--general header-{{ currentTheme.baseSettings.header.headerSkin }}">
   <nav class="m-stack__item m-topbar__nav-wrapper" [attr.aria-label]="l('TopMenu')">
     <ul class="m-topbar__nav m-nav m-nav--inline" aria-label="TopMenu">
+      @if (languages.length > 1) {
       <li
-        *ngIf="languages.length > 1"
         class="m-nav__item m-topbar__languages m-dropdown m-dropdown--small m-dropdown--arrow m-dropdown--align-right m-dropdown--mobile-full-width m-dropdown--skin-{{
           currentTheme.baseSettings.header.headerSkin
         }} m-list-search--skin-{{ currentTheme.baseSettings.header.headerSkin }}"
@@ -24,27 +24,28 @@
             <div class="m-dropdown__body">
               <div class="m-dropdown__content">
                 <ul class="m-nav m-nav--skin-{{ currentTheme.baseSettings.header.headerSkin }}">
-                  <ng-container *ngFor="let language of languages">
-                    <li class="m-nav__item" [ngClass]="{ 'm-nav__item--active': language.active }">
-                      <a href="javascript:;" (click)="changeLanguage(language.name)" class="m-nav__link">
-                        <span class="m-nav__link-icon">
-                          <span class="m-nav__link-icon-wrapper">
-                            <i [class]="language.icon"></i>
-                          </span>
+                  @for (language of languages; track language) {
+                  <li class="m-nav__item" [ngClass]="{ 'm-nav__item--active': language.active }">
+                    <a href="javascript:;" (click)="changeLanguage(language.name)" class="m-nav__link">
+                      <span class="m-nav__link-icon">
+                        <span class="m-nav__link-icon-wrapper">
+                          <i [class]="language.icon"></i>
                         </span>
-                        <span
-                          class="m-nav__link-title m-topbar__language-text m-nav__link-text-{{ currentTheme.baseSettings.menu.asideSkin }}"
-                          >{{ language.displayName }}</span
-                        >
-                      </a>
-                    </li>
-                  </ng-container>
+                      </span>
+                      <span
+                        class="m-nav__link-title m-topbar__language-text m-nav__link-text-{{ currentTheme.baseSettings.menu.asideSkin }}"
+                        >{{ language.displayName }}</span
+                      >
+                    </a>
+                  </li>
+                  }
                 </ul>
               </div>
             </div>
           </div>
         </div>
       </li>
+      }
 
       <li
         adm-bar
@@ -75,19 +76,24 @@
           style="text-decoration: none"
           [ngClass]="{ 'm--hide': !this.showChatMenu }"
         >
-          <span class="m-nav__link-badge m-badge m-badge--dot m-badge--dot-small m-badge--danger" *ngIf="unreadChatMessageCount"></span>
+          @if (unreadChatMessageCount) {
+          <span class="m-nav__link-badge m-badge m-badge--dot m-badge--dot-small m-badge--danger"></span>
+          }
           <span class="m-nav__link-icon">
-            <span class="m-nav__link-icon-wrapper" *ngIf="!chatConnected">
+            @if (!chatConnected) {
+            <span class="m-nav__link-icon-wrapper">
+              @if (!chatConnected) {
               <img
-                *ngIf="!chatConnected"
                 src="./assets/common/images/loading.gif"
                 style="width: 23px"
                 alt="{{ 'ChatIsConnecting' | localize }}"
                 tooltip="{{ 'ChatIsConnecting' | localize }}"
                 placement="left"
               />
+              }
             </span>
-            <span class="m-nav__link-icon-wrapper" *ngIf="chatConnected">
+            } @if (chatConnected) {
+            <span class="m-nav__link-icon-wrapper">
               <a
                 (click)="showChat('chatSideRight')"
                 class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-desktop-inline-block ng-star-inserted pull-bs-canvas-right d-block text-primary text-decoration-none"
@@ -99,6 +105,7 @@
                 </div>
               </a>
             </span>
+            }
           </span>
         </a>
       </li>
@@ -133,13 +140,9 @@
             <div class="m-dropdown__body">
               <nav class="m-dropdown__content" [attr.aria-label]="l('UserAccount')">
                 <ul class="m-nav m-nav--skin-light" [attr.aria-label]="l('UserAccount')">
-                  <li *ngIf="isImpersonatedLogin" class="m-nav__item">
-                    <a
-                      href="javascript:;"
-                      class="m-nav__link"
-                      (click)="backToMyAccount()"
-                      tabindex="-1"
-                    >
+                  @if (isImpersonatedLogin) {
+                  <li class="m-nav__item">
+                    <a href="javascript:;" class="m-nav__link" (click)="backToMyAccount()" tabindex="-1">
                       <i class="m-nav__link-icon fa fa-reply m--font-danger"></i>
                       <span class="m-nav__link-title">
                         <span class="m-nav__link-wrap">
@@ -153,16 +156,14 @@
                       </span>
                     </a>
                   </li>
-                  <li *ngIf="isImpersonatedLogin" class="m-nav__separator m-nav__separator--fit"></li>
+                  } @if (isImpersonatedLogin) {
+                  <li class="m-nav__separator m-nav__separator--fit"></li>
+                  }
 
                   <li class="m-nav__separator m-nav__separator--fit"></li>
-                  <li class="m-nav__item" *ngIf="isSystemUser">
-                    <a
-                      href="javascript:;"
-                      class="m-nav__link"
-                      (click)="changePassword()"
-                      tabindex="-1"
-                    >
+                  @if (isSystemUser) {
+                  <li class="m-nav__item">
+                    <a href="javascript:;" class="m-nav__link" (click)="changePassword()" tabindex="-1">
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-more-v6"></i>
                       <span class="m-nav__link-title">
                         <span class="m-nav__link-wrap">
@@ -173,13 +174,9 @@
                       </span>
                     </a>
                   </li>
+                  }
                   <li class="m-nav__item">
-                    <a
-                      href="javascript:;"
-                      class="m-nav__link"
-                      (click)="showLoginAttempts()"
-                      tabindex="-1"
-                    >
+                    <a href="javascript:;" class="m-nav__link" (click)="showLoginAttempts()" tabindex="-1">
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-list"></i>
                       <span class="m-nav__link-title">
                         <span class="m-nav__link-wrap">
@@ -191,12 +188,7 @@
                     </a>
                   </li>
                   <li class="m-nav__item">
-                    <a
-                      href="javascript:;"
-                      class="m-nav__link"
-                      (click)="changeProfilePicture()"
-                      tabindex="-1"
-                    >
+                    <a href="javascript:;" class="m-nav__link" (click)="changeProfilePicture()" tabindex="-1">
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-profile-1"></i>
                       <span class="m-nav__link-title">
                         <span class="m-nav__link-wrap">
@@ -208,12 +200,7 @@
                     </a>
                   </li>
                   <li class="m-nav__item">
-                    <a
-                      href="javascript:;"
-                      class="m-nav__link"
-                      (click)="changeMySettings()"
-                      tabindex="-1"
-                    >
+                    <a href="javascript:;" class="m-nav__link" (click)="changeMySettings()" tabindex="-1">
                       <i class="m-nav__link-icon-{{ currentTheme.baseSettings.menu.asideSkin }} flaticon-cogwheel"></i>
                       <span class="m-nav__link-title">
                         <span class="m-nav__link-wrap">

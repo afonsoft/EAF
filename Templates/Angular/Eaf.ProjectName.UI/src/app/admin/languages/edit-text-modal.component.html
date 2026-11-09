@@ -4,13 +4,13 @@
   class="modal fade"
   (onShown)="onShown()"
   tabindex="-1"
- 
   aria-labelledby="createOrEditModal"
   [config]="{ backdrop: 'static' }"
 >
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form autocomplete="off" *ngIf="active" #editForm="ngForm" novalidate (ngSubmit)="save()">
+      @if (active) {
+      <form autocomplete="off" #editForm="ngForm" novalidate (ngSubmit)="save()">
         <div class="modal-header">
           <h4 class="modal-title">
             <span>{{ 'Edit' | localize }}</span>
@@ -63,6 +63,7 @@
           </button>
         </div>
       </form>
+      }
     </div>
   </div>
 </div>

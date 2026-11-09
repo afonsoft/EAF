@@ -1,5 +1,5 @@
-﻿<p-dialog
-  *ngIf="active"
+﻿@if (active) {
+<p-dialog
   [(visible)]="visible"
   (onHide)="close()"
   [modal]="true"
@@ -8,21 +8,25 @@
   [draggable]="false"
   [resizable]="false"
   [closeOnEscape]="true"
-  [dismissableMask]="false">
+  [dismissableMask]="false"
+>
   <ng-template pTemplate="header">
-    <div *ngIf="entityChange">
+    @if (entityChange) {
+    <div>
       <span>{{ entityChange.entityTypeFullName | localize }}</span>
       <br />
       <small [innerHTML]="l('CreatedAtByUser', entityChange.changeTime, entityChange.userName)"></small>
     </div>
+    }
   </ng-template>
-
   <div class="modal-body scroll-horizontal">
     <p-table [value]="entityPropertyChanges" scrollable="true" [scrollable]="true" styleClass="p-datatable-sm" [responsive]="true">
       <ng-template pTemplate="header">
         <tr>
           <th scope="col">{{ 'Property' | localize }}</th>
-          <th *ngIf="isUpdated()" scope="col" style="min-width: 200px">{{ 'OriginalValue' | localize }}</th>
+          @if (isUpdated()) {
+          <th scope="col" style="min-width: 200px">{{ 'OriginalValue' | localize }}</th>
+          }
           <th scope="col" style="min-width: 200px">{{ 'NewValue' | localize }}</th>
         </tr>
       </ng-template>
@@ -31,7 +35,9 @@
           <td>
             <strong>{{ propertyChange.propertyName }}</strong>
           </td>
-          <td *ngIf="isUpdated()">{{ getPropertyChangeValue(propertyChange.originalValue, propertyChange.propertyTypeFullName) }}</td>
+          @if (isUpdated()) {
+          <td>{{ getPropertyChangeValue(propertyChange.originalValue, propertyChange.propertyTypeFullName) }}</td>
+          }
           <td>{{ getPropertyChangeValue(propertyChange.newValue, propertyChange.propertyTypeFullName) }}</td>
         </tr>
       </ng-template>
@@ -42,8 +48,8 @@
       </ng-template>
     </p-table>
   </div>
-
   <ng-template pTemplate="footer">
     <button type="button" pButton label="{{ 'Close' | localize }}" (click)="close()"></button>
   </ng-template>
 </p-dialog>
+}

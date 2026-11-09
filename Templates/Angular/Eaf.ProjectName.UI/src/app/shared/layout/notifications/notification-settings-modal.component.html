@@ -1,12 +1,4 @@
-<div
-  bsModal
-  #modal="bs-modal"
-  class="modal fade"
-  tabindex="-1"
- 
-  aria-labelledby="modal"
-  [config]="{ backdrop: 'static' }"
->
+<div bsModal #modal="bs-modal" class="modal fade" tabindex="-1" aria-labelledby="modal" [config]="{ backdrop: 'static' }">
   <div class="modal-dialog modal-lg" style="max-width: 920px">
     <div class="modal-content" cdkTrapFocus cdkTrapFocusAutoCapture>
       <form autocomplete="off" #editForm="ngForm" novalidate (ngSubmit)="save()">
@@ -18,24 +10,34 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body" *ngIf="settings">
+        @if (settings) {
+        <div class="modal-body">
           <h4>{{ 'ReceiveNotifications' | localize }}</h4>
           <div>
             <span class="m-switch m-switch--icon-check">
               <label [attr.aria-label]="l('ReceiveNotifications')">
-                <input id="ReceiveNotifications" type="checkbox" name="ReceiveNotifications" value="true" [(ngModel)]="settings.receiveNotifications" />
+                <input
+                  id="ReceiveNotifications"
+                  type="checkbox"
+                  name="ReceiveNotifications"
+                  value="true"
+                  [(ngModel)]="settings.receiveNotifications"
+                />
                 <span></span>
               </label>
             </span>
-
             <div class="help-block">{{ 'ReceiveNotifications_Definition' | localize }}</div>
           </div>
-          <h4 *ngIf="settings.notifications.length" class="m--margin-top-20">{{ 'NotificationTypes' | localize }}</h4>
-          <p *ngIf="settings.notifications.length && !settings.receiveNotifications" class="text-danger">
+          @if (settings.notifications.length) {
+          <h4 class="m--margin-top-20">{{ 'NotificationTypes' | localize }}</h4>
+          } @if (settings.notifications.length && !settings.receiveNotifications) {
+          <p class="text-danger">
             <small>{{ 'ReceiveNotifications_DisableInfo' | localize }}</small>
           </p>
+          }
           <div class="m-checkbox-list row">
-            <div class="col-6" *ngFor="let notification of settings.notifications; let i = index">
+            @for (notification of settings.notifications; track notification; let i = $index) {
+            <div class="col-6">
               <span class="m-switch m-switch--icon-check">
                 <label attr.for="Notification_{{ notification.name }}">
                   <input
@@ -50,10 +52,14 @@
                   <span class="m-switch-label">{{ notification.displayName | localize }}</span>
                 </label>
               </span>
-              <span *ngIf="notification.description" class="help-block">{{ notification.description }}</span>
+              @if (notification.description) {
+              <span class="help-block">{{ notification.description }}</span>
+              }
             </div>
+            }
           </div>
         </div>
+        }
         <div class="modal-footer">
           <button [disabled]="saving" type="button" class="btn btn-default" (click)="close()">{{ 'Cancel' | localize }}</button>
           <button type="submit" class="btn btn-primary" [buttonBusy]="saving" [busyText]="l('SavingWithThreeDot')">

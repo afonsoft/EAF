@@ -1,122 +1,133 @@
 <div [@routerTransition]>
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    <h1>{{ "MyRequests" | localize }}</h1>
-                </div>
-                <div class="col-6 text-right">
-                    <button class="btn btn-primary" (click)="load()">
-                        <i class="fa fa-sync"></i> {{ "Refresh" | localize }}
-                    </button>
-                </div>
-            </div>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-6">
+          <h1>{{ 'MyRequests' | localize }}</h1>
         </div>
-    </section>
-    <section class="content px-2">
-        <div class="container-fluid">
-            <div class="card">
-                <div class="card-body">
-                    <p-table [value]="requests" [loading]="loading" [paginator]="true" [rows]="10">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th scope="col">{{ "Workflow" | localize }}</th>
-                                <th scope="col">{{ "Status" | localize }}</th>
-                                <th scope="col">{{ "CurrentStep" | localize }}</th>
-                                <th scope="col">{{ "CreationTime" | localize }}</th>
-                                <th scope="col" style="width: 240px">{{ "Actions" | localize }}</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-req>
-                            <tr>
-                                <td>{{ req.definitionId.slice(0, 8) }}… (v{{ req.version }})</td>
-                                <td><span class="badge" [ngClass]="statusClass(req.status)">{{ req.status }}</span></td>
-                                <td>{{ req.currentStepId || "-" }}</td>
-                                <td>{{ req.creationTime | date: 'dd/MM/yyyy HH:mm' }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary mr-1" (click)="openDetail(req)">
-                                        <i class="fa fa-eye"></i> {{ "Details" | localize }}
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" *ngIf="req.status === 'InProgress' || req.status === 'SentBack'"
-                                            (click)="cancel(req)">
-                                        <i class="fa fa-times"></i> {{ "Cancel" | localize }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr><td colspan="5">{{ "NoRequestsYet" | localize }}</td></tr>
-                        </ng-template>
-                    </p-table>
-                </div>
-            </div>
+        <div class="col-6 text-right">
+          <button class="btn btn-primary" (click)="load()"><i class="fa fa-sync"></i> {{ 'Refresh' | localize }}</button>
         </div>
-    </section>
-
-    <div class="modal show d-block" tabindex="-1" role="dialog" *ngIf="showDetailModal" style="background: rgba(0,0,0,.4)">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content" *ngIf="detail">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ "RequestDetail" | localize }} — {{ detail.instance.status }}</h5>
-                    <button type="button" class="close" (click)="closeDetail()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h6>{{ "Tasks" | localize }}</h6>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col">{{ "Step" | localize }}</th>
-                                <th scope="col">{{ "Assignee" | localize }}</th>
-                                <th scope="col">{{ "Status" | localize }}</th>
-                                <th scope="col">{{ "Comment" | localize }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let t of detail.tasks">
-                                <td>{{ t.stepId }}</td>
-                                <td>{{ t.assigneeUserId }}</td>
-                                <td>{{ t.status }}</td>
-                                <td>{{ t.comment || "-" }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h6 class="mt-3">{{ "Timeline" | localize }}</h6>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col">{{ "Time" | localize }}</th>
-                                <th scope="col">{{ "Event" | localize }}</th>
-                                <th scope="col">{{ "Step" | localize }}</th>
-                                <th scope="col">{{ "Actor" | localize }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let e of detail.timeline">
-                                <td>{{ e.creationTime | date: 'dd/MM/yyyy HH:mm' }}</td>
-                                <td>{{ e.eventType }}</td>
-                                <td>{{ e.stepId || "-" }}</td>
-                                <td>{{ e.actorUserId ?? "-" }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div *ngIf="detail.instance.status === 'SentBack'">
-                        <h6 class="mt-3">{{ "EditAndResubmit" | localize }}</h6>
-                        <div class="form-group" *ngFor="let kv of resubmitValues | keyvalue">
-                            <label [for]="'resub_' + kv.key">{{ kv.key }}</label>
-                            <input class="form-control" [id]="'resub_' + kv.key" [(ngModel)]="resubmitValues[kv.key]" />
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" *ngIf="detail.instance.status === 'SentBack'" (click)="resubmit()">
-                        <i class="fa fa-paper-plane"></i> {{ "Resubmit" | localize }}
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </section>
+  <section class="content px-2">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-body">
+          <p-table [value]="requests" [loading]="loading" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th scope="col">{{ 'Workflow' | localize }}</th>
+                <th scope="col">{{ 'Status' | localize }}</th>
+                <th scope="col">{{ 'CurrentStep' | localize }}</th>
+                <th scope="col">{{ 'CreationTime' | localize }}</th>
+                <th scope="col" style="width: 240px">{{ 'Actions' | localize }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-req>
+              <tr>
+                <td>{{ req.definitionId.slice(0, 8) }}… (v{{ req.version }})</td>
+                <td>
+                  <span class="badge" [ngClass]="statusClass(req.status)">{{ req.status }}</span>
+                </td>
+                <td>{{ req.currentStepId || '-' }}</td>
+                <td>{{ req.creationTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary mr-1" (click)="openDetail(req)">
+                    <i class="fa fa-eye"></i> {{ 'Details' | localize }}
+                  </button>
+                  @if (req.status === 'InProgress' || req.status === 'SentBack') {
+                  <button class="btn btn-sm btn-danger" (click)="cancel(req)"><i class="fa fa-times"></i> {{ 'Cancel' | localize }}</button>
+                  }
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5">{{ 'NoRequestsYet' | localize }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @if (showDetailModal) {
+  <div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0, 0, 0, 0.4)">
+    <div class="modal-dialog modal-lg" role="document">
+      @if (detail) {
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ 'RequestDetail' | localize }} — {{ detail.instance.status }}</h5>
+          <button type="button" class="close" (click)="closeDetail()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <h6>{{ 'Tasks' | localize }}</h6>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'Step' | localize }}</th>
+                <th scope="col">{{ 'Assignee' | localize }}</th>
+                <th scope="col">{{ 'Status' | localize }}</th>
+                <th scope="col">{{ 'Comment' | localize }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of detail.tasks; track t) {
+              <tr>
+                <td>{{ t.stepId }}</td>
+                <td>{{ t.assigneeUserId }}</td>
+                <td>{{ t.status }}</td>
+                <td>{{ t.comment || '-' }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+          <h6 class="mt-3">{{ 'Timeline' | localize }}</h6>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'Time' | localize }}</th>
+                <th scope="col">{{ 'Event' | localize }}</th>
+                <th scope="col">{{ 'Step' | localize }}</th>
+                <th scope="col">{{ 'Actor' | localize }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of detail.timeline; track e) {
+              <tr>
+                <td>{{ e.creationTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ e.eventType }}</td>
+                <td>{{ e.stepId || '-' }}</td>
+                <td>{{ e.actorUserId ?? '-' }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+          @if (detail.instance.status === 'SentBack') {
+          <div>
+            <h6 class="mt-3">{{ 'EditAndResubmit' | localize }}</h6>
+            @for (kv of resubmitValues | keyvalue; track kv) {
+            <div class="form-group">
+              <label [for]="'resub_' + kv.key">{{ kv.key }}</label>
+              <input class="form-control" [id]="'resub_' + kv.key" [(ngModel)]="resubmitValues[kv.key]" />
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="modal-footer">
+          @if (detail.instance.status === 'SentBack') {
+          <button class="btn btn-primary" (click)="resubmit()"><i class="fa fa-paper-plane"></i> {{ 'Resubmit' | localize }}</button>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
 </div>

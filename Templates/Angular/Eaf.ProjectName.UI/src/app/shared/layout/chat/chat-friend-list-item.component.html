@@ -1,10 +1,7 @@
-<button
-  type="button"
-  (click)="selectChatFriend.emit($event)"
-  class="d-flex align-items-center justify-content-between mb-2 chat-user"
->
+<button type="button" (click)="selectChatFriend.emit($event)" class="d-flex align-items-center justify-content-between mb-2 chat-user">
   <div class="row d-flex align-items-center" style="width: 100%">
-    <div *ngIf="friend.isOnline" class="col-1 symbol symbol-circle symbol-50 mr-2" style="width: 100%">
+    @if (friend.isOnline) {
+    <div class="col-1 symbol symbol-circle symbol-50 mr-2" style="width: 100%">
       <friend-profile-picture
         [tenantId]="friend.friendTenantId"
         [userId]="friend.friendUserId"
@@ -12,7 +9,8 @@
       >
       </friend-profile-picture>
     </div>
-    <div *ngIf="!friend.isOnline" class="col-1 symbol symbol-circle symbol-50 mr-2" style="width: 100%">
+    } @if (!friend.isOnline) {
+    <div class="col-1 symbol symbol-circle symbol-50 mr-2" style="width: 100%">
       <friend-profile-picture
         [tenantId]="friend.friendTenantId"
         [userId]="friend.friendUserId"
@@ -20,21 +18,17 @@
       >
       </friend-profile-picture>
     </div>
+    }
     <div class="col-9 d-flex flex-column">
-      <span
-        *ngIf="friend.friendTenancyName && friend.friendTenancyName !== 'Default'"
-        class="text-muted font-weight-bold font-size-sm"
-        style="font-size: 8pt"
-      >
+      @if (friend.friendTenancyName && friend.friendTenancyName !== 'Default') {
+      <span class="text-muted font-weight-bold font-size-sm" style="font-size: 8pt">
         {{ friend.friendTenancyName }}
       </span>
-      <span
-        *ngIf="!friend.friendTenancyName"
-        class="text-muted font-weight-bold font-size-sm m-nav__link-icon-wrapper m-nav__link-text-light"
-        style="font-size: 8pt"
-      >
+      } @if (!friend.friendTenancyName) {
+      <span class="text-muted font-weight-bold font-size-sm m-nav__link-icon-wrapper m-nav__link-text-light" style="font-size: 8pt">
         Host
       </span>
+      }
       <a
         class="m-nav__link-title m-topbar__menu-text m-nav__link-text-light"
         data-placement="top"
@@ -47,9 +41,11 @@
       </a>
     </div>
     <div class="col-1 d-flex flex-column align-items-end">
-      <span *ngIf="friend.unreadMessageCount" class="m-nav__link-title m-topbar__menu-text m-nav__link-text-light unread-notification">
+      @if (friend.unreadMessageCount) {
+      <span class="m-nav__link-title m-topbar__menu-text m-nav__link-text-light unread-notification">
         {{ friend.unreadMessageCount }}
       </span>
+      }
     </div>
   </div>
 </button>

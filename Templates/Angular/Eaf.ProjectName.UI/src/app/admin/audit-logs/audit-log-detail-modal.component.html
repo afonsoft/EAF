@@ -1,5 +1,5 @@
-﻿<p-dialog
-  *ngIf="active"
+﻿@if (active) {
+<p-dialog
   [(visible)]="visible"
   (onHide)="close()"
   [modal]="true"
@@ -9,8 +9,10 @@
   [resizable]="false"
   [closeOnEscape]="true"
   [dismissableMask]="false"
-  header="{{ 'AuditLogDetail' | localize }}">
-  <div *ngIf="auditLog" class="modal-body">
+  header="{{ 'AuditLogDetail' | localize }}"
+>
+  @if (auditLog) {
+  <div class="modal-body">
     <h3 class="form-section">{{ 'UserInformations' | localize }}</h3>
     <div class="row">
       <div class="col-md-12">
@@ -38,15 +40,16 @@
             <span>{{ auditLog.browserInfo }}</span>
           </div>
         </div>
-        <div class="form-group m-form__group row" *ngIf="auditLog.impersonatorUserId">
+        @if (auditLog.impersonatorUserId) {
+        <div class="form-group m-form__group row">
           <span class="col-lg-3 col-form-label"></span>
           <div class="col-lg-9 text-warning">
             <span>{{ 'AuditLogImpersonatedOperationInfo' | localize }}</span>
           </div>
         </div>
+        }
       </div>
     </div>
-
     <h3 class="form-section">{{ 'ActionInformations' | localize }}</h3>
     <div class="row">
       <div class="col-md-12">
@@ -84,48 +87,74 @@
           <span class="col-lg-3 col-form-label">{{ 'Parameters' | localize }}:</span>
           <div class="col-lg-9">
             <div class="d-flex justify-content-end mb-1">
-              <button type="button" pButton icon="pi pi-copy" class="p-button-sm p-button-text" [pTooltip]="'Copy' | localize" (click)="copyToClipboard(getFormattedParameters())"></button>
+              <button
+                type="button"
+                pButton
+                icon="pi pi-copy"
+                class="p-button-sm p-button-text"
+                [pTooltip]="'Copy' | localize"
+                (click)="copyToClipboard(getFormattedParameters())"
+              ></button>
             </div>
             <pre class="code-block">{{ getFormattedParameters() }}</pre>
           </div>
         </div>
       </div>
     </div>
-
     <h3 class="form-section">{{ 'CustomData' | localize }}</h3>
     <div class="row">
       <div class="col-md-12">
         <div class="form-group m-form__group row">
           <span class="col-lg-3 col-form-label">{{ 'CustomData' | localize }}:</span>
           <div class="col-lg-9">
-            <div class="d-flex justify-content-end mb-1" *ngIf="auditLog.customData">
-              <button type="button" pButton icon="pi pi-copy" class="p-button-sm p-button-text" [pTooltip]="'Copy' | localize" (click)="copyToClipboard(getFormattedCustomData())"></button>
+            @if (auditLog.customData) {
+            <div class="d-flex justify-content-end mb-1">
+              <button
+                type="button"
+                pButton
+                icon="pi pi-copy"
+                class="p-button-sm p-button-text"
+                [pTooltip]="'Copy' | localize"
+                (click)="copyToClipboard(getFormattedCustomData())"
+              ></button>
             </div>
-            <pre class="code-block" *ngIf="auditLog.customData">{{ getFormattedCustomData() }}</pre>
-            <span *ngIf="!auditLog.customData">{{ 'None' | localize }}</span>
+            } @if (auditLog.customData) {
+            <pre class="code-block">{{ getFormattedCustomData() }}</pre>
+            } @if (!auditLog.customData) {
+            <span>{{ 'None' | localize }}</span>
+            }
           </div>
         </div>
       </div>
     </div>
-
     <h3 class="form-section">{{ 'ErrorState' | localize }}</h3>
     <div class="row">
       <div class="col-md-12">
         <div class="form-group m-form__group row">
-          <span *ngIf="!auditLog.exception" class="col-lg-12 col-form-label">
-            <i class="fa fa-check-circle m--font-success"></i> {{ 'Success' | localize }}
-          </span>
-          <div *ngIf="auditLog.exception" class="col-lg-12">
+          @if (!auditLog.exception) {
+          <span class="col-lg-12 col-form-label"> <i class="fa fa-check-circle m--font-success"></i> {{ 'Success' | localize }} </span>
+          } @if (auditLog.exception) {
+          <div class="col-lg-12">
             <div class="d-flex justify-content-end mb-1">
-              <button type="button" pButton icon="pi pi-copy" class="p-button-sm p-button-text" [pTooltip]="'Copy' | localize" (click)="copyToClipboard(getFormattedException())"></button>
+              <button
+                type="button"
+                pButton
+                icon="pi pi-copy"
+                class="p-button-sm p-button-text"
+                [pTooltip]="'Copy' | localize"
+                (click)="copyToClipboard(getFormattedException())"
+              ></button>
             </div>
             <pre class="code-block">{{ getFormattedException() }}</pre>
           </div>
+          }
         </div>
       </div>
     </div>
   </div>
+  }
   <ng-template pTemplate="footer">
     <button type="button" pButton label="{{ 'Close' | localize }}" (click)="close()"></button>
   </ng-template>
 </p-dialog>
+}

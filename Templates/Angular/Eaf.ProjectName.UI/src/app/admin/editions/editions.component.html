@@ -10,10 +10,12 @@
         </span>
       </div>
       <div class="col text-right mt-3 mt-md-0">
-        <button *ngIf="isGranted('Pages.Administration.Editions.Create')" (click)="createEdition()" class="btn btn-primary">
+        @if (isGranted('Pages.Administration.Editions.Create')) {
+        <button (click)="createEdition()" class="btn btn-primary">
           <i class="flaticon-add"></i>
           {{ 'Create' | localize }}
         </button>
+        }
       </div>
     </div>
   </div>
@@ -108,20 +110,34 @@
                     ></app-status-badge>
                   </td>
                   <td style="width: 130px">
-                    <button *ngIf="isGranted('Pages.Administration.Editions.Features')" (click)="showFeatures(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Features')">
+                    @if (isGranted('Pages.Administration.Editions.Features')) {
+                    <button
+                      (click)="showFeatures(record)"
+                      class="btn btn-sm btn-clean btn-icon btn-icon-md"
+                      [attr.aria-label]="l('Features')"
+                    >
                       <i class="flaticon-interface-8"></i>
                     </button>
-                    <button *ngIf="isGranted('Pages.Administration.Editions.Edit')" (click)="editEdition(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Edit')">
+                    } @if (isGranted('Pages.Administration.Editions.Edit')) {
+                    <button (click)="editEdition(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Edit')">
                       <i class="flaticon-edit"></i>
                     </button>
-                    <button *ngIf="isGranted('Pages.Administration.Editions.Delete')" (click)="deleteEdition(record)" class="btn btn-sm btn-clean btn-icon btn-icon-md" [attr.aria-label]="l('Delete')">
+                    } @if (isGranted('Pages.Administration.Editions.Delete')) {
+                    <button
+                      (click)="deleteEdition(record)"
+                      class="btn btn-sm btn-clean btn-icon btn-icon-md"
+                      [attr.aria-label]="l('Delete')"
+                    >
                       <i class="flaticon-delete-1"></i>
                     </button>
+                    }
                   </td>
                 </tr>
               </ng-template>
             </p-table>
-            <app-empty-state *ngIf="dataTableHelper.totalRecordsCount === 0 && !dataTableHelper.isLoading" [message]="'NoData' | localize"></app-empty-state>
+            @if (dataTableHelper.totalRecordsCount === 0 && !dataTableHelper.isLoading) {
+            <app-empty-state [message]="'NoData' | localize"></app-empty-state>
+            }
             <div class="primeng-paging-container">
               <p-paginator
                 (onPageChange)="getEditions($event)"

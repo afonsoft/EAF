@@ -7,48 +7,48 @@
   </div>
   <div class="m-stack__item m-stack__item--middle m-brand__tools">
     <!-- BEGIN: Left Aside Minimize Toggle -->
+    @if (currentTheme.isLeftMenuUsed && currentTheme.baseSettings.menu.allowAsideHiding) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.isLeftMenuUsed && currentTheme.baseSettings.menu.allowAsideHiding"
       id="m_aside_left_hide_toggle"
       (click)="clickLeftAsideHideToggle()"
       class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-desktop-inline-block"
     >
       <span></span>
     </a>
+    } @if ( currentTheme.isLeftMenuUsed && currentTheme.baseSettings.menu.allowAsideMinimizing &&
+    !currentTheme.baseSettings.menu.allowAsideHiding ) {
     <a
       href="javascript:;"
-      *ngIf="
-        currentTheme.isLeftMenuUsed &&
-        currentTheme.baseSettings.menu.allowAsideMinimizing &&
-        !currentTheme.baseSettings.menu.allowAsideHiding
-      "
       mMenuAsideToggle
       id="m_aside_left_minimize_toggle"
       class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-desktop-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- END -->
     <!-- BEGIN: Responsive Aside Left Menu Toggler-->
+    @if (currentTheme.isLeftMenuUsed) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.isLeftMenuUsed"
       id="m_aside_left_offcanvas_toggle"
       class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-tablet-and-mobile-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- END -->
     <!-- begin::Responsive Header Menu Toggler-->
+    @if (currentTheme.isTopMenuUsed || currentTheme.isTabMenuUsed) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.isTopMenuUsed || currentTheme.isTabMenuUsed"
       id="m_aside_header_menu_mobile_toggle"
       class="m-brand__icon m-brand__toggler m--visible-tablet-and-mobile-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- end::Responsive Header Menu Toggler-->
     <!-- BEGIN: Topbar Toggler -->
     <a

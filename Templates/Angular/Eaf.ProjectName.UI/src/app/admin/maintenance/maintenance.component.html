@@ -32,7 +32,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let cache of caches">
+                    @for (cache of caches; track cache) {
+                    <tr>
                       <td>
                         <span>{{ cache.name }}</span>
                         <button class="btn btn-primary btn-sm pull-right" (click)="clearCache(cache.name)">
@@ -40,6 +41,7 @@
                         </button>
                       </td>
                     </tr>
+                    }
                   </tbody>
                 </table>
               </div>
@@ -60,10 +62,12 @@
             <div class="row">
               <div class="col-xl-12">
                 <div class="web-log-view full-height">
-                  <span class="log-line" *ngFor="let log of logs">
+                  @for (log of logs; track log) {
+                  <span class="log-line">
                     <span [class]="getLogClass(log)">{{ getLogType(log) }}</span>
                     {{ getRawLogContent(log) }}
                   </span>
+                  }
                 </div>
               </div>
             </div>

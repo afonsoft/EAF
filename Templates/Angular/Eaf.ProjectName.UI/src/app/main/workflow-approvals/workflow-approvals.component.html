@@ -1,68 +1,64 @@
 <div [@routerTransition]>
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-6">
-                    <h1>{{ "WorkflowApprovals" | localize }}</h1>
-                </div>
-                <div class="col-6 text-right">
-                    <button class="btn btn-primary" (click)="loadTasks()">
-                        <i class="fa fa-sync"></i> {{ "Refresh" | localize }}
-                    </button>
-                </div>
-            </div>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-6">
+          <h1>{{ 'WorkflowApprovals' | localize }}</h1>
         </div>
-    </section>
-    <section class="content px-2">
-        <div class="container-fluid">
-            <div class="card">
-                <div class="card-body">
-                    <p-table
-                        [value]="tasks"
-                        [loading]="loading"
-                        [paginator]="true"
-                        [rows]="10">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th scope="col">{{ "Step" | localize }}</th>
-                                <th scope="col">{{ "DueTime" | localize }}</th>
-                                <th scope="col">{{ "CreationTime" | localize }}</th>
-                                <th scope="col">{{ "Comment" | localize }}</th>
-                                <th scope="col" style="width: 300px">{{ "Actions" | localize }}</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-task>
-                            <tr>
-                                <td>{{ task.stepId }}</td>
-                                <td>
-                                    {{ task.dueTime ? (task.dueTime | date: 'dd/MM/yyyy HH:mm') : "-" }}
-                                    <span *ngIf="isOverdue(task)" class="badge badge-danger ml-1">
-                                        {{ "Overdue" | localize }}
-                                    </span>
-                                </td>
-                                <td>{{ task.creationTime | date: 'dd/MM/yyyy HH:mm' }}</td>
-                                <td>{{ task.comment || "-" }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-success mr-1" (click)="decide(task, 'approve')">
-                                        <i class="fa fa-check"></i> {{ "Approve" | localize }}
-                                    </button>
-                                    <button class="btn btn-sm btn-warning mr-1" (click)="decide(task, 'send-back')">
-                                        <i class="fa fa-undo"></i> {{ "SendBack" | localize }}
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" (click)="decide(task, 'reject')">
-                                        <i class="fa fa-times"></i> {{ "Reject" | localize }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr>
-                                <td colspan="5">{{ "NoPendingApprovals" | localize }}</td>
-                            </tr>
-                        </ng-template>
-                    </p-table>
-                </div>
-            </div>
+        <div class="col-6 text-right">
+          <button class="btn btn-primary" (click)="loadTasks()"><i class="fa fa-sync"></i> {{ 'Refresh' | localize }}</button>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
+  <section class="content px-2">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-body">
+          <p-table [value]="tasks" [loading]="loading" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="header">
+              <tr>
+                <th scope="col">{{ 'Step' | localize }}</th>
+                <th scope="col">{{ 'DueTime' | localize }}</th>
+                <th scope="col">{{ 'CreationTime' | localize }}</th>
+                <th scope="col">{{ 'Comment' | localize }}</th>
+                <th scope="col" style="width: 300px">{{ 'Actions' | localize }}</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-task>
+              <tr>
+                <td>{{ task.stepId }}</td>
+                <td>
+                  {{ task.dueTime ? (task.dueTime | date: 'dd/MM/yyyy HH:mm') : '-' }}
+                  @if (isOverdue(task)) {
+                  <span class="badge badge-danger ml-1">
+                    {{ 'Overdue' | localize }}
+                  </span>
+                  }
+                </td>
+                <td>{{ task.creationTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ task.comment || '-' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-success mr-1" (click)="decide(task, 'approve')">
+                    <i class="fa fa-check"></i> {{ 'Approve' | localize }}
+                  </button>
+                  <button class="btn btn-sm btn-warning mr-1" (click)="decide(task, 'send-back')">
+                    <i class="fa fa-undo"></i> {{ 'SendBack' | localize }}
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="decide(task, 'reject')">
+                    <i class="fa fa-times"></i> {{ 'Reject' | localize }}
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5">{{ 'NoPendingApprovals' | localize }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>

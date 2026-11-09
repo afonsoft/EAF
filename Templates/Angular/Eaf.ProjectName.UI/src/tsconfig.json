@@ -15,7 +15,7 @@
     ],
     "mapRoot": "./",
     "module": "ES2020",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "outDir": "../dist/out-tsc",
     "target": "ES2022",
     "useDefineForClassFields": false,

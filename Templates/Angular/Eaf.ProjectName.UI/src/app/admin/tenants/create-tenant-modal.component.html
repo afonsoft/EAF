@@ -4,13 +4,13 @@
   (onShown)="onShown()"
   class="modal fade"
   tabindex="-1"
- 
   aria-labelledby="createModal"
   [config]="{ backdrop: 'static' }"
 >
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form autocomplete="off" #tenantCreateForm="ngForm" novalidate class="form-validation" *ngIf="active" (submit)="save()">
+      @if (active) {
+      <form autocomplete="off" #tenantCreateForm="ngForm" novalidate class="form-validation" (submit)="save()">
         <div class="modal-header">
           <h5 class="modal-title">
             <span>{{ 'Create' | localize }}</span>
@@ -19,7 +19,6 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-
         <div class="modal-body">
           <div class="form-group">
             <label for="TenancyName">{{ 'Code' | localize }} *</label>
@@ -39,11 +38,10 @@
             <validation-messages [formCtrl]="tenancyNameInput"></validation-messages>
           </div>
           <div>
-            <span class="help-block text-danger" *ngIf="!tenancyName.valid && !tenancyName.pristine">{{
-              'TenantName_Regex_Description' | localize
-            }}</span>
+            @if (!tenancyName.valid && !tenancyName.pristine) {
+            <span class="help-block text-danger">{{ 'TenantName_Regex_Description' | localize }}</span>
+            }
           </div>
-
           <div class="form-group">
             <label for="Name">{{ 'Name' | localize }} *</label>
             <input
@@ -59,7 +57,6 @@
             />
             <validation-messages [formCtrl]="nameInput"></validation-messages>
           </div>
-
           <div class="form-group">
             <label for="AdminEmailAddress">{{ 'AdminEmailAddress' | localize }} *</label>
             <input
@@ -76,7 +73,6 @@
             />
             <validation-messages [formCtrl]="adminEmailAddressInput"></validation-messages>
           </div>
-
           <div class="m-checkbox-list">
             <label class="m-checkbox">
               <input id="CreateTenant_SetRandomPassword" type="checkbox" name="SetRandomPassword" [(ngModel)]="setRandomPassword" />
@@ -84,8 +80,8 @@
               <span></span>
             </label>
           </div>
-
-          <div class="form-group" *ngIf="!setRandomPassword">
+          @if (!setRandomPassword) {
+          <div class="form-group">
             <label for="AdminPassword">{{ 'AdminPassword' | localize }}</label>
             <input
               id="AdminPassword"
@@ -107,12 +103,10 @@
               [requiredLength]="passwordComplexitySetting.requiredLength"
             />
           </div>
-
+          }
           <div [hidden]="tenantCreateForm.form.valid || tenantCreateForm.form.pristine">
-            <ul
-              class="help-block text-danger"
-              *ngIf="tenantCreateForm.controls['adminPassword'] && tenantCreateForm.controls['adminPassword'].errors"
-            >
+            @if (tenantCreateForm.controls['adminPassword'] && tenantCreateForm.controls['adminPassword'].errors) {
+            <ul class="help-block text-danger">
               <li [hidden]="!tenantCreateForm.controls['adminPassword'].errors.requireDigit">
                 {{ 'PasswordComplexity_RequireDigit_Hint' | localize }}
               </li>
@@ -129,9 +123,10 @@
                 {{ 'PasswordComplexity_RequiredLength_Hint' | localize: passwordComplexitySetting.requiredLength }}
               </li>
             </ul>
+            }
           </div>
-
-          <div class="form-group" *ngIf="!setRandomPassword">
+          @if (!setRandomPassword) {
+          <div class="form-group">
             <label for="AdminPasswordRepeat">{{ 'AdminPasswordRepeat' | localize }}</label>
             <input
               id="AdminPasswordRepeat"
@@ -151,12 +146,10 @@
               maxlength="32"
             />
           </div>
-
+          }
           <div [hidden]="tenantCreateForm.form.valid || tenantCreateForm.form.pristine">
-            <ul
-              class="help-block text-danger"
-              *ngIf="tenantCreateForm.controls['adminPasswordRepeat'] && tenantCreateForm.controls['adminPasswordRepeat'].errors"
-            >
+            @if (tenantCreateForm.controls['adminPasswordRepeat'] && tenantCreateForm.controls['adminPasswordRepeat'].errors) {
+            <ul class="help-block text-danger">
               <li [hidden]="!tenantCreateForm.controls['adminPasswordRepeat'].errors.requireDigit">
                 {{ 'PasswordComplexity_RequireDigit_Hint' | localize }}
               </li>
@@ -174,8 +167,8 @@
               </li>
               <li [hidden]="tenantCreateForm.controls['adminPasswordRepeat'].valid">{{ 'PasswordsDontMatch' | localize }}</li>
             </ul>
+            }
           </div>
-
           <div class="m-checkbox-list">
             <label for="CreateTenant_ShouldChangePasswordOnNextLogin" class="m-checkbox">
               <input
@@ -207,6 +200,7 @@
           </button>
         </div>
       </form>
+      }
     </div>
   </div>
 </div>

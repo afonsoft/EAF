@@ -15,14 +15,19 @@
   <div class="m-content">
     <div class="m-portlet m-portlet--mobile">
       <div class="m-portlet__body">
-        <p-tabView [(activeIndex)]="activeTabIndex" (onChange)="onTabChange($event.index)">
-          <p-tabPanel header="{{ 'OperationLogs' | localize }}">
+        <p-tabs [(value)]="activeTabIndex" (valueChange)="onTabChange($event)">
+          <p-tablist>
+            <p-tab [value]="0">{{ 'OperationLogs' | localize }}</p-tab>
+            <p-tab [value]="1">{{ 'ChangeLogs' | localize }}</p-tab>
+          </p-tablist>
+          <p-tabpanels>
+          <p-tabpanel [value]="0">
             <div class="m-form m-form--label-align-right">
               <form autocomplete="off" class="horizontal-form">
                 <div class="row align-items-end m--margin-bottom-10">
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="AuditLogDateRange" class="control-label">{{ 'DateRange' | localize }}</label>
-                    <p-calendar
+                    <p-datepicker
                       id="AuditLogDateRange"
                       [(ngModel)]="dateRange"
                       name="AuditLogDateRange"
@@ -31,28 +36,61 @@
                       [readonlyInput]="true"
                       [style]="{ width: '100%' }"
                       [inputStyle]="{ width: '100%' }"
-                      placeholder="{{ 'DateRange' | localize }}">
-                    </p-calendar>
+                      placeholder="{{ 'DateRange' | localize }}"
+                    >
+                    </p-datepicker>
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="UsernameAuditLog" class="control-label">{{ 'UserName' | localize }}</label>
-                    <input id="UsernameAuditLog" name="UsernameAuditLog" type="text" pInputText [(ngModel)]="usernameAuditLog" class="w-100" placeholder="{{ 'UserName' | localize }}" />
+                    <input
+                      id="UsernameAuditLog"
+                      name="UsernameAuditLog"
+                      type="text"
+                      pInputText
+                      [(ngModel)]="usernameAuditLog"
+                      class="w-100"
+                      placeholder="{{ 'UserName' | localize }}"
+                    />
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="ServiceName" class="control-label">{{ 'Service' | localize }}</label>
-                    <input id="ServiceName" name="ServiceName" type="text" pInputText [(ngModel)]="serviceName" class="w-100" placeholder="{{ 'Service' | localize }}" />
+                    <input
+                      id="ServiceName"
+                      name="ServiceName"
+                      type="text"
+                      pInputText
+                      [(ngModel)]="serviceName"
+                      class="w-100"
+                      placeholder="{{ 'Service' | localize }}"
+                    />
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="MethodName" class="control-label">{{ 'Action' | localize }}</label>
-                    <input id="MethodName" name="MethodName" type="text" pInputText [(ngModel)]="methodName" class="w-100" placeholder="{{ 'Action' | localize }}" />
+                    <input
+                      id="MethodName"
+                      name="MethodName"
+                      type="text"
+                      pInputText
+                      [(ngModel)]="methodName"
+                      class="w-100"
+                      placeholder="{{ 'Action' | localize }}"
+                    />
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="BrowserInfo" class="control-label">{{ 'Browser' | localize }}</label>
-                    <input id="BrowserInfo" name="BrowserInfo" type="text" pInputText [(ngModel)]="browserInfo" class="w-100" placeholder="{{ 'Browser' | localize }}" />
+                    <input
+                      id="BrowserInfo"
+                      name="BrowserInfo"
+                      type="text"
+                      pInputText
+                      [(ngModel)]="browserInfo"
+                      class="w-100"
+                      placeholder="{{ 'Browser' | localize }}"
+                    />
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="HasException" class="control-label">{{ 'ErrorState' | localize }}</label>
-                    <p-dropdown
+                    <p-select
                       id="HasException"
                       name="HasException"
                       [options]="hasExceptionOptions"
@@ -61,22 +99,59 @@
                       optionValue="value"
                       [showClear]="false"
                       [style]="{ width: '100%' }"
-                      placeholder="{{ 'ErrorState' | localize }}">
-                    </p-dropdown>
+                      placeholder="{{ 'ErrorState' | localize }}"
+                    >
+                    </p-select>
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="MinExecutionDuration" class="control-label">{{ 'MinExecutionDuration' | localize }}</label>
-                    <p-inputNumber id="MinExecutionDuration" name="MinExecutionDuration" [(ngModel)]="minExecutionDuration" mode="decimal" [min]="0" placeholder="{{ 'MinExecutionDuration' | localize }}" [style]="{ width: '100%' }"></p-inputNumber>
+                    <p-inputNumber
+                      id="MinExecutionDuration"
+                      name="MinExecutionDuration"
+                      [(ngModel)]="minExecutionDuration"
+                      mode="decimal"
+                      [min]="0"
+                      placeholder="{{ 'MinExecutionDuration' | localize }}"
+                      [style]="{ width: '100%' }"
+                    ></p-inputNumber>
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <label for="MaxExecutionDuration" class="control-label">{{ 'MaxExecutionDuration' | localize }}</label>
-                    <p-inputNumber id="MaxExecutionDuration" name="MaxExecutionDuration" [(ngModel)]="maxExecutionDuration" mode="decimal" [min]="0" placeholder="{{ 'MaxExecutionDuration' | localize }}" [style]="{ width: '100%' }"></p-inputNumber>
+                    <p-inputNumber
+                      id="MaxExecutionDuration"
+                      name="MaxExecutionDuration"
+                      [(ngModel)]="maxExecutionDuration"
+                      mode="decimal"
+                      [min]="0"
+                      placeholder="{{ 'MaxExecutionDuration' | localize }}"
+                      [style]="{ width: '100%' }"
+                    ></p-inputNumber>
                   </div>
                   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                     <div class="d-flex gap-2">
-                      <button type="button" pButton icon="pi pi-search" label="{{ 'Search' | localize }}" (click)="searchAuditLogs()"></button>
-                      <button type="button" pButton icon="pi pi-refresh" label="{{ 'Reset' | localize }}" (click)="resetAuditLogFilters()" class="p-button-secondary"></button>
-                      <button type="button" pButton icon="pi pi-file-excel" label="{{ 'ExportToExcel' | localize }}" (click)="exportAuditLogsToExcel()" class="p-button-success"></button>
+                      <button
+                        type="button"
+                        pButton
+                        icon="pi pi-search"
+                        label="{{ 'Search' | localize }}"
+                        (click)="searchAuditLogs()"
+                      ></button>
+                      <button
+                        type="button"
+                        pButton
+                        icon="pi pi-refresh"
+                        label="{{ 'Reset' | localize }}"
+                        (click)="resetAuditLogFilters()"
+                        class="p-button-secondary"
+                      ></button>
+                      <button
+                        type="button"
+                        pButton
+                        icon="pi pi-file-excel"
+                        label="{{ 'ExportToExcel' | localize }}"
+                        (click)="exportAuditLogsToExcel()"
+                        class="p-button-success"
+                      ></button>
                     </div>
                   </div>
                 </div>
@@ -125,11 +200,21 @@
                   <ng-template pTemplate="body" let-record="$implicit">
                     <tr>
                       <td style="width: 80px">
-                        <button type="button" pButton icon="pi pi-eye" class="p-button-sm" (click)="showAuditLogDetails(record)" [pTooltip]="'Details' | localize"></button>
+                        <button
+                          type="button"
+                          pButton
+                          icon="pi pi-eye"
+                          class="p-button-sm"
+                          (click)="showAuditLogDetails(record)"
+                          [pTooltip]="'Details' | localize"
+                        ></button>
                       </td>
                       <td style="width: 200px">
-                        <i *ngIf="record.exception" class="fa fa-exclamation-triangle m--font-warning"></i>
-                        <i *ngIf="!record.exception" class="fa fa-check-circle m--font-success"></i>
+                        @if (record.exception) {
+                        <i class="fa fa-exclamation-triangle m--font-warning"></i>
+                        } @if (!record.exception) {
+                        <i class="fa fa-check-circle m--font-success"></i>
+                        }
                         {{ record.executionTime | momentFormat: 'YYYY-MM-DD HH:mm:ss' }}
                       </td>
                       <td style="width: 150px">
@@ -150,9 +235,11 @@
                     </tr>
                   </ng-template>
                 </p-table>
-                <div class="primeng-no-data" *ngIf="dataTableHelperAuditLogs.totalRecordsCount == 0">
+                @if (dataTableHelperAuditLogs.totalRecordsCount == 0) {
+                <div class="primeng-no-data">
                   {{ 'NoData' | localize }}
                 </div>
+                }
                 <div class="primeng-paging-container">
                   <p-paginator
                     [rows]="dataTableHelperAuditLogs.defaultRecordsCountPerPage"
@@ -168,14 +255,13 @@
                 </div>
               </div>
             </div>
-          </p-tabPanel>
-
-          <p-tabPanel header="{{ 'ChangeLogs' | localize }}">
+          </p-tabpanel>
+          <p-tabpanel [value]="1">
             <form autocomplete="off" class="horizontal-form">
               <div class="row align-items-end m--margin-bottom-10">
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                   <label for="EntityChangesDateRange" class="control-label">{{ 'DateRange' | localize }}</label>
-                  <p-calendar
+                  <p-datepicker
                     id="EntityChangesDateRange"
                     [(ngModel)]="dateRangeEntityChanges"
                     name="EntityChangesDateRange"
@@ -184,16 +270,25 @@
                     [readonlyInput]="true"
                     [style]="{ width: '100%' }"
                     [inputStyle]="{ width: '100%' }"
-                    placeholder="{{ 'DateRange' | localize }}">
-                  </p-calendar>
+                    placeholder="{{ 'DateRange' | localize }}"
+                  >
+                  </p-datepicker>
                 </div>
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                   <label for="UsernameEntityChange" class="control-label">{{ 'UserName' | localize }}</label>
-                  <input id="UsernameEntityChange" name="UsernameEntityChange" type="text" pInputText [(ngModel)]="usernameEntityChange" class="w-100" placeholder="{{ 'UserName' | localize }}" />
+                  <input
+                    id="UsernameEntityChange"
+                    name="UsernameEntityChange"
+                    type="text"
+                    pInputText
+                    [(ngModel)]="usernameEntityChange"
+                    class="w-100"
+                    placeholder="{{ 'UserName' | localize }}"
+                  />
                 </div>
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2">
                   <label for="EntityTypeFullName" class="control-label">{{ 'Object' | localize }}</label>
-                  <p-dropdown
+                  <p-select
                     id="EntityTypeFullName"
                     name="EntityTypeFullName"
                     [options]="objectTypes"
@@ -202,13 +297,34 @@
                     optionValue="value"
                     [showClear]="true"
                     [style]="{ width: '100%' }"
-                    placeholder="{{ 'Object' | localize }}">
-                  </p-dropdown>
+                    placeholder="{{ 'Object' | localize }}"
+                  >
+                  </p-select>
                 </div>
                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-2 d-flex gap-2">
-                  <button type="button" pButton icon="pi pi-search" label="{{ 'Search' | localize }}" (click)="searchEntityChanges()"></button>
-                  <button type="button" pButton icon="pi pi-refresh" label="{{ 'Reset' | localize }}" (click)="resetEntityChangeFilters()" class="p-button-secondary"></button>
-                  <button type="button" pButton icon="pi pi-file-excel" label="{{ 'ExportToExcel' | localize }}" (click)="exportEntityChangesToExcel()" class="p-button-success"></button>
+                  <button
+                    type="button"
+                    pButton
+                    icon="pi pi-search"
+                    label="{{ 'Search' | localize }}"
+                    (click)="searchEntityChanges()"
+                  ></button>
+                  <button
+                    type="button"
+                    pButton
+                    icon="pi pi-refresh"
+                    label="{{ 'Reset' | localize }}"
+                    (click)="resetEntityChangeFilters()"
+                    class="p-button-secondary"
+                  ></button>
+                  <button
+                    type="button"
+                    pButton
+                    icon="pi pi-file-excel"
+                    label="{{ 'ExportToExcel' | localize }}"
+                    (click)="exportEntityChangesToExcel()"
+                    class="p-button-success"
+                  ></button>
                 </div>
               </div>
             </form>
@@ -250,7 +366,14 @@
                   <ng-template pTemplate="body" let-record="$implicit">
                     <tr>
                       <td style="width: 80px">
-                        <button type="button" pButton icon="pi pi-eye" class="p-button-sm" (click)="showEntityChangeDetails(record)" [pTooltip]="'Details' | localize"></button>
+                        <button
+                          type="button"
+                          pButton
+                          icon="pi pi-eye"
+                          class="p-button-sm"
+                          (click)="showEntityChangeDetails(record)"
+                          [pTooltip]="'Details' | localize"
+                        ></button>
                       </td>
                       <td style="width: 150px">
                         {{ l(record.changeTypeName) }}
@@ -267,9 +390,11 @@
                     </tr>
                   </ng-template>
                 </p-table>
-                <div class="primeng-no-data" *ngIf="dataTableHelperEntityChanges.totalRecordsCount == 0">
+                @if (dataTableHelperEntityChanges.totalRecordsCount == 0) {
+                <div class="primeng-no-data">
                   {{ 'NoData' | localize }}
                 </div>
+                }
                 <div class="primeng-paging-container">
                   <p-paginator
                     [rows]="dataTableHelperEntityChanges.defaultRecordsCountPerPage"
@@ -285,8 +410,9 @@
                 </div>
               </div>
             </div>
-          </p-tabPanel>
-        </p-tabView>
+          </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
       </div>
     </div>
   </div>

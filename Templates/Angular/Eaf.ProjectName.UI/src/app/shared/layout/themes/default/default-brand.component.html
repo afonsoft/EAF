@@ -7,15 +7,16 @@
   </div>
   <div class="m-stack__item m-stack__item--middle m-brand__tools">
     <!-- BEGIN: Left Aside Minimize Toggle -->
+    @if (currentTheme.baseSettings.menu.allowAsideMinimizing) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.baseSettings.menu.allowAsideMinimizing"
       mMenuAsideToggle
       id="m_aside_left_minimize_toggle"
       class="m-brand__icon m-brand__toggler m-brand__toggler--left m--visible-desktop-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- END -->
 
     <!-- BEGIN: Responsive Aside Left Menu Toggler-->
@@ -29,14 +30,15 @@
     <!-- END -->
 
     <!-- begin::Responsive Header Menu Toggler-->
+    @if (currentTheme.isTopMenuUsed || currentTheme.isTabMenuUsed) {
     <a
       href="javascript:;"
-      *ngIf="currentTheme.isTopMenuUsed || currentTheme.isTabMenuUsed"
       id="m_aside_header_menu_mobile_toggle"
       class="m-brand__icon m-brand__toggler m--visible-tablet-and-mobile-inline-block"
     >
       <span></span>
     </a>
+    }
     <!-- end::Responsive Header Menu Toggler-->
 
     <!-- BEGIN: Topbar Toggler -->

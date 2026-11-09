@@ -8,7 +8,9 @@ import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@an
   selector: 'role-combo',
   template: ` <select class="form-control" [formControl]="selectedRole">
     <option value="">{{ 'FilterByRole' | localize }}</option>
-    <option *ngFor="let role of roles" [value]="role.id">{{ role.displayName }}</option>
+    @for (role of roles; track role) {
+    <option [value]="role.id">{{ role.displayName }}</option>
+    }
   </select>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -52,8 +54,10 @@ export class RoleComboComponent extends AppComponentBase implements OnInit, Cont
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void { //NOSONAR ControlValueAccessor interface requires a boolean flag
-    if (isDisabled) { //NOSONAR ControlValueAccessor interface requires a boolean flag
+  setDisabledState?(isDisabled: boolean): void {
+    //NOSONAR ControlValueAccessor interface requires a boolean flag
+    if (isDisabled) {
+      //NOSONAR ControlValueAccessor interface requires a boolean flag
       this.selectedRole.disable();
     } else {
       this.selectedRole.enable();

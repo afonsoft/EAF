@@ -15,20 +15,20 @@
     <div class="m-dropdown__body">
       <div class="m-dropdown__content">
         <ul class="m-nav m-nav--skin-{{ currentTheme.baseSettings.menu.asideSkin }}">
-          <ng-container *ngFor="let menu of this.menu?.items">
-            <li class="m-nav__item" *ngIf="showMenuItem(menu)">
-              <a [routerLink]="menu.route" class="m-nav__link">
-                <span class="m-nav__link-icon">
-                  <span class="m-nav__link-icon-wrapper m-nav__link-text-{{ currentTheme.baseSettings.menu.asideSkin }}">
-                    <i [class]="menu.icon"></i>
-                  </span>
+          @for (menu of this.menu?.items; track menu) { @if (showMenuItem(menu)) {
+          <li class="m-nav__item">
+            <a [routerLink]="menu.route" class="m-nav__link">
+              <span class="m-nav__link-icon">
+                <span class="m-nav__link-icon-wrapper m-nav__link-text-{{ currentTheme.baseSettings.menu.asideSkin }}">
+                  <i [class]="menu.icon"></i>
                 </span>
-                <span class="m-nav__link-title m-topbar__menu-text m-nav__link-text-{{ currentTheme.baseSettings.menu.asideSkin }}">
-                  {{ menu.name | localize }}
-                </span>
-              </a>
-            </li>
-          </ng-container>
+              </span>
+              <span class="m-nav__link-title m-topbar__menu-text m-nav__link-text-{{ currentTheme.baseSettings.menu.asideSkin }}">
+                {{ menu.name | localize }}
+              </span>
+            </a>
+          </li>
+          } }
         </ul>
       </div>
     </div>

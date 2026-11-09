@@ -19,11 +19,12 @@
                 <th>{{ 'User' | localize }}</th>
                 <th>{{ 'Message' | localize }}</th>
                 <th>{{ 'CreationTime' | localize }}</th>
-                <th style="width: 180px;">{{ 'Actions' | localize }}</th>
+                <th style="width: 180px">{{ 'Actions' | localize }}</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let request of requests">
+              @for (request of requests; track request) {
+              <tr>
                 <td>{{ request.userName }}</td>
                 <td>{{ request.message }}</td>
                 <td>{{ request.creationTime | momentFormat: 'L LT' }}</td>
@@ -32,9 +33,11 @@
                   <button class="btn btn-danger btn-sm ml-2" (click)="reject(request.id)">{{ 'Reject' | localize }}</button>
                 </td>
               </tr>
-              <tr *ngIf="!requests.length && !loading">
+              } @if (!requests.length && !loading) {
+              <tr>
                 <td colspan="4" class="text-center">{{ 'NoData' | localize }}</td>
               </tr>
+              }
             </tbody>
           </table>
         </div>

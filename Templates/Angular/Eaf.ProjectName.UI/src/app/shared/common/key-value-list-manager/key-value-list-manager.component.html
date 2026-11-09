@@ -1,18 +1,36 @@
 ﻿<div class="form-group mb-2">
   <label for="KeyValueListManagerKey">{{ header }}</label>
   <div class="input-group">
-    <input id="KeyValueListManagerKey" type="text" class="form-control" [(ngModel)]="addOrEditKey" placeholder="{{ keyPlaceHolder }}" (change)="onKeyChange()" />
-    <input type="text" id="KeyValueListManagerValue" class="form-control" [(ngModel)]="addOrEditValue" placeholder="{{ valuePlaceHolder }}" aria-label="{{ valuePlaceHolder }}" />
+    <input
+      id="KeyValueListManagerKey"
+      type="text"
+      class="form-control"
+      [(ngModel)]="addOrEditKey"
+      placeholder="{{ keyPlaceHolder }}"
+      (change)="onKeyChange()"
+    />
+    <input
+      type="text"
+      id="KeyValueListManagerValue"
+      class="form-control"
+      [(ngModel)]="addOrEditValue"
+      placeholder="{{ valuePlaceHolder }}"
+      aria-label="{{ valuePlaceHolder }}"
+    />
     <div class="input-group-append">
       <button class="btn btn-primary" (click)="addOrEdit()" type="button">
-        <span *ngIf="!isEdit">{{ 'Add' | localize }}</span>
-        <span *ngIf="isEdit">{{ 'Edit' | localize }}</span>
+        @if (!isEdit) {
+        <span>{{ 'Add' | localize }}</span>
+        } @if (isEdit) {
+        <span>{{ 'Edit' | localize }}</span>
+        }
       </button>
     </div>
   </div>
-  <div class="key-value-items-list" *ngIf="items">
+  @if (items) {
+  <div class="key-value-items-list">
+    @for (keyValueItem of items; track keyValueItem) {
     <div
-      *ngFor="let keyValueItem of items"
       class="alert alert-custom alert-bold m-1"
       [class.alert-white]="addOrEditKey !== keyValueItem.key"
       [class.alert-warning]="addOrEditKey === keyValueItem.key"
@@ -28,5 +46,7 @@
         </button>
       </div>
     </div>
+    }
   </div>
+  }
 </div>

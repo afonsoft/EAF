@@ -3,8 +3,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          <span *ngIf="edition.id">{{ 'EditEdition' | localize }}</span>
-          <span *ngIf="!edition.id">{{ 'CreateNewEdition' | localize }}</span>
+          @if (edition.id) {
+          <span>{{ 'EditEdition' | localize }}</span>
+          } @if (!edition.id) {
+          <span>{{ 'CreateNewEdition' | localize }}</span>
+          }
         </h5>
         <button type="button" class="close" (click)="close()" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -37,7 +40,13 @@
         <div class="row">
           <div class="col-md-6 form-group">
             <label for="EditionQuarterlyPrice">{{ 'QuarterlyPrice' | localize }}</label>
-            <input id="EditionQuarterlyPrice" class="form-control" [(ngModel)]="edition.quarterlyPrice" name="quarterlyPrice" type="number" />
+            <input
+              id="EditionQuarterlyPrice"
+              class="form-control"
+              [(ngModel)]="edition.quarterlyPrice"
+              name="quarterlyPrice"
+              type="number"
+            />
           </div>
           <div class="col-md-6 form-group">
             <label for="EditionBiannualPrice">{{ 'BiannualPrice' | localize }}</label>
@@ -48,11 +57,22 @@
         <div class="row">
           <div class="col-md-6 form-group">
             <label for="EditionPermanentPrice">{{ 'PermanentPrice' | localize }}</label>
-            <input id="EditionPermanentPrice" class="form-control" [(ngModel)]="edition.permanentPrice" name="permanentPrice" type="number" />
+            <input
+              id="EditionPermanentPrice"
+              class="form-control"
+              [(ngModel)]="edition.permanentPrice"
+              name="permanentPrice"
+              type="number"
+            />
           </div>
           <div class="col-md-6 form-group">
             <label for="EditionDefaultPaymentPeriodType">{{ 'DefaultPaymentPeriodType' | localize }}</label>
-            <select id="EditionDefaultPaymentPeriodType" class="form-control" [(ngModel)]="edition.defaultPaymentPeriodType" name="defaultPaymentPeriodType">
+            <select
+              id="EditionDefaultPaymentPeriodType"
+              class="form-control"
+              [(ngModel)]="edition.defaultPaymentPeriodType"
+              name="defaultPaymentPeriodType"
+            >
               <option [ngValue]="1">{{ 'Daily' | localize }}</option>
               <option [ngValue]="7">{{ 'Weekly' | localize }}</option>
               <option [ngValue]="30">{{ 'Monthly' | localize }}</option>
@@ -71,19 +91,33 @@
           </div>
           <div class="col-md-6 form-group">
             <label for="EditionWaitingDayAfterExpire">{{ 'WaitingDayAfterExpire' | localize }}</label>
-            <input id="EditionWaitingDayAfterExpire" class="form-control" [(ngModel)]="edition.waitingDayAfterExpire" name="waitingDayAfterExpire" type="number" />
+            <input
+              id="EditionWaitingDayAfterExpire"
+              class="form-control"
+              [(ngModel)]="edition.waitingDayAfterExpire"
+              name="waitingDayAfterExpire"
+              type="number"
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label for="EditionExpiringEditionId">{{ 'ExpiringEdition' | localize }}</label>
-          <input id="EditionExpiringEditionId" class="form-control" [(ngModel)]="edition.expiringEditionId" name="expiringEditionId" type="number" />
+          <input
+            id="EditionExpiringEditionId"
+            class="form-control"
+            [(ngModel)]="edition.expiringEditionId"
+            name="expiringEditionId"
+            type="number"
+          />
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">{{ 'Cancel' | localize }}</button>
         <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'Save' | localize }}
         </button>
       </div>

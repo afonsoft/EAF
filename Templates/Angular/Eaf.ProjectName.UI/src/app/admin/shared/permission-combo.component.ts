@@ -9,7 +9,9 @@ import { ControlValueAccessor, UntypedFormControl, NG_VALUE_ACCESSOR } from '@an
   selector: 'permission-combo',
   template: `<select class="form-control" [formControl]="selectedPermission">
     <option value="">{{ 'SearchWithThreeDot' | localize }}</option>
-    <option *ngFor="let permission of permissions" [value]="permission.name">{{ permission.displayName }}</option>
+    @for (permission of permissions; track permission) {
+    <option [value]="permission.name">{{ permission.displayName }}</option>
+    }
   </select>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -57,8 +59,10 @@ export class PermissionComboComponent extends AppComponentBase implements OnInit
     this.onTouched = fn;
   }
 
-  setDisabledState?(isDisabled: boolean): void { //NOSONAR ControlValueAccessor interface requires a boolean flag
-    if (isDisabled) { //NOSONAR ControlValueAccessor interface requires a boolean flag
+  setDisabledState?(isDisabled: boolean): void {
+    //NOSONAR ControlValueAccessor interface requires a boolean flag
+    if (isDisabled) {
+      //NOSONAR ControlValueAccessor interface requires a boolean flag
       this.selectedPermission.disable();
     } else {
       this.selectedPermission.enable();

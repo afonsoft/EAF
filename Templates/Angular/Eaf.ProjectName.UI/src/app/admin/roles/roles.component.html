@@ -10,9 +10,9 @@
         </span>
       </div>
       <div class="col text-right mt-3 mt-md-0">
-        <button (click)="createRole()" *ngIf="isGranted('Pages.Administration.Roles.Create')" class="btn btn-primary">
-          <i class="fa fa-plus"></i> {{ 'Create' | localize }}
-        </button>
+        @if (isGranted('Pages.Administration.Roles.Create')) {
+        <button (click)="createRole()" class="btn btn-primary"><i class="fa fa-plus"></i> {{ 'Create' | localize }}</button>
+        }
       </div>
     </div>
   </div>
@@ -58,7 +58,11 @@
             >
               <ng-template pTemplate="header">
                 <tr>
-                  <th scope="col" style="width: 80px" [hidden]="!isGrantedAny('Pages.Administration.Roles.Edit', 'Pages.Administration.Roles.Delete')">
+                  <th
+                    scope="col"
+                    style="width: 80px"
+                    [hidden]="!isGrantedAny('Pages.Administration.Roles.Edit', 'Pages.Administration.Roles.Delete')"
+                  >
                     {{ 'Actions' | localize }}
                   </th>
                   <th scope="col" pSortableColumn="name">
@@ -81,42 +85,38 @@
                       </button>
                       <ul class="dropdown-menu" *dropdownMenu>
                         <li>
-                          <a
-                            href="javascript:;"
-                            *ngIf="permission.isGranted('Pages.Administration.Roles.Edit')"
-                            (click)="createOrEditRoleModal.show(record.id)"
-                            >{{ 'Edit' | localize }}</a
-                          >
+                          @if (permission.isGranted('Pages.Administration.Roles.Edit')) {
+                          <a href="javascript:;" (click)="createOrEditRoleModal.show(record.id)">{{ 'Edit' | localize }}</a>
+                          }
                         </li>
                         <li>
-                          <a
-                            href="javascript:;"
-                            *ngIf="!record.isStatic && permission.isGranted('Pages.Administration.Roles.Delete')"
-                            (click)="deleteRole(record)"
-                            >{{ 'Delete' | localize }}</a
-                          >
+                          @if (!record.isStatic && permission.isGranted('Pages.Administration.Roles.Delete')) {
+                          <a href="javascript:;" (click)="deleteRole(record)">{{ 'Delete' | localize }}</a>
+                          }
                         </li>
                         <li>
-                          <a href="javascript:;" *ngIf="entityHistoryEnabled" (click)="showHistory(record)">{{ 'History' | localize }}</a>
+                          @if (entityHistoryEnabled) {
+                          <a href="javascript:;" (click)="showHistory(record)">{{ 'History' | localize }}</a>
+                          }
                         </li>
                       </ul>
                     </div>
                   </td>
                   <td>
-                                        >
+                    >
                     <span>
                       {{ record.displayName }}
+                      @if (record.isStatic) {
                       <span
-                        *ngIf="record.isStatic"
                         class="m-badge m-badge--brand m-badge--wide"
                         data-toggle="tooltip"
                         title="{{ 'StaticRole_Tooltip' | localize }}"
                         data-placement="top"
                       >
-                        {{ 'Static' | localize }} </span
-                      >
+                        {{ 'Static' | localize }}
+                      </span>
+                      } @if (record.isDefault) {
                       <span
-                        *ngIf="record.isDefault"
                         class="m-badge m-badge--metal m-badge--wide"
                         data-toggle="tooltip"
                         title="{{ 'DefaultRole_Description' | localize }}"
@@ -124,17 +124,20 @@
                       >
                         {{ 'Default' | localize }}
                       </span>
+                      }
                     </span>
                   </td>
                   <td>
-                                        {{ record.lastModificationDate | momentFormat: 'L LT' }}
+                    {{ record.lastModificationDate | momentFormat: 'L LT' }}
                   </td>
                 </tr>
               </ng-template>
             </p-table>
-            <div class="primeng-no-data" *ngIf="dataTableHelper.totalRecordsCount == 0">
+            @if (dataTableHelper.totalRecordsCount == 0) {
+            <div class="primeng-no-data">
               {{ 'NoData' | localize }}
             </div>
+            }
           </div>
         </div>
       </div>

@@ -10,23 +10,34 @@
         </button>
       </div>
       <div class="modal-body">
-        <div *ngIf="subscription" class="alert alert-info">
+        @if (subscription) {
+        <div class="alert alert-info">
           <strong>{{ 'Edition' | localize }}:</strong> {{ getEditionName(subscription.editionId) || ('NotAssigned' | localize) }}<br />
-          <strong>{{ 'SubscriptionEndDate' | localize }}:</strong> {{ subscription.subscriptionEndDateUtc ? (subscription.subscriptionEndDateUtc | momentFormat: 'L LT') : ('NotSet' | localize) }}<br />
+          <strong>{{ 'SubscriptionEndDate' | localize }}:</strong>
+          {{ subscription.subscriptionEndDateUtc ? (subscription.subscriptionEndDateUtc | momentFormat: 'L LT') : ('NotSet' | localize)
+          }}<br />
           <strong>{{ 'RemainingDays' | localize }}:</strong> {{ subscription.remainingDays ?? ('N/A' | localize) }}
         </div>
+        }
 
         <h6>{{ 'AssignEdition' | localize }}</h6>
         <div class="row">
           <div class="col-md-6 form-group">
             <label for="SubscriptionEdition">{{ 'Edition' | localize }}</label>
             <select id="SubscriptionEdition" class="form-control" [(ngModel)]="assignInput.editionId" name="editionId">
-              <option *ngFor="let edition of editions" [ngValue]="edition.id">{{ edition.displayName }}</option>
+              @for (edition of editions; track edition) {
+              <option [ngValue]="edition.id">{{ edition.displayName }}</option>
+              }
             </select>
           </div>
           <div class="col-md-6 form-group">
             <label for="AssignPaymentPeriod">{{ 'PaymentPeriod' | localize }}</label>
-            <select id="AssignPaymentPeriod" class="form-control" [(ngModel)]="assignInput.paymentPeriodType" name="assignPaymentPeriodType">
+            <select
+              id="AssignPaymentPeriod"
+              class="form-control"
+              [(ngModel)]="assignInput.paymentPeriodType"
+              name="assignPaymentPeriodType"
+            >
               <option [ngValue]="1">{{ 'Daily' | localize }}</option>
               <option [ngValue]="7">{{ 'Weekly' | localize }}</option>
               <option [ngValue]="30">{{ 'Monthly' | localize }}</option>
@@ -38,7 +49,9 @@
           </div>
         </div>
         <button type="button" class="btn btn-primary" [disabled]="saving" (click)="assignEdition()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'Assign' | localize }}
         </button>
 
@@ -48,7 +61,12 @@
         <div class="row">
           <div class="col-md-6 form-group">
             <label for="ExtendPaymentPeriod">{{ 'PaymentPeriod' | localize }}</label>
-            <select id="ExtendPaymentPeriod" class="form-control" [(ngModel)]="extendInput.paymentPeriodType" name="extendPaymentPeriodType">
+            <select
+              id="ExtendPaymentPeriod"
+              class="form-control"
+              [(ngModel)]="extendInput.paymentPeriodType"
+              name="extendPaymentPeriodType"
+            >
               <option [ngValue]="1">{{ 'Daily' | localize }}</option>
               <option [ngValue]="7">{{ 'Weekly' | localize }}</option>
               <option [ngValue]="30">{{ 'Monthly' | localize }}</option>
@@ -60,7 +78,9 @@
           </div>
         </div>
         <button type="button" class="btn btn-primary" [disabled]="saving" (click)="extendSubscription()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'Extend' | localize }}
         </button>
       </div>

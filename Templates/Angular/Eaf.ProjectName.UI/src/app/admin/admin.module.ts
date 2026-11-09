@@ -14,18 +14,18 @@ import { BsDatepickerConfig, BsDatepickerModule, BsDaterangepickerConfig, BsLoca
 import { TreeDragDropService } from 'primeng/api';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { DialogModule } from 'primeng/dialog';
 import { DragDropModule } from 'primeng/dragdrop';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { InputMaskModule } from 'primeng/inputmask';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { NgxFileDropModule } from 'ngx-file-drop';
 import { FileUploadModule as PrimeNgFileUploadModule } from 'primeng/fileupload';
 import { PaginatorModule } from 'primeng/paginator';
-import { TabViewModule } from 'primeng/tabview';
+import { TabsModule as PrimeNgTabsModule } from 'primeng/tabs';
 import { TableModule } from 'primeng/table';
 import { TooltipModule as PrimeNgTooltipModule } from 'primeng/tooltip';
 import { TreeModule } from 'primeng/tree';
@@ -106,9 +106,9 @@ import { EmailTemplatesComponent } from './email-templates/email-templates.compo
     DialogModule,
     ButtonModule,
     InputTextModule,
-    CalendarModule,
-    DropdownModule,
-    TabViewModule,
+    DatePickerModule,
+    SelectModule,
+    PrimeNgTabsModule,
     InputNumberModule,
     PrimeNgTooltipModule,
   ],

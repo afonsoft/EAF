@@ -10,7 +10,8 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" *ngIf="settings">
+      @if (settings) {
+      <div class="modal-body">
         <form autocomplete="off">
           <tabset class="tab-container tabbable-line">
             <tab heading="{{ 'General' | localize }}" customClass="m-tabs__item">
@@ -19,17 +20,20 @@
                   <label for="DefaultGateway">{{ 'DefaultGateway' | localize }}</label>
                   <select id="DefaultGateway" class="form-control" [(ngModel)]="settings.defaultGateway" name="defaultGateway">
                     <option value="">{{ 'NotSelected' | localize }}</option>
-                    <option *ngFor="let gateway of gateways" [value]="gateway">{{ gateway }}</option>
+                    @for (gateway of gateways; track gateway) {
+                    <option [value]="gateway">{{ gateway }}</option>
+                    }
                   </select>
                 </div>
               </div>
             </tab>
-
             <tab customClass="m-tabs__item">
               <ng-template tabHeading>
-                Stripe
-                <span *ngIf="isGatewayConfigured('Stripe')" class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
-                <span *ngIf="!isGatewayConfigured('Stripe')" class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                Stripe @if (isGatewayConfigured('Stripe')) {
+                <span class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
+                } @if (!isGatewayConfigured('Stripe')) {
+                <span class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                }
               </ng-template>
               <div class="m--margin-top-20">
                 <div class="alert alert-info" role="alert">
@@ -70,12 +74,13 @@
                 </div>
               </div>
             </tab>
-
             <tab customClass="m-tabs__item">
               <ng-template tabHeading>
-                PayPal
-                <span *ngIf="isGatewayConfigured('PayPal')" class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
-                <span *ngIf="!isGatewayConfigured('PayPal')" class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                PayPal @if (isGatewayConfigured('PayPal')) {
+                <span class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
+                } @if (!isGatewayConfigured('PayPal')) {
+                <span class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                }
               </ng-template>
               <div class="m--margin-top-20">
                 <div class="alert alert-info" role="alert">
@@ -116,12 +121,13 @@
                 </div>
               </div>
             </tab>
-
             <tab customClass="m-tabs__item">
               <ng-template tabHeading>
-                Mercado Pago
-                <span *ngIf="isGatewayConfigured('MercadoPago')" class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
-                <span *ngIf="!isGatewayConfigured('MercadoPago')" class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                Mercado Pago @if (isGatewayConfigured('MercadoPago')) {
+                <span class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
+                } @if (!isGatewayConfigured('MercadoPago')) {
+                <span class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                }
               </ng-template>
               <div class="m--margin-top-20">
                 <div class="alert alert-info" role="alert">
@@ -152,12 +158,13 @@
                 </div>
               </div>
             </tab>
-
             <tab customClass="m-tabs__item">
               <ng-template tabHeading>
-                PagSeguro
-                <span *ngIf="isGatewayConfigured('PagSeguro')" class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
-                <span *ngIf="!isGatewayConfigured('PagSeguro')" class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                PagSeguro @if (isGatewayConfigured('PagSeguro')) {
+                <span class="badge badge-success ml-1">{{ 'Configured' | localize }}</span>
+                } @if (!isGatewayConfigured('PagSeguro')) {
+                <span class="badge badge-secondary ml-1">{{ 'NotConfigured' | localize }}</span>
+                }
               </ng-template>
               <div class="m--margin-top-20">
                 <div class="alert alert-info" role="alert">
@@ -191,10 +198,13 @@
           </tabset>
         </form>
       </div>
+      }
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">{{ 'Cancel' | localize }}</button>
         <button type="button" class="btn btn-primary" [disabled]="saving || !settings || !isSettingsValid()" (click)="save()">
-          <i class="fa fa-spinner fa-spin" *ngIf="saving"></i>
+          @if (saving) {
+          <i class="fa fa-spinner fa-spin"></i>
+          }
           {{ 'Save' | localize }}
         </button>
       </div>

@@ -20,19 +20,28 @@
   <div class="m-content">
     <div class="m-portlet m-portlet--mobile">
       <div class="m-portlet__body">
-        <tabset *ngIf="hostSettings" class="tab-container tabbable-line">
+        @if (hostSettings) {
+        <tabset class="tab-container tabbable-line">
           <tab customClass="m-tabs__item" heading="{{ 'General' | localize }}">
-            <h5 *ngIf="showTimezoneSelection">
+            @if (showTimezoneSelection) {
+            <h5>
               {{ 'TimezoneSettings' | localize }}
             </h5>
-            <div *ngIf="showTimezoneSelection" class="form-group m--margin-bottom-20">
+            } @if (showTimezoneSelection) {
+            <div class="form-group m--margin-bottom-20">
               <label for="Timezone">
                 {{ 'DefaultTimezone' | localize }}
               </label>
-              <timezone-combo [(ngModel)]="hostSettings.general.timezone" defaultTimezoneScope="{{ defaultTimezoneScope }}" name="Timezone" id="Timezone" aria-label="{{ 'DefaultTimezone' | localize }}">
+              <timezone-combo
+                [(ngModel)]="hostSettings.general.timezone"
+                defaultTimezoneScope="{{ defaultTimezoneScope }}"
+                name="Timezone"
+                id="Timezone"
+                aria-label="{{ 'DefaultTimezone' | localize }}"
+              >
               </timezone-combo>
             </div>
-
+            }
             <h5>{{ 'SessionSettings' | localize }}</h5>
             <div class="form-group m--margin-bottom-20">
               <label for="TokenExpiration">
@@ -47,7 +56,6 @@
                 type="number"
               />
             </div>
-
             <h5>{{ 'CookieSettings' | localize }}</h5>
             <span class="m-switch m-switch--icon-check">
               <label>
@@ -64,7 +72,6 @@
                 </span>
               </label>
             </span>
-
             <h5>{{ 'UseCaptchaOnLogin' | localize }}</h5>
             <span class="m-switch m-switch--icon-check">
               <label>
@@ -79,14 +86,17 @@
                 <span class="m-switch-label"> Google ReCaptcha </span>
               </label>
             </span>
-            <div *ngIf="hostSettings.userManagement.useCaptchaOnLogin">
+            @if (hostSettings.userManagement.useCaptchaOnLogin) {
+            <div>
               <div class="form-group">
                 <label for="Setting_CaptchaKey"> {{ 'ReCaptcha' | localize }}* </label>
                 <input [(ngModel)]="hostSettings.google.recaptchaSiteKey" class="form-control" id="Setting_CaptchaKey" type="text" />
               </div>
             </div>
+            }
           </tab>
-          <tab *ngIf="hostSettings.userManagement" customClass="m-tabs__item" heading="{{ 'UserManagement' | localize }}">
+          @if (hostSettings.userManagement) {
+          <tab customClass="m-tabs__item" heading="{{ 'UserManagement' | localize }}">
             <div class="m-checkbox-list">
               <h5>{{ 'LoginSettings' | localize }}</h5>
               <span class="m-switch m-switch--icon-check">
@@ -103,8 +113,8 @@
                   </span>
                 </label>
               </span>
-
-              <div *ngIf="hostSettings.azureActiveDirectory.isModuleEnabled">
+              @if (hostSettings.azureActiveDirectory.isModuleEnabled) {
+              <div>
                 <h5 class="margin-top-20">
                   {{ 'ActiveDirectorySettings' | localize }}
                 </h5>
@@ -123,7 +133,6 @@
                     </span>
                   </label>
                 </span>
-
                 <div [hidden]="!hostSettings.azureActiveDirectory.isEnabled" class="form-group">
                   <label for="AzureActiveDirectoryTenant">
                     {{ 'AzureTenant' | localize }}
@@ -163,7 +172,6 @@
                     type="password"
                   />
                 </div>
-
                 <span [hidden]="!hostSettings.azureActiveDirectory.isEnabled" class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -179,7 +187,6 @@
                   </label>
                 </span>
                 <br />
-
                 <span [hidden]="!hostSettings.azureActiveDirectory.isEnabled" class="m-switch m-switch--icon-check m--margin-bottom-20">
                   <label>
                     <input
@@ -195,12 +202,11 @@
                   </label>
                 </span>
               </div>
-
-              <div *ngIf="hostSettings.ldap.isModuleEnabled">
+              } @if (hostSettings.ldap.isModuleEnabled) {
+              <div>
                 <h5 class="margin-top-20">
                   {{ 'LdapSettings' | localize }}
                 </h5>
-
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -216,7 +222,6 @@
                     </span>
                   </label>
                 </span>
-
                 <div [hidden]="!hostSettings.ldap.isEnabled" class="form-group">
                   <label for="LdapDomainName">
                     {{ 'DomainName' | localize }}
@@ -256,7 +261,6 @@
                     type="password"
                   />
                 </div>
-
                 <span [hidden]="!hostSettings.ldap.isEnabled" class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -272,7 +276,6 @@
                   </label>
                 </span>
                 <br />
-
                 <span [hidden]="!hostSettings.ldap.isEnabled" class="m-switch m-switch--icon-check m--margin-bottom-20">
                   <label>
                     <input
@@ -288,9 +291,11 @@
                   </label>
                 </span>
               </div>
+              }
             </div>
           </tab>
-          <tab *ngIf="hostSettings.tenantManagement" customClass="m-tabs__item" heading="{{ 'TenantManagement' | localize }}">
+          } @if (hostSettings.tenantManagement) {
+          <tab customClass="m-tabs__item" heading="{{ 'TenantManagement' | localize }}">
             <div class="m-checkbox-list">
               <h5>{{ 'TenantRegistrationSettings' | localize }}</h5>
               <span class="m-switch m-switch--icon-check">
@@ -337,10 +342,10 @@
               </span>
             </div>
           </tab>
-          <tab *ngIf="hostSettings.security" customClass="m-tabs__item" heading="{{ 'Security' | localize }}">
+          } @if (hostSettings.security) {
+          <tab customClass="m-tabs__item" heading="{{ 'Security' | localize }}">
             <div>
               <h5>{{ 'PasswordComplexity' | localize }}</h5>
-
               <span class="m-switch m-switch--icon-check">
                 <label>
                   <input
@@ -355,8 +360,8 @@
                   </span>
                 </label>
               </span>
-
-              <div *ngIf="!hostSettings.security.useDefaultPasswordComplexitySettings" class="m-checkbox-list m--margin-top-10">
+              @if (!hostSettings.security.useDefaultPasswordComplexitySettings) {
+              <div class="m-checkbox-list m--margin-top-10">
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -372,7 +377,6 @@
                   </label>
                 </span>
                 <br />
-
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -388,7 +392,6 @@
                   </label>
                 </span>
                 <br />
-
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -404,7 +407,6 @@
                   </label>
                 </span>
                 <br />
-
                 <span class="m-switch m-switch--icon-check">
                   <label>
                     <input
@@ -419,36 +421,36 @@
                     </span>
                   </label>
                 </span>
-
                 <div class="form-group">
                   <label for="Setting_RequiredLength">
                     {{ 'PasswordComplexity_RequiredLength' | localize }}
                   </label>
+                  @if (!hostSettings.security.useDefaultPasswordComplexitySettings) {
                   <input
                     [(ngModel)]="hostSettings.security.passwordComplexity.requiredLength"
                     [ngClass]="{ edited: hostSettings.security.passwordComplexity.requiredLength }"
-                    *ngIf="!hostSettings.security.useDefaultPasswordComplexitySettings"
                     class="form-control"
                     id="Setting_RequiredLength"
                     name="RequiredLength"
                     type="number"
                   />
+                  } @if (hostSettings.security.useDefaultPasswordComplexitySettings) {
                   <input
                     [(ngModel)]="hostSettings.security.defaultPasswordComplexity.requiredLength"
                     [ngClass]="{ edited: hostSettings.security.defaultPasswordComplexity.requiredLength }"
-                    *ngIf="hostSettings.security.useDefaultPasswordComplexitySettings"
                     class="form-control"
                     disabled
                     name="RequiredLength"
                     aria-label="{{ 'PasswordComplexity_RequiredLength' | localize }}"
                     type="number"
                   />
+                  }
                 </div>
               </div>
+              }
             </div>
             <div class="m--margin-top-20">
               <h5>{{ 'UserLockOut' | localize }}</h5>
-
               <span class="m-switch m-switch--icon-check">
                 <label>
                   <input
@@ -463,8 +465,8 @@
                   </span>
                 </label>
               </span>
-
-              <div *ngIf="hostSettings.security.userLockOut.isEnabled" class="form-group">
+              @if (hostSettings.security.userLockOut.isEnabled) {
+              <div class="form-group">
                 <label for="MaxFailedAccessAttemptsBeforeLockout">
                   {{ 'MaxFailedAccessAttemptsBeforeLockout' | localize }}
                 </label>
@@ -477,7 +479,8 @@
                   type="number"
                 />
               </div>
-              <div *ngIf="hostSettings.security.userLockOut.isEnabled" class="form-group">
+              } @if (hostSettings.security.userLockOut.isEnabled) {
+              <div class="form-group">
                 <label for="DefaultAccountLockoutDurationAsSeconds">
                   {{ 'DefaultAccountLockoutDurationAsSeconds' | localize }}
                 </label>
@@ -490,9 +493,11 @@
                   type="number"
                 />
               </div>
+              }
             </div>
           </tab>
-          <tab *ngIf="hostSettings.email" customClass="m-tabs__item" heading="{{ 'EmailSmtp' | localize }}">
+          } @if (hostSettings.email) {
+          <tab customClass="m-tabs__item" heading="{{ 'EmailSmtp' | localize }}">
             <div class="form-group">
               <label for="DefaultFromAddress">
                 {{ 'DefaultFromAddress' | localize }}
@@ -549,7 +554,6 @@
                 type="number"
               />
             </div>
-
             <span class="m-switch m-switch--icon-check">
               <label>
                 <input [(ngModel)]="hostSettings.email.smtpEnableSsl" id="Settings_SmtpEnableSsl" name="SmtpEnableSsl" type="checkbox" />
@@ -574,7 +578,6 @@
                 </span>
               </label>
             </span>
-
             <div [hidden]="hostSettings.email.smtpUseDefaultCredentials" class="form-group">
               <label for="SmtpDomainName">
                 {{ 'DomainName' | localize }}
@@ -621,7 +624,13 @@
             <h5>{{ 'TestEmailSettingsHeader' | localize }}</h5>
             <div class="row">
               <div class="form-group col-md-4">
-                <input [(ngModel)]="testEmailAddress" class="form-control input-mini" type="text" id="TestEmailAddress" aria-label="{{ 'TestEmailAddress' | localize }}" />
+                <input
+                  [(ngModel)]="testEmailAddress"
+                  class="form-control input-mini"
+                  type="text"
+                  id="TestEmailAddress"
+                  aria-label="{{ 'TestEmailAddress' | localize }}"
+                />
               </div>
               <div class="form-group col-md-2">
                 <button (click)="sendTestEmail()" class="btn btn-primary" type="button">
@@ -630,11 +639,8 @@
               </div>
             </div>
           </tab>
-          <tab
-            *ngIf="enabledSocialLoginSettings && enabledSocialLoginSettings.length"
-            customClass="m-tabs__item"
-            heading="{{ 'ExternalLoginSettings' | localize }}"
-          >
+          } @if (enabledSocialLoginSettings && enabledSocialLoginSettings.length) {
+          <tab customClass="m-tabs__item" heading="{{ 'ExternalLoginSettings' | localize }}">
             <h5>Auth0</h5>
             <span class="m-switch m-switch--icon-check">
               <label>
@@ -650,7 +656,8 @@
                 </span>
               </label>
             </span>
-            <div *ngIf="hostSettings.externalLoginProviderSettings.authZero_IsEnabled">
+            @if (hostSettings.externalLoginProviderSettings.authZero_IsEnabled) {
+            <div>
               <div class="form-group">
                 <label for="Setting_Auth0_ClientId"> {{ 'ClientId' | localize }}* </label>
                 <input
@@ -680,7 +687,7 @@
                 />
               </div>
             </div>
-
+            }
             <h5>Google</h5>
             <span class="m-switch m-switch--icon-check">
               <label>
@@ -696,7 +703,8 @@
                 </span>
               </label>
             </span>
-            <div *ngIf="hostSettings.externalLoginProviderSettings.google_IsEnabled">
+            @if (hostSettings.externalLoginProviderSettings.google_IsEnabled) {
+            <div>
               <div class="form-group">
                 <label for="Setting_Google_ClientId"> {{ 'ClientId' | localize }}* </label>
                 <input
@@ -727,6 +735,7 @@
                 />
               </div>
             </div>
+            }
             <h5 class="margin-top-20">Microsoft</h5>
             <span class="m-switch m-switch--icon-check">
               <label>
@@ -742,7 +751,8 @@
                 </span>
               </label>
             </span>
-            <div *ngIf="hostSettings.externalLoginProviderSettings.microsoft_IsEnabled">
+            @if (hostSettings.externalLoginProviderSettings.microsoft_IsEnabled) {
+            <div>
               <div class="form-group">
                 <label for="Setting_Microsoft_ClientId"> {{ 'ClientId' | localize }}* </label>
                 <input
@@ -777,6 +787,7 @@
                 />
               </div>
             </div>
+            }
             <h5 class="margin-top-20">OpenIdConnect</h5>
             <span class="m-switch m-switch--icon-check">
               <label>
@@ -792,7 +803,8 @@
                 </span>
               </label>
             </span>
-            <div *ngIf="hostSettings.externalLoginProviderSettings.openIdConnect_IsEnabled">
+            @if (hostSettings.externalLoginProviderSettings.openIdConnect_IsEnabled) {
+            <div>
               <div class="form-group">
                 <label for="Setting_OpenIdConnect_ClientId">
                   {{ 'ClientId' | localize }}
@@ -857,19 +869,22 @@
               >
               </key-value-list-manager>
             </div>
+            }
           </tab>
-          <tab *ngIf="hostSettings.google" customClass="m-tabs__item" heading="Google Analytics">
+          } @if (hostSettings.google) {
+          <tab customClass="m-tabs__item" heading="Google Analytics">
             <div class="form-group">
               <label for="Setting_analytics">Analytics</label>
               <input [(ngModel)]="hostSettings.google.analytics" class="form-control" id="Setting_analytics" type="text" />
             </div>
-
             <div class="form-group">
               <label for="Setting_tag">Tag Manager</label>
               <input [(ngModel)]="hostSettings.google.tag" class="form-control" id="Setting_tag" type="text" />
             </div>
           </tab>
+          }
         </tabset>
+        }
       </div>
     </div>
   </div>

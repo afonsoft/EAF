@@ -14,7 +14,8 @@
   <div class="m-content">
     <div class="m-portlet m-portlet--mobile">
       <div class="m-portlet__body" [busyIf]="loading">
-        <p-table [value]="apiKeys" [scrollable]="true" scrollWidth="100%" *ngIf="apiKeys.length > 0">
+        @if (apiKeys.length > 0) {
+        <p-table [value]="apiKeys" [scrollable]="true" scrollWidth="100%">
           <ng-template pTemplate="header">
             <tr>
               <th scope="col" style="width: 18%">{{ 'Name' | localize }}</th>
@@ -30,30 +31,37 @@
             <tr>
               <td style="width: 18%">{{ key.name }}</td>
               <td style="width: 14%">{{ key.userName ?? key.userId }}</td>
-              <td style="width: 14%"><code>{{ key.keyPrefix }}…</code></td>
+              <td style="width: 14%">
+                <code>{{ key.keyPrefix }}…</code>
+              </td>
               <td style="width: 13%">{{ key.expirationTime ? (key.expirationTime | momentFormat: 'L') : ('Never' | localize) }}</td>
               <td style="width: 13%">{{ key.lastUsedTime ? (key.lastUsedTime | momentFormat: 'L LT') : '—' }}</td>
               <td style="width: 12%">
                 <app-status-badge
                   [value]="key.status === ApiKeyStatus.Active"
                   [trueLabel]="'Active' | localize"
-                  [falseLabel]="'Revoked' | localize">
+                  [falseLabel]="'Revoked' | localize"
+                >
                 </app-status-badge>
               </td>
               <td style="width: 16%">
+                @if (key.status === ApiKeyStatus.Active) {
                 <button
-                  *ngIf="key.status === ApiKeyStatus.Active"
                   (click)="revoke(key)"
                   class="btn btn-sm btn-clean btn-icon btn-icon-md"
                   [attr.aria-label]="l('ApiKeyRevoke')"
-                  [title]="l('ApiKeyRevoke')">
+                  [title]="l('ApiKeyRevoke')"
+                >
                   <i class="flaticon-cancel"></i>
                 </button>
+                }
               </td>
             </tr>
           </ng-template>
         </p-table>
-        <app-empty-state *ngIf="apiKeys.length === 0 && !loading" [message]="'ApiKeysEmptyMessage' | localize"></app-empty-state>
+        } @if (apiKeys.length === 0 && !loading) {
+        <app-empty-state [message]="'ApiKeysEmptyMessage' | localize"></app-empty-state>
+        }
       </div>
     </div>
   </div>
