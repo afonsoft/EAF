@@ -5,6 +5,7 @@ using Abp.Domain.Uow;
 using Abp.Logging;
 using Abp.Runtime.Caching;
 using Abp.Threading;
+using Eaf.Middleware.Authentication.Sessions;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -61,6 +62,16 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
 
             var principal = _tokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
 
+            var sessionId = principal.Claims.FirstOrDefault(c => c.Type == SessionConsts.SessionIdClaim)?.Value;
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                var sessionRegistry = IocManager.Instance.Resolve<ISessionRegistry>();
+                if (AsyncHelper.RunSync(() => sessionRegistry.IsRevokedAsync(sessionId)))
+                {
+                    throw new SecurityTokenException("Session revoked");
+                }
+            }
+
             var userIdentifierString = principal.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.UserIdentifier)?.Value ?? "";
             var tokenValidityKeyInClaims = principal.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityKey)?.Value ?? "";
             var tokenValidityValueInClaims = principal.Claims.FirstOrDefault(c => c.Type == MiddlewareCoreConsts.TokenValidityValue)?.Value ?? "";
@@ -71,6 +82,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
 
             if (tokenValidityKeyInCache != null)
             {
+                TouchSession(sessionId);
                 return principal;
             }
 
@@ -118,6 +130,7 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
                                         absoluteExpireTime: DateTimeOffset.UtcNow.Add(expiration).AddHours(1));
                                 }
 
+                                TouchSession(sessionId);
                                 return principal;
                             }
                         }
@@ -126,6 +139,28 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
             }
 
             throw new SecurityTokenException("Invalid Token");
+        }
+
+        private static void TouchSession(string sessionId)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                return;
+            }
+
+            try
+            {
+                var sessionRegistry = IocManager.Instance.Resolve<ISessionRegistry>();
+                var session = AsyncHelper.RunSync(() => sessionRegistry.GetAsync(sessionId));
+                if (session != null && session.LastActivityTime < DateTime.UtcNow.Subtract(SessionConsts.ActivityThrottle))
+                {
+                    AsyncHelper.RunSync(() => sessionRegistry.TouchAsync(sessionId));
+                }
+            }
+            catch
+            {
+                // Activity tracking nunca deve derrubar o request autenticado.
+            }
         }
     }
 }

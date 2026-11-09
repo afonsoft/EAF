@@ -1,0 +1,66 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <h1>{{ "ActiveSessions" | localize }}</h1>
+                </div>
+                <div class="col-6 text-right">
+                    <button class="btn btn-danger" (click)="revokeAllSessions()">
+                        <i class="fa fa-sign-out-alt"></i> {{ "RevokeOtherSessions" | localize }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content px-2">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                    <p-table
+                        [value]="sessions"
+                        [loading]="loading"
+                        [paginator]="true"
+                        [rows]="10">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th scope="col">{{ "Device" | localize }}</th>
+                                <th scope="col">{{ "IpAddress" | localize }}</th>
+                                <th scope="col">{{ "LastActivityTime" | localize }}</th>
+                                <th scope="col">{{ "CreationTime" | localize }}</th>
+                                <th scope="col" style="width: 140px">{{ "Actions" | localize }}</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-session>
+                            <tr>
+                                <td>
+                                    {{ session.userAgent || "-" }}
+                                    <span *ngIf="session.isCurrent" class="badge badge-success ml-1">
+                                        {{ "CurrentSession" | localize }}
+                                    </span>
+                                </td>
+                                <td>{{ session.ipAddress || "-" }}</td>
+                                <td>{{ session.lastActivityTime | momentFormat: "lll" }}</td>
+                                <td>{{ session.creationTime | momentFormat: "lll" }}</td>
+                                <td>
+                                    <button
+                                        class="btn btn-sm btn-danger"
+                                        (click)="revokeSession(session)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    {{ "NoDataAvailable" | localize }}
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

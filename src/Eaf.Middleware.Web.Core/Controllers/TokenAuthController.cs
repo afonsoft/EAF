@@ -22,6 +22,7 @@ using Eaf.Middleware.Security.Recaptcha;
 using Eaf.Middleware.Storage;
 using Eaf.Middleware.Web.Authentication;
 using Eaf.Middleware.Web.Authentication.Identity;
+using Eaf.Middleware.Authentication.Sessions;
 using Eaf.Middleware.Web.Authentication.JwtBearer;
 using Eaf.Middleware.Web.Models.TokenAuth;
 using Eaf.Middleware.Web.Notifications;
@@ -71,6 +72,7 @@ namespace Eaf.Middleware.Web.Controllers
         private readonly AbpLoginResultTypeHelper _AbpLoginResultTypeHelper;
         private readonly IEmailSender _emailSender;
         private readonly IRefreshTokenStore _refreshTokenStore;
+        private readonly ISessionRegistry _sessionRegistry;
         private readonly IExternalAuthConfiguration _externalAuthConfiguration;
         private readonly IExternalAuthManager _externalAuthManager;
         private readonly IdentityOptions _identityOptions;
@@ -116,7 +118,8 @@ namespace Eaf.Middleware.Web.Controllers
             INotificationSubscriptionManager notificationSubscriptionManager,
             IWebhookPublisher webhookPublisher,
             IPrincipalAccessor principalAccessor,
-            IRefreshTokenStore refreshTokenStore
+            IRefreshTokenStore refreshTokenStore,
+            ISessionRegistry sessionRegistry
         )
         {
             _logInManager = logInManager;
@@ -142,6 +145,7 @@ namespace Eaf.Middleware.Web.Controllers
             _notificationSubscriptionManager = notificationSubscriptionManager;
             _principalAccessor = principalAccessor;
             _refreshTokenStore = refreshTokenStore;
+            _sessionRegistry = sessionRegistry;
             RecaptchaValidator = NullRecaptchaValidator.Instance;
         }
 
@@ -237,8 +241,8 @@ namespace Eaf.Middleware.Web.Controllers
             }
 
             //Login!
-            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User), expiration);
             var refreshToken = await GenerateAndStoreRefreshTokenAsync(loginResult.User);
+            var accessToken = CreateAccessToken(await CreateJwtClaims(loginResult.Identity, loginResult.User, sessionId: refreshToken.SessionId), expiration);
             AppendRefreshTokenCookie(refreshToken.Token, refreshToken.ExpireDate);
 
             return new AuthenticateResultModel
@@ -333,8 +337,8 @@ namespace Eaf.Middleware.Web.Controllers
                         identity = (ClaimsIdentity)principal.Identity;
                     }
 
-                    var accessToken = CreateAccessToken(await CreateJwtClaims(identity, shadowUser), expiration);
                     var refreshToken = await GenerateAndStoreRefreshTokenAsync(shadowUser);
+                    var accessToken = CreateAccessToken(await CreateJwtClaims(identity, shadowUser, sessionId: refreshToken.SessionId), expiration);
                     AppendRefreshTokenCookie(refreshToken.Token, refreshToken.ExpireDate);
 
                     return new AuthenticateResultModel
@@ -700,9 +704,11 @@ namespace Eaf.Middleware.Web.Controllers
                 cacheItem
             );
 
+            // Provider selection keyed by (tenant,user) — concurrent logins no longer clobber each other.
             await _cacheManager.GetCache("ProviderCache").SetAsync(
-                "Provider",
-                model.Provider
+                cacheKey,
+                model.Provider,
+                slidingExpireTime: TimeSpan.FromMinutes(30)
             );
         }
 
@@ -757,7 +763,7 @@ namespace Eaf.Middleware.Web.Controllers
         }
 
         [UnitOfWork]
-        protected async Task<IEnumerable<Claim>> CreateJwtClaims(ClaimsIdentity identity, User user, string externalAuthProviderformation = "")
+        protected async Task<IEnumerable<Claim>> CreateJwtClaims(ClaimsIdentity identity, User user, string externalAuthProviderformation = "", string sessionId = null)
         {
             var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
             var isTwoFactorEnabled = await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.TwoFactorLogin.IsEnabled);
@@ -782,6 +788,11 @@ namespace Eaf.Middleware.Web.Controllers
                 new Claim(MiddlewareCoreConsts.TokenValidityKey, tokenValidityKey),
                 new Claim(MiddlewareCoreConsts.UserIdentifier, userIdentifier.ToUserIdentifierString())
             });
+
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                claims.Add(new Claim(SessionConsts.SessionIdClaim, sessionId));
+            }
 
             if (user.TenantId.HasValue)
             {
@@ -1322,6 +1333,24 @@ namespace Eaf.Middleware.Web.Controllers
                 throw new UserFriendlyException(L("InvalidRefreshToken"));
             }
 
+            if (!string.IsNullOrEmpty(refreshToken.SessionId))
+            {
+                var session = await _sessionRegistry.GetAsync(refreshToken.SessionId);
+                if (session == null || await _sessionRegistry.IsRevokedAsync(refreshToken.SessionId))
+                {
+                    await _refreshTokenStore.RemoveAsync(refreshTokenValue);
+                    throw new UserFriendlyException(L("InvalidRefreshToken"));
+                }
+
+                var idleMinutes = await GetSessionIdleTimeoutMinutesAsync();
+                if (idleMinutes > 0 && session.LastActivityTime.AddMinutes(idleMinutes) < DateTime.UtcNow)
+                {
+                    await _sessionRegistry.RevokeAsync(refreshToken.SessionId);
+                    await _refreshTokenStore.RemoveAsync(refreshTokenValue);
+                    throw new UserFriendlyException(L("SessionExpiredByInactivity"));
+                }
+            }
+
             var user = await _userManager.GetUserByIdAsync(refreshToken.UserId);
             if (user == null)
             {
@@ -1344,8 +1373,8 @@ namespace Eaf.Middleware.Web.Controllers
             var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
             var expiration = TimeSpan.FromSeconds(expirationSettings);
 
-            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user), expiration);
-            var newRefreshToken = await GenerateAndStoreRefreshTokenAsync(user);
+            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user, sessionId: refreshToken.SessionId), expiration);
+            var newRefreshToken = await GenerateAndStoreRefreshTokenAsync(user, refreshToken.SessionId);
             AppendRefreshTokenCookie(newRefreshToken.Token, newRefreshToken.ExpireDate);
 
             return new AuthenticateResultModel
@@ -1355,6 +1384,12 @@ namespace Eaf.Middleware.Web.Controllers
                 EncryptedAccessToken = GetEncryptedAccessToken(accessToken),
                 UserId = user.Id
             };
+        }
+
+        private async Task<int> GetSessionIdleTimeoutMinutesAsync()
+        {
+            var value = await SettingManager.GetSettingValueAsync(AppSettings.UserManagement.Sessions.IdleTimeoutMinutes);
+            return int.TryParse(value, out var minutes) ? minutes : 0;
         }
 
         private async Task<int> GetRefreshTokenExpirationDaysAsync()
@@ -1373,7 +1408,7 @@ namespace Eaf.Middleware.Web.Controllers
             return 7;
         }
 
-        protected async Task<RefreshTokenInfo> GenerateAndStoreRefreshTokenAsync(User user)
+        protected async Task<RefreshTokenInfo> GenerateAndStoreRefreshTokenAsync(User user, string existingSessionId = null)
         {
             var refreshTokenExpirationDays = await GetRefreshTokenExpirationDaysAsync();
             var refreshTokenExpiration = TimeSpan.FromDays(refreshTokenExpirationDays > 0 ? refreshTokenExpirationDays : 7);
@@ -1382,6 +1417,7 @@ namespace Eaf.Middleware.Web.Controllers
             var refreshToken = new RefreshTokenInfo
             {
                 Token = GenerateRefreshTokenValue(),
+                SessionId = existingSessionId ?? Guid.NewGuid().ToString("N"),
                 UserId = user.Id,
                 TenantId = AbpSession.TenantId,
                 SecurityStamp = securityStamp,
@@ -1389,7 +1425,32 @@ namespace Eaf.Middleware.Web.Controllers
             };
 
             await _refreshTokenStore.SetAsync(refreshToken);
+            await RegisterSessionAsync(refreshToken, existingSessionId);
             return refreshToken;
+        }
+
+        private async Task RegisterSessionAsync(RefreshTokenInfo refreshToken, string existingSessionId)
+        {
+            var now = DateTime.UtcNow;
+            var session = existingSessionId == null
+                ? new UserSessionInfo { CreationTime = now }
+                : (await _sessionRegistry.GetAsync(existingSessionId)) ?? new UserSessionInfo { CreationTime = now };
+
+            session.SessionId = refreshToken.SessionId;
+            session.UserId = refreshToken.UserId;
+            session.TenantId = refreshToken.TenantId;
+            session.RefreshToken = refreshToken.Token;
+            session.ExpireDate = refreshToken.ExpireDate;
+            session.LastActivityTime = now;
+
+            if (Request != null)
+            {
+                session.IpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
+                var ua = Request.Headers["User-Agent"].ToString();
+                session.UserAgent = string.IsNullOrEmpty(ua) ? null : (ua.Length > 256 ? ua[..256] : ua);
+            }
+
+            await _sessionRegistry.SetAsync(session);
         }
 
         private static string GenerateRefreshTokenValue()

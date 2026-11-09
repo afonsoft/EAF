@@ -8,6 +8,7 @@ import { PaymentExtendedService } from './payment-extended.service';
 import { TenantJoinRequestService } from './tenant-join-request.service';
 import { AdminApiKeyService, ApiKeyService } from './api-key.service';
 import { PasskeyService } from './passkey.service';
+import { SessionService, AdminSessionService } from './session.service';
 
 @NgModule({
   providers: [
@@ -48,6 +49,8 @@ import { PasskeyService } from './passkey.service';
     ApiKeyService,
     AdminApiKeyService,
     PasskeyService,
+    SessionService,
+    AdminSessionService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }
   ],
 })
