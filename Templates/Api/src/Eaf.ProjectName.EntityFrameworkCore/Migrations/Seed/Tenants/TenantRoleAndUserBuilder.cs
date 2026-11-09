@@ -5,6 +5,7 @@ using Eaf.ProjectName.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System;
 using System.Linq;
 
 namespace Eaf.ProjectName.Migrations.Seed.Tenants
@@ -65,6 +66,59 @@ namespace Eaf.ProjectName.Migrations.Seed.Tenants
 
                 _context.SaveChanges();
             }
+
+            SeedWorkflowTemplate();
+        }
+
+        private void SeedWorkflowTemplate()
+        {
+            if (_context.WorkflowDefinitions.IgnoreQueryFilters().Any(d => d.TenantId == _tenantId))
+            {
+                return;
+            }
+
+            var form = new Eaf.Workflow.Domain.WorkflowFormModel();
+            form.Fields.Add(new Eaf.Workflow.Domain.WorkflowFormField { Id = "reason", Label = "Reason", Type = "text", Required = true });
+            form.Fields.Add(new Eaf.Workflow.Domain.WorkflowFormField { Id = "amount", Label = "Amount", Type = "number", Required = true });
+
+            var flow = new Eaf.Workflow.Domain.WorkflowFlowModel { StartStepId = "approve" };
+            flow.Steps.Add(new Eaf.Workflow.Domain.WorkflowStepModel
+            {
+                Id = "approve",
+                Name = "Manager approval",
+                Type = "approval",
+                NextStepId = "end",
+                Assignee = new Eaf.Workflow.Domain.WorkflowAssigneeModel { Kind = "manager" },
+                DueTimeHours = 48
+            });
+            flow.Steps.Add(new Eaf.Workflow.Domain.WorkflowStepModel { Id = "end", Name = "Done", Type = "end" });
+
+            var formJson = System.Text.Json.JsonSerializer.Serialize(form);
+            var flowJson = System.Text.Json.JsonSerializer.Serialize(flow);
+            var definitionId = Guid.NewGuid();
+
+            _context.WorkflowDefinitions.Add(new Eaf.Workflow.Domain.WorkflowDefinition
+            {
+                Id = definitionId,
+                TenantId = _tenantId,
+                Name = "Expense approval (sample)",
+                Description = "Sample published workflow — manager approves expenses submitted through the catalog.",
+                Category = "Samples",
+                Status = Eaf.Workflow.Domain.WorkflowStatus.Published,
+                Version = 1,
+                FormJson = formJson,
+                FlowJson = flowJson
+            });
+            _context.WorkflowVersions.Add(new Eaf.Workflow.Domain.WorkflowVersion
+            {
+                Id = Guid.NewGuid(),
+                TenantId = _tenantId,
+                DefinitionId = definitionId,
+                Version = 1,
+                FormJson = formJson,
+                FlowJson = flowJson
+            });
+            _context.SaveChanges();
         }
     }
 }

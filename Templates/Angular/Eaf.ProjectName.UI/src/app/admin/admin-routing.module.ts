@@ -21,6 +21,8 @@ import { UsersComponent } from './users/users.component';
 import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-requests.component';
 import { UserSessionsComponent } from './user-sessions/user-sessions.component';
 import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
+import { WorkflowsComponent } from './workflows/workflows.component';
+import { WorkflowDesignerComponent } from './workflows/designer.component';
 
 @NgModule({
   imports: [
@@ -52,6 +54,9 @@ import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
           { path: 'ui-customization', component: UiCustomizationComponent, data: { permission: 'Pages.Administration.UiCustomization' } },
           { path: 'user-sessions', component: UserSessionsComponent, data: { permission: 'Pages.Administration.UserSessions' } },
                     { path: 'api-keys', component: AdminApiKeysComponent, data: { permission: 'Pages.Administration.ApiKeys' } },
+          { path: 'workflows', component: WorkflowsComponent, data: { permission: 'Pages.Administration.Workflows' } },
+          { path: 'workflows/new', component: WorkflowDesignerComponent, data: { permission: 'Pages.Administration.Workflows' } },
+          { path: 'workflows/:id', component: WorkflowDesignerComponent, data: { permission: 'Pages.Administration.Workflows' } },
         ],
       },
     ]),

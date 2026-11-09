@@ -11,6 +11,8 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SessionsComponent } from './sessions/sessions.component';
 import { WorkflowApprovalsComponent } from './workflow-approvals/workflow-approvals.component';
+import { WorkflowCatalogComponent } from './workflow-catalog/workflow-catalog.component';
+import { MyRequestsComponent } from './my-requests/my-requests.component';
 import { PasskeysComponent } from './passkeys/passkeys.component';
 import { ApiKeysComponent } from './api-keys/api-keys.component';
 import { MainRoutingModule } from './main-routing.module';
@@ -62,7 +64,7 @@ NgxBootstrapDatePickerConfigService.registerNgxBootstrapDatePickerLocales();
     InputMaskModule,
     NgxChartsModule,
   ],
-  declarations: [DashboardComponent, ApiKeysComponent, PasskeysComponent, SessionsComponent, WorkflowApprovalsComponent],
+  declarations: [DashboardComponent, ApiKeysComponent, PasskeysComponent, SessionsComponent, WorkflowApprovalsComponent, WorkflowCatalogComponent, MyRequestsComponent],
   providers: [
     provideNgxMask(),
     { provide: BsDatepickerConfig, useFactory: NgxBootstrapDatePickerConfigService.getDatepickerConfig },

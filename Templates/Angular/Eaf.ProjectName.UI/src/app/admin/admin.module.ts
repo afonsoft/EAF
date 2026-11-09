@@ -74,6 +74,8 @@ import { UsersComponent } from './users/users.component';
 import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-requests.component';
 import { UserSessionsComponent } from './user-sessions/user-sessions.component';
 import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
+import { WorkflowsComponent } from './workflows/workflows.component';
+import { WorkflowDesignerComponent } from './workflows/designer.component';
 
 @NgModule({
   imports: [
@@ -152,7 +154,7 @@ import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
     Theme3ThemeUiSettingsComponent,
     TenantJoinRequestsComponent,
     AdminApiKeysComponent, UserSessionsComponent,
-  ],
+    WorkflowsComponent, WorkflowDesignerComponent],
   exports: [],
   providers: [
     ImpersonationService,

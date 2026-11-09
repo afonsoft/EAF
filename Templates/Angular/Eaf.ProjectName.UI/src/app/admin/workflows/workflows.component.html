@@ -1,0 +1,65 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <h1>{{ "Workflows" | localize }}</h1>
+                </div>
+                <div class="col-6 text-right">
+                    <button class="btn btn-primary" [routerLink]="['/app/admin/workflows/new']">
+                        <i class="fa fa-plus"></i> {{ "CreateNewWorkflow" | localize }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content px-2">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                    <p-table
+                        [value]="definitions"
+                        [loading]="loading"
+                        [paginator]="true"
+                        [rows]="10">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th scope="col">{{ "Name" | localize }}</th>
+                                <th scope="col">{{ "Category" | localize }}</th>
+                                <th scope="col">{{ "Status" | localize }}</th>
+                                <th scope="col">{{ "Version" | localize }}</th>
+                                <th scope="col" style="width: 340px">{{ "Actions" | localize }}</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-def>
+                            <tr>
+                                <td>{{ def.name }}</td>
+                                <td>{{ def.category || "-" }}</td>
+                                <td><span class="badge" [ngClass]="statusClass(def.status)">{{ def.status }}</span></td>
+                                <td>v{{ def.version }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary mr-1" *ngIf="def.status !== 'Published'"
+                                            [routerLink]="['/app/admin/workflows', def.id]">
+                                        <i class="fa fa-edit"></i> {{ "Edit" | localize }}
+                                    </button>
+                                    <button class="btn btn-sm btn-success mr-1" *ngIf="def.status === 'Draft'" (click)="publish(def)">
+                                        <i class="fa fa-upload"></i> {{ "Publish" | localize }}
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary mr-1" *ngIf="def.status === 'Published'" (click)="archive(def)">
+                                        <i class="fa fa-archive"></i> {{ "Archive" | localize }}
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" (click)="delete(def)">
+                                        <i class="fa fa-trash"></i> {{ "Delete" | localize }}
+                                    </button>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr><td colspan="5">{{ "NoWorkflowsYet" | localize }}</td></tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
