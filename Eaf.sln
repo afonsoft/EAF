@@ -128,6 +128,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Dapper", "src\Eaf.Dappe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Dapper.Tests", "test\Eaf.Dapper.Tests\Eaf.Dapper.Tests.csproj", "{4BB96E36-9639-4F76-BC05-576F138FD43F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.MongoDB", "src\Eaf.MongoDB\Eaf.MongoDB.csproj", "{796F7779-B8B1-4641-A82A-B682A9BB8C58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.MongoDB.Tests", "test\Eaf.MongoDB.Tests\Eaf.MongoDB.Tests.csproj", "{58A5CEE5-5942-4777-ADEC-0CBEBE4F55E6}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Notifications.Sms", "src\Eaf.Notifications.Sms\Eaf.Notifications.Sms.csproj", "{56F3054E-0F22-43E2-9149-9BF83DD795FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Notifications.Push", "src\Eaf.Notifications.Push\Eaf.Notifications.Push.csproj", "{AEC64BF8-B90E-4560-ABD9-3C7D4550A09A}"
@@ -158,6 +162,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58A5CEE5-5942-4777-ADEC-0CBEBE4F55E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58A5CEE5-5942-4777-ADEC-0CBEBE4F55E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58A5CEE5-5942-4777-ADEC-0CBEBE4F55E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58A5CEE5-5942-4777-ADEC-0CBEBE4F55E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{796F7779-B8B1-4641-A82A-B682A9BB8C58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{796F7779-B8B1-4641-A82A-B682A9BB8C58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{796F7779-B8B1-4641-A82A-B682A9BB8C58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{796F7779-B8B1-4641-A82A-B682A9BB8C58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
