@@ -1,5 +1,7 @@
 using Abp;
 using Abp.AutoMapper;
+using Abp.ObjectMapping;
+using Castle.MicroKernel.Registration;
 using Abp.DynamicEntityProperties;
 using Abp.Modules;
 using Abp.Reflection.Extensions;
@@ -25,6 +27,14 @@ namespace Eaf.DynamicEntityProperties
         public override void Initialize()
         {
             IocManager.RegisterAssemblyByConvention(typeof(EafDynamicEntityPropertiesModule).GetAssembly());
+
+            // Mapperly pilot: IObjectMapper backed by source-generated mappers for this
+            // module's pairs, delegating the rest to AutoMapper until the full rollout.
+            IocManager.IocContainer.Register(
+                Component.For<IObjectMapper>()
+                    .ImplementedBy<EafMapperlyObjectMapper>()
+                    .IsDefault()
+                    .LifestyleTransient());
         }
     }
 }
