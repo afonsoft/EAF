@@ -153,6 +153,15 @@ namespace Eaf.Middleware.Configuration
             /// <summary>
             /// Representa a classe ApiKeys.
             /// </summary>
+            /// <summary>
+            /// Settings de passkeys (login WebAuthn sem senha).
+            /// </summary>
+            public static class Passkeys
+            {
+                /// <summary>App.UserManagement.Passkeys.IsEnabled — liga/desliga passkeys.</summary>
+                public const string IsEnabled = "App.UserManagement.Passkeys.IsEnabled";
+            }
+
             public static class ApiKeys
             {
                 public const string IsEnabled = "App.UserManagement.ApiKeys.IsEnabled";

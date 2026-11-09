@@ -706,7 +706,7 @@ namespace Eaf.Middleware.Web.Controllers
             );
         }
 
-        private static string GetEncryptedAccessToken(string accessToken)
+        protected static string GetEncryptedAccessToken(string accessToken)
         {
             return SimpleStringCipher.Instance.Encrypt(accessToken, MiddlewareCoreConsts.DefaultPassPhrase);
         }
@@ -742,7 +742,7 @@ namespace Eaf.Middleware.Web.Controllers
             return SettingManager.GetSettingValue<bool>(AppSettings.UserManagement.AllowOneConcurrentLoginPerUser);
         }
 
-        private string CreateAccessToken(IEnumerable<Claim> claims, TimeSpan expiration)
+        protected string CreateAccessToken(IEnumerable<Claim> claims, TimeSpan expiration)
         {
             var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _configuration.Issuer,
@@ -757,7 +757,7 @@ namespace Eaf.Middleware.Web.Controllers
         }
 
         [UnitOfWork]
-        private async Task<IEnumerable<Claim>> CreateJwtClaims(ClaimsIdentity identity, User user, string externalAuthProviderformation = "")
+        protected async Task<IEnumerable<Claim>> CreateJwtClaims(ClaimsIdentity identity, User user, string externalAuthProviderformation = "")
         {
             var expirationSettings = await SettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
             var isTwoFactorEnabled = await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.TwoFactorLogin.IsEnabled);
@@ -1373,7 +1373,7 @@ namespace Eaf.Middleware.Web.Controllers
             return 7;
         }
 
-        private async Task<RefreshTokenInfo> GenerateAndStoreRefreshTokenAsync(User user)
+        protected async Task<RefreshTokenInfo> GenerateAndStoreRefreshTokenAsync(User user)
         {
             var refreshTokenExpirationDays = await GetRefreshTokenExpirationDaysAsync();
             var refreshTokenExpiration = TimeSpan.FromDays(refreshTokenExpirationDays > 0 ? refreshTokenExpirationDays : 7);
@@ -1402,7 +1402,7 @@ namespace Eaf.Middleware.Web.Controllers
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
 
-        private void AppendRefreshTokenCookie(string token, DateTime expireDate)
+        protected void AppendRefreshTokenCookie(string token, DateTime expireDate)
         {
             if (Response == null)
                 return;
