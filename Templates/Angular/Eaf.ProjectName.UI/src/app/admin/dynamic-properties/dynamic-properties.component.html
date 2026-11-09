@@ -28,6 +28,7 @@
                 <th scope="col">{{ l('PropertyName') }}</th>
                 <th scope="col">{{ l('DisplayName') }}</th>
                 <th scope="col">{{ l('InputType') }}</th>
+                <th scope="col">{{ l('Mandatory') }}</th>
                 <th scope="col">{{ l('Actions') }}</th>
               </tr>
             </ng-template>
@@ -36,6 +37,7 @@
                 <td>{{ item.propertyName }}</td>
                 <td>{{ item.displayName }}</td>
                 <td>{{ item.inputType }}</td>
+                <td><span *ngIf="item.isMandatory" class="label label-inline label-light-danger">{{ l('Mandatory') }}</span></td>
                 <td>
                   <button
                     type="button"
@@ -92,6 +94,17 @@
     <div class="form-group">
       <label for="permission">{{ l('Permission') }}</label>
       <input id="permission" type="text" class="form-control" [(ngModel)]="property.permission" />
+    </div>
+
+    <div class="form-group">
+      <div class="checkbox-list">
+        <label class="checkbox">
+          <input id="isMandatory" type="checkbox" [(ngModel)]="property.isMandatory" />
+          <span></span>
+          {{ l('Mandatory') }}
+        </label>
+      </div>
+      <small class="form-text text-muted">{{ l('MandatoryDynamicPropertyHint') }}</small>
     </div>
 
     <div class="form-group">

@@ -38,5 +38,15 @@
     <text name="EditionIsRequired">A edição é obrigatória</text>
     <text name="GatewayIsRequired">O gateway é obrigatório</text>
     <text name="PaymentStatus">Status do pagamento</text>
+    <text name="Mandatory">Obrigatório</text>
+    <text name="MandatoryDynamicPropertyHint">Quando ativado, toda gravação de valor da entidade deve incluir um valor não vazio para esta propriedade.</text>
+    <text name="DynamicProperties">Propriedades dinâmicas</text>
+    <text name="CreateNewDynamicProperty">Nova propriedade dinâmica</text>
+    <text name="EditDynamicProperty">Editar propriedade dinâmica</text>
+    <text name="PropertyName">Nome da propriedade</text>
+    <text name="PropertyNameRequired">O nome da propriedade é obrigatório</text>
+    <text name="InputType">Tipo de entrada</text>
+    <text name="DynamicPropertyDeleteWarningMessage">Isso excluirá a propriedade dinâmica '{0}' e todos os seus valores.</text>
+    <text name="DynamicPropertyValuesHint">Separe os valores com ponto e vírgula (ex.: Baixo;Médio;Alto).</text>
   </texts>
 </localizationDictionary>

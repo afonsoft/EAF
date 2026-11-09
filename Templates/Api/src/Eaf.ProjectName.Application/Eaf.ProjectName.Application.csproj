@@ -14,6 +14,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Eaf.ProjectName.EntityFrameworkCore\Eaf.ProjectName.EntityFrameworkCore.csproj" />
 		<ProjectReference Include="..\..\..\..\src\Eaf.Middleware.Application\Eaf.Middleware.Application.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.DynamicEntityProperties\Eaf.DynamicEntityProperties.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
 		<PackageReference Include="Eaf.Middleware.Application" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />
+		<PackageReference Include="Eaf.DynamicEntityProperties" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />
 	</ItemGroup>
 </Project>

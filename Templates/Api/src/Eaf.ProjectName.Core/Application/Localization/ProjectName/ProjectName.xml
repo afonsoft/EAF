@@ -38,5 +38,15 @@
     <text name="EditionIsRequired">Edition is required</text>
     <text name="GatewayIsRequired">Gateway is required</text>
     <text name="PaymentStatus">Payment status</text>
+    <text name="Mandatory">Mandatory</text>
+    <text name="MandatoryDynamicPropertyHint">When enabled, every entity value write must include a non-empty value for this property.</text>
+    <text name="DynamicProperties">Dynamic properties</text>
+    <text name="CreateNewDynamicProperty">Create new dynamic property</text>
+    <text name="EditDynamicProperty">Edit dynamic property</text>
+    <text name="PropertyName">Property name</text>
+    <text name="PropertyNameRequired">Property name is required</text>
+    <text name="InputType">Input type</text>
+    <text name="DynamicPropertyDeleteWarningMessage">This will delete the dynamic property '{0}' and all its values.</text>
+    <text name="DynamicPropertyValuesHint">Separate values with semicolons (e.g. Low;Medium;High).</text>
   </texts>
 </localizationDictionary>

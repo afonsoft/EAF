@@ -1,6 +1,7 @@
 ﻿using Abp.Zero.EntityFrameworkCore;
 using Eaf.Middleware.Authentication.ApiKeys;
 using Eaf.Middleware.Authentication.Passkeys;
+using Eaf.DynamicEntityProperties.Domain;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
@@ -83,6 +84,7 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<PushSubscription> PushSubscriptions { get; set; }
         public virtual DbSet<ApiKey> ApiKeys { get; set; }
         public virtual DbSet<UserPasskey> UserPasskeys { get; set; }
+        public virtual DbSet<DynamicPropertyMetadata> DynamicPropertyMetadata { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
