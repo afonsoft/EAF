@@ -48,5 +48,16 @@
     <text name="InputType">Input type</text>
     <text name="DynamicPropertyDeleteWarningMessage">This will delete the dynamic property '{0}' and all its values.</text>
     <text name="DynamicPropertyValuesHint">Separate values with semicolons (e.g. Low;Medium;High).</text>
-  </texts>
+      <text name="WorkflowApprovals">Approvals</text>
+    <text name="WorkflowDecided">Decision recorded</text>
+    <text name="WorkflowDecideWarningMessage">Confirm {0} on this workflow task?</text>
+    <text name="NoPendingApprovals">No pending approvals</text>
+    <text name="Step">Step</text>
+    <text name="DueTime">Due</text>
+    <text name="Overdue">Overdue</text>
+    <text name="Approve">Approve</text>
+    <text name="Reject">Reject</text>
+    <text name="SendBack">Send back</text>
+    <text name="Refresh">Refresh</text>
+</texts>
 </localizationDictionary>

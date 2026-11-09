@@ -22,6 +22,11 @@ namespace Eaf.Middleware.Authorization.Users
         public virtual Guid? ProfilePictureId { get; set; }
 
         /// <summary>
+        /// Gestor direto do usuário (resolução de assignee "manager" do workflow).
+        /// </summary>
+        public virtual long? ManagerUserId { get; set; }
+
+        /// <summary>
         /// Obtém ou define ShouldChangePasswordOnNextLogin.
         /// </summary>
         public virtual bool ShouldChangePasswordOnNextLogin { get; set; }

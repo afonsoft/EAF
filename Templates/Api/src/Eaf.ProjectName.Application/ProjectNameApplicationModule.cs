@@ -33,6 +33,14 @@ namespace Eaf.ProjectName
         public override void Initialize()
         {
             IocManager.RegisterAssemblyByConvention(typeof(ProjectNameApplicationModule).GetAssembly());
+
+            // Phase B: real workflow user directory overrides the module's null default.
+            IocManager.IocContainer.Register(
+                Castle.MicroKernel.Registration.Component
+                    .For<Eaf.Workflow.Domain.IWorkflowUserDirectory>()
+                    .ImplementedBy<Workflows.WorkflowUserDirectory>()
+                    .IsDefault()
+                    .LifestyleTransient());
         }
 
         public override void PostInitialize()

@@ -65,6 +65,9 @@ namespace Eaf.Workflow.Domain
 
         /// <summary>Regra de atribuição (approval).</summary>
         public WorkflowAssigneeModel Assignee { get; set; }
+
+        /// <summary>SLA: horas até o vencimento da tarefa a partir da ativação (null = sem SLA).</summary>
+        public double? DueTimeHours { get; set; }
     }
 
     /// <summary>Who approves a step.</summary>

@@ -22,6 +22,9 @@ namespace Eaf.Workflow.Domain
         Task<List<long>> GetUsersInOrganizationUnitAsync(string ouCode, int? tenantId);
         /// <summary>Manager of a user (null when none).</summary>
         Task<long?> GetManagerAsync(long userId, int? tenantId);
+
+        /// <summary>User ids that currently delegate to <paramref name="delegateUserId"/> (active delegations).</summary>
+        Task<List<long>> GetActiveDelegatorIdsAsync(long delegateUserId, int? tenantId);
     }
 
     /// <summary>Default directory — resolves to empty sets (used until Phase B wires the real one).</summary>
@@ -35,6 +38,9 @@ namespace Eaf.Workflow.Domain
 
         /// <inheritdoc />
         public Task<long?> GetManagerAsync(long userId, int? tenantId) => Task.FromResult<long?>(null);
+
+        /// <inheritdoc />
+        public Task<List<long>> GetActiveDelegatorIdsAsync(long delegateUserId, int? tenantId) => Task.FromResult(new List<long>());
     }
 
     /// <summary>
@@ -297,7 +303,10 @@ namespace Eaf.Workflow.Domain
                                 StepId = step.Id,
                                 AssigneeUserId = userId,
                                 Status = WorkflowTaskStatus.Pending,
-                                TenantId = instance.TenantId
+                                TenantId = instance.TenantId,
+                                DueTime = step.DueTimeHours.HasValue
+                                    ? Clock.Now.AddHours(step.DueTimeHours.Value)
+                                    : null
                             });
                         }
                         await AddTimelineAsync(instance, "activated", step.Id, actorUserId,

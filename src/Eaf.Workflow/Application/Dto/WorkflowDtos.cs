@@ -106,6 +106,8 @@ namespace Eaf.Workflow.Application.Dto
         public string Status { get; set; }
         /// <summary>Comentário.</summary>
         public string Comment { get; set; }
+        /// <summary>SLA.</summary>
+        public DateTime? DueTime { get; set; }
         /// <summary>Criação.</summary>
         public DateTime CreationTime { get; set; }
     }

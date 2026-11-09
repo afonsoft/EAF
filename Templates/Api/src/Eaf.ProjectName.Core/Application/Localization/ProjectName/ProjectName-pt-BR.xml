@@ -48,5 +48,16 @@
     <text name="InputType">Tipo de entrada</text>
     <text name="DynamicPropertyDeleteWarningMessage">Isso excluirá a propriedade dinâmica '{0}' e todos os seus valores.</text>
     <text name="DynamicPropertyValuesHint">Separe os valores com ponto e vírgula (ex.: Baixo;Médio;Alto).</text>
-  </texts>
+      <text name="WorkflowApprovals">Aprovações</text>
+    <text name="WorkflowDecided">Decisão registrada</text>
+    <text name="WorkflowDecideWarningMessage">Confirmar {0} nesta tarefa de workflow?</text>
+    <text name="NoPendingApprovals">Nenhuma aprovação pendente</text>
+    <text name="Step">Etapa</text>
+    <text name="DueTime">Vencimento</text>
+    <text name="Overdue">Vencida</text>
+    <text name="Approve">Aprovar</text>
+    <text name="Reject">Rejeitar</text>
+    <text name="SendBack">Devolver</text>
+    <text name="Refresh">Atualizar</text>
+</texts>
 </localizationDictionary>
