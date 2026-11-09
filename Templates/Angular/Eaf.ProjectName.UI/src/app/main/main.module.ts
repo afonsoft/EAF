@@ -15,6 +15,7 @@ import { WorkflowCatalogComponent } from './workflow-catalog/workflow-catalog.co
 import { MyRequestsComponent } from './my-requests/my-requests.component';
 import { PasskeysComponent } from './passkeys/passkeys.component';
 import { ApiKeysComponent } from './api-keys/api-keys.component';
+import { QrApproveComponent } from './qr-approve/qr-approve.component';
 import { MainRoutingModule } from './main-routing.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
@@ -64,7 +65,7 @@ NgxBootstrapDatePickerConfigService.registerNgxBootstrapDatePickerLocales();
     InputMaskModule,
     NgxChartsModule,
   ],
-  declarations: [DashboardComponent, ApiKeysComponent, PasskeysComponent, SessionsComponent, WorkflowApprovalsComponent, WorkflowCatalogComponent, MyRequestsComponent],
+  declarations: [DashboardComponent, ApiKeysComponent, PasskeysComponent, SessionsComponent, WorkflowApprovalsComponent, WorkflowCatalogComponent, MyRequestsComponent, QrApproveComponent],
   providers: [
     provideNgxMask(),
     { provide: BsDatepickerConfig, useFactory: NgxBootstrapDatePickerConfigService.getDatepickerConfig },

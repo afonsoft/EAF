@@ -7,6 +7,7 @@ import { ApiKeysComponent } from './api-keys/api-keys.component';
 import { WorkflowApprovalsComponent } from './workflow-approvals/workflow-approvals.component';
 import { WorkflowCatalogComponent } from './workflow-catalog/workflow-catalog.component';
 import { MyRequestsComponent } from './my-requests/my-requests.component';
+import { QrApproveComponent } from './qr-approve/qr-approve.component';
 
 @NgModule({
   imports: [
@@ -17,6 +18,7 @@ import { MyRequestsComponent } from './my-requests/my-requests.component';
           { path: 'dashboard', component: DashboardComponent, data: { permission: 'Pages.Dashboard' } },
           { path: 'passkeys', component: PasskeysComponent },
           { path: 'sessions', component: SessionsComponent },
+          { path: 'qr-approve', component: QrApproveComponent },
           { path: 'workflow-approvals', component: WorkflowApprovalsComponent, data: { permission: 'Pages.Workflows.Approvals' } },
           { path: 'workflow-catalog', component: WorkflowCatalogComponent, data: { permission: 'Pages.Workflows' } },
           { path: 'my-requests', component: MyRequestsComponent, data: { permission: 'Pages.Workflows' } },

@@ -155,6 +155,51 @@
           </button>
         </div>
       </div>
+
+      <div class="row" *ngIf="qrLoginEnabled && !showQrLogin">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-outline-primary m-btn m-btn--pill m-btn--air"
+            (click)="startQrLogin()"
+            [disabled]="submitting"
+          >
+            <i class="fa fa-qrcode"></i> {{ 'SignInWithQrCode' | localize }}
+          </button>
+        </div>
+      </div>
+
+      <div class="row" *ngIf="showQrLogin">
+        <div class="col text-center">
+          <p>{{ 'QrLoginScanInstructions' | localize }}</p>
+          <img
+            *ngIf="qrCodeDataUrl"
+            [src]="qrCodeDataUrl"
+            alt="QR code"
+            width="220"
+            height="220"
+          />
+          <div *ngIf="qrExpired" class="m--margin-top-10">
+            <p class="text-warning">{{ 'QrLoginExpired' | localize }}</p>
+            <button
+              type="button"
+              class="btn btn-outline-primary m-btn m-btn--pill m-btn--air"
+              (click)="generateQrToken()"
+            >
+              {{ 'QrLoginGenerateNew' | localize }}
+            </button>
+          </div>
+          <div class="m--margin-top-10">
+            <button
+              type="button"
+              class="btn btn-link"
+              (click)="cancelQrLogin()"
+            >
+              {{ 'Cancel' | localize }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 </div>

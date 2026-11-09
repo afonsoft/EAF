@@ -126,5 +126,17 @@
 		<text name="EmailTemplateResetToDefault">Reset to default</text>
 		<text name="EmailTemplateResetWarningMessage">The override will be removed and the system default will be used again.</text>
 		<text name="EmailTemplateAddCulture">Add culture override</text>
+		<text name="SignInWithQrCode">Sign in with QR code</text>
+		<text name="QrLoginScanInstructions">Open the app on your phone and scan this code to sign in.</text>
+		<text name="QrLoginExpired">This QR code expired. Generate a new one.</text>
+		<text name="QrLoginGenerateNew">Generate new QR code</text>
+		<text name="QrLoginTokenId">QR token id</text>
+		<text name="QrLoginTokenRequired">Enter the QR token id.</text>
+		<text name="QrLoginApproved">Login approved</text>
+		<text name="QrLoginApprovedMessage">Login approved. You can return to the other device.</text>
+		<text name="QrLoginApproveTitle">Approve QR login</text>
+		<text name="QrLoginApproveDescription">Confirm that you want to sign in on another device.</text>
+		<text name="QrLoginApproveButton">Approve login</text>
+		<text name="QrLoginTokenExpired">QR login token expired or already used.</text>
 </texts>
 </localizationDictionary>

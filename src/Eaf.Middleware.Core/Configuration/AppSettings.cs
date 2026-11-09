@@ -177,6 +177,12 @@ namespace Eaf.Middleware.Configuration
                 public const string IsEnabled = "App.UserManagement.Passkeys.IsEnabled";
             }
 
+            public static class QrLogin
+            {
+                /// <summary>App.UserManagement.QrLogin.IsEnabled — liga/desliga login por QR code.</summary>
+                public const string IsEnabled = "App.UserManagement.QrLogin.IsEnabled";
+            }
+
             public static class ApiKeys
             {
                 public const string IsEnabled = "App.UserManagement.ApiKeys.IsEnabled";

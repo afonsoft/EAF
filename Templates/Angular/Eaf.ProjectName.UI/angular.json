@@ -32,7 +32,8 @@
               "lodash",
               "rtl-detect",
               "@swimlane/ngx-charts",
-              "bezier-easing"
+              "bezier-easing",
+              "qrcode"
             ],
             "assets": [
               "src/assets",

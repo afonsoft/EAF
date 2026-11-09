@@ -126,5 +126,17 @@
 		<text name="EmailTemplateResetToDefault">Restaurar padrão</text>
 		<text name="EmailTemplateResetWarningMessage">A personalização será removida e o padrão do sistema voltará a ser usado.</text>
 		<text name="EmailTemplateAddCulture">Adicionar personalização por cultura</text>
+		<text name="SignInWithQrCode">Entrar com QR code</text>
+		<text name="QrLoginScanInstructions">Abra o app no celular e escaneie este código para entrar.</text>
+		<text name="QrLoginExpired">Este QR code expirou. Gere um novo.</text>
+		<text name="QrLoginGenerateNew">Gerar novo QR code</text>
+		<text name="QrLoginTokenId">Token do QR login</text>
+		<text name="QrLoginTokenRequired">Informe o token do QR login.</text>
+		<text name="QrLoginApproved">Login aprovado</text>
+		<text name="QrLoginApprovedMessage">Login aprovado. Você pode voltar ao outro dispositivo.</text>
+		<text name="QrLoginApproveTitle">Aprovar login por QR code</text>
+		<text name="QrLoginApproveDescription">Confirme que deseja entrar em outro dispositivo.</text>
+		<text name="QrLoginApproveButton">Aprovar login</text>
+		<text name="QrLoginTokenExpired">Token de QR login expirado ou já utilizado.</text>
 </texts>
 </localizationDictionary>
