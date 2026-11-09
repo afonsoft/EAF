@@ -11,6 +11,9 @@ namespace Eaf.Middleware.Web.Authentication.JwtBearer
         /// <summary>Token do refresh.</summary>
         public string Token { get; set; }
 
+        /// <summary>Id da sessão interativa vinculada (claim eaf_session_id).</summary>
+        public string SessionId { get; set; }
+
         /// <summary>Identificador do usuário.</summary>
         public long UserId { get; set; }
 

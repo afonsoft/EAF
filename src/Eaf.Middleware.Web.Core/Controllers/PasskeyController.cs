@@ -15,6 +15,7 @@ using Abp.Runtime.Session;
 using Abp.UI;
 using Abp.Webhooks;
 using Eaf.Middleware.Authentication.Passkeys;
+using Eaf.Middleware.Authentication.Sessions;
 using Eaf.Middleware.Authorization;
 using Eaf.Middleware.Authorization.Impersonation;
 using Eaf.Middleware.Authorization.Roles;
@@ -94,6 +95,7 @@ namespace Eaf.Middleware.Web.Controllers
             IWebhookPublisher webhookPublisher,
             IPrincipalAccessor principalAccessor,
             IRefreshTokenStore refreshTokenStore,
+            ISessionRegistry sessionRegistry,
             IPasskeyManager passkeyManager,
             IConfiguration appConfiguration,
             IAbpSession abpSession,
@@ -101,7 +103,7 @@ namespace Eaf.Middleware.Web.Controllers
             : base(logInManager, AbpLoginResultTypeHelper, configuration, userManager, roleManager, tenantCache,
                    cacheManager, impersonationManager, identityOptions, logger, settingManager, externalAuthManager,
                    externalAuthConfiguration, iocManager, passwordHasher, emailSender, jwtOptions, notificationPublisher,
-                   binaryObjectManager, notificationSubscriptionManager, webhookPublisher, principalAccessor, refreshTokenStore)
+                   binaryObjectManager, notificationSubscriptionManager, webhookPublisher, principalAccessor, refreshTokenStore, sessionRegistry)
         {
             _passkeyCacheManager = cacheManager;
             _passkeyManager = passkeyManager;
@@ -402,8 +404,8 @@ namespace Eaf.Middleware.Web.Controllers
             var expirationSettings = await _passkeySettingManager.GetSettingValueAsync<int>(AppSettings.UserManagement.TokenExpiration);
             var expiration = TimeSpan.FromSeconds(expirationSettings);
 
-            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user, "passkey"), expiration);
             var refreshToken = await GenerateAndStoreRefreshTokenAsync(user);
+            var accessToken = CreateAccessToken(await CreateJwtClaims(identity, user, "passkey", refreshToken.SessionId), expiration);
             AppendRefreshTokenCookie(refreshToken.Token, refreshToken.ExpireDate);
 
             return new AuthenticateResultModel

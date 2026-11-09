@@ -156,6 +156,15 @@ namespace Eaf.Middleware.Configuration
             /// <summary>
             /// Settings de passkeys (login WebAuthn sem senha).
             /// </summary>
+            /// <summary>
+            /// Settings de sessão (idle timeout).
+            /// </summary>
+            public static class Sessions
+            {
+                /// <summary>App.UserManagement.Sessions.IdleTimeoutMinutes — 0 = desligado.</summary>
+                public const string IdleTimeoutMinutes = "App.UserManagement.Sessions.IdleTimeoutMinutes";
+            }
+
             public static class Passkeys
             {
                 /// <summary>App.UserManagement.Passkeys.IsEnabled — liga/desliga passkeys.</summary>

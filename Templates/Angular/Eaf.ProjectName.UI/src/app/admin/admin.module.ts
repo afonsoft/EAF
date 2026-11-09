@@ -72,6 +72,7 @@ import { EditUserPermissionsModalComponent } from './users/edit-user-permissions
 import { ImpersonationService } from './users/impersonation.service';
 import { UsersComponent } from './users/users.component';
 import { TenantJoinRequestsComponent } from './tenant-join-requests/tenant-join-requests.component';
+import { UserSessionsComponent } from './user-sessions/user-sessions.component';
 import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
 
 @NgModule({
@@ -150,7 +151,7 @@ import { AdminApiKeysComponent } from './api-keys/admin-api-keys.component';
     Theme2ThemeUiSettingsComponent,
     Theme3ThemeUiSettingsComponent,
     TenantJoinRequestsComponent,
-    AdminApiKeysComponent,
+    AdminApiKeysComponent, UserSessionsComponent,
   ],
   exports: [],
   providers: [

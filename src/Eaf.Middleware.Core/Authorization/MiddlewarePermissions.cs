@@ -18,6 +18,9 @@ namespace Eaf.Middleware.Authorization
         public const string Pages_Administration_Languages_Edit = "Pages.Administration.Languages.Edit";
         public const string Pages_Administration_Maintenance = "Pages.Administration.Maintenance";
         public const string Pages_Administration_ApiKeys = "Pages.Administration.ApiKeys";
+
+        /// <summary>Pages.Administration.UserSessions — admin vê/revoga sessões do tenant.</summary>
+        public const string Pages_Administration_UserSessions = "Pages.Administration.UserSessions";
         public const string Pages_Administration_Roles = "Pages.Administration.Roles";
         public const string Pages_Administration_Roles_Create = "Pages.Administration.Roles.Create";
         public const string Pages_Administration_Roles_Delete = "Pages.Administration.Roles.Delete";

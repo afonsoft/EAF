@@ -9,6 +9,7 @@ import { PopoverModule } from 'ngx-bootstrap/popover';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { SessionsComponent } from './sessions/sessions.component';
 import { PasskeysComponent } from './passkeys/passkeys.component';
 import { ApiKeysComponent } from './api-keys/api-keys.component';
 import { MainRoutingModule } from './main-routing.module';
@@ -60,7 +61,7 @@ NgxBootstrapDatePickerConfigService.registerNgxBootstrapDatePickerLocales();
     InputMaskModule,
     NgxChartsModule,
   ],
-  declarations: [DashboardComponent, ApiKeysComponent, PasskeysComponent],
+  declarations: [DashboardComponent, ApiKeysComponent, PasskeysComponent, SessionsComponent],
   providers: [
     provideNgxMask(),
     { provide: BsDatepickerConfig, useFactory: NgxBootstrapDatePickerConfigService.getDatepickerConfig },
