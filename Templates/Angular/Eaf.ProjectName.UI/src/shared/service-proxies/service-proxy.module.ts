@@ -9,7 +9,7 @@ import { TenantJoinRequestService } from './tenant-join-request.service';
 import { AdminApiKeyService, ApiKeyService } from './api-key.service';
 import { PasskeyService } from './passkey.service';
 import { SessionService, AdminSessionService } from './session.service';
-import { WorkflowApprovalService } from './workflow.service';
+import { WorkflowApprovalService, AdminWorkflowService, WorkflowRequestService } from './workflow.service';
 
 @NgModule({
   providers: [
@@ -51,6 +51,8 @@ import { WorkflowApprovalService } from './workflow.service';
     AdminApiKeyService,
     PasskeyService,
     WorkflowApprovalService,
+    AdminWorkflowService,
+    WorkflowRequestService,
     SessionService,
     AdminSessionService,
     { provide: HTTP_INTERCEPTORS, useClass: EafHttpInterceptor, multi: true }

@@ -22,6 +22,8 @@ export class AppNavigationService {
       new AppMenuItem('Metrics', 'Pages.Dashboard', 'flaticon-graph', '/app/main/dashboard'),
       new AppMenuItem('ActiveSessions', '', 'flaticon-laptop', '/app/main/sessions'),
       new AppMenuItem('WorkflowApprovals', 'Pages.Workflows.Approvals', 'flaticon-list-2', '/app/main/workflow-approvals'),
+      new AppMenuItem('WorkflowCatalog', 'Pages.Workflows', 'flaticon-play', '/app/main/workflow-catalog'),
+      new AppMenuItem('MyRequests', 'Pages.Workflows', 'flaticon-folder', '/app/main/my-requests'),
                         new AppMenuItem('Passkeys', '', 'flaticon-lock', '/app/main/passkeys'),
                         new AppMenuItem('MyApiKeys', '', 'flaticon-lock', '/app/main/api-keys'),
     ]);
@@ -38,6 +40,7 @@ export class AppNavigationService {
       new AppMenuItem('UserDelegation', 'Pages.Administration.Users.Delegation', 'flaticon-user-ok', '/app/admin/user-delegations'),
       new AppMenuItem('UserSessions', 'Pages.Administration.UserSessions', 'flaticon-users', '/app/admin/user-sessions'),
                             new AppMenuItem('ApiKeys', 'Pages.Administration.ApiKeys', 'flaticon-lock', '/app/admin/api-keys'),
+                            new AppMenuItem('Workflows', 'Pages.Administration.Workflows', 'flaticon-map', '/app/admin/workflows'),
       new AppMenuItem('Payments', 'Pages.Administration.Payments', 'flaticon-coins', '/app/admin/payments'),
       new AppMenuItem('Subscriptions', 'Pages.Administration.Payments', 'flaticon-money', '/app/admin/subscriptions'),
       new AppMenuItem('Languages', 'Pages.Administration.Languages', 'flaticon-tabs', '/app/admin/languages'),
