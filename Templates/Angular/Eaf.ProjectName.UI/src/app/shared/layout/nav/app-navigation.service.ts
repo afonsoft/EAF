@@ -21,6 +21,7 @@ export class AppNavigationService {
       new AppMenuItem('Dashboard', 'Pages.Dashboard', 'flaticon-line-graph', '/app/main/dashboard'),
       new AppMenuItem('Metrics', 'Pages.Dashboard', 'flaticon-graph', '/app/main/dashboard'),
       new AppMenuItem('ActiveSessions', '', 'flaticon-laptop', '/app/main/sessions'),
+      new AppMenuItem('WorkflowApprovals', 'Pages.Workflows.Approvals', 'flaticon-list-2', '/app/main/workflow-approvals'),
                         new AppMenuItem('Passkeys', '', 'flaticon-lock', '/app/main/passkeys'),
                         new AppMenuItem('MyApiKeys', '', 'flaticon-lock', '/app/main/api-keys'),
     ]);

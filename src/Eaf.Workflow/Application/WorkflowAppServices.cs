@@ -314,6 +314,7 @@ namespace Eaf.Workflow.Application
             AssigneeUserId = t.AssigneeUserId,
             Status = t.Status.ToString(),
             Comment = t.Comment,
+            DueTime = t.DueTime,
             CreationTime = t.CreationTime
         };
     }
@@ -327,23 +328,26 @@ namespace Eaf.Workflow.Application
         private readonly IRepository<WorkflowTask, Guid> _tasks;
         private readonly IRepository<WorkflowInstance, Guid> _instances;
         private readonly IWorkflowEngine _engine;
+        private readonly IWorkflowUserDirectory _directory;
 
         /// <summary>WorkflowApprovalAppService.</summary>
         public WorkflowApprovalAppService(
             IRepository<WorkflowTask, Guid> tasks,
             IRepository<WorkflowInstance, Guid> instances,
-            IWorkflowEngine engine)
+            IWorkflowEngine engine,
+            IWorkflowUserDirectory directory)
         {
             _tasks = tasks;
             _instances = instances;
             _engine = engine;
+            _directory = directory;
         }
 
-        /// <summary>Tarefas pendentes atribuídas a mim.</summary>
+        /// <summary>Tarefas pendentes atribuídas a mim (incluindo delegações ativas a meu favor).</summary>
         public async Task<ListResultDto<WorkflowTaskDto>> GetMyPendingAsync()
         {
-            var list = await _tasks.GetAllListAsync(t =>
-                t.AssigneeUserId == AbpSession.UserId.GetValueOrDefault() && t.Status == WorkflowTaskStatus.Pending);
+            var allowed = await AllowedAssigneeIdsAsync();
+            var list = await _tasks.GetAllListAsync(t => allowed.Contains(t.AssigneeUserId) && t.Status == WorkflowTaskStatus.Pending);
             return new ListResultDto<WorkflowTaskDto>(
                 list.OrderBy(t => t.CreationTime).Select(WorkflowRequestAppService.MapTask).ToList());
         }
@@ -352,7 +356,8 @@ namespace Eaf.Workflow.Application
         public async Task DecideAsync(DecideWorkflowInput input)
         {
             var task = await _tasks.GetAsync(input.TaskId);
-            if (task.AssigneeUserId != AbpSession.UserId.GetValueOrDefault())
+            var allowed = await AllowedAssigneeIdsAsync();
+            if (!allowed.Contains(task.AssigneeUserId))
             {
                 throw new UserFriendlyException("This task is not assigned to you.");
             }
@@ -364,6 +369,15 @@ namespace Eaf.Workflow.Application
                 _ => throw new UserFriendlyException("Decision must be approve, reject or send-back.")
             };
             await _engine.DecideAsync(task, AbpSession.UserId.GetValueOrDefault(), decision, input.Comment);
+        }
+
+        private async Task<List<long>> AllowedAssigneeIdsAsync()
+        {
+            var me = AbpSession.UserId.GetValueOrDefault();
+            var delegators = await _directory.GetActiveDelegatorIdsAsync(me, AbpSession.TenantId);
+            var allowed = new List<long> { me };
+            allowed.AddRange(delegators);
+            return allowed;
         }
     }
 }

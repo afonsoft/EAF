@@ -1578,6 +1578,9 @@ namespace Eaf.ProjectName.Migrations
                     b.Property<DateTime?>("LockoutEndDateUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<long?>("ManagerUserId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
