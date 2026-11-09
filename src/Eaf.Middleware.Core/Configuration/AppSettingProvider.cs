@@ -303,6 +303,8 @@ namespace Eaf.Middleware.Configuration
 
             new SettingDefinition(AppSettings.UserManagement.Passkeys.IsEnabled, "true", scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
 
+            new SettingDefinition(AppSettings.UserManagement.Workflows.IsEnabled, "true", scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
+
             new SettingDefinition(AppSettings.UserManagement.ApiKeys.IsEnabled, GetFromAppSettings(AppSettings.UserManagement.ApiKeys.IsEnabled, "true"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UserManagement.ApiKeys.MaxKeysPerUser, GetFromAppSettings(AppSettings.UserManagement.ApiKeys.MaxKeysPerUser, "10"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),
                 new SettingDefinition(AppSettings.UserManagement.ApiKeys.MaxLifetimeDays, GetFromAppSettings(AppSettings.UserManagement.ApiKeys.MaxLifetimeDays, "365"), scopes: SettingScopes.Application | SettingScopes.Tenant, isVisibleToClients: true),

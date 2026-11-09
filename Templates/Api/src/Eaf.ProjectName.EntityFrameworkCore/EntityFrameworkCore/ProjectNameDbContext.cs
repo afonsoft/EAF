@@ -2,6 +2,7 @@
 using Eaf.Middleware.Authentication.ApiKeys;
 using Eaf.Middleware.Authentication.Passkeys;
 using Eaf.DynamicEntityProperties.Domain;
+using Eaf.Workflow.Domain;
 using Eaf.Middleware.Authorization.Roles;
 using Eaf.Middleware.Authorization.Users;
 using Eaf.Middleware.Chat;
@@ -85,6 +86,11 @@ namespace Eaf.ProjectName.EntityFrameworkCore
         public virtual DbSet<ApiKey> ApiKeys { get; set; }
         public virtual DbSet<UserPasskey> UserPasskeys { get; set; }
         public virtual DbSet<DynamicPropertyMetadata> DynamicPropertyMetadata { get; set; }
+        public virtual DbSet<WorkflowDefinition> WorkflowDefinitions { get; set; }
+        public virtual DbSet<WorkflowVersion> WorkflowVersions { get; set; }
+        public virtual DbSet<WorkflowInstance> WorkflowInstances { get; set; }
+        public virtual DbSet<WorkflowTask> WorkflowTasks { get; set; }
+        public virtual DbSet<WorkflowTimelineEntry> WorkflowTimeline { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

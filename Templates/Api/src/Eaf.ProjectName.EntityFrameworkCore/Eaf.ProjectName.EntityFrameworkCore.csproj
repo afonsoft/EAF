@@ -25,6 +25,8 @@
 		<ProjectReference Include="..\..\..\..\src\Eaf.Notifications.Push\Eaf.Notifications.Push.csproj" />
 		<ProjectReference Include="..\Eaf.ProjectName.Core\Eaf.ProjectName.Core.csproj" />
 		<ProjectReference Include="..\..\..\..\src\Eaf.DynamicEntityProperties\Eaf.DynamicEntityProperties.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
+		<ProjectReference Include="..\..\..\..\src\Eaf.Workflow\Eaf.Workflow.csproj" Condition="'$(UseSourceProjects)' == 'true'" />
 		<PackageReference Include="Eaf.DynamicEntityProperties" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />
+		<PackageReference Include="Eaf.Workflow" Version="9.4.6" Condition="'$(UseSourceProjects)' != 'true'" />
 	</ItemGroup>
 </Project>
