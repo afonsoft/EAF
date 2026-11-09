@@ -124,6 +124,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.RateLimiting", "src\Eaf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.RateLimiting.Tests", "test\Eaf.RateLimiting.Tests\Eaf.RateLimiting.Tests.csproj", "{B95E1D2B-943E-4A9E-BD2C-572A64D9187C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Dapper", "src\Eaf.Dapper\Eaf.Dapper.csproj", "{DBBB5106-ACAE-4A1D-B00C-2A2E735B7921}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Dapper.Tests", "test\Eaf.Dapper.Tests\Eaf.Dapper.Tests.csproj", "{4BB96E36-9639-4F76-BC05-576F138FD43F}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Notifications.Sms", "src\Eaf.Notifications.Sms\Eaf.Notifications.Sms.csproj", "{56F3054E-0F22-43E2-9149-9BF83DD795FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eaf.Notifications.Push", "src\Eaf.Notifications.Push\Eaf.Notifications.Push.csproj", "{AEC64BF8-B90E-4560-ABD9-3C7D4550A09A}"
@@ -154,6 +158,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BB96E36-9639-4F76-BC05-576F138FD43F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBBB5106-ACAE-4A1D-B00C-2A2E735B7921}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBBB5106-ACAE-4A1D-B00C-2A2E735B7921}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBBB5106-ACAE-4A1D-B00C-2A2E735B7921}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBBB5106-ACAE-4A1D-B00C-2A2E735B7921}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B95E1D2B-943E-4A9E-BD2C-572A64D9187C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B95E1D2B-943E-4A9E-BD2C-572A64D9187C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B95E1D2B-943E-4A9E-BD2C-572A64D9187C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
