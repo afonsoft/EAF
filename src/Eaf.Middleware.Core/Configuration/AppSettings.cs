@@ -165,6 +165,12 @@ namespace Eaf.Middleware.Configuration
                 public const string IdleTimeoutMinutes = "App.UserManagement.Sessions.IdleTimeoutMinutes";
             }
 
+            public static class Workflows
+            {
+                /// <summary>App.Workflows.IsEnabled — liga/desliga o motor de workflows.</summary>
+                public const string IsEnabled = "App.Workflows.IsEnabled";
+            }
+
             public static class Passkeys
             {
                 /// <summary>App.UserManagement.Passkeys.IsEnabled — liga/desliga passkeys.</summary>

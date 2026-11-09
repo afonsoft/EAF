@@ -19,7 +19,8 @@ namespace Eaf.ProjectName
     [DependsOn(
         typeof(ProjectNameEntityFrameworkCoreModule),
         typeof(MiddlewareApplicationModule),
-        typeof(Eaf.DynamicEntityProperties.EafDynamicEntityPropertiesModule)
+        typeof(Eaf.DynamicEntityProperties.EafDynamicEntityPropertiesModule),
+        typeof(Eaf.Workflow.EafWorkflowModule)
     )]
     public class ProjectNameApplicationModule : AbpModule
     {
