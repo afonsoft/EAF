@@ -27,7 +27,7 @@ jobs:
         persist-credentials: false
 
     - name: Run OpenCode PR Review
-      uses: anomalyco/opencode/github@4b7e19e315cca414121ba1d61523fef74bb3ae8b   # v1.18.27
+      uses: anomalyco/opencode/github@1097e2668b1e08ad63bdf0b1c4860b9bc01e420c   # v2.2.0
       env:
         OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
